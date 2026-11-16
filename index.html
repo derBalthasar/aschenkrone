@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Aschenkrone · Der Weg nach Krähenfurt</title>
+  <link rel="stylesheet" href="bestiarium/stil.css">
+  <link rel="stylesheet" href="spiel/stil.css">
+  <script defer src="bestiarium/daten.js"></script>
+  <script defer src="profilbilder/portraets.js"></script>
+  <script defer src="spiel/welt.js"></script>
+  <script defer src="spiel/regeln.js"></script>
+  <script defer src="spiel/prolog.js"></script>
+  <script defer src="spiel/spiel.js"></script>
+</head>
+<body>
+  <header class="game-header">
+    <div class="game-wrap header-inner">
+      <div><p class="wordmark">Aschenkrone</p><h1>Der Weg nach Krähenfurt</h1></div>
+      <div class="header-controls">
+        <nav aria-label="Nachschlagewerke">
+          <a href="bestiarium/index.html">Bestiarium</a>
+          <a href="profilbilder/index.html">Porträts</a>
+        </nav>
+        <label class="layout-picker" for="layout-mode">Ansicht
+          <select id="layout-mode">
+            <option value="auto">Automatisch</option>
+            <option value="compact">Kompakt</option>
+            <option value="wide">Breitbild (16:9)</option>
+            <option value="ultrawide">Ultrawide</option>
+          </select>
+        </label>
+      </div>
+    </div>
+  </header>
+  <main class="game-wrap">
+    <noscript><p>Zum Spielen muss JavaScript im Browser aktiviert sein.</p></noscript>
+    <section id="home" class="paper welcome" hidden>
+      <p class="overline">Valmarch · Kornland</p>
+      <h2>Am Weidenkamm</h2>
+      <p>Graue Asche bedeckt den Weidenkamm. Am Morgen erwachst du am Rand eines Feldwegs.</p>
+      <div class="actions">
+        <button id="continue" class="action primary" hidden>Spiel fortsetzen</button>
+        <button id="new-game" class="action">Neues Spiel</button>
+        <label for="save-file" class="action file-label">Spielstand laden<input type="file" id="save-file" accept=".json,application/json"></label>
+      </div>
+      <p id="home-status" role="status"></p>
+    </section>
+
+    <section id="creation" class="paper creation" hidden>
+      <form id="character-form">
+        <h2 id="creation-title" tabindex="-1">Charakter erstellen</h2>
+        <label for="character-name">Name</label>
+        <input id="character-name" required maxlength="40" autocomplete="off">
+        <label for="origin">Herkunft</label>
+        <select id="origin"></select>
+        <label for="class">Klasse</label>
+        <select id="class" aria-describedby="class-description"></select>
+        <p id="class-description"></p>
+        <label for="appearance">Porträt</label>
+        <select id="appearance"><option value="mann">Männlich</option><option value="frau">Weiblich</option></select>
+        <label for="variant">Variante</label>
+        <select id="variant"></select>
+        <fieldset id="point-buy"><legend>Attributpunkte</legend>
+          <p id="points-left" aria-live="polite"></p>
+          <div id="point-controls"></div>
+        </fieldset>
+        <dl id="preview-stats" class="stat-line"></dl>
+        <p id="creation-status" role="status"></p>
+        <div class="actions">
+          <button id="character-submit" class="action primary" type="submit">Prolog starten</button>
+          <button class="action" type="button" id="cancel">Zurück</button>
+        </div>
+      </form>
+      <figure><div id="preview" class="avatar" role="img"></div><figcaption id="preview-caption"></figcaption></figure>
+    </section>
+
+    <section class="prologue" id="prologue" aria-labelledby="intro-title" hidden>
+      <div class="prologue-stage">
+        <div id="intro-scene" class="prologue-scene">
+          <img id="intro-art" class="prologue-art" alt="">
+          <div id="intro-portrait" class="avatar prologue-portrait" role="img" hidden></div>
+          <div class="prologue-caption" aria-live="polite" aria-atomic="true">
+            <p id="intro-location" class="wordmark"></p>
+            <h2 id="intro-title" tabindex="-1"></h2>
+            <p id="intro-text"></p>
+          </div>
+        </div>
+      </div>
+      <div class="actions prologue-controls">
+        <button id="intro-toggle" type="button" class="action">Pausieren</button>
+        <button id="intro-next" type="button" class="action primary">Weiter</button>
+        <button id="intro-skip" type="button" class="action">Prolog überspringen</button>
+      </div>
+    </section>
+
+    <div class="game-grid" id="play" hidden>
+      <nav class="play-shortcuts" aria-label="Spielbereiche">
+        <a href="#scene-title">Szene</a>
+        <a href="#travel-map">Reisekarte</a>
+        <a href="#character-panel">Charakter</a>
+      </nav>
+      <section class="paper encounter">
+        <p class="overline" id="location"></p>
+        <h2 id="scene-title" tabindex="-1"></h2>
+        <div id="scene-content"></div>
+        <p id="turn-status" role="status"></p>
+        <div id="scene-actions" class="actions scene-actions"></div>
+      </section>
+      <div class="travel-tools">
+        <details id="travel-map" class="travel-map" open>
+          <summary>Reisekarte · Valmarch</summary>
+          <p id="map-status" class="map-status"></p>
+          <div id="map-destinations" class="actions map-destinations" role="group" aria-label="Erreichbare Reiseziele"></div>
+          <div id="map-plan" class="actions map-plan"></div>
+          <div class="map-scroll" role="region" aria-label="Grafische Reisekarte" tabindex="0">
+            <div id="map-board" class="map-board">
+              <svg id="map-routes" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
+              <div id="map-places"></div>
+            </div>
+          </div>
+        </details>
+        <aside id="character-panel" class="sidebar" aria-label="Charakter und Reise" tabindex="-1">
+          <div class="party">
+            <div id="avatar" class="avatar" role="img"></div>
+            <div><h2 id="hero-name"></h2><p id="hero-origin"></p></div>
+          </div>
+          <dl id="vitals" class="stat-line"></dl>
+          <section class="progression" aria-labelledby="level-heading">
+            <h3 id="level-heading"></h3>
+            <progress id="xp-bar" max="75" value="0" aria-label="Erfahrung bis zur nächsten Stufe"></progress>
+            <p id="xp-label"></p>
+            <div id="training" class="actions"></div>
+          </section>
+          <details>
+            <summary>Glutgleichgewicht</summary>
+            <p>Angriffszauber verschieben die Glut um 2 Richtung Zerstörung. Schützen, Binden oder Heilen verschiebt sie um 2 Richtung Erneuerung. Bei +4 oder −4 schlägt die Glut zurück. Deckung bewegt dich einen Schritt zur Mitte.</p>
+          </details>
+          <section class="travel-objective" aria-labelledby="objective-heading">
+            <h3 id="objective-heading">Reiseauftrag</h3>
+            <p id="objective"></p>
+            <ul id="quest-clues" hidden></ul>
+          </section>
+          <details><summary>Eigenschaften</summary><dl id="attributes" class="stat-line"></dl></details>
+          <details open><summary>Inventar und Ausrüstung</summary><p id="equipment"></p><ul id="inventory" class="inventory-list"></ul></details>
+          <details open><summary id="party-count">Gefährten</summary><ul id="party-members" class="inventory-list"></ul>
+            <details><summary>Mögliche Treffpunkte</summary><ul id="party-leads"></ul></details>
+          </details>
+          <details><summary>Fraktionsruf</summary><ul id="faction-ruf" class="inventory-list"></ul></details>
+          <details open><summary>Reisejournal</summary><ol id="journal"></ol></details>
+          <div class="actions save-actions">
+            <button id="legacy-build" class="action" hidden>Klasse und Attribute nachtragen</button>
+            <button id="export" class="action">Spielstand exportieren</button>
+            <button id="menu" class="action">Hauptmenü</button>
+          </div>
+          <p id="save-status" role="status"></p>
+        </aside>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,41 @@
+# Übergabe für Claude Code · Aschenkrone
+
+Stand: 16. November 2026
+
+Arbeite im Ordner `C:\Users\afisc\Documents\ChatGPT\Pen and Paper - Aschenkrone`. Der aktuelle Stand liegt in der **`index.html` auf oberster Ebene** und ihren Unterordnern `spiel/`, `bestiarium/` und `profilbilder/`. `Aschenkrone-Upload/` und `Aschenkrone-Spielvorschau.zip` sind ältere Kopien. Die Browserexporte unter `C:\Users\afisc\Desktop\Rollenspiel - Claude Code_files` gehören zur frühen Vorlage. Öffne zum Spielen die aktuelle `index.html` direkt im Browser. Das Spiel verwendet HTML, CSS und Vanilla-JavaScript und startet ohne Build oder Backend.
+
+## Wo was liegt
+
+| Datei | Aufgabe |
+| --- | --- |
+| `index.html`, `spiel/stil.css` | Hauptmenü, Charaktererstellung, Prolog, Szene, Reisekarte, Seitenleiste und responsive Ansichten |
+| `spiel/welt.js` | Szenen und Entscheidungen, Klassen, Herkünfte, Reiseziele und Routen, Kämpfe, Gegenstände, Loot-Tabellen, Gefährten und Fraktionen |
+| `spiel/regeln.js` | Zustandswechsel, Regeln für Proben, Reisen und Kampf, Inventar, EP und Stufen, Beziehungen, Fraktionsruf und Spielstandvalidierung |
+| `spiel/spiel.js` | DOM und Ereignisse, Kampfanzeige und Animationen, Routenplanung, lokale Speicherung und JSON-Spielstandimport/-export |
+| `spiel/prolog.js`, `spiel/prolog/` | Illustrierter Prolog mit drei Bildern beziehungsweise Einstellungen sowie weiteren Szenenbildern |
+| `bestiarium/daten.js`, `bestiarium/bilder/` | Bestehendes Bestiarium und Kreaturenbilder. Für einen spielbaren Gegner zusätzlich Kampfregeln, Loot und Szenenanbindung in `spiel/welt.js` ergänzen. |
+| `profilbilder/portraets.js`, `profilbilder/bilder/` | Porträts und Varianten. Fünf Grundfiguren pro Geschlecht sowie ein eigenes Untotenmotiv. |
+| `quellen/` | Bestiarium und Modellanweisungen als PDF |
+
+## Spielstand der Entwicklung
+
+- **Start und Glutmagie.** Nach der Charaktererstellung zeigt der Prolog das Erwachen aus der Asche. Sechs Herkünfte einschließlich Vampirgeschlechtern und Untoten beginnen mit jeweils einer eigenen Szene. Neun Klassen stehen zur Wahl: Ritter, Magier, Priester, Waldläufer, Dieb, Nekromant, Paladin, Druide und Krieger. Bei der Erstellung werden sechs Attributpunkte verteilt. Jede Klasse nutzt Glut anders. Glut steht zwischen Erneuerung und Zerstörung und kann Land beleben oder verbrennen. Zu starke Ausschläge lösen einen Rückschlag aus.
+- **Reise und Konsequenzen.** Spielbar sind unter anderem Weidenkamm, Krähenfurt, Schwarzmoor, Hochwacht, Nordpass und der Abschnitt in Skarnheim bis zu Torbens Rettung am Runentor. Die Karte wählt erreichbare Ziele und zeigt Zwischenstopps. Die Route wird über die jeweils nächste Etappe gespielt. Entscheidungen am Acker, bei Jorens Rettung und am Runentor haben Folgen für spätere Szenen, Ruf und Belohnungen. Die Zollstelle hat Verhandlung, Umgehung und Kampf gegen menschliche Deserteure.
+- **Gruppe und Kampf.** Bis zu fünf Gefährten mit unterschiedlichen Klassen, jeweils aus den anderen Klassen als der Spielfigur. Gruppenmitglieder wirken im Kampf mit. Begegnungen können mit der Truppenstärke skalieren. Gegner werden einzeln ausgewählt, Animationen zeigen Aktionen und Treffer. Das zuletzt abgestimmte Animationstempo liegt bei 248 ms pro Schritt. Reduzierte Bewegung wird berücksichtigt.
+- **Fortschritt und Beute.** EP, Stufen, freie Attributpunkte, Silber, Inventar, Waffen- und Rüstungsslots, Verbrauchsgüter, Handel, Trophäen und Beutetabellen mit Qualitätsstufen sind vorhanden.
+- **Gefährtenruf.** Jeder Gefährte verlangt vor der Anwerbung ein Versprechen oder eine erledigte Aufgabe. Tovin wartet, bis du Ada geholfen hast. Entscheidungen und Rastgespräche verändern den persönlichen Ruf. Bei ≤ −25 kann ein Gefährte dauerhaft gehen. Bei 100 % werden ein einmaliges Geschenk und die Wahl zwischen enger Freundschaft und Romanze freigeschaltet.
+- **Fraktionsruf.** Acht Fraktionen sind eingetragen. Grenzwache und Bergwacht bieten ab +25 Ruf zusätzliche Vorräte. Konklave, Knochenlegion und Splitterliga haben bislang keine Rufereignisse.
+- **Bildschirmformate.** Im Kopfbereich gibt es Automatisch, Kompakt, Breitbild (16:9) und Ultrawide. Das Layout passt sich gleichzeitig dem verfügbaren Platz an. Auf dem Handy gibt es eine Schnellleiste für Szene, Karte und Charakter sowie eine Liste antippbarer Reiseziele. Auf Ultrawide können alle drei Bereiche nebeneinander stehen. Die Ansicht wird separat vom Spielstand gespeichert.
+
+## Prüfen und weiterarbeiten
+
+```powershell
+node --check spiel/spiel.js
+node --test spiel/regeln.test.cjs
+```
+
+Die Regeltests waren bei der Übergabe grün. Ansichtswechsel, Speicherung und Kartenbedienung wurden zuletzt mit simuliertem DOM geprüft. Die visuelle Browserprüfung auf einem Handy steht aus. Ein sinnvoller erster Durchlauf geht von der Charaktererstellung über Kartenauswahl und Kampf bis zum Charakterbereich, jeweils im Hoch- und Querformat, bei 1920 × 1080 und bei 2560 × 1080. Auf Handybreite besonders prüfen, ob die Schnellleiste den fokussierten Inhalt freilässt und mehrere Gegner leicht antippbar sind.
+
+Spielstandschlüssel: `aschenkrone.valmarch.v1`. Ansichtsschlüssel: `aschenkrone.layout`. Spielstände waren für den Nutzer bisher nachrangig. Ein frischer Spielstand ist für Tests geeignet.
+
+Für neue Inhalte will der Nutzer eine Welt mit echten Abzweigungen und Konsequenzen über mehrere Szenen hinweg. Gute Beute soll es bei Kämpfen, Erkundung und menschlichen Begegnungen geben. Der nächste inhaltliche Ausbau kann an das Runentor anknüpfen und frühere Entscheidungen, Gefährtenversprechen und Fraktionsruf in einer späteren Begegnung wieder aufgreifen. Steam und Unreal Engine 5 wurden als mögliche Zukunft diskutiert. Der aktuelle Arbeitsstand ist das lokale Browser-Rollenspiel.

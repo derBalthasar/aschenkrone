@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bestiarium von Aldwyr · Aschenkrone</title>
+  <link rel="stylesheet" href="stil.css">
+  <script defer src="daten.js"></script>
+  <script defer src="bestiarium.js"></script>
+</head>
+<body>
+  <header class="masthead">
+    <div class="wrap">
+      <p class="wordmark">Aschenkrone</p>
+      <h1>Bestiarium von Aldwyr</h1>
+    </div>
+  </header>
+  <main class="wrap">
+    <nav class="lands" aria-label="Landmassen" id="lands"></nav>
+    <section class="catalog" aria-label="Bestiarium">
+      <aside class="index">
+        <label for="search">Einträge suchen</label>
+        <input id="search" type="search" placeholder="Name oder Fundort" autocomplete="off">
+        <div class="kinds" aria-label="Art des Eintrags" role="group" id="kinds"></div>
+        <ul id="entries" aria-label="Einträge"></ul>
+      </aside>
+      <article class="detail" id="detail"></article>
+    </section>
+    <details class="reference" id="regions"><summary>Regionen</summary><dl id="region-list"></dl></details>
+    <details class="reference">
+      <summary>Grundregeln</summary>
+      <dl>
+        <dt>Scheu</dt><dd>Flieht bei Gefahr, greift nur in die Enge getrieben an. Jagen (Probe, um es zu stellen), beobachten, in Ruhe lassen.</dd>
+        <dt>Revier</dt><dd>Greift an, wenn man ihm zu nah kommt oder es stört. Umgehen (Heimlichkeit), vertreiben (Einschüchtern, Feuer), kämpfen.</dd>
+        <dt>Jäger</dt><dd>Sucht aktiv nach Beute, vor allem nachts beim Lagern. Wachen aufstellen, Feuer, Fallen, kämpfen.</dd>
+        <dt>Verteilung</dt><dd>Jede Region hat eine Liste von Kreaturen für Zufallsbegegnungen. In Nestern und Höhlen sind die Kreaturen stärker und zahlreicher. Dort gibt es bessere Beute und oft eine Truhe früherer Opfer. Nachts sind Jäger häufiger.</dd>
+        <dt>Aschenflut</dt><dd>Mit steigender Flut werden Tiere zu stärkeren Aschen-Varianten mit grauem Körper und glühenden Augen. Sie sind schwach gegen Feuer. Ab 30 % Flut tauchen sie im Norden auf, ab 60 % überall. Wer die Flut zurückdrängt, sieht die Tiere wieder gesund.</dd>
+        <dt>Alphatiere</dt><dd>Benannte Einzeltiere kündigen sich durch Spuren, Gerüchte und Opfer an. Sie haben eigene Fähigkeiten und eine Chance auf legendäre Beute. Jedes Alphatier gibt es nur einmal pro Spiel.</dd>
+        <dt>Beute</dt><dd>Kreaturen lassen Trophäen fallen. Pflanzen erkennt man mit Naturmagie oder Wissen und kann sie sammeln. Beides lässt sich verkaufen und später im Handwerk verwenden.</dd>
+      </dl>
+    </details>
+    <footer><a href="../index.html">Zum Spiel</a><a href="../quellen/bestiarium.pdf">Original-Bestiarium (PDF)</a><a href="../quellen/arbeitsanweisung-modelle.pdf">Bildvorlage und Spielwerte (PDF)</a></footer>
+  </main>
+</body>
+</html>

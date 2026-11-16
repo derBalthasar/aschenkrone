@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Profilbilder · Aschenkrone</title>
+<link rel="stylesheet" href="../bestiarium/stil.css">
+<style>
+.portrait-picker { display:grid; grid-template-columns:minmax(220px,330px) minmax(0,460px); gap:1.5rem; margin-block:1.5rem; }
+.portrait-controls { align-self:start; padding:1rem; background:#211b15; border:1px solid var(--line); }
+.portrait-controls label { display:block; margin:.6rem 0 .4rem; }
+.portrait-controls select { width:100%; padding:.6rem; font:inherit; color:inherit; background:#14110f; border:1px solid var(--line); }
+.portrait-controls .kinds { margin-top:1rem; }
+.portrait-frame { aspect-ratio:1; width:100%; background-color:#211b15; background-size:200% 200%; border:1px solid var(--line); }
+figcaption { color:var(--muted); }
+@media(max-width:650px) { .portrait-picker { grid-template-columns:1fr; } }
+</style>
+<script defer src="portraets.js"></script>
+<script defer src="auswahl.js"></script>
+</head>
+<body>
+<header class="masthead"><div class="wrap"><p class="wordmark">Aschenkrone</p><h1>Profilbilder</h1></div></header>
+<main class="wrap">
+  <div class="portrait-picker">
+    <section class="portrait-controls" aria-label="Porträt auswählen">
+      <label for="person">Grundcharakter</label>
+      <select id="person"></select>
+      <div class="kinds" id="variants" role="group" aria-label="Varianten"></div>
+    </section>
+    <figure><div class="portrait-frame" id="portrait" role="img"></div><figcaption id="caption" aria-live="polite"></figcaption></figure>
+  </div>
+  <footer><a href="../index.html">Zum Spiel</a><a href="../bestiarium/index.html">Zum Bestiarium</a></footer>
+</main>
+</body>
+</html>
