@@ -12,18 +12,18 @@ const prologue = (() => {
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const slides = [
     {
-      image: "nordpass.png", location: "Nordpass · In der Nacht", title: "Asche auf dem Pass",
-      text: "Noch vor Tagesanbruch trägt der Wind graue Asche über die Grenzsteine nach Valmarch.",
+      image: "nordpass.png", location: "Eispass · In der Nacht", title: "Asche auf dem Pass",
+      text: "Noch vor Tagesanbruch trägt der Wind graue Asche vom Eispass über die Felder des Kronreichs.",
       duration: 5200,
     },
     {
-      image: "asche.png", location: "Weidenkamm · Vor Sonnenaufgang", title: "Unter grauer Asche",
+      image: "asche.png", location: "Kornwik · Vor Sonnenaufgang", title: "Unter grauer Asche",
       text: "Bis zum Morgen legt sich die Asche in die Wagenspuren und unter die Hecken. Am Wegrand glimmt noch etwas unter der grauen Schicht.",
       duration: 6500,
     },
     {
-      image: "asche.png", location: "Weidenkamm · Morgengrauen", title: "Du erwachst in der Asche",
-      text: "Du holst Luft und hustest. Asche klebt an deinem Gesicht. An deinen Namen erinnerst du dich: %NAME%. Wie du hierhergekommen bist, weißt du nicht.",
+      image: "asche.png", location: "Kornwik · Morgengrauen", title: "Du erwachst in der Asche",
+      text: "Du holst Luft und hustest. An deinen Namen erinnerst du dich: %NAME%. Wie du hierhergekommen bist, weißt du nicht. In deiner Hand regt sich Glut. Als du ausatmest, richtet sich zwischen deinen Fingern ein Halm auf.",
       duration: 7300, showPortrait: true,
     },
   ];

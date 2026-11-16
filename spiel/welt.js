@@ -12,11 +12,11 @@ const world = (() => {
     presence: "Ausstrahlung", will: "Willenskraft",
   };
   const origins = {
-    "valmarcher": { name: "Valmarcher", bonuses: { presence: 1, will: 1 }, portrait: 1, path: "wake-road", lead: "Dem Licht am Feldweg folgen" },
+    "valmarcher": { name: "Mensch aus dem Kronreich", bonuses: { presence: 1, will: 1 }, portrait: 1, path: "wake-road", lead: "Dem Licht am Feldweg folgen" },
     "waldelf": { name: "Waldelfen", bonuses: { agility: 2 }, portrait: 2, path: "wake-wood", lead: "Durch die Hecke zu den Eichen gehen" },
     "bergzwerg": { name: "Bergzwerge", bonuses: { strength: 1, will: 1 }, portrait: 3, path: "wake-stone", lead: "Den alten Grenzstein untersuchen" },
-    "gruenhaut": { name: "Grünhäute", bonuses: { strength: 2, will: 1 }, portrait: 4, path: "wake-cart", lead: "Den Rufen am Graben nachgehen" },
-    "vampir": { name: "Vampirgeschlechter", bonuses: { presence: 2 }, portrait: 5, path: "wake-shade", lead: "Im Schatten dem Herzschlag folgen" },
+    "gruenhaut": { name: "Orks", bonuses: { strength: 2, will: 1 }, portrait: 4, path: "wake-cart", lead: "Den Rufen am Graben nachgehen" },
+    "vampir": { name: "Vampire · Die Erinnernden", bonuses: { presence: 2 }, portrait: 5, path: "wake-shade", lead: "Im Schatten dem Herzschlag folgen" },
     "untot": { name: "Untote · Erwachte", bonuses: { will: 2 }, portrait: 6, path: "wake-grave", lead: "Zu den Steinen am Rand des Gräberfelds gehen" },
   };
   const classes = {
@@ -74,17 +74,17 @@ const world = (() => {
   };
   const items = {
     galgenwurz: "Galgenwurz", keilerhauer: "Keilerhauer", borstenfell: "Borstenfell",
-    kraehenfedern: "Krähenfedern", flusssiegel: "Siegel von Krähenfurt",
+    kraehenfedern: "Krähenfedern", flusssiegel: "Siegel von Heidvang",
     wolfspelz: "Wolfspelz", wolfszahn: "Wolfszahn",
     glutfunke: "Glutfunke", glutpanzer: "Glutpanzer", greifenfeder: "Greifenfeder",
     greifenklaue: "Greifenklaue", trollblut: "Trollblut",
     speer: "Speer", schwert: "Schwert", bogen: "Bogen", dolch: "Dolch", stab: "Stab",
     axt: "Axt", lederwams: "Lederwams", faeuste: "Fäuste",
-    wachschwert: "Wachschwert von Hochwacht", grauflussbogen: "Grauflussbogen",
+    wachschwert: "Wachschwert von Eiswacht", grauflussbogen: "Heidvanger Jagdbogen",
     runenstab: "Runenstab der alten Mine", grenzmantel: "Grenzläufermantel",
     aschenwaechter: "Aschenwächterwams", eisenkeil: "Minenspeer",
     rostklaue: "Rostklaue", harzverband: "Harzverband", glutampulle: "Glutampulle",
-    forstbuch: "Forstbuch der Rotwälder", frostfell: "Frostklippenmantel", runenbeil: "Runenbeil",
+    forstbuch: "Heidvanger Forstbuch", frostfell: "Frostklippenmantel", runenbeil: "Runenbeil",
     baerenklaue: "Bärenklaue", runensplitter: "Runensplitter",
   };
   const gear = {
@@ -138,7 +138,7 @@ const world = (() => {
 
   const scenes = {
     wake: {
-      place: "Weidenkamm · Feldweg", title: "Aus der Asche",
+      place: "Kornwik · Feldweg", title: "Aus der Asche",
       objective: "Finde heraus, wo du bist.",
       illustration: "asche.png",
       text: "Du stützt dich auf den Ellbogen. Unter deiner Hand ist die Erde noch warm. Eine Wagenspur führt am Feld entlang. Weiter vorn hängt eine Laterne.",
@@ -146,15 +146,15 @@ const world = (() => {
         ({ id: "lantern", origin, label: data.lead, to: data.path })),
     },
     "wake-road": {
-      place: "Weidenkamm · Feldweg", title: "Kerben im Holz", objective: "Lies die Zeichen am Feldweg.",
-      text: "Du kennst die Kerben am Wegpfahl. Die Fuhrleute aus dem Kornland markieren damit sichere Gräben und Wege.",
+      place: "Kornwik · Feldweg", title: "Kerben im Holz", objective: "Lies die Zeichen am Feldweg.",
+      text: "Du kennst die Kerben am Wegpfahl. Die Fuhrleute aus Kornwik markieren damit sichere Gräben und Wege.",
       choices: [
         { id: "prepare", label: "Die Markierung für den trockenen Graben einprägen", mark: "ditch", to: "start" },
         { id: "move", label: "Direkt zum Kornwagen gehen", to: "start" },
       ],
     },
     "wake-wood": {
-      place: "Weidenkamm · Eichenhecke", title: "Spuren unter den Eichen", objective: "Lies die Spuren am Waldrand.",
+      place: "Kornwik · Eichenhecke", title: "Spuren unter den Eichen", objective: "Lies die Spuren am Waldrand.",
       text: "Unter den Eichen reicht ein einziger Blick auf den Boden. Du erkennst, wo die Wölfe den Bach queren und wo das Ufer frei bleibt.",
       choices: [
         { id: "prepare", label: "Den freien Bachpfad einprägen", mark: "waldspur", to: "start" },
@@ -162,15 +162,15 @@ const world = (() => {
       ],
     },
     "wake-stone": {
-      place: "Weidenkamm · Grenzstein", title: "Wärme unter dem Stein", objective: "Untersuche den Grenzstein.",
-      text: "Im Sockel des Grenzsteins liegt eine warme Naht. Du erkennst das Muster aus den tiefen Stollen Skarnheims und weißt, wie du den Glutfluss abfangen kannst.",
+      place: "Kornwik · Grenzstein", title: "Wärme unter dem Stein", objective: "Untersuche den Grenzstein.",
+      text: "Im Sockel des Grenzsteins liegt eine warme Naht. Du erkennst ein Muster der Runenschmiede von Essenfels und weißt, wie du den Glutfluss abfangen kannst.",
       choices: [
         { id: "prepare", label: "Dir den Rhythmus der Glut merken", mark: "steinrhythmus", to: "start" },
         { id: "move", label: "Weiter zum Feldweg gehen", to: "start" },
       ],
     },
     "wake-cart": {
-      place: "Weidenkamm · Wagengraben", title: "Das Rad im Graben", objective: "Finde heraus, wer am Graben ruft.",
+      place: "Kornwik · Wagengraben", title: "Das Rad im Graben", objective: "Finde heraus, wer am Graben ruft.",
       text: "Zwei Fuhrleute stemmen sich gegen ein festgefahrenes Wagenrad. Als du näher kommst, lassen sie vor Schreck den Hebel fallen.",
       choices: [
         { id: "prepare", label: "Das Rad anheben und mit ihnen zum Lager gehen", mark: "fuhrleute-vertrauen", to: "start" },
@@ -178,15 +178,15 @@ const world = (() => {
       ],
     },
     "wake-shade": {
-      place: "Weidenkamm · Heckenrand", title: "Ein Herzschlag im Nebel", objective: "Finde den Ursprung des Geräuschs.",
-      text: "Hinter der Hecke hörst du den Herzschlag eines Fuhrmanns. Er murmelt ein altes Kennwort aus der Ostmark, um sich bei der Furt zu erkennen zu geben.",
+      place: "Kornwik · Heckenrand", title: "Ein Herzschlag im Nebel", objective: "Finde den Ursprung des Geräuschs.",
+      text: "Hinter der Hecke hörst du den Herzschlag eines Fuhrmanns. Er murmelt ein Kennwort der Erinnernden aus Eryndor, um sich bei der Furt zu erkennen zu geben.",
       choices: [
         { id: "prepare", label: "Das Kennwort der Fährleute einprägen", mark: "faehrwort", to: "start" },
         { id: "move", label: "Dem Feldweg zum Kornwagen folgen", to: "start" },
       ],
     },
     "wake-grave": {
-      place: "Weidenkamm · Altes Gräberfeld", title: "Der Name auf dem Tuch",
+      place: "Kornwik · Altes Gräberfeld", title: "Der Name auf dem Tuch",
       objective: "Untersuche das alte Gräberfeld.",
       text: "Du findest ein aufgerissenes Leichentuch unter den Steinen. Dein Name steht darauf. Neben dem Tuch wächst Galgenwurz. In der Ferne hörst du die Fuhrleute.",
       choices: [
@@ -195,9 +195,9 @@ const world = (() => {
       ],
     },
     start: {
-      place: "Weidenkamm · Kornland", title: "Die Warnung", objective: "Bereite den Aufbruch vor.",
+      place: "Kornwik · Ackerland", title: "Die Warnung", objective: "Bereite den Aufbruch vor.",
       illustration: "lager.png",
-      text: "Die Laterne hängt an einem Kornwagen. Eine Fuhrfrau reicht dir Wasser und erzählt von der grauen Asche am Nordpass. Die Fuhrleute wollen noch vor Dunkelheit nach Krähenfurt. Sie bitten dich, vorauszugehen und einen freien Weg zu finden.",
+      text: "Die Laterne hängt an einem Kornwagen. Eine Fuhrfrau reicht dir Wasser und erzählt von der grauen Asche am Eispass. Die Fuhrleute wollen noch vor Dunkelheit nach Heidvang. Sie bitten dich, vorauszugehen und einen freien Weg zu finden.",
       choices: [
         { id: "talk", label: "Die Fuhrleute nach sicheren Wegen fragen", check: ["presence", 11], advantage: "fuhrleute-vertrauen",
           pass: "Sie zeigen dir einen trockenen Graben am Acker. Darin kannst du ungesehen näher heran.", fail: "Niemand war seit dem letzten Regen draußen.", mark: "ditch", to: "field" },
@@ -208,7 +208,7 @@ const world = (() => {
       ],
     },
     "ash-field": {
-      place: "Weidenkamm · Saatstreifen", title: "Was unter der Asche wächst",
+      place: "Kornwik · Saatstreifen", title: "Was unter der Asche wächst",
       objective: "Entscheide, wie viel Glut du der Erde anvertraust.",
       text: "Unter der grauen Schicht liegen noch Samen. Ausgewogene Glut kann sie zum Keimen bringen. Wer sie zu schnell entfacht, kann die ganze Saat verbrennen.",
       choices: [
@@ -218,23 +218,23 @@ const world = (() => {
       ],
     },
     field: {
-      place: "Weidenkamm · Ackerweg", title: "Im Revier des Keilers", creature: "keiler",
+      place: "Kornwik · Ackerweg", title: "Im Revier des Keilers", creature: "keiler",
       objective: "Finde einen Weg zur Furt, auf dem die Kornfuhre folgen kann.",
-      text: "Zwischen aufgeworfenen Rübenreihen steht ein Eisenborstenkeiler. Er scharrt im Boden, senkt den Kopf und hält den Weg zum Graufluss besetzt.",
+      text: "Zwischen aufgeworfenen Rübenreihen steht ein Eisenborstenkeiler. Er scharrt im Boden, senkt den Kopf und hält den Weg zum Fluss bei Heidvang besetzt.",
       choices: [
         { id: "sneak", label: "Am Keiler vorbeischleichen", check: ["agility", 11], advantage: "ditch",
-          pass: "Du erreichst den Graufluss. Der Keiler bleibt auf dem Acker und der Kornwagen muss warten.", fail: "Der Keiler hört dich und scharrt zum Angriff.",
+          pass: "Du erreichst den Fluss bei Heidvang. Der Keiler bleibt auf dem Acker und der Kornwagen muss warten.", fail: "Der Keiler hört dich und scharrt zum Angriff.",
           mark: "keiler-umgangen", to: "ford", fight: "keiler" },
         { id: "fire", label: "Mit der Laterne aus dem Revier treiben", check: ["presence", 12],
           pass: "Der Keiler weicht in die Hecken zurück. Der Kornweg ist frei.", fail: "Er schnaubt durch den Rauch und hält stand.",
           mark: "keiler-vertrieben", to: "ford", fight: "keiler" },
         { id: "fight", label: "Den Keiler mit dem Speer stellen", fight: "keiler", to: "ford" },
-        { id: "detour", label: "Einen Umweg durch die Rotwälder nehmen", destination: "rotwaelder", mark: "waldweg", to: "forest" },
+        { id: "detour", label: "Einen Umweg durch den Eichenwald bei Heidvang nehmen", destination: "rotwaelder", mark: "waldweg", to: "forest" },
       ],
     },
     forest: {
-      place: "Rotwälder · Rotwasser", title: "Unter den Eichen", creature: "grauwolf",
-      objective: "Prüfe, ob der Wagenweg durch die Rotwälder frei ist.",
+      place: "Eichenwald bei Heidvang · Bachpfad", title: "Unter den Eichen", creature: "grauwolf",
+      objective: "Prüfe, ob der Wagenweg durch den Eichenwald bei Heidvang frei ist.",
       text: "Unter den Eichen wird es früh dunkel. Im Schlamm siehst du frische Wolfsspuren. Der Weg über den Waldrand ist auch für den Kornwagen breit genug, wenn du das Rudel von dort fernhältst.",
       choices: [
         { id: "trace", label: "Den Spuren ausweichen und am Bach bleiben", check: ["agility", 11], advantage: "waldspur",
@@ -248,7 +248,7 @@ const world = (() => {
       ],
     },
     ford: {
-      place: "Krähenfurt · Graufluss", title: "Am Galgen", objective: "Überbringe der Fährfrau die Nachricht.",
+      place: "Heidvang · Furt", title: "Am Galgen", objective: "Überbringe der Fährfrau die Nachricht.",
       text: "Am Ufer steht der alte Galgen. Krähen hacken an einem verlassenen Wagen. Eine Fährfrau wartet auf der anderen Seite. Sie will die Furt erst wieder öffnen, wenn sie weiß, ob das Korn sicher passieren kann.",
       creature: "galgenkraehe",
       choices: [
@@ -265,28 +265,28 @@ const world = (() => {
       ],
     },
     arrival: {
-      place: "Krähenfurt", title: "Die Nachricht kommt an", objective: "Nachricht überbracht.",
-      text: "Du berichtest der Fährfrau vom Ackerweg und den Krähen. Als Zeichen für die Fuhrleute gibt sie dir das Siegel von Krähenfurt.",
+      place: "Heidvang", title: "Die Nachricht kommt an", objective: "Nachricht überbracht.",
+      text: "Du berichtest der Fährfrau vom Ackerweg und den Krähen. Als Zeichen für die Fuhrleute gibt sie dir das Siegel von Heidvang.",
       choices: [
         { id: "seed", label: "Mit den Fuhrleuten Saatgut für den geretteten Acker zurücklegen",
           requires: "saat-erholt", condition: "delivery", item: "galgenwurz", recover: 6, mark: "saatgut-zurueckgelegt", to: "moor",
           message: "Die Fuhrleute legen Saatgut zurück, versorgen deine Wunden (bis zu 6 LP) und geben dir Galgenwurz." },
-        { id: "guide", label: "Eine ortskundige Begleitung ins Schwarzmoor mitnehmen",
+        { id: "guide", label: "Eine ortskundige Begleitung ins Moor bei Eiswacht mitnehmen",
           condition: "delivery", excludes: "saat-verbrannt", mark: "moorbegleitung", recover: 10, to: "moor",
           message: "Die Fuhrleute stellen dir eine Ortskundige zur Seite. Vor dem Aufbruch versorgt sie deine Wunden (bis zu 10 LP)." },
-        { id: "rest", label: "In Krähenfurt rasten und im Morgengrauen allein aufbrechen",
+        { id: "rest", label: "In Heidvang rasten und im Morgengrauen allein aufbrechen",
           condition: "delivery", recover: 99, replenish: 99, to: "moor",
           message: "Die Rast füllt deine Lebenspunkte und Glut wieder auf. Dein Gleichgewicht kehrt zur Mitte zurück." },
         { id: "messengers", label: "Boten zur wartenden Kornfuhre schicken",
           condition: "no-delivery", mark: "boten-unterwegs", recover: 8, to: "moor",
           message: "Du schickst zwei Boten zu den Fuhrleuten. Während sie aufbrechen, versorgt die Fährfrau deine Wunden (bis zu 8 LP)." },
-        { id: "urgent", label: "Sofort ins Schwarzmoor aufbrechen",
+        { id: "urgent", label: "Sofort ins Moor bei Eiswacht aufbrechen",
           condition: "no-delivery", replenish: 1, to: "moor",
           message: "Du nimmst auf dem Weg Glut aus der Kohle am Fährhaus auf (bis zu 1 Glut)." },
       ],
     },
     moor: {
-      place: "Schwarzmoor · Alter Bohlenweg", title: "Lichter über dem Wasser", creature: "irrglut",
+      place: "Moor bei Eiswacht · Alter Bohlenweg", title: "Lichter über dem Wasser", creature: "irrglut",
       objective: "Finde heraus, warum die Lichter den Bohlenweg blockieren.",
       text: "Zwischen den Bohlen steigt ein orangefarbenes Licht auf. Es zieht in Bögen über das schwarze Wasser. Die Fährfrau hatte erzählt, dass seit drei Nächten niemand mehr über den alten Weg kommt.",
       choices: [
@@ -303,8 +303,8 @@ const world = (() => {
       ],
     },
     "moor-report": {
-      place: "Krähenfurt · Fährhaus", title: "Was das Moor zurückgibt",
-      objective: "Entscheide, wie Krähenfurt mit dem Bohlenweg umgehen soll.",
+      place: "Heidvang · Fährhaus", title: "Was das Moor zurückgibt",
+      objective: "Entscheide, wie Heidvang mit dem Bohlenweg umgehen soll.",
       text: "Die Fährfrau hat das Ufer abgesperrt. Sie wartet darauf, was du über die Lichter und den alten Weg berichten kannst.",
       choices: [
         { id: "hand-over", label: "Den Glutfunken der Fährfrau als Beleg geben", requiresItem: "glutfunke",
@@ -318,23 +318,23 @@ const world = (() => {
       ],
     },
     "moor-end": {
-      place: "Krähenfurt · Fährhaus", title: "Der nächste Morgen",
-      objective: "Den Bericht über das Schwarzmoor abgeschlossen.",
-      text: "Am nächsten Morgen macht sich ein Bote zur Hochwacht auf. Er nimmt deinen Bericht über die Lichter im Schwarzmoor mit.",
+      place: "Heidvang · Fährhaus", title: "Der nächste Morgen",
+      objective: "Den Bericht über das Moor bei Eiswacht abgeschlossen.",
+      text: "Am nächsten Morgen macht sich ein Bote nach Eiswacht auf. Er nimmt deinen Bericht über die Lichter im Moor bei Eiswacht mit.",
       choices: [
-        { id: "bridge", label: "Bei Tageslicht über den markierten Bohlenweg zur Hochwacht reisen",
+        { id: "bridge", label: "Bei Tageslicht über den markierten Bohlenweg nach Eiswacht reisen",
           requires: "moorpassage-offen", mark: "hochweg-kurz", to: "watch" },
-        { id: "ridge", label: "Über den trockenen Höhenweg zur Hochwacht reisen", destination: "hochwacht", to: "watch" },
+        { id: "ridge", label: "Über den trockenen Höhenweg nach Eiswacht reisen", destination: "hochwacht", to: "watch" },
       ],
     },
     watch: {
-      place: "Hochwacht · Torhaus", title: "Unter dem Nordpass",
-      objective: "Verschaffe dir Zugang zu den Berichten vom Nordpass.",
-      text: "Die Wache sammelt Meldungen über die Asche am Nordpass. Der Bericht aus Krähenfurt liegt auf dem Tisch. Eine Schreiberin fragt, was sie als gesichert weitergeben kann.",
+      place: "Eiswacht · Torhaus", title: "Unter dem Eispass",
+      objective: "Verschaffe dir Zugang zu den Berichten vom Eispass.",
+      text: "Die Wache sammelt Meldungen über die Asche am Eispass. Der Bericht aus Heidvang liegt auf dem Tisch. Eine Schreiberin fragt, was sie als gesichert weitergeben kann.",
       choices: [
         { id: "archive", label: "Den bereits übergebenen Glutfunken untersuchen lassen",
           requires: "beleg-uebergeben", mark: "hochwacht-archiv", to: "watch-end",
-          message: "Die Wache hat den Glutfunken bereits untersucht. Du bekommst sofort Zugang zu den Berichten vom Nordpass." },
+          message: "Die Wache hat den Glutfunken bereits untersucht. Du bekommst sofort Zugang zu den Berichten vom Eispass." },
         { id: "show", label: "Den eigenen Glutfunken vorzeigen und als Beleg abgeben",
           requiresItem: "glutfunke", consume: "glutfunke", mark: "hochwacht-archiv", to: "watch-end",
           message: "Die Schreiberin nimmt den Glutfunken entgegen und öffnet das Archiv." },
@@ -346,8 +346,8 @@ const world = (() => {
       ],
     },
     "watch-end": {
-      place: "Hochwacht · Torhaus", title: "Die Meldungen vom Nordpass",
-      objective: "Erkunde die Wege zum Nordpass.",
+      place: "Eiswacht · Torhaus", title: "Die Meldungen vom Eispass",
+      objective: "Erkunde die Wege zum Eispass.",
       text: "Die Schreiberin siegelt das Protokoll. Draußen wird das Tor vor Einbruch der Nacht geschlossen.",
       map: "hochwacht",
       choices: [
@@ -355,7 +355,7 @@ const world = (() => {
       ],
     },
     "watch-yard": {
-      place: "Hochwacht · Wachhof", title: "Wege zum Nordpass",
+      place: "Eiswacht · Wachhof", title: "Wege zum Eispass",
       objective: "Finde heraus, wo der vermisste Grenzläufer steckt.",
       illustration: "wachhof.png",
       text: "Unter der Torlaube hängt ein leerer Haken. Daran sollte Jorens Signallaterne hängen. Seine Schwester Lene steht seit Sonnenaufgang am Tor und hat ihm einen trockenen Schal mitgebracht. Wachtmeisterin Runa lässt einen Seilwagen bereitmachen, hält ihn aber im Hof zurück. Seit die Asche am Pass fällt, schickt sie niemanden ohne ein Zeichen hinauf.",
@@ -369,19 +369,19 @@ const world = (() => {
           message: "„Zwei kurze Lichtzeichen“, sagt Runa. „Dann schicke ich den Seilwagen. Aber erst muss ich wissen, wo wir suchen.“" },
         { id: "camp", label: "Am Wachfeuer rasten · LP und Glut auffüllen", recover: 99, replenish: 99, center: true,
           to: "watch-yard", message: "Am Wachfeuer versorgst du deine Wunden und sammelst deine Glut." },
-        { id: "skarn-briefing", label: "Mit Runa über die ausgebliebenen Zeichen aus Skarnheim sprechen",
+        { id: "skarn-briefing", label: "Mit Runa über die ausgebliebenen Zeichen aus Glutberg sprechen",
           requires: "pass-gemeldet", excludes: "skarn-auftrag", to: "skarn-briefing" },
-        { id: "skarn-road", label: "Über den bewachten Nordpass zum Grenzlager reisen", requires: ["skarn-auftrag", "pass-bewacht"],
+        { id: "skarn-road", label: "Über den bewachten Eispass zum Grenzlager reisen", requires: ["skarn-auftrag", "pass-bewacht"],
           destination: "skarn-gate", to: "skarn-gate" },
         { id: "skarn-detour", label: "Am gesperrten Pass vorbei über die alte Ziegenstiege reisen",
           requires: ["skarn-auftrag", "pass-gesperrt"], destination: "skarn-gate", to: "skarn-gate" },
-        { id: "return-ford", label: "Nach Krähenfurt zurückreisen", destination: "kraehenfurt", to: "return-ford" },
+        { id: "return-ford", label: "Nach Heidvang zurückreisen", destination: "kraehenfurt", to: "return-ford" },
         { id: "supply-post", label: "Mit der Quartiermeisterin handeln", to: "supply-post" },
         { id: "rescue-reward", label: "Lene und Runa wegen Jorens Rettung aufsuchen", requires: ["joren-gerettet", "pass-gemeldet"],
           excludes: "jorens-dank", to: "pass-report" },
         { id: "toll", label: "Nach dem Streit an der alten Zollstelle sehen", condition: "toll-unresolved", destination: "toll", to: "toll" },
         { id: "toll-revisit", label: "Zur alten Zollstelle zurückkehren", condition: "toll-resolved", destination: "toll", to: "toll-resolved" },
-        { id: "return-moor", label: "Über die markierten Bohlen ins Schwarzmoor reisen", destination: "schwarzmoor",
+        { id: "return-moor", label: "Über die markierten Bohlen ins Moor bei Eiswacht reisen", destination: "schwarzmoor",
           requires: "moorpassage-offen", to: "return-moor" },
         { id: "guard-supply", label: "Die Vorräte der Passwache abholen", requires: "pass-bewacht",
           excludes: "wachvorrat", mark: "wachvorrat", item: "galgenwurz", to: "watch-yard",
@@ -395,24 +395,24 @@ const world = (() => {
         { id: "ridge-revisit", label: "Zum Signalplatz auf der Felsrippe reisen", destination: "ridge", requires: "pass-ridge", to: "ridge-cleared" },
         { id: "ravine", label: "In den Trollschlund hinabsteigen", destination: "ravine", excludes: "pass-ravine", to: "ravine" },
         { id: "ravine-revisit", label: "Zum Treidelpfad im Trollschlund reisen", destination: "ravine", requires: "pass-ravine", to: "ravine-cleared" },
-        { id: "pass", label: "Den erschlossenen Weg zum Nordpass nehmen", destination: "pass", condition: "pass-open", to: "pass" },
+        { id: "pass", label: "Den erschlossenen Weg zum Eispass nehmen", destination: "pass", condition: "pass-open", to: "pass" },
       ],
     },
     "supply-post": {
-      place: "Hochwacht · Zeugkammer", map: "hochwacht", title: "Maren zählt die Vorräte",
+      place: "Eiswacht · Zeugkammer", map: "hochwacht", title: "Maren zählt die Vorräte",
       objective: "Kaufe Vorräte oder verkaufe Trophäen.",
       text: "Maren streicht jede ausgegebene Binde auf ihrer Tafel an. Trophäen nimmt sie für die Gerber an. Ausrüstung gibt sie dir für Silber mit.",
       choices: [{ id: "supply-back", label: "Zum Wachhof gehen", to: "watch-yard" }],
     },
     toll: {
-      place: "Nordpass · Alte Zollstelle", map: "toll", title: "Ein Zoll ohne Siegel",
+      place: "Eispass · Alte Zollstelle", map: "toll", title: "Ein Zoll ohne Siegel",
       objective: "Kläre den Streit um Adas Wagen.",
       text: "Die Händlerin Ada steht vor einer quer gelegten Stange. Ein Deserteur verlangt die Hälfte ihrer Ladung und behauptet, für die Wache zu kassieren. Sein Gegenüber betrachtet die Stange, als suche er einen Vorwand, sie selbst aus dem Weg zu räumen.",
       creature: "deserteure",
       choices: [
         { id: "toll-talk", label: "Mit dem Fährsiegel aushandeln, dass Ada passieren darf", requiresItem: "flusssiegel",
           condition: "toll-unresolved", check: ["presence", 13], mark: "zoll-verhandelt", fight: "deserteure", to: "toll-resolved",
-          pass: "Die Männer sehen das Siegel und geben den Weg frei. Sie wollen keinen Bericht an die Hochwacht riskieren.",
+          pass: "Die Männer sehen das Siegel und geben den Weg frei. Sie wollen keinen Bericht an die Wache in Eiswacht riskieren.",
           fail: "Der Wortführer schlägt das Siegel zur Seite und zieht sein Schwert." },
         { id: "toll-help", label: "Ada über den Seitenweg an der Sperre vorbeiführen",
           condition: "toll-unresolved", check: ["agility", 11], advantage: "waldspur",
@@ -421,53 +421,53 @@ const world = (() => {
           mark: "zoll-umgangen", fight: "deserteure", to: "toll-resolved" },
         { id: "toll-fight", label: "Die Deserteure stellen · Kampf", condition: "toll-unresolved", fight: "deserteure", to: "toll-resolved" },
         { id: "toll-revisit", label: "Mit Ada an der freigewordenen Zollstelle sprechen", condition: "toll-resolved", to: "toll-resolved" },
-        { id: "toll-back", label: "Zur Hochwacht zurückkehren", destination: "hochwacht", to: "watch-yard" },
+        { id: "toll-back", label: "Nach Eiswacht zurückkehren", destination: "hochwacht", to: "watch-yard" },
       ],
     },
     "toll-resolved": {
-      place: "Nordpass · Alte Zollstelle", map: "toll", title: "Adas Wagen",
+      place: "Eispass · Alte Zollstelle", map: "toll", title: "Adas Wagen",
       objective: "Hilf Ada beim Anspannen oder reise weiter.",
       text: "Ada zieht die Riemen ihres Pferdes nach. Ein Kasten ist vom Wagen gefallen. Sie bittet dich, ihn unter die Plane zu heben, und will dich aus ihrem Reisevorrat bezahlen.",
       choices: [
         { id: "toll-reward", label: "Den Kasten sichern und Adas Dank annehmen", excludes: "haendlerin-geholfen",
           mark: "haendlerin-geholfen", loot: "haendlerwagen", to: "toll-resolved" },
-        { id: "toll-back", label: "Zur Hochwacht zurückkehren", destination: "hochwacht", to: "watch-yard" },
+        { id: "toll-back", label: "Nach Eiswacht zurückkehren", destination: "hochwacht", to: "watch-yard" },
       ],
     },
     "return-ford": {
-      place: "Krähenfurt · Fährhaus", title: "Zurück an der Furt", map: "kraehenfurt",
+      place: "Heidvang · Fährhaus", title: "Zurück an der Furt", map: "kraehenfurt",
       objective: "Entscheide, welchen Weg du als Nächstes nimmst.",
       text: "Die Fährfrau erkennt dich. Am alten Galgen hängt noch die Laterne vom Tag deiner Ankunft.",
       choices: [
-        { id: "return-yard", label: "Über den Höhenweg zur Hochwacht reisen", destination: "hochwacht", to: "watch-yard" },
-        { id: "return-moor", label: "Den Uferweg zum Schwarzmoor nehmen", destination: "schwarzmoor", to: "return-moor" },
-        { id: "return-forest", label: "Die Rotwälder aufsuchen", destination: "rotwaelder", to: "return-forest" },
-        { id: "return-field", label: "Den Ackerweg am Weidenkamm aufsuchen", destination: "weidenkamm", to: "return-field" },
+        { id: "return-yard", label: "Über den Höhenweg nach Eiswacht reisen", destination: "hochwacht", to: "watch-yard" },
+        { id: "return-moor", label: "Den Uferweg zum Moor bei Eiswacht nehmen", destination: "schwarzmoor", to: "return-moor" },
+        { id: "return-forest", label: "Den Eichenwald bei Heidvang aufsuchen", destination: "rotwaelder", to: "return-forest" },
+        { id: "return-field", label: "Den Ackerweg bei Kornwik aufsuchen", destination: "weidenkamm", to: "return-field" },
       ],
     },
     "return-moor": {
-      place: "Schwarzmoor · Alter Bohlenweg", title: "Wieder am Moor", map: "schwarzmoor",
+      place: "Moor bei Eiswacht · Alter Bohlenweg", title: "Wieder am Moor", map: "schwarzmoor",
       objective: "Wähle deinen Rückweg.",
       text: "Über dem Wasser liegt Nebel. An den Bohlen siehst du, wie die Fährfrau deinen Bericht umgesetzt hat.",
       choices: [
-        { id: "return-ford", label: "Am Ufer nach Krähenfurt zurückgehen", destination: "kraehenfurt", to: "return-ford" },
-        { id: "return-yard", label: "Über die markierten Bohlen zur Hochwacht reisen", destination: "hochwacht",
+        { id: "return-ford", label: "Am Ufer nach Heidvang zurückgehen", destination: "kraehenfurt", to: "return-ford" },
+        { id: "return-yard", label: "Über die markierten Bohlen nach Eiswacht reisen", destination: "hochwacht",
           requires: "moorpassage-offen", to: "watch-yard" },
       ],
     },
     "return-forest": {
-      place: "Rotwälder · Rotwasser", title: "Am alten Bachpfad", map: "rotwaelder",
-      objective: "Wähle zwischen Krähenfurt und dem Weidenkamm.",
+      place: "Eichenwald bei Heidvang · Bachpfad", title: "Am alten Bachpfad", map: "rotwaelder",
+      objective: "Wähle zwischen Heidvang und Kornwik.",
       text: "Der Bach läuft zwischen den Eichen. Neben dem Wagenweg hat Försterin Enna ihre nassen Karten auf einen Zaun gehängt. Eine davon zeigt einen alten Messpfahl auf der anderen Seite des Bachs.",
       choices: [
         { id: "forest-book", label: "Enna fragen, was sie am Bach sucht", excludes: "forstbuch-zurueckgegeben",
           to: "forest-cache" },
-        { id: "return-ford", label: "Nach Krähenfurt zurückkehren", destination: "kraehenfurt", to: "return-ford" },
-        { id: "return-field", label: "Zum Weidenkamm gehen", destination: "weidenkamm", to: "return-field" },
+        { id: "return-ford", label: "Nach Heidvang zurückkehren", destination: "kraehenfurt", to: "return-ford" },
+        { id: "return-field", label: "Nach Kornwik gehen", destination: "weidenkamm", to: "return-field" },
       ],
     },
     "forest-cache": {
-      place: "Rotwälder · Messpfahl", map: "rotwaelder", title: "Was das Wasser mitnahm",
+      place: "Eichenwald bei Heidvang · Messpfahl", map: "rotwaelder", title: "Was das Wasser mitnahm",
       objective: "Hilf Enna, ihr Forstbuch zu bergen.",
       text: "„Da stehen die Grenzen der Holzrechte drin“, sagt Enna. „Seit der Bach die Kiste weggespült hat, behauptet der Gutshof, die Weide gehöre ihm.“ Am anderen Ufer klemmt die Kiste zwischen zwei Wurzeln. Oberhalb führt ein trockener Steg dorthin.",
       choices: [
@@ -477,12 +477,12 @@ const world = (() => {
         { id: "forest-return-book", label: "Enna das Forstbuch zurückgeben", requiresItem: "forstbuch",
           excludes: "forstbuch-zurueckgegeben", consume: "forstbuch", mark: "forstbuch-zurueckgegeben",
           loot: "foersterlohn", to: "return-forest",
-          message: "Enna prüft den Eintrag zur Weide und reicht dir ihren Grauflussbogen. „Den Eintrag bringe ich morgen nach Krähenfurt.“" },
+          message: "Enna prüft den Eintrag zur Weide und reicht dir ihren Heidvanger Jagdbogen. „Den Eintrag bringe ich morgen nach Heidvang.“" },
         { id: "forest-back", label: "Zum Bachpfad zurückgehen", to: "return-forest" },
       ],
     },
     "return-field": {
-      place: "Weidenkamm · Ackerweg", title: "Wieder im Kornland", map: "weidenkamm",
+      place: "Kornwik · Ackerweg", title: "Wieder im Ackerland", map: "weidenkamm",
       objective: "Sieh nach der Saat oder reise weiter.",
       illustration: "lager.png",
       text: "Am Feldrand stehen noch die Pfähle der Fuhrleute. Von hier führt der Weg zur Furt oder unter den Eichen hindurch.",
@@ -491,11 +491,11 @@ const world = (() => {
           excludes: "ackervorrat-geholt", mark: "ackervorrat-geholt", loot: "ackervorrat", to: "return-field",
           message: "Am Feldpfahl hängt ein Beutel mit deinem Namen. Unter dem Beutel siehst du die neuen Saatreihen." },
         { id: "return-ford", label: "Zur Furt reisen", destination: "kraehenfurt", to: "return-ford" },
-        { id: "return-forest", label: "In die Rotwälder gehen", destination: "rotwaelder", to: "return-forest" },
+        { id: "return-forest", label: "In den Eichenwald bei Heidvang gehen", destination: "rotwaelder", to: "return-forest" },
       ],
     },
     mine: {
-      place: "Nordpass · Alte Glutmine", title: "Ein Licht unter dem Hang",
+      place: "Eispass · Alte Glutmine", title: "Ein Licht unter dem Hang",
       objective: "Untersuche den alten Entwässerungsstollen.", map: "mine",
       text: "Im Stollen zieht kalte Luft nach Norden. Ein Schwarm Glutkäfer sitzt auf dem morschen Gitter. Zwischen den Steinen siehst du einen Hebel. Hier könnten die Fuhrleute unter dem Hang hindurch, sobald der Durchgang frei ist.",
       choices: [
@@ -505,12 +505,12 @@ const world = (() => {
         { id: "mine-fight", label: "Die Glutkäfer stellen · Kampf", excludes: "kaefer-besiegt", fight: "glutkaefer", to: "mine-cleared" },
         { id: "mine-mechanism", label: "Den Mechanismus aus dem Wachbericht benutzen", requires: "hochwacht-archiv",
           excludes: "pass-mine", mark: "pass-mine", to: "mine-cleared" },
-        { id: "mine-back", label: "Zur Hochwacht zurückkehren", to: "watch-yard", destination: "hochwacht" },
+        { id: "mine-back", label: "Nach Eiswacht zurückkehren", to: "watch-yard", destination: "hochwacht" },
       ],
       creature: "glutkaefer",
     },
     "mine-cleared": {
-      place: "Nordpass · Entwässerungsstollen", title: "Das Gitter hebt sich",
+      place: "Eispass · Entwässerungsstollen", title: "Das Gitter hebt sich",
       objective: "Nutze den Stollen oder melde den neuen Weg.", map: "mine",
       text: "Hinter dem Gitter stehen noch Brotdosen auf einer Bank. Der Stollen ist so trocken, dass selbst die Kerben im Holz geblieben sind. An der letzten Abzweigung liegt ein Werkzeugkasten im Staub.",
       choices: [
@@ -519,12 +519,12 @@ const world = (() => {
         { id: "inspect-mine", label: "Das rote Garn am Werkzeugkasten und die Kerbe im Staub prüfen", excludes: "joren-spur",
           mark: "joren-spur", to: "mine-cleared",
           message: "Der Pfeil weist zum alten Grenzhaus. Jemand hat mit dem Fingernagel ein zweites Zeichen daneben geritzt: verletzt." },
-        { id: "mine-pass", label: "Durch den Stollen zum Nordpass weitergehen", destination: "pass", excludes: "pass-gesperrt", to: "pass" },
-        { id: "mine-back", label: "Zur Hochwacht zurückkehren", to: "watch-yard", destination: "hochwacht" },
+        { id: "mine-pass", label: "Durch den Stollen zum Eispass weitergehen", destination: "pass", excludes: "pass-gesperrt", to: "pass" },
+        { id: "mine-back", label: "Nach Eiswacht zurückkehren", to: "watch-yard", destination: "hochwacht" },
       ],
     },
     "ridge-trail": {
-      place: "Nordpass · Felsrippe", title: "Der Schatten über dem Steig",
+      place: "Eispass · Felsrippe", title: "Der Schatten über dem Steig",
       objective: "Sichere den Steig über die Felsrippe.", map: "ridge",
       text: "Ein Felsgreif kreist über dem einzigen offenen Absatz. Im Geröll liegen alte Seile der Grenzwache. Dahinter führt der Steig hinauf zu einem verlassenen Signalplatz.",
       creature: "felsgreif",
@@ -536,11 +536,11 @@ const world = (() => {
         { id: "ridge-climb", label: "Die gedeckte Seilroute erklettern", check: ["agility", 13], advantage: "waldspur",
           excludes: "pass-ridge", pass: "Du erreichst den Signalplatz unter dem Felsüberhang.", fail: "Ein Stein löst sich. Der Greif stößt herab.",
           mark: "pass-ridge", fight: "felsgreif", to: "ridge-cleared" },
-        { id: "ridge-back", label: "Zur Hochwacht zurückkehren", to: "watch-yard", destination: "hochwacht" },
+        { id: "ridge-back", label: "Nach Eiswacht zurückkehren", to: "watch-yard", destination: "hochwacht" },
       ],
     },
     "ridge-cleared": {
-      place: "Nordpass · Signalplatz", title: "Über der Schlucht",
+      place: "Eispass · Signalplatz", title: "Über der Schlucht",
       objective: "Markiere den Steig und gehe zum Pass.", map: "ridge",
       illustration: "signalplatz.png",
       text: "In der Signalschale liegt nasses Tuch. Jenseits der Schlucht steht das Grenzhaus, das Dach halb eingesunken. Für einen Augenblick hält jemand einen blanken Gegenstand in die Öffnung. Dann bleibt sie dunkel.",
@@ -553,35 +553,35 @@ const world = (() => {
         { id: "send-signal", label: "Runa das vereinbarte Signal für den Seilwagen geben", requires: ["runa-plan", "joren-spur"],
           excludes: ["seilwagen", "joren-gerettet", "joren-verloren"], mark: "seilwagen", to: "ridge-cleared",
           message: "Du deckst die Laterne zweimal kurz auf. Tief unten antwortet ein Licht. Der Seilwagen ist unterwegs." },
-        { id: "ridge-pass", label: "Vom Signalplatz zum Nordpass steigen", destination: "pass", excludes: "pass-gesperrt", to: "pass" },
-        { id: "ridge-back", label: "Zur Hochwacht zurückkehren", to: "watch-yard", destination: "hochwacht" },
+        { id: "ridge-pass", label: "Vom Signalplatz zum Eispass steigen", destination: "pass", excludes: "pass-gesperrt", to: "pass" },
+        { id: "ridge-back", label: "Nach Eiswacht zurückkehren", to: "watch-yard", destination: "hochwacht" },
       ],
     },
     ravine: {
-      place: "Nordpass · Trollschlund", title: "Unter den Grenzsteinen",
+      place: "Eispass · Trollschlund", title: "Unter den Grenzsteinen",
       objective: "Erkunde die Schlucht. Der Troll ist ein schwerer Gegner.", map: "ravine",
       text: "Aus der Felsspalte dringt ein schweres Atmen. Hinter dem Troll führt ein alter Treidelpfad zum Pass. Seine Wunden schließen sich ohne Feuer. Die Höhle ist eng genug, um ihn mit einer Fackel auf Abstand zu halten.",
       creature: "schlundtroll",
       choices: [
         { id: "ravine-fight", label: "In die Höhle treten · Schwerer Kampf", excludes: "troll-besiegt", fight: "schlundtroll", to: "ravine-cleared" },
-        { id: "ravine-back", label: "Zur Hochwacht zurückkehren", to: "watch-yard", destination: "hochwacht" },
+        { id: "ravine-back", label: "Nach Eiswacht zurückkehren", to: "watch-yard", destination: "hochwacht" },
       ],
     },
     "ravine-cleared": {
-      place: "Nordpass · Treidelpfad", title: "Der Weg hinter der Höhle",
+      place: "Eispass · Treidelpfad", title: "Der Weg hinter der Höhle",
       objective: "Nutze den Pfad oder melde ihn der Wache.", map: "ravine",
       text: "Hinter der Höhle findest du einen schmalen Pfad. Du legst Steine an die Abzweigung, damit die Grenzwache ihn wiederfindet.",
       choices: [
         { id: "find-shelter", label: "Den blutigen Stoff am Grenzstein untersuchen", excludes: "joren-spur",
           mark: "joren-spur", to: "ravine-cleared",
           message: "Ein Streifen roten Garns hängt im Stein. Die Schleifspur zieht sich bergauf zum Grenzhaus." },
-        { id: "ravine-pass", label: "Dem Treidelpfad zum Nordpass folgen", destination: "pass", excludes: "pass-gesperrt", to: "pass" },
-        { id: "ravine-back", label: "Zur Hochwacht zurückkehren", to: "watch-yard", destination: "hochwacht" },
+        { id: "ravine-pass", label: "Dem Treidelpfad zum Eispass folgen", destination: "pass", excludes: "pass-gesperrt", to: "pass" },
+        { id: "ravine-back", label: "Nach Eiswacht zurückkehren", to: "watch-yard", destination: "hochwacht" },
       ],
     },
     pass: {
-      place: "Nordpass · Grenzsteine", title: "Die Asche auf der Südseite",
-      objective: "Entscheide, welche Nachricht die Hochwacht erhält.", map: "pass",
+      place: "Eispass · Grenzsteine", title: "Die Asche auf der Südseite",
+      objective: "Entscheide, welche Nachricht Eiswacht erhält.", map: "pass",
       text: "Südlich der Grenzsteine ist der Schnee unter einer grauen Schicht verschwunden. Zwischen zwei Steinen glimmt noch eine schmale Linie. Was du hier meldest, bestimmt, wie die Wache den Pass sichert.",
       choices: [
         { id: "shelter", label: "Der Spur zum alten Grenzhaus folgen", requires: "joren-spur", excludes: ["joren-gerettet", "joren-verloren"], to: "pass-shelter" },
@@ -590,11 +590,11 @@ const world = (() => {
           mark: "pass-gesperrt", to: "pass-report" },
         { id: "pass-post", label: "Den erschlossenen Weg unter Bewachung offen halten", condition: "report-ready", excludes: "pass-gemeldet",
           mark: "pass-bewacht", to: "pass-report" },
-        { id: "pass-back", label: "Zur Hochwacht zurückkehren", destination: "hochwacht", to: "watch-yard" },
+        { id: "pass-back", label: "Nach Eiswacht zurückkehren", destination: "hochwacht", to: "watch-yard" },
       ],
     },
     "pass-shelter": {
-      place: "Nordpass · Grenzhaus", title: "Unter dem geborstenen Balken", map: "pass",
+      place: "Eispass · Grenzhaus", title: "Unter dem geborstenen Balken", map: "pass",
       objective: "Entscheide, wie du Joren aus dem Grenzhaus holst.",
       text: "Jorens Bein steckt unter einem Querbalken. Mit einem Messer hat er Kerben in den Türrahmen geschlagen, damit ihn jemand hört. Als er dich sieht, fragt er zuerst nach seiner Schwester. Vom Dach rieselt Asche auf seine Stiefel.",
       choices: [
@@ -608,13 +608,13 @@ const world = (() => {
           message: "Du bindest die Glut im Holz. Der Balken hält gerade lange genug, um Joren hinauszuziehen." },
         { id: "rescue-balance", label: "Atmen und die Glut sammeln", condition: "unbalanced",
           center: true, to: "pass-shelter", message: "Du wartest, bis sich die Glut beruhigt hat." },
-        { id: "rescue-wait", label: "Zurück zur Hochwacht gehen und zuerst Hilfe organisieren", to: "watch-yard", destination: "hochwacht" },
+        { id: "rescue-wait", label: "Zurück nach Eiswacht gehen und zuerst Hilfe organisieren", to: "watch-yard", destination: "hochwacht" },
         { id: "rescue-leave", label: "Das Grenzhaus aufgeben und Joren zurücklassen", mark: "joren-verloren", to: "pass",
           message: "Du hörst das Klopfen noch einmal, als du die Schwelle verlässt. Danach ist es still." },
       ],
     },
     "pass-report": {
-      place: "Hochwacht · Wachhof", title: "Der Auftrag am Nordpass", map: "hochwacht",
+      place: "Eiswacht · Wachhof", title: "Der Auftrag am Eispass", map: "hochwacht",
       objective: "Der Bericht ist abgegeben. Weitere Wege bleiben erkundbar.",
       text: "Runa legt den Bericht neben die Signallaterne. Draußen wartet Lene an derselben Stelle wie am Morgen.",
       choices: [
@@ -626,16 +626,16 @@ const world = (() => {
       ],
     },
     "skarn-briefing": {
-      place: "Hochwacht · Kartenstube", map: "hochwacht", title: "Dreimal kein Licht",
-      objective: "Nimm Runas Auftrag an und finde heraus, warum Skarnheim schweigt.",
-      text: "Runa dreht drei Holzmarken auf der Karte um. Seit drei Abenden fehlt das Licht vom Runentor. Die Hütten am Grenzlager sind noch bewohnt. Wenn die Asche die Stiege nimmt, kommen die Bewohner mit ihren Vorräten nicht mehr fort.",
+      place: "Eiswacht · Kartenstube", map: "hochwacht", title: "Dreimal kein Licht",
+      objective: "Finde heraus, warum das Runentor am Glutberg kein Signal mehr gibt.",
+      text: "Runa dreht drei Holzmarken auf der Karte um. Die Ewige Flamme brennt in Glutberg weiter. Seit drei Abenden fehlt aber das Signal vom unteren Runentor. Die Hütten am Grenzlager sind bewohnt. Wenn die Asche die Stiege nimmt, kommen die Bewohner mit ihren Vorräten nicht mehr fort.",
       choices: [
         { id: "skarn-accept", label: "Zum Runentor aufbrechen und nach den Bewohnern sehen", mark: "skarn-auftrag", to: "watch-yard" },
         { id: "skarn-later", label: "Erst am Wachhof Vorbereitungen treffen", to: "watch-yard" },
       ],
     },
     "skarn-gate": {
-      place: "Skarnheim · Grenzlager", map: "skarn-gate", title: "Die Häuser ohne Rauch",
+      place: "Glutberg · Grenzlager", map: "skarn-gate", title: "Die Häuser ohne Rauch",
       objective: "Finde einen Weg zum Runentor.",
       text: "Die Steinmetzin Nalda sitzt vor einer kalten Esse und wickelt Seile um ihre Finger. Ihr Sohn Torben ist mit der letzten Laterne zum Runentor gegangen. Seitdem steht ein Frostbär auf dem alten Klippenweg.",
       choices: [
@@ -651,11 +651,11 @@ const world = (() => {
         { id: "skarn-cliffs", label: "Den alten Klippenweg nehmen", excludes: "skarn-klippen-frei", destination: "skarn-cliffs", to: "skarn-cliffs" },
         { id: "skarn-cliffs-return", label: "Zum freien Klippenweg zurückkehren", requires: "skarn-klippen-frei",
           destination: "skarn-cliffs", to: "skarn-cliffs-open" },
-        { id: "skarn-south", label: "Zur Hochwacht zurückreisen", destination: "hochwacht", to: "watch-yard" },
+        { id: "skarn-south", label: "Nach Eiswacht zurückreisen", destination: "hochwacht", to: "watch-yard" },
       ],
     },
     "skarn-cliffs": {
-      place: "Skarnheim · Klippenweg", map: "skarn-cliffs", title: "Tatzen am Abgrund",
+      place: "Glutberg · Klippenweg", map: "skarn-cliffs", title: "Tatzen am Abgrund",
       objective: "Finde einen Weg am Frostbären vorbei.",
       creature: "frostbaer",
       illustration: "nordpass.png",
@@ -673,7 +673,7 @@ const world = (() => {
       ],
     },
     "skarn-cliffs-open": {
-      place: "Skarnheim · Klippenweg", map: "skarn-cliffs", title: "Die andere Seite",
+      place: "Glutberg · Klippenweg", map: "skarn-cliffs", title: "Die andere Seite",
       objective: "Folge dem Steig zum Runentor.",
       text: "Hinter dem Windfang findest du Torbens Laterne. Über die Felswand kommt ein dumpfes Klopfen vom Runentor.",
       choices: [
@@ -685,9 +685,9 @@ const world = (() => {
       ],
     },
     "skarn-runes": {
-      place: "Skarnheim · Runentor", map: "skarn-runes", title: "Namen im Stein",
+      place: "Glutberg · Runentor", map: "skarn-runes", title: "Namen im Stein",
       objective: "Entscheide, wie du Torben und den Weg aus der Asche holst.",
-      text: "Torben steckt auf der falschen Seite der halb eingestürzten Torbögen. Die Glut an den Runen hält den Durchgang noch offen. Nalda hat die Namen der Familien in denselben Stein gemeißelt. Die Schrift glüht bis in den Boden.",
+      text: "Torben steckt auf der falschen Seite der halb eingestürzten Torbögen. Die Flammenrunen des Ordens halten den Durchgang offen. Nalda hat die Namen der Familien in denselben Stein gemeißelt. Als du die Hand hebst, folgt deine eigene Glut deinem Atem und breitet sich entlang der Schrift aus.",
       choices: [
         { id: "skarn-balance", label: "Die Runen mit gebundener Glut stabilisieren · 1 Glut", emberCost: 1,
           emberRescue: "runen-geschuetzt", to: "skarn-aftermath",
@@ -704,7 +704,7 @@ const world = (() => {
       ],
     },
     "skarn-aftermath": {
-      place: "Skarnheim · Runentor", map: "skarn-runes", title: "Was die Stiege trägt",
+      place: "Glutberg · Runentor", map: "skarn-runes", title: "Was die Stiege trägt",
       objective: "Kehre ins Grenzlager zurück.",
       text: "Nalda hat euch vom Steig aus gesehen. Sie steigt die letzten Stufen herauf und drückt Torben die Laterne in die Hand. Beim Abstieg zählt er die Lichter im Grenzlager.",
       choices: [
@@ -716,7 +716,7 @@ const world = (() => {
       ],
     },
     defeat: {
-      place: "Valmarch", title: "Der Weg endet hier", objective: "Deine Reise ist beendet.",
+      place: "Kronreich", title: "Der Weg endet hier", objective: "Deine Reise ist beendet.",
       text: "Du gehst zu Boden. Dein Auftrag bleibt unerledigt.",
     },
   };
@@ -783,19 +783,19 @@ const world = (() => {
     glutkaefer: [30, 0], felsgreif: [55, 0], schlundtroll: [85, 0], deserteure: [50, 14], frostbaer: [75, 0],
   };
   const destinations = {
-    weidenkamm: { name: "Weidenkamm", position: [15, 88], note: "Kornland" },
-    rotwaelder: { name: "Rotwälder", position: [28, 77], note: "Wagenweg" },
-    kraehenfurt: { name: "Krähenfurt", position: [53, 86], note: "Fährhaus" },
-    schwarzmoor: { name: "Schwarzmoor", position: [81, 89], note: "Bohlenweg" },
-    hochwacht: { name: "Hochwacht", position: [28, 60], note: "Wachhof und Rast" },
+    weidenkamm: { name: "Kornwik", position: [15, 88], note: "Ackerland" },
+    rotwaelder: { name: "Eichenwald", position: [28, 77], note: "Wagenweg bei Heidvang" },
+    kraehenfurt: { name: "Heidvang", position: [53, 86], note: "Fährhaus" },
+    schwarzmoor: { name: "Bohlenweg", position: [81, 89], note: "Moor bei Eiswacht" },
+    hochwacht: { name: "Eiswacht", position: [28, 60], note: "Wachhof und Rast" },
     mine: { name: "Alte Glutmine", position: [23, 38], note: "Glutkäfer · Stollen" },
     ridge: { name: "Felsrippe", position: [53, 49], note: "Felsgreif · Steig" },
     ravine: { name: "Trollschlund", position: [78, 68], note: "Schlundtroll · Schwerer Kampf" },
-    pass: { name: "Nordpass", position: [72, 33], note: "Grenzsteine · Auftragsziel" },
+    pass: { name: "Eispass", position: [72, 33], note: "Grenzsteine · Auftragsziel" },
     toll: { name: "Zollstelle", position: [53, 68], note: "Adas Wagen · Menschliche Begegnung" },
-    "skarn-gate": { name: "Grenzlager", position: [83, 48], note: "Skarnheim · Naldas Lager" },
-    "skarn-cliffs": { name: "Klippenweg", position: [82, 18], note: "Skarnheim · Frostbär" },
-    "skarn-runes": { name: "Runentor", position: [56, 9], note: "Skarnheim · Torben suchen" },
+    "skarn-gate": { name: "Glutberg", position: [83, 48], note: "Unteres Grenzlager · Naldas Lager" },
+    "skarn-cliffs": { name: "Klippenweg", position: [82, 18], note: "Glutberg · Frostbär" },
+    "skarn-runes": { name: "Runentor", position: [56, 9], note: "Glutberg · Torben suchen" },
   };
   const routes = [
     ["weidenkamm", "rotwaelder"], ["weidenkamm", "kraehenfurt"], ["rotwaelder", "kraehenfurt"], ["kraehenfurt", "schwarzmoor"],
@@ -814,7 +814,7 @@ const world = (() => {
   };
   const companions = {
     knight: {
-      name: "Iven", scenes: ["watch-yard"], place: "Wachhof der Hochwacht",
+      name: "Iven", scenes: ["watch-yard"], place: "Wachhof von Eiswacht",
       introduction: "Iven zieht die lockeren Riemen an seinem Schild fest. Seit sein Trupp am Pass aufgerieben wurde, begleitet er Reisende über die alten Wachwege.",
       ability: "Schildwall", guard: 11,
     },
@@ -824,47 +824,47 @@ const world = (() => {
       ability: "Runenfeuer", damage: 13, fire: true,
     },
     priest: {
-      name: "Heda", scenes: ["arrival", "return-ford"], place: "Fährhaus in Krähenfurt",
+      name: "Heda", scenes: ["arrival", "return-ford"], place: "Fährhaus in Heidvang",
       introduction: "Heda spült blutige Tücher am Fährhaus aus. Sie sucht jemanden, der sie zu den Dörfern begleitet, die seit der Asche keine Hilfe mehr bekommen.",
       ability: "Wunden schließen", heal: 12, cleanse: true,
     },
     ranger: {
-      name: "Neri", scenes: ["forest", "return-forest"], place: "Bachpfad in den Rotwäldern",
+      name: "Neri", scenes: ["forest", "return-forest"], place: "Bachpfad in den Wäldern bei Heidvang",
       introduction: "Neri kniet neben zwei verwischten Spuren am Bach. Sie kennt den Wagenweg und sucht Begleitung für die höheren Steige.",
       ability: "Gezielter Schuss", damage: 10, airborne: 4,
     },
     thief: {
       name: "Tovin", scenes: ["toll-resolved"], place: "Adas Wagen an der Zollstelle",
-      introduction: "Tovin gibt Ada einen Schlüssel zurück, den die Deserteure ihr abgenommen hatten. Er kennt ihre alten Verstecke und möchte in der Hochwacht neu anfangen.",
+      introduction: "Tovin gibt Ada einen Schlüssel zurück, den die Deserteure ihr abgenommen hatten. Er kennt ihre alten Verstecke und möchte in Eiswacht neu anfangen.",
       ability: "Täuschmanöver", guard: 8, damage: 4,
     },
     necromancer: {
-      name: "Oren", scenes: ["return-moor"], place: "Bohlenweg im Schwarzmoor",
+      name: "Oren", scenes: ["return-moor"], place: "Bohlenweg im Moor bei Eiswacht",
       introduction: "Oren liest die Namen auf alten Grabpfählen ab, bevor sie im Moor versinken. Er bittet dich, ihn bis zur nächsten befestigten Siedlung mitzunehmen.",
       ability: "Knochenwacht", guard: 7, damage: 6,
     },
     paladin: {
-      name: "Mira", scenes: ["watch-yard"], place: "Wachfeuer der Hochwacht",
+      name: "Mira", scenes: ["watch-yard"], place: "Wachfeuer von Eiswacht",
       introduction: "Mira teilt ihr Brot mit den Wachen. Sie hat ihren Eid auf Menschen geschworen, die den Pass überqueren müssen, und will mit dir hinauf.",
       ability: "Schutzsegen", heal: 6, guard: 6,
     },
     druid: {
-      name: "Bryn", scenes: ["start", "return-field"], place: "Weidenkamm",
+      name: "Bryn", scenes: ["start", "return-field"], place: "Kornwik",
       introduction: "Bryn kniet am Feldrain und wäscht Asche von einem jungen Halm. Er möchte herausfinden, an welchen Orten sich das Land von selbst erholt.",
       ability: "Wurzelverband", heal: 8, guard: 3,
     },
     warrior: {
-      name: "Kelda", scenes: ["supply-post"], place: "Zeugkammer der Hochwacht",
+      name: "Kelda", scenes: ["supply-post"], place: "Zeugkammer von Eiswacht",
       introduction: "Kelda feilt die Scharte aus ihrer Axt. Für einen weiteren Tag in der Zeugkammer, sagt sie, reiche ihre Geduld kaum.",
       ability: "Wuchtiger Hieb", damage: 12,
     },
   };
   const factions = {
-    watch: "Grenzwache der Hochwacht",
-    skarn: "Bergwacht von Skarnheim",
+    watch: "Grenzwache von Eiswacht",
+    skarn: "Bergwacht von Glutberg",
     groves: "Ewige Haine",
-    houses: "Vampirgeschlechter der Ostmark",
-    order: "Orden der Asche",
+    houses: "Die Erinnernden",
+    order: "Orden der Flamme",
     conclave: "Konklave",
     legion: "Knochenlegion",
     league: "Splitterliga",
@@ -875,8 +875,8 @@ const world = (() => {
     mage: { request: "Sela versprechen, die Schrift am Runentor zu erhalten", proof: ["runen-geschuetzt"], broken: ["runen-verbrannt"], gift: "glutampulle",
       talk: ["Sela zeigt dir, wie viel Wärme der Runenstein durch den Filz abgibt.", "Sela erzählt, wem sie ihre ersten Aufzeichnungen verdankt.", "Ihr sprecht darüber, was Glut bewahren kann.", "Sela legt ihr Notizbuch beiseite und bleibt bei dir."] },
     priest: { request: "Heda versprechen, den vermissten Grenzläufer zurückzubringen", proof: ["joren-gerettet"], broken: ["joren-verloren"], gift: "harzverband",
-      talk: ["Heda erzählt von ihrer Arbeit im Fährhaus.", "Du hilfst Heda, die Namen der Vermissten aufzuschreiben.", "Heda erzählt dir von der ersten Person, die sie nicht retten konnte.", "Heda fragt, ob ihr nach der Reise zusammen nach Krähenfurt gehen könnt."] },
-    ranger: { request: "Neri versprechen, den Leuten in den Rotwäldern zu helfen", proof: ["woelfe-vertrieben", "woelfe-besiegt", "forstbuch-zurueckgegeben"], gift: "wolfszahn",
+      talk: ["Heda erzählt von ihrer Arbeit im Fährhaus.", "Du hilfst Heda, die Namen der Vermissten aufzuschreiben.", "Heda erzählt dir von der ersten Person, die sie nicht retten konnte.", "Heda fragt, ob ihr nach der Reise zusammen nach Heidvang gehen könnt."] },
+    ranger: { request: "Neri versprechen, den Leuten in den Wäldern bei Heidvang zu helfen", proof: ["woelfe-vertrieben", "woelfe-besiegt", "forstbuch-zurueckgegeben"], gift: "wolfszahn",
       talk: ["Neri zeigt dir die Spuren am Bach.", "Neri erzählt dir, wo sie als Kind im Wald übernachtet hat.", "Neri verrät dir, warum sie den Wagenweg so gut kennt.", "Neri bittet dich, eines Tages mit ihr zu ihrem alten Aussichtspunkt zu gehen."] },
     thief: { request: "Ada mit ihrem Wagen helfen, damit Tovin dir vertraut", task: "haendlerin-geholfen", gift: "rostklaue",
       talk: ["Tovin gibt zu, dass der Schlüssel von Ada nicht seine einzige Schuld war.", "Tovin erzählt dir, weshalb er sich den Deserteuren angeschlossen hat.", "Tovin fragt, ob du glaubst, dass Ada ihm irgendwann verzeiht.", "Tovin bleibt beim Wachfeuer sitzen, als die anderen schon gegangen sind."] },
@@ -884,10 +884,10 @@ const world = (() => {
       talk: ["Oren liest dir einen der Namen von den Grabpfählen vor.", "Oren erklärt, weshalb er Tote mit Namen anspricht.", "Oren verrät dir, wessen Namen er auf der Reise sucht.", "Oren legt die Liste beiseite und fragt, ob du noch etwas bleiben möchtest."] },
     paladin: { request: "Mira zusagen, den Grenzläufer lebend zurückzubringen", proof: ["joren-gerettet"], broken: ["joren-verloren"], gift: "glutampulle",
       talk: ["Mira teilt ihr Brot mit dir.", "Mira erzählt, wann sie ihren Eid abgelegt hat.", "Ihr sprecht darüber, wann ein Versprechen zu schwer wird.", "Mira fragt dich, wem du dich anvertrauen kannst, wenn die Reise vorbei ist."] },
-    druid: { request: "Bryn versprechen, die Saat am Weidenkamm zu schonen", proof: ["saat-erholt"], broken: ["saat-verbrannt", "runen-verbrannt"], gift: "galgenwurz",
+    druid: { request: "Bryn versprechen, die Saat bei Kornwik zu schonen", proof: ["saat-erholt"], broken: ["saat-verbrannt", "runen-verbrannt"], gift: "galgenwurz",
       talk: ["Bryn zeigt dir, welcher Halm die Asche überstanden hat.", "Bryn erzählt, welche Pflanzen ihm auf seiner ersten Reise geholfen haben.", "Bryn spricht darüber, weshalb er nach einem Brand zuerst nach Keimlingen sucht.", "Bryn hält einen Platz für dich am Feldrain frei."] },
     warrior: { request: "Kelda versprechen, die alte Glutmine wieder begehbar zu machen", proof: ["pass-mine", "kaefer-besiegt"], gift: "eisenkeil",
-      talk: ["Kelda erzählt, wie sie ihre erste Axt verloren hat.", "Kelda zeigt dir die Macke, die sie am Griff belassen hat.", "Kelda erzählt, warum ihr die Zeugkammer zu eng geworden ist.", "Kelda fragt, wo ihr nach dem Nordpass als Nächstes hingehen wollt."] },
+      talk: ["Kelda erzählt, wie sie ihre erste Axt verloren hat.", "Kelda zeigt dir die Macke, die sie am Griff belassen hat.", "Kelda erzählt, warum ihr die Zeugkammer zu eng geworden ist.", "Kelda fragt, wo ihr nach dem Eispass als Nächstes hingehen wollt."] },
   };
   const factionEffects = {
     "joren-gerettet": { watch: 30 }, "joren-verloren": { watch: -35 },
@@ -914,8 +914,8 @@ const world = (() => {
     if (scene.map) continue;
     const region = scene.place.split(" · ")[0];
     scene.map = ({
-      Weidenkamm: "weidenkamm", Rotwälder: "rotwaelder", Krähenfurt: "kraehenfurt",
-      Schwarzmoor: "schwarzmoor", Hochwacht: "hochwacht",
+      Kornwik: "weidenkamm", "Eichenwald bei Heidvang": "rotwaelder", Heidvang: "kraehenfurt",
+      "Moor bei Eiswacht": "schwarzmoor", Eiswacht: "hochwacht",
     })[region];
   }
   return { attributes, origins, classes, items, gear, supplies, rarity, lootTables, milestones, deeds, shop, salePrices,

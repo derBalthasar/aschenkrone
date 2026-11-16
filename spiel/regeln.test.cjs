@@ -13,6 +13,7 @@ for (const file of ["bestiarium/daten.js", "spiel/welt.js", "spiel/regeln.js"]) 
 }
 
 const rules = vm.runInContext("rules", context);
+const world = vm.runInContext("world", context);
 const highRoll = () => 0.99;
 const lowRoll = () => 0;
 const hero = () => rules.create("Tala", "valmarcher", "frau", 2);
@@ -27,6 +28,11 @@ const narrowPath = rules.choose(detour, "trace", highRoll);
 const clearForest = rules.choose(detour, "lead", highRoll);
 const clearField = rules.choose(field(), "fire", highRoll);
 assert.equal(detour.scene, "forest");
+assert.equal(world.scenes[detour.scene].map, "rotwaelder");
+assert.equal(world.scenes.ford.map, "kraehenfurt");
+assert.equal(world.scenes.moor.map, "schwarzmoor");
+assert.equal(world.scenes.watch.map, "hochwacht");
+assert.equal(world.destinations[world.scenes["skarn-gate"].map].name, "Glutberg");
 assert.equal(rules.ending(rules.choose(narrowPath, "scare", highRoll)).delivery, false);
 assert.equal(rules.ending(rules.choose(clearForest, "scare", highRoll)).delivery, true);
 assert.equal(rules.ending(rules.choose(clearField, "signal")).delivery, false);
@@ -270,7 +276,6 @@ assert.ok(ids(abandonedRescue).includes("pass-seal"));
 assert.ok(!ids(abandonedRescue).includes("shelter"));
 
 const attributes = { agility: 4, will: 2 };
-const world = vm.runInContext("world", context);
 assert.equal(Object.keys(world.classes).length, 9);
 for (const [id, cls] of Object.entries(world.classes)) {
   const fresh = rules.create("Tala", "untot", "frau", 1, id, attributes);
@@ -496,4 +501,4 @@ assert.equal(rules.relationship(rules.bondWith(gift, "knight", "friendship"), "k
 assert.equal(rules.recruitment({ ...failingRescue, scene: "watch-yard" }, "knight"), "refused");
 assert.equal(rules.reputation(scorchedRunes, "skarn"), rules.reputation(torben, "skarn") - 35);
 
-console.log("Gefährtenaufträge, Beziehungsfolgen, Geschenke, Romanze, Fraktionsruf und Skarnheim geprüft.");
+console.log("Gefährtenaufträge, Beziehungsfolgen, Geschenke, Romanze, Fraktionsruf und Glutberg geprüft.");

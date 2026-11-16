@@ -544,7 +544,7 @@
       }
       content.append(element("p", sceneText));
       if (state.scene === "skarn-gate" && state.marks.includes("pass-gesperrt")) {
-        content.append(element("p", "Von der Ziegenstiege siehst du unten die Schranke. Nach Valmarch gelangt die Bergwacht derzeit nur über den schmalen Umweg."));
+        content.append(element("p", "Von der Ziegenstiege siehst du unten die Schranke. Ins Kronreich gelangt die Bergwacht derzeit nur über den schmalen Umweg."));
       }
       if (state.scene === "skarn-aftermath") {
         content.append(element("p", state.marks.includes("runen-geschuetzt")
@@ -575,23 +575,23 @@
         const { field, ford, delivery } = rules.ending(state);
         content.append(element("p", field), element("p", ford));
         const result = element("p", delivery
-          ? "Noch vor Einbruch der Dunkelheit erreicht die Kornfuhre Krähenfurt."
-          : "Die Warnung ist überbracht. Die Kornfuhre bleibt über Nacht am Weidenkamm.");
+          ? "Noch vor Einbruch der Dunkelheit erreicht die Kornfuhre Heidvang."
+          : "Die Warnung ist überbracht. Die Kornfuhre bleibt über Nacht in Kornwik.");
         result.className = "chapter-result";
         content.append(result);
         if (state.marks.includes("saat-erholt")) {
           content.append(element("p", "Am geretteten Acker keimt die Saat. Die Fuhrleute bitten dich, etwas Saatgut für sie zurückzulegen."));
         }
         if (state.marks.includes("saat-verbrannt")) {
-          content.append(element("p", "Die Fuhrleute haben die verbrannte Saat gesehen. Sie stellen dir keine Begleitung für das Schwarzmoor."));
+          content.append(element("p", "Die Fuhrleute haben die verbrannte Saat gesehen. Sie stellen dir keine Begleitung für das Moor bei Eiswacht."));
         }
       }
       if (state.scene === "moor-end") {
         const { bridge, news, messengers } = rules.moorConsequences(state);
         content.append(element("h3", "Folgen deiner Entscheidung"), element("p", bridge), element("p", news));
-        if (messengers) content.append(element("p", "Die Boten haben die Fuhrleute erreicht. Sie bleiben vorerst am Weidenkamm."));
+        if (messengers) content.append(element("p", "Die Boten haben die Fuhrleute erreicht. Sie bleiben vorerst bei Kornwik."));
         if (state.marks.includes("saatgut-zurueckgelegt")) {
-          content.append(element("p", "Die Fuhrleute bringen das zurückgelegte Saatgut zum Weidenkamm. Der erholte Acker kann neu bestellt werden."));
+          content.append(element("p", "Die Fuhrleute bringen das zurückgelegte Saatgut nach Kornwik. Der erholte Acker kann neu bestellt werden."));
         }
       }
       if (state.scene === "watch") {
@@ -601,7 +601,7 @@
       }
       if (state.scene === "watch-end") {
         content.append(element("p", state.marks.includes("hochwacht-archiv")
-          ? "Du darfst die Wachberichte einsehen. Einer vermerkt graue Asche auf der Südseite des Nordpasses."
+          ? "Du darfst die Wachberichte einsehen. Einer vermerkt graue Asche auf der Südseite des Eispasses."
           : "Die Berichte bleiben unter Verschluss. Die Wache nimmt deinen Namen für eine spätere Befragung auf."));
       }
       if (state.scene === "pass-report") {
@@ -617,8 +617,8 @@
       }
       if (state.scene === "return-ford") {
         content.append(element("p", rules.ending(state).delivery
-          ? "Das Korn vom Weidenkamm liegt im Speicher."
-          : "Die Fährfrau wartet noch auf die Kornfuhre vom Weidenkamm."));
+          ? "Das Korn aus Kornwik liegt im Speicher."
+          : "Die Fährfrau wartet noch auf die Kornfuhre aus Kornwik."));
       }
       if (state.scene === "return-moor") {
         content.append(element("p", rules.moorConsequences(state).bridge));
@@ -680,7 +680,7 @@
     const finishedRescue = state.marks.includes("joren-gerettet") || state.marks.includes("joren-verloren");
     const skarnDone = state.marks.includes("runen-geschuetzt") || state.marks.includes("runen-verbrannt");
     el("objective").textContent = state.scene === "watch-yard" && finishedRescue
-      ? "Reise weiter nach Skarnheim oder erkunde die übrigen Wege."
+      ? "Reise weiter nach Glutberg oder erkunde die übrigen Wege."
       : state.scene === "skarn-gate" && skarnDone
         ? "Der Auftrag am Runentor ist abgeschlossen."
         : world.scenes[state.scene].objective;

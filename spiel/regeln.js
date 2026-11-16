@@ -661,7 +661,7 @@ const rules = (() => {
       if (step.stops.at(-1) === target) return step;
       for (const option of choices({ ...state, scene: step.scene })) {
         if (!option.destination || seen.has(option.to)) continue;
-        // Before Hochwacht, only offer the next in-story leg. Do not plan through unresolved quests.
+        // Before Eiswacht, only offer the next in-story leg. Do not plan through unresolved quests.
         if (step.first && !world.travelScenes[step.stops.at(-1)]?.includes(step.scene)) continue;
         seen.add(option.to);
         const stops = step.stops.at(-1) === option.destination ? step.stops : [...step.stops, option.destination];
@@ -696,7 +696,7 @@ const rules = (() => {
       ? "Der Ackerweg ist frei. Die Fuhrleute können das Korn auf dem direkten Weg zur Furt bringen."
       : "Der Keiler hält den Ackerweg. Die Fuhrleute warten auf einen sicheren Umweg.";
     if (forestClear) {
-      field = "Der Keiler bleibt auf dem Acker. Die Fuhrleute können den freien Wagenweg durch die Rotwälder nehmen.";
+      field = "Der Keiler bleibt auf dem Acker. Die Fuhrleute können den freien Wagenweg durch den Eichenwald bei Heidvang nehmen.";
     }
     const ford = fordClear
       ? "Die Fährfrau öffnet die Furt wieder."
@@ -710,11 +710,11 @@ const rules = (() => {
     const bridge = marks.includes("moorpassage-offen")
       ? "Die Fährfrau gibt den markierten Bohlenweg bei Tageslicht frei."
       : "Der Bohlenweg bleibt gesperrt. Reisende müssen den trockenen Umweg nehmen.";
-    let news = "Die Hochwacht erhält eine Warnung über die Lichter im Schwarzmoor.";
+    let news = "Die Wache in Eiswacht erhält eine Warnung über die Lichter am Bohlenweg.";
     if (marks.includes("beleg-uebergeben")) {
-      news = "Der Glutfunke liegt dem Bericht bei. An der Hochwacht soll ihn die Wache untersuchen.";
+      news = "Der Glutfunke liegt dem Bericht bei. In Eiswacht soll ihn die Wache untersuchen.";
     } else if (marks.includes("beleg-behalten")) {
-      news = "Der Glutfunke ist in deinem Inventar. Die Hochwacht erhält zunächst deinen Bericht.";
+      news = "Der Glutfunke ist in deinem Inventar. Eiswacht erhält zunächst deinen Bericht.";
     }
     return { bridge, news, messengers: marks.includes("boten-unterwegs") };
   }

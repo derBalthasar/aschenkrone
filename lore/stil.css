@@ -1,0 +1,20 @@
+.lore { padding-bottom: 1rem; }
+.lore-nav { display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; margin-top: .65rem; }
+.lore-nav a { display: inline-flex; align-items: center; min-height: 2.75rem; }
+.lore section { margin-block: 1.5rem; scroll-margin-top: 1rem; }
+.lore p, .lore dd { line-height: 1.55; }
+.lore p { max-width: 75ch; }
+.lore figcaption { color: var(--muted); }
+.lore figure img { height: auto; }
+.lore article { padding-block: 1rem; border-top: 1px solid var(--line); scroll-margin-top: .75rem; }
+.lore article h3 { color: var(--accent); font-size: 1.45rem; margin: 0; }
+.lore details { border-bottom: 1px solid var(--line); padding: .65rem 0; }
+.lore details > summary { padding-block: .4rem; overflow-wrap: anywhere; }
+.lore details > p { margin-top: .35rem; }
+.lore .cities { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: .45rem 1.35rem; padding-left: 1.2rem; }
+.lore .chronik { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .65rem 1.4rem; }
+.lore .chronik dt, .lore .chronik dd { margin: 0; }
+@media (max-width: 34rem) {
+  .lore .chronik { display: block; }
+  .lore .chronik dd { margin-bottom: .65rem; }
+}

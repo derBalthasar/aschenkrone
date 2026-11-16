@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Aschenkrone · Der Weg nach Krähenfurt</title>
+  <title>Aschenkrone · Der Weg nach Heidvang</title>
   <link rel="stylesheet" href="bestiarium/stil.css">
   <link rel="stylesheet" href="spiel/stil.css">
   <script defer src="bestiarium/daten.js"></script>
@@ -16,9 +16,10 @@
 <body>
   <header class="game-header">
     <div class="game-wrap header-inner">
-      <div><p class="wordmark">Aschenkrone</p><h1>Der Weg nach Krähenfurt</h1></div>
+      <div><p class="wordmark">Aschenkrone</p><h1>Der Weg nach Heidvang</h1></div>
       <div class="header-controls">
         <nav aria-label="Nachschlagewerke">
+          <a href="lore/index.html">Weltbuch</a>
           <a href="bestiarium/index.html">Bestiarium</a>
           <a href="profilbilder/index.html">Porträts</a>
         </nav>
@@ -36,9 +37,9 @@
   <main class="game-wrap">
     <noscript><p>Zum Spielen muss JavaScript im Browser aktiviert sein.</p></noscript>
     <section id="home" class="paper welcome" hidden>
-      <p class="overline">Valmarch · Kornland</p>
-      <h2>Am Weidenkamm</h2>
-      <p>Graue Asche bedeckt den Weidenkamm. Am Morgen erwachst du am Rand eines Feldwegs.</p>
+      <p class="overline">Kronreich · Ackerland</p>
+      <h2>Bei Kornwik</h2>
+      <p>Graue Asche bedeckt die Felder bei Kornwik. Am Morgen erwachst du am Rand eines Feldwegs.</p>
       <div class="actions">
         <button id="continue" class="action primary" hidden>Spiel fortsetzen</button>
         <button id="new-game" class="action">Neues Spiel</button>
@@ -109,7 +110,7 @@
       </section>
       <div class="travel-tools">
         <details id="travel-map" class="travel-map" open>
-          <summary>Reisekarte · Valmarch</summary>
+          <summary>Reisekarte · Kronreich und Ordensland</summary>
           <p id="map-status" class="map-status"></p>
           <div id="map-destinations" class="actions map-destinations" role="group" aria-label="Erreichbare Reiseziele"></div>
           <div id="map-plan" class="actions map-plan"></div>
@@ -134,7 +135,7 @@
           </section>
           <details>
             <summary>Glutgleichgewicht</summary>
-            <p>Angriffszauber verschieben die Glut um 2 Richtung Zerstörung. Schützen, Binden oder Heilen verschiebt sie um 2 Richtung Erneuerung. Bei +4 oder −4 schlägt die Glut zurück. Deckung bewegt dich einen Schritt zur Mitte.</p>
+          <p>Deine Glut ist eine eigene Gabe. In Glutberg stützt sich die Flammenmagie des Ordens auf Glauben und Runen. Angriffszauber verschieben deine Glut um 2 Richtung Zerstörung. Schützen, Binden oder Heilen verschiebt sie um 2 Richtung Erneuerung. Bei +4 oder −4 schlägt die Glut zurück. Deckung bewegt dich einen Schritt zur Mitte.</p>
           </details>
           <section class="travel-objective" aria-labelledby="objective-heading">
             <h3 id="objective-heading">Reiseauftrag</h3>

@@ -2,6 +2,8 @@
 
 Stand: 16. November 2026
 
+Vor Änderungen und vor jedem Push gilt der Git-Abgleich aus [AGENTS.md](AGENTS.md).
+
 Arbeite im Ordner `C:\Users\afisc\Documents\ChatGPT\Pen and Paper - Aschenkrone`. Der aktuelle Stand liegt in der **`index.html` auf oberster Ebene** und ihren Unterordnern `spiel/`, `bestiarium/` und `profilbilder/`. `Aschenkrone-Upload/` und `Aschenkrone-Spielvorschau.zip` sind ältere Kopien. Die Browserexporte unter `C:\Users\afisc\Desktop\Rollenspiel - Claude Code_files` gehören zur frühen Vorlage. Öffne zum Spielen die aktuelle `index.html` direkt im Browser. Das Spiel verwendet HTML, CSS und Vanilla-JavaScript und startet ohne Build oder Backend.
 
 ## Wo was liegt
@@ -15,12 +17,13 @@ Arbeite im Ordner `C:\Users\afisc\Documents\ChatGPT\Pen and Paper - Aschenkrone`
 | `spiel/prolog.js`, `spiel/prolog/` | Illustrierter Prolog mit drei Bildern beziehungsweise Einstellungen sowie weiteren Szenenbildern |
 | `bestiarium/daten.js`, `bestiarium/bilder/` | Bestehendes Bestiarium und Kreaturenbilder. Für einen spielbaren Gegner zusätzlich Kampfregeln, Loot und Szenenanbindung in `spiel/welt.js` ergänzen. |
 | `profilbilder/portraets.js`, `profilbilder/bilder/` | Porträts und Varianten. Fünf Grundfiguren pro Geschlecht sowie ein eigenes Untotenmotiv. |
-| `quellen/` | Bestiarium und Modellanweisungen als PDF |
+| `quellen/arbeitsanweisung-modelle.pdf` | Arbeitsanweisung für Bestiarium-Modelle |
+| `lore/index.html`, `lore/voelker.js`, `lore/KANON.md` | Weltkarte, Chronik und Fraktionsregister mit 150 Städten sowie Quellenentscheidungen und Kampagnenanschlüsse |
 
 ## Spielstand der Entwicklung
 
 - **Start und Glutmagie.** Nach der Charaktererstellung zeigt der Prolog das Erwachen aus der Asche. Sechs Herkünfte einschließlich Vampirgeschlechtern und Untoten beginnen mit jeweils einer eigenen Szene. Neun Klassen stehen zur Wahl: Ritter, Magier, Priester, Waldläufer, Dieb, Nekromant, Paladin, Druide und Krieger. Bei der Erstellung werden sechs Attributpunkte verteilt. Jede Klasse nutzt Glut anders. Glut steht zwischen Erneuerung und Zerstörung und kann Land beleben oder verbrennen. Zu starke Ausschläge lösen einen Rückschlag aus.
-- **Reise und Konsequenzen.** Spielbar sind unter anderem Weidenkamm, Krähenfurt, Schwarzmoor, Hochwacht, Nordpass und der Abschnitt in Skarnheim bis zu Torbens Rettung am Runentor. Die Karte wählt erreichbare Ziele und zeigt Zwischenstopps. Die Route wird über die jeweils nächste Etappe gespielt. Entscheidungen am Acker, bei Jorens Rettung und am Runentor haben Folgen für spätere Szenen, Ruf und Belohnungen. Die Zollstelle hat Verhandlung, Umgehung und Kampf gegen menschliche Deserteure.
+- **Reise und Konsequenzen.** Spielbar sind unter anderem Kornwik, Heidvang, Moor bei Eiswacht, Eiswacht, Eispass und der Abschnitt in Glutberg bis zu Torbens Rettung am Runentor. Die Karte wählt erreichbare Ziele und zeigt Zwischenstopps. Die Route wird über die jeweils nächste Etappe gespielt. Entscheidungen am Acker, bei Jorens Rettung und am Runentor haben Folgen für spätere Szenen, Ruf und Belohnungen. Die Zollstelle hat Verhandlung, Umgehung und Kampf gegen menschliche Deserteure.
 - **Gruppe und Kampf.** Bis zu fünf Gefährten mit unterschiedlichen Klassen, jeweils aus den anderen Klassen als der Spielfigur. Gruppenmitglieder wirken im Kampf mit. Begegnungen können mit der Truppenstärke skalieren. Gegner werden einzeln ausgewählt, Animationen zeigen Aktionen und Treffer. Das zuletzt abgestimmte Animationstempo liegt bei 248 ms pro Schritt. Reduzierte Bewegung wird berücksichtigt.
 - **Fortschritt und Beute.** EP, Stufen, freie Attributpunkte, Silber, Inventar, Waffen- und Rüstungsslots, Verbrauchsgüter, Handel, Trophäen und Beutetabellen mit Qualitätsstufen sind vorhanden.
 - **Gefährtenruf.** Jeder Gefährte verlangt vor der Anwerbung ein Versprechen oder eine erledigte Aufgabe. Tovin wartet, bis du Ada geholfen hast. Entscheidungen und Rastgespräche verändern den persönlichen Ruf. Bei ≤ −25 kann ein Gefährte dauerhaft gehen. Bei 100 % werden ein einmaliges Geschenk und die Wahl zwischen enger Freundschaft und Romanze freigeschaltet.
