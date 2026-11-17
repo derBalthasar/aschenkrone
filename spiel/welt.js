@@ -86,13 +86,17 @@ const world = (() => {
     rostklaue: "Rostklaue", harzverband: "Harzverband", glutampulle: "Glutampulle",
     forstbuch: "Heidvanger Forstbuch", frostfell: "Frostklippenmantel", runenbeil: "Runenbeil",
     baerenklaue: "Bärenklaue", runensplitter: "Runensplitter",
+    holzschild: "Eichenrundschild", wachschild: "Schild der Grenzwache",
+    glutamulett: "Glutamulett", spurenring: "Ring des Spurenlesers",
+    lederhaube: "Lederhaube", eisenhelm: "Eisenhelm der Bergwacht", lederbeinlinge: "Lederbeinlinge",
+    kettenbeinlinge: "Kettenbeinlinge", eisenring: "Eisenring der Wache",
   };
   const gear = {
     speer: { slot: "weapon", stat: "strength", power: 5, pierce: 2 },
     schwert: { slot: "weapon", stat: "strength", power: 5 },
-    bogen: { slot: "weapon", stat: "agility", power: 5, airborne: 2 },
+    bogen: { slot: "weapon", stat: "agility", power: 5, airborne: 2, twoHanded: true },
     dolch: { slot: "weapon", stat: "agility", power: 4, pierce: 1 },
-    stab: { slot: "weapon", stat: "mind", power: 4 },
+    stab: { slot: "weapon", stat: "mind", power: 4, twoHanded: true },
     axt: { slot: "weapon", stat: "strength", power: 6 },
     faeuste: { stat: "strength", power: 2 },
     lederwams: { slot: "armor", armor: 1 },
@@ -100,20 +104,32 @@ const world = (() => {
     wolfspelz: { slot: "armor", armor: 1, travel: 1 },
     glutpanzer: { slot: "armor", armor: 3 },
     wachschwert: { slot: "weapon", stat: "strength", power: 8, pierce: 1 },
-    grauflussbogen: { slot: "weapon", stat: "agility", power: 8, airborne: 3 },
-    runenstab: { slot: "weapon", stat: "mind", power: 6, magic: 3 },
+    grauflussbogen: { slot: "weapon", stat: "agility", power: 8, airborne: 3, twoHanded: true },
+    runenstab: { slot: "weapon", stat: "mind", power: 6, magic: 3, twoHanded: true },
     grenzmantel: { slot: "armor", armor: 2, travel: 2 },
     aschenwaechter: { slot: "armor", armor: 4 },
     eisenkeil: { slot: "weapon", stat: "strength", power: 7, pierce: 2 },
     rostklaue: { slot: "weapon", stat: "agility", power: 7, pierce: 2 },
     frostfell: { slot: "armor", armor: 4, travel: 1 },
     runenbeil: { slot: "weapon", stat: "strength", power: 9, pierce: 2, magic: 1 },
+    // Linke Hand, Kopf, Hals, Beine und Ringe (17.11.2026, Vorschlagswerte)
+    holzschild: { slot: "offhand", armor: 1 },
+    wachschild: { slot: "offhand", armor: 2 },
+    glutamulett: { slot: "neck", magic: 1 },
+    spurenring: { slot: "ring", travel: 1 },
+    eisenring: { slot: "ring", armor: 1 },
+    lederhaube: { slot: "head", armor: 1 },
+    eisenhelm: { slot: "head", armor: 2 },
+    lederbeinlinge: { slot: "legs", armor: 1 },
+    kettenbeinlinge: { slot: "legs", armor: 2 },
   };
   const supplies = { galgenwurz: { heal: 10 }, glutfunke: { ember: 2 }, harzverband: { heal: 16 }, glutampulle: { ember: 3 } };
   const rarity = {
     eisenkeil: "Ungewöhnlich", rostklaue: "Ungewöhnlich", glutpanzer: "Ungewöhnlich",
     grenzmantel: "Selten", grauflussbogen: "Selten", wachschwert: "Selten", runenstab: "Selten",
     aschenwaechter: "Episch", frostfell: "Selten", runenbeil: "Selten",
+    wachschild: "Ungewöhnlich", glutamulett: "Ungewöhnlich", spurenring: "Ungewöhnlich",
+    eisenhelm: "Ungewöhnlich", kettenbeinlinge: "Ungewöhnlich", eisenring: "Ungewöhnlich",
   };
   const lootTables = {
     "minenfach": [[50, ["harzverband"], 8], [32, ["eisenkeil"], 5], [18, ["runenstab"], 0]],
@@ -133,7 +149,12 @@ const world = (() => {
     "forstbuch-geborgen": 20, "forstbuch-zurueckgegeben": 25,
     "klippen-umgangen": 35, "klippen-beruhigt": 40, "runen-geschuetzt": 65, "runen-verbrannt": 45,
   };
-  const shop = { harzverband: 8, glutampulle: 12, eisenkeil: 22, rostklaue: 24, grenzmantel: 40 };
+  // Zentrallager: ein gemeinsames Lager, erreichbar aus jeder Stadt.
+  const storageSites = { weidenkamm: "Zentrallager · Kornwik", kraehenfurt: "Zentrallager · Heidvang",
+    hochwacht: "Zentrallager · Eiswacht", "skarn-gate": "Zentrallager · Glutberg" };
+  const shop = { harzverband: 8, glutampulle: 12, eisenkeil: 22, rostklaue: 24, grenzmantel: 40,
+    holzschild: 14, wachschild: 34, glutamulett: 26, spurenring: 24, eisenring: 24,
+    lederhaube: 10, eisenhelm: 28, lederbeinlinge: 10, kettenbeinlinge: 28 };
   const salePrices = { keilerhauer: 5, wolfszahn: 4, kraehenfedern: 2, greifenfeder: 10, greifenklaue: 14, trollblut: 18 };
 
   const scenes = {
@@ -918,7 +939,7 @@ const world = (() => {
       "Moor bei Eiswacht": "schwarzmoor", Eiswacht: "hochwacht",
     })[region];
   }
-  return { attributes, origins, classes, items, gear, supplies, rarity, lootTables, milestones, deeds, shop, salePrices,
+  return { attributes, origins, classes, items, gear, supplies, rarity, lootTables, milestones, deeds, shop, salePrices, storageSites,
     battleRewards, enemyGroups, companions, loyalties, factions, factionEffects, relationshipEffects,
     scenes, creatures, fights, destinations, routes, travelScenes };
 })();
