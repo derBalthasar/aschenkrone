@@ -7,69 +7,65 @@ const world = (() => {
       ([name, , , , , , image, stats]) => [image.replace(".png", ""), { name, image, stats }]
     )
   );
-  const attributes = {
-    strength: "Stärke", agility: "Geschick", mind: "Verstand",
-    presence: "Ausstrahlung", will: "Willenskraft",
-  };
+  // Grundwerte des Klassensystems. Die Schlüssel bleiben wegen bestehender Spielstände gleich.
+  const attributes = klassen.grundwerte;
+  const skills = klassen.fertigkeiten;
+  // Herkunft bestimmt Erwachensszene und Porträt. Volk und Fraktion stehen in spiel/klassen.js.
   const origins = {
-    "valmarcher": { name: "Mensch aus dem Kronreich", bonuses: { presence: 1, will: 1 }, portrait: 1, path: "wake-road", lead: "Dem Licht am Feldweg folgen" },
-    "waldelf": { name: "Elfen", bonuses: { agility: 2 }, portrait: 2, path: "wake-wood", lead: "Durch die Hecke zu den Eichen gehen" },
-    "bergzwerg": { name: "Zwerge", bonuses: { strength: 1, will: 1 }, portrait: 3, path: "wake-stone", lead: "Den alten Grenzstein untersuchen" },
-    "gruenhaut": { name: "Orks", bonuses: { strength: 2, will: 1 }, portrait: 4, path: "wake-cart", lead: "Den Rufen am Graben nachgehen" },
-    "vampir": { name: "Vampire · Die Erinnernden", bonuses: { presence: 2 }, portrait: 5, path: "wake-shade", lead: "Im Schatten dem Herzschlag folgen" },
-    "untot": { name: "Untote · Erwachte", bonuses: { will: 2 }, portrait: 6, path: "wake-grave", lead: "Zu den Steinen am Rand des Gräberfelds gehen" },
+    "valmarcher": { name: "Menschen", volk: "menschen", portrait: 1, path: "wake-road", lead: "Dem Licht am Feldweg folgen" },
+    "waldelf": { name: "Elfen", volk: "elfen", portrait: 2, path: "wake-wood", lead: "Durch die Hecke zu den Eichen gehen" },
+    "bergzwerg": { name: "Zwerge", volk: "zwerge", portrait: 3, path: "wake-stone", lead: "Den alten Grenzstein untersuchen" },
+    "gruenhaut": { name: "Orks", volk: "orks", portrait: 4, path: "wake-cart", lead: "Den Rufen am Graben nachgehen" },
+    "vampir": { name: "Untote · Die Erinnernden", volk: "untote", portrait: 5, path: "wake-shade", lead: "Im Schatten dem Herzschlag folgen" },
+    "untot": { name: "Untote", volk: "untote", portrait: 6, path: "wake-grave", lead: "Zu den Steinen am Rand des Gräberfelds gehen" },
   };
+  // Kampfwerte der Grundklassen. Glut ist die Gabe aller Gezeichneten und steht jeder Klasse offen,
+  // auch Skalden, Pulvermeistern und Feldschern ohne Magie. skill nennt die Fertigkeit, die den Glutangriff trägt.
   const classes = {
-    knight: {
-      name: "Ritter", weapon: "speer", attack: { name: "Glutklinge", power: 8, stat: "strength" },
+    krieger: {
+      name: "Krieger", weapon: "axt", attack: { name: "Gluthieb", power: 10, skill: "nahkampf" },
+      restore: { name: "Standglut", guard: 8 },
+      description: "Setzt auf Nahkampf und einen schweren Gluthieb. Standglut hält dich beim Gegenangriff auf den Beinen.",
+    },
+    waechter: {
+      name: "Wächter", weapon: "speer", attack: { name: "Glutklinge", power: 8, skill: "nahkampf" },
       restore: { name: "Glutschild", guard: 9 },
       description: "Legt Glut auf seine Waffe oder bindet sie zu einem Schild gegen den nächsten Gegenangriff.",
     },
-    mage: {
-      name: "Magier", weapon: "stab", attack: { name: "Flammenstoß", power: 11, stat: "mind" },
+    spaeher: {
+      name: "Späher", weapon: "bogen", attack: { name: "Glutpfeil", power: 8, skill: "fernkampf" },
+      restore: { name: "Dornenwall", guard: 6, hinder: 2 },
+      description: "Kämpft auf Distanz. Glutpfeile treffen aus der Ferne, ein Dornenwall schwächt den Gegenangriff.",
+    },
+    magier: {
+      name: "Magier", weapon: "stab", attack: { name: "Flammenstoß", power: 11, skill: "magie" },
       restore: { name: "Wurzelgriff", guard: 4, hinder: 4 },
       description: "Bündelt Glut zu einer Flamme oder lässt Wurzeln wachsen, die den Gegner festhalten.",
     },
-    priest: {
-      name: "Priester", weapon: "stab", attack: { name: "Glutstrahl", power: 6, stat: "will" },
+    heiler: {
+      name: "Heiler/Priester", weapon: "stab", attack: { name: "Glutstrahl", power: 6, skill: "magie" },
       restore: { name: "Heilglut", heal: 10 },
       description: "Wehrt Gegner mit einem Glutstrahl ab oder heilt Wunden mit gebundener Glut.",
     },
-    ranger: {
-      name: "Waldläufer", weapon: "bogen",
-      attack: { name: "Glutpfeil", power: 8, stat: "agility" },
-      restore: { name: "Dornenwall", guard: 6, hinder: 2 },
-      description: "Kämpft mit dem Bogen. Glutpfeile treffen aus der Distanz, ein Dornenwall schwächt den Gegenangriff.",
-    },
-    thief: {
-      name: "Dieb", weapon: "dolch",
-      attack: { name: "Glutstich", power: 9, stat: "agility" },
+    schurke: {
+      name: "Schurke", weapon: "dolch", attack: { name: "Glutstich", power: 9, skill: "list" },
       restore: { name: "Aschenschleier", guard: 8 },
-      description: "Setzt auf Geschick. Der Aschenschleier deckt dich gegen den nächsten Gegenangriff.",
+      description: "Trifft aus dem Hinterhalt. Der Aschenschleier deckt dich gegen den nächsten Gegenangriff.",
     },
-    necromancer: {
-      name: "Nekromant", weapon: "stab",
-      attack: { name: "Totenglut", power: 8, stat: "mind" },
-      restore: { name: "Knochenwacht", guard: 7, hinder: 3 },
-      description: "Bindet Glut in Gebeinen, die einen Angriff abfangen und den Gegner bedrängen.",
+    skalde: {
+      name: "Skalde", weapon: "schwert", attack: { name: "Glutsaga", power: 8, skill: "fuehrung" },
+      restore: { name: "Kriegslied", guard: 5, heal: 5 },
+      description: "Keine Magie: Ein Lied voller Glut lähmt den Feind, das Kriegslied heilt leicht und schwächt den nächsten Angriff.",
     },
-    paladin: {
-      name: "Paladin", weapon: "schwert",
-      attack: { name: "Gluturteil", power: 8, stat: "will" },
-      restore: { name: "Schutzsegen", guard: 5, heal: 5 },
-      description: "Kämpft mit Schwert und Glut. Der Schutzsegen heilt leicht und schwächt den nächsten Angriff.",
+    pulvermeister: {
+      name: "Pulvermeister", weapon: "dolch", attack: { name: "Glutladung", power: 10, skill: "fernkampf" },
+      restore: { name: "Pulverrauch", guard: 6, hinder: 2 },
+      description: "Keine Magie: Eine Ladung mit Glut zündet wie ein Flächenzauber, Pulverrauch deckt dich und trifft den Gegner.",
     },
-    druid: {
-      name: "Druide", weapon: "stab",
-      attack: { name: "Dornenglut", power: 7, stat: "mind" },
-      restore: { name: "Lebensranke", guard: 3, heal: 7 },
-      description: "Lenkt Glut in lebende Pflanzen. Die Lebensranke versorgt Wunden und bietet etwas Deckung.",
-    },
-    warrior: {
-      name: "Krieger", weapon: "axt",
-      attack: { name: "Gluthieb", power: 10, stat: "strength" },
-      restore: { name: "Standglut", guard: 8 },
-      description: "Setzt auf Stärke und einen schweren Gluthieb. Standglut hält dich beim Gegenangriff auf den Beinen.",
+    feldscher: {
+      name: "Feldscher", weapon: "dolch", attack: { name: "Brennender Schnitt", power: 6, skill: "mut" },
+      restore: { name: "Glutverband", heal: 10 },
+      description: "Keine Magie: Kräuter, Verbände und ein glühendes Messer. Der Glutverband schließt Wunden.",
     },
   };
   const items = {
@@ -91,11 +87,12 @@ const world = (() => {
     lederhaube: "Lederhaube", eisenhelm: "Eisenhelm der Bergwacht", lederbeinlinge: "Lederbeinlinge",
     kettenbeinlinge: "Kettenbeinlinge", eisenring: "Eisenring der Wache",
   };
+  // stat nennt den Grundwert der Waffe, skill die Fertigkeit, die ihren Schaden trägt.
   const gear = {
     speer: { slot: "weapon", stat: "strength", power: 5, pierce: 2 },
     schwert: { slot: "weapon", stat: "strength", power: 5 },
     bogen: { slot: "weapon", stat: "agility", power: 5, airborne: 2, twoHanded: true },
-    dolch: { slot: "weapon", stat: "agility", power: 4, pierce: 1 },
+    dolch: { slot: "weapon", stat: "agility", skill: "nahkampf", power: 4, pierce: 1 },
     stab: { slot: "weapon", stat: "mind", power: 4, twoHanded: true },
     axt: { slot: "weapon", stat: "strength", power: 6 },
     faeuste: { stat: "strength", power: 2 },
@@ -109,7 +106,7 @@ const world = (() => {
     grenzmantel: { slot: "armor", armor: 2, travel: 2 },
     aschenwaechter: { slot: "armor", armor: 4 },
     eisenkeil: { slot: "weapon", stat: "strength", power: 7, pierce: 2 },
-    rostklaue: { slot: "weapon", stat: "agility", power: 7, pierce: 2 },
+    rostklaue: { slot: "weapon", stat: "agility", skill: "nahkampf", power: 7, pierce: 2 },
     frostfell: { slot: "armor", armor: 4, travel: 1 },
     runenbeil: { slot: "weapon", stat: "strength", power: 9, pierce: 2, magic: 1 },
     // Linke Hand, Kopf, Hals, Beine und Ringe (17.11.2026, Vorschlagswerte)
@@ -220,9 +217,9 @@ const world = (() => {
       illustration: "lager.png",
       text: "Die Laterne hängt an einem Kornwagen. Eine Fuhrfrau aus Garbenfeld reicht dir Wasser und erzählt von der grauen Asche am Eispass. Die Fuhrleute wollen noch vor Dunkelheit nach Heidvang. Sie bitten dich, vorauszugehen und einen freien Weg zu finden.",
       choices: [
-        { id: "talk", label: "Die Fuhrleute nach sicheren Wegen fragen", check: ["presence", 11], advantage: "fuhrleute-vertrauen",
+        { id: "talk", label: "Die Fuhrleute nach sicheren Wegen fragen", check: ["fuehrung", 11], advantage: "fuhrleute-vertrauen",
           pass: "Sie zeigen dir einen trockenen Graben am Acker. Darin kannst du ungesehen näher heran.", fail: "Niemand war seit dem letzten Regen draußen.", mark: "ditch", to: "field" },
-        { id: "search", label: "Am alten Galgen nach Galgenwurz suchen", check: ["mind", 10],
+        { id: "search", label: "Am alten Galgen nach Galgenwurz suchen", check: ["list", 10],
           pass: "Unter dem Balken findest du Galgenwurz und steckst sie ein.", fail: "Unter dem Balken liegen nur faulige Wurzeln.", item: "galgenwurz", to: "field" },
         { id: "go", label: "Zum Acker aufbrechen", to: "field" },
         { id: "soil", label: "Den verschütteten Saatstreifen ansehen", to: "ash-field" },
@@ -243,10 +240,10 @@ const world = (() => {
       objective: "Finde einen Weg zur Furt, auf dem die Kornfuhre folgen kann.",
       text: "Zwischen aufgeworfenen Rübenreihen steht ein Eisenborstenkeiler. Er scharrt im Boden, senkt den Kopf und hält den Weg zum Fluss bei Heidvang besetzt.",
       choices: [
-        { id: "sneak", label: "Am Keiler vorbeischleichen", check: ["agility", 11], advantage: "ditch",
+        { id: "sneak", label: "Am Keiler vorbeischleichen", check: ["list", 11], advantage: "ditch",
           pass: "Du erreichst den Fluss bei Heidvang. Der Keiler bleibt auf dem Acker und der Kornwagen muss warten.", fail: "Der Keiler hört dich und scharrt zum Angriff.",
           mark: "keiler-umgangen", to: "ford", fight: "keiler" },
-        { id: "fire", label: "Mit der Laterne aus dem Revier treiben", check: ["presence", 12],
+        { id: "fire", label: "Mit der Laterne aus dem Revier treiben", check: ["mut", 12],
           pass: "Der Keiler weicht in die Hecken zurück. Der Kornweg ist frei.", fail: "Er schnaubt durch den Rauch und hält stand.",
           mark: "keiler-vertrieben", to: "ford", fight: "keiler" },
         { id: "fight", label: "Den Keiler mit dem Speer stellen", fight: "keiler", to: "ford" },
@@ -258,10 +255,10 @@ const world = (() => {
       objective: "Prüfe, ob der Wagenweg durch den Eichenwald bei Heidvang frei ist.",
       text: "Unter den Eichen wird es früh dunkel. Im Schlamm siehst du frische Wolfsspuren. Der Weg über den Waldrand ist auch für den Kornwagen breit genug, wenn du das Rudel von dort fernhältst.",
       choices: [
-        { id: "trace", label: "Den Spuren ausweichen und am Bach bleiben", check: ["agility", 11], advantage: "waldspur",
+        { id: "trace", label: "Den Spuren ausweichen und am Bach bleiben", check: ["list", 11], advantage: "waldspur",
           pass: "Du lässt die Spuren hinter dir. Der Bachpfad ist für einen Wagen zu schmal.",
           fail: "Beim Queren des Bachs bemerkt dich das Rudel.", to: "ford", fight: "grauwolf" },
-        { id: "lead", label: "Den Leitwolf mit Feuer vom Wagenweg vertreiben", check: ["mind", 11],
+        { id: "lead", label: "Den Leitwolf mit Feuer vom Wagenweg vertreiben", check: ["mut", 11],
           pass: "Du erkennst den Leitwolf an der gekerbten Ohrspitze. Er weicht vor der Flamme zurück und das Rudel folgt ihm.",
           fail: "Der Leitwolf umkreist die Flamme und die anderen Wölfe schließen auf.",
           mark: "woelfe-vertrieben", to: "ford", fight: "grauwolf" },
@@ -274,10 +271,10 @@ const world = (() => {
       creature: "galgenkraehe",
       choices: [
         { id: "signal", label: "Die Fährfrau vom Ufer aus warnen", mark: "warnung", to: "arrival" },
-        { id: "scare", label: "Die Krähen mit Laterne und Lärm vertreiben", check: ["presence", 11],
+        { id: "scare", label: "Die Krähen mit Laterne und Lärm vertreiben", check: ["mut", 11],
           pass: "Die Krähen steigen auf. Die Fährfrau sieht den freien Weg und winkt dich heran.", fail: "Der Schwarm stürzt sich auf dich.",
           mark: "kraehen-vertrieben", to: "arrival", fight: "galgenkraehe" },
-        { id: "cross", label: "Durch das flache Wasser zur Fährfrau waten", check: ["agility", 10],
+        { id: "cross", label: "Durch das flache Wasser zur Fährfrau waten", check: ["list", 10],
           pass: "Du erreichst das andere Ufer, während der Schwarm am Wagen bleibt.", fail: "Ein Stein rutscht weg. Die Krähen kommen näher.",
           mark: "furt-durchquert", to: "arrival", fight: "galgenkraehe" },
         { id: "password", label: "Der Fährfrau das Kennwort zurufen und gemeinsam die Krähen vertreiben",
@@ -314,7 +311,7 @@ const world = (() => {
         { id: "bank", label: "Mit deiner Begleitung das feste Ufer und die morschen Bohlen markieren",
           requires: "moorbegleitung", mark: "bohlen-markiert", to: "moor-report",
           message: "Deine Begleitung zeigt dir einen festen Uferstreifen. Ihr markiert den Weg und die Stellen, an denen die Irrglut auftaucht." },
-        { id: "water", label: "Die Irrglut mit Moorwasser von den Bohlen treiben", check: ["mind", 11],
+        { id: "water", label: "Die Irrglut mit Moorwasser von den Bohlen treiben", check: ["mut", 11],
           pass: "Die Funken zischen im Wasser. Du markierst die morschen Bohlen, während das Licht über dem offenen Moor verblasst.",
           fail: "Das Licht weicht dem Wasser aus und schießt auf dich zu.",
           mark: "bohlen-markiert", to: "moor-report", fight: "irrglut" },
@@ -360,7 +357,7 @@ const world = (() => {
           requiresItem: "glutfunke", consume: "glutfunke", mark: "hochwacht-archiv", to: "watch-end",
           message: "Die Schreiberin nimmt den Glutfunken entgegen und öffnet das Archiv." },
         { id: "testimony", label: "Der Wache schildern, was du im Moor gesehen hast",
-          check: ["presence", 12], advantage: "hochweg-kurz", mark: "hochwacht-archiv", to: "watch-end",
+          check: ["fuehrung", 12], advantage: "hochweg-kurz", mark: "hochwacht-archiv", to: "watch-end",
           pass: "Die Schreiberin hält deinen Bericht für glaubwürdig und lässt dich ins Archiv.",
           fail: "Die Schreiberin nimmt den Bericht an. Bis ein zweiter Zeuge eintrifft, bleibt das Archiv geschlossen." },
         { id: "wait", label: "Den Bericht hinterlegen und auf weitere Zeugen warten", to: "watch-end" },
@@ -432,11 +429,11 @@ const world = (() => {
       creature: "deserteure",
       choices: [
         { id: "toll-talk", label: "Mit dem Fährsiegel aushandeln, dass Ada passieren darf", requiresItem: "flusssiegel",
-          condition: "toll-unresolved", check: ["presence", 13], mark: "zoll-verhandelt", fight: "deserteure", to: "toll-resolved",
+          condition: "toll-unresolved", check: ["fuehrung", 13], mark: "zoll-verhandelt", fight: "deserteure", to: "toll-resolved",
           pass: "Die Männer sehen das Siegel und geben den Weg frei. Sie wollen keinen Bericht an die Wache in Eiswacht riskieren.",
           fail: "Der Wortführer schlägt das Siegel zur Seite und zieht sein Schwert." },
         { id: "toll-help", label: "Ada über den Seitenweg an der Sperre vorbeiführen",
-          condition: "toll-unresolved", check: ["agility", 11], advantage: "waldspur",
+          condition: "toll-unresolved", check: ["list", 11], advantage: "waldspur",
           pass: "Du gehst voraus und winkst Ada zwischen zwei Grenzpfählen hindurch. Als die Männer den leeren Weg bemerken, ist der Wagen schon hinter der Böschung.",
           fail: "Ein Rad schlägt gegen einen Grenzpfahl. Die Deserteure hören es und kommen auf euch zu.",
           mark: "zoll-umgangen", fight: "deserteure", to: "toll-resolved" },
@@ -554,7 +551,7 @@ const world = (() => {
           mark: "greifnetz", to: "ridge-trail",
           message: "Du spannst das alte Netz am Fels. Der Greif kann sich beim ersten Gegenangriff darin verfangen." },
         { id: "ridge-fight", label: "Den Felsgreif am Absatz stellen · Kampf", excludes: "greif-besiegt", fight: "felsgreif", to: "ridge-cleared" },
-        { id: "ridge-climb", label: "Die gedeckte Seilroute erklettern", check: ["agility", 13], advantage: "waldspur",
+        { id: "ridge-climb", label: "Die gedeckte Seilroute erklettern", check: ["list", 13], advantage: "waldspur",
           excludes: "pass-ridge", pass: "Du erreichst den Signalplatz unter dem Felsüberhang.", fail: "Ein Stein löst sich. Der Greif stößt herab.",
           mark: "pass-ridge", fight: "felsgreif", to: "ridge-cleared" },
         { id: "ridge-back", label: "Nach Eiswacht zurückkehren", to: "watch-yard", destination: "hochwacht" },
@@ -686,7 +683,7 @@ const world = (() => {
           requires: "skarn-seilschlitten", mark: "klippen-umgangen", to: "skarn-cliffs-open",
           message: "Ihr sichert den Steig unterhalb der Mulde. Muttertier und Junges bleiben am Windfang." },
         { id: "skarn-calm", label: "Die Gruppe zurückhalten und langsam am Windfang vorbeigehen",
-          check: ["will", 13], mark: "klippen-beruhigt", fight: "frostbaer", to: "skarn-cliffs-open",
+          check: ["mut", 13], mark: "klippen-beruhigt", fight: "frostbaer", to: "skarn-cliffs-open",
           pass: "Du hältst Abstand, bis der Bär mit seinem Jungen abzieht.",
           fail: "Auf dem Steig bricht Eis unter dir. Der Bär springt vor die Mulde." },
         { id: "skarn-fight", label: "Den Frostbären am Windfang stellen", fight: "frostbaer", to: "skarn-cliffs-open" },
@@ -835,47 +832,47 @@ const world = (() => {
   };
   const companions = {
     knight: {
-      name: "Iven", scenes: ["watch-yard"], place: "Wachhof von Eiswacht",
+      klasse: "waechter", name: "Iven", scenes: ["watch-yard"], place: "Wachhof von Eiswacht",
       introduction: "Iven zieht die lockeren Riemen an seinem Schild fest. Seit sein Trupp am Pass aufgerieben wurde, begleitet er Reisende über die alten Wachwege.",
       ability: "Schildwall", guard: 11,
     },
     mage: {
-      name: "Sela", scenes: ["mine-cleared", "supply-post"], place: "Glutmine oder Zeugkammer",
+      klasse: "magier", name: "Sela", scenes: ["mine-cleared", "supply-post"], place: "Glutmine oder Zeugkammer",
       introduction: "Sela wickelt einen warmen Runenstein in Filz. Sie will wissen, warum die Glut in den Minen anders reagiert als unter freiem Himmel.",
       ability: "Runenfeuer", damage: 13, fire: true,
     },
     priest: {
-      name: "Heda", scenes: ["arrival", "return-ford"], place: "Fährhaus in Heidvang",
+      klasse: "heiler", name: "Heda", scenes: ["arrival", "return-ford"], place: "Fährhaus in Heidvang",
       introduction: "Heda spült blutige Tücher am Fährhaus aus. Sie sucht jemanden, der sie zu den Dörfern begleitet, die seit der Asche keine Hilfe mehr bekommen.",
       ability: "Wunden schließen", heal: 12, cleanse: true,
     },
     ranger: {
-      name: "Neri", scenes: ["forest", "return-forest"], place: "Bachpfad in den Wäldern bei Heidvang",
+      klasse: "spaeher", name: "Neri", scenes: ["forest", "return-forest"], place: "Bachpfad in den Wäldern bei Heidvang",
       introduction: "Neri kniet neben zwei verwischten Spuren am Bach. Sie kennt den Wagenweg und sucht Begleitung für die höheren Steige.",
       ability: "Gezielter Schuss", damage: 10, airborne: 4,
     },
     thief: {
-      name: "Tovin", scenes: ["toll-resolved"], place: "Adas Wagen an der Zollstelle",
+      klasse: "schurke", name: "Tovin", scenes: ["toll-resolved"], place: "Adas Wagen an der Zollstelle",
       introduction: "Tovin gibt Ada einen Schlüssel zurück, den die Deserteure ihr abgenommen hatten. Er kennt ihre alten Verstecke und möchte in Eiswacht neu anfangen.",
       ability: "Täuschmanöver", guard: 8, damage: 4,
     },
     necromancer: {
-      name: "Oren", scenes: ["return-moor"], place: "Bohlenweg im Moor bei Eiswacht",
+      klasse: "magier", name: "Oren", scenes: ["return-moor"], place: "Bohlenweg im Moor bei Eiswacht",
       introduction: "Oren liest die Namen auf alten Grabpfählen ab, bevor sie im Moor versinken. Er bittet dich, ihn bis zur nächsten befestigten Siedlung mitzunehmen.",
       ability: "Knochenwacht", guard: 7, damage: 6,
     },
     paladin: {
-      name: "Mira", scenes: ["watch-yard"], place: "Wachfeuer von Eiswacht",
+      klasse: "krieger", name: "Mira", scenes: ["watch-yard"], place: "Wachfeuer von Eiswacht",
       introduction: "Mira teilt ihr Brot mit den Wachen. Sie hat im Aschenkloster ihren Eid auf Menschen geschworen, die den Pass überqueren müssen, und will mit dir hinauf.",
       ability: "Schutzsegen", heal: 6, guard: 6,
     },
     druid: {
-      name: "Bryn", scenes: ["start", "return-field"], place: "Kornwik",
+      klasse: "heiler", name: "Bryn", scenes: ["start", "return-field"], place: "Kornwik",
       introduction: "Bryn kniet am Feldrain und wäscht Asche von einem jungen Halm. Er möchte herausfinden, an welchen Orten sich das Land von selbst erholt.",
       ability: "Wurzelverband", heal: 8, guard: 3,
     },
     warrior: {
-      name: "Kelda", scenes: ["supply-post"], place: "Zeugkammer von Eiswacht",
+      klasse: "krieger", name: "Kelda", scenes: ["supply-post"], place: "Zeugkammer von Eiswacht",
       introduction: "Kelda feilt die Scharte aus ihrer Axt. Für einen weiteren Tag in der Zeugkammer, sagt sie, reiche ihre Geduld kaum.",
       ability: "Wuchtiger Hieb", damage: 12,
     },
@@ -939,7 +936,7 @@ const world = (() => {
       "Moor bei Eiswacht": "schwarzmoor", Eiswacht: "hochwacht",
     })[region];
   }
-  return { attributes, origins, classes, items, gear, supplies, rarity, lootTables, milestones, deeds, shop, salePrices, storageSites,
+  return { attributes, skills, origins, classes, items, gear, supplies, rarity, lootTables, milestones, deeds, shop, salePrices, storageSites,
     battleRewards, enemyGroups, companions, loyalties, factions, factionEffects, relationshipEffects,
     scenes, creatures, fights, destinations, routes, travelScenes };
 })();

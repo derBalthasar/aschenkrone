@@ -1,7 +1,8 @@
 "use strict";
 
 const rules = (() => {
-  const version = 1;
+  const version = 2;
+  const K = klassen;
   // Ausrüstungsplätze: rechte Hand (weapon), linke Hand (offhand), Kopf, Hals, Körper (armor), Beine, zwei Ringe.
   // Die Schlüssel weapon und armor bleiben wegen bestehender Spielstände erhalten.
   const equipmentSlots = ["weapon", "offhand", "head", "neck", "armor", "legs", "ring1", "ring2"];
@@ -10,56 +11,224 @@ const rules = (() => {
   const emptyEquipment = () => Object.fromEntries(equipmentSlots.map(slot => [slot, null]));
   const own = (obj, key) => typeof key === "string" && Object.hasOwn(obj, key);
   const intBetween = (value, low, high) => Number.isInteger(value) && value >= low && value <= high;
+  const total = (record) => Object.values(record ?? {}).reduce((sum, value) => sum + value, 0);
+  const isRecord = (value) => Boolean(value) && typeof value === "object" && !Array.isArray(value);
+  const keys = Object.keys(K.grundwerte);
 
-  function attributes(origin, allocation = {}) {
-    return Object.fromEntries(Object.keys(world.attributes).map((key) =>
-      [key, 2 + (world.origins[origin].bonuses[key] || 0) + (allocation[key] || 0)]
-    ));
+  // ---- Klassensystem: Volk, Fraktion, Klasse, Grundwerte und Fertigkeiten ----
+
+  const people = (faction) => K.fraktionen[faction].volk;
+  function originOf(faction) {
+    const volk = people(faction);
+    if (volk === "untote") return faction === "erinnernde" ? "vampir" : "untot";
+    return { menschen: "valmarcher", elfen: "waldelf", orks: "gruenhaut", zwerge: "bergzwerg" }[volk];
+  }
+  // Kronreich und Freie Häfen ersetzen Magier und Heiler durch Klassen ohne Magie.
+  const profile = (faction, role) => K.fraktionen[faction].profile?.[role] ?? role;
+  const kit = (state) => world.classes[profile(state.faction, state.role)];
+  const className = (faction, role) => K.fraktionen[faction].klassen[role].name;
+  const cap = (value) => K.regeln.grenzen.find(([max]) => value <= max)[1];
+  const modifier = (value) => K.regeln.modifikatoren.find(([max]) => value <= max)[1];
+  const skillPoints = (build) => K.regeln.fertigkeitsPunkte + (build?.spez ? 1 : 0) + (build?.meister ? 1 : 0);
+
+  function baseAttributes(faction, role, choice = null) {
+    const fraktion = K.fraktionen[faction];
+    const volk = K.voelker[fraktion.volk];
+    const klasse = K.grundklassen[profile(faction, role)];
+    return Object.fromEntries(keys.map((key) => [key, K.regeln.start + (volk.bonus[key] ?? 0) +
+      (fraktion.bonus[key] ?? 0) + (klasse.bonus[key] ?? 0) + (volk.wahl && choice === key ? volk.wahl : 0)]));
   }
 
-  function maxHealth(origin, allocation) {
-    return 22 + 3 * attributes(origin, allocation).strength;
+  // Grundwerte aus Volk, Fraktion, Klasse, freien Punkten, Stufenaufstiegen, Spezialisierung und Meisterklasse.
+  function attributes(faction, role, build, training = {}) {
+    const base = baseAttributes(faction, role, build?.wahl ?? null);
+    return Object.fromEntries(keys.map((key) => [key, base[key] + (build?.frei?.[key] ?? 0) + (training[key] ?? 0) +
+      (build?.spez?.grundwert === key ? 1 : 0) + (build?.meister?.grundwerte?.[key] ?? 0)]));
   }
 
-  function maxEmber(origin, allocation) {
-    return 1 + attributes(origin, allocation).will;
+  function skillLimits(faction, values) {
+    return Object.fromEntries(Object.entries(K.fertigkeiten).map(([id, skill]) =>
+      [id, id === "magie" && !K.fraktionen[faction].magie ? 0 : cap(values[skill.grundwert])]));
   }
 
-  function validAllocation(allocation) {
-    return allocation && typeof allocation === "object" && !Array.isArray(allocation) &&
-      Object.entries(allocation).every(([key, value]) => own(world.attributes, key) && intBetween(value, 0, 6)) &&
-      Object.values(allocation).reduce((total, value) => total + value, 0) === 6;
+  // Liefert eine Fehlermeldung oder null.
+  function buildProblem(faction, role, build, training = {}) {
+    if (!own(K.fraktionen, faction)) return "Wähle eine Fraktion.";
+    if (!K.klassenFolge.includes(role)) return "Wähle eine Klasse.";
+    if (!isRecord(build) || !isRecord(build.frei) || !isRecord(build.fertigkeiten)) return "Verteile Grundwerte und Fertigkeiten.";
+    const volk = K.voelker[people(faction)];
+    if (!Object.entries(build.frei).every(([key, value]) => own(K.grundwerte, key) && intBetween(value, 0, K.regeln.freiePunkte)) ||
+        total(build.frei) !== K.regeln.freiePunkte) return "Verteile genau " + K.regeln.freiePunkte + " freie Punkte auf die Grundwerte.";
+    if (volk.wahl ? !own(K.grundwerte, build.wahl) : (build.wahl ?? null) !== null) return "Wähle den Grundwert für den Bonus der Menschen.";
+    if (build.spez !== null && build.spez !== undefined &&
+        (!isRecord(build.spez) || !["a", "b"].includes(build.spez.variante) || !own(K.grundwerte, build.spez.grundwert))) {
+      return "Die Spezialisierung ist ungültig.";
+    }
+    if (build.meister !== null && build.meister !== undefined && (!build.spez || !isRecord(build.meister) ||
+        !isRecord(build.meister.grundwerte) || total(build.meister.grundwerte) !== 2 ||
+        !Object.entries(build.meister.grundwerte).every(([key, value]) => own(K.grundwerte, key) && intBetween(value, 1, 2)))) {
+      return "Die Meisterklasse ist ungültig.";
+    }
+    const values = attributes(faction, role, build, training);
+    if (Object.values(values).some((value) => value > K.regeln.grundwertMax)) return "Kein Grundwert darf über 20 steigen.";
+    const limits = skillLimits(faction, values);
+    const skills = build.fertigkeiten;
+    if (!Object.keys(skills).every((id) => own(K.fertigkeiten, id)) ||
+        !Object.keys(K.fertigkeiten).every((id) => intBetween(skills[id], 0, K.regeln.fertigkeitMax))) return "Die Fertigkeiten sind ungültig.";
+    if (total(skills) !== skillPoints(build)) return "Verteile genau " + skillPoints(build) + " Fertigkeitspunkte.";
+    for (const [id, limit] of Object.entries(limits)) {
+      if (skills[id] > limit) {
+        return id === "magie" && !limit ? K.fraktionen[faction].name + " wirkt keine Magie."
+          : K.fertigkeiten[id].name + " darf mit " + K.grundwerte[K.fertigkeiten[id].grundwert] + " " +
+            values[K.fertigkeiten[id].grundwert] + " höchstens " + limit + " sein.";
+      }
+    }
+    const main = K.grundklassen[profile(faction, role)].haupt.find((id) => skills[id] < 3);
+    if (main) return "Die Hauptfertigkeit " + K.fertigkeiten[main].name + " braucht mindestens 3.";
+    return null;
   }
 
-  function create(name, origin, appearance, variant, role = "knight", allocation = null) {
+  // Ein gültiger Vorschlag: freie Punkte auf die Grundwerte der Hauptfertigkeiten, dann Fertigkeiten auffüllen.
+  function suggestSkills(faction, role, build) {
+    const limits = skillLimits(faction, attributes(faction, role, { ...build, fertigkeiten: {} }));
+    const main = K.grundklassen[profile(faction, role)].haupt;
+    const skills = Object.fromEntries(Object.keys(K.fertigkeiten).map((id) => [id, 0]));
+    let left = skillPoints(build);
+    const others = Object.keys(K.fertigkeiten).filter((id) => !main.includes(id));
+    const raise = (ids, ceiling) => {
+      let changed = true;
+      while (left > 0 && changed) {
+        changed = false;
+        for (const id of ids) {
+          if (left > 0 && skills[id] < Math.min(ceiling, limits[id])) {
+            skills[id]++;
+            left--;
+            changed = true;
+          }
+        }
+      }
+    };
+    raise(main, 4);
+    raise(others, 2);
+    raise(main, 5);
+    raise(others, 3);
+    raise(others, 5);
+    return skills;
+  }
+
+  function defaultBuild(faction, role, frei = null, wahl = null) {
+    const volk = K.voelker[people(faction)];
+    const main = K.grundklassen[profile(faction, role)].haupt.map((id) => K.fertigkeiten[id].grundwert);
+    const focus = [...new Set(main)];
+    const choice = volk.wahl ? (own(K.grundwerte, wahl) ? wahl : focus[0]) : null;
+    let points = frei;
+    if (!points) {
+      // Erst die Grundwerte der Hauptfertigkeiten auf 16 (volle 5), danach die schwächsten übrigen Grundwerte.
+      points = {};
+      const values = baseAttributes(faction, role, choice);
+      for (let index = 0; index < K.regeln.freiePunkte; index++) {
+        const key = focus.find((id) => values[id] < 16) ??
+          keys.filter((id) => !focus.includes(id)).sort((a, b) => values[a] - values[b])[0];
+        points[key] = (points[key] ?? 0) + 1;
+        values[key]++;
+      }
+    }
+    const build = { frei: points, wahl: choice, fertigkeiten: {}, spez: null, meister: null };
+    build.fertigkeiten = suggestSkills(faction, role, build);
+    return build;
+  }
+
+  function create(name, faction, appearance, variant, role = "krieger", build = null) {
     const cleanName = name.trim();
-    if (!cleanName || cleanName.length > 40 || !own(world.origins, origin) ||
-        !["mann", "frau"].includes(appearance) || !intBetween(variant, 0, origin === "untot" ? 1 : 3) || !own(world.classes, role)) {
+    if (!own(K.fraktionen, faction) || !K.klassenFolge.includes(role)) throw new Error("Wähle Volk, Fraktion und Klasse.");
+    const origin = originOf(faction);
+    if (!cleanName || cleanName.length > 40 ||
+        !["mann", "frau"].includes(appearance) || !intBetween(variant, 0, origin === "untot" ? 1 : 3)) {
       throw new Error("Bitte gib einen Namen ein und wähle ein Porträt.");
     }
-    if (allocation !== null && !validAllocation(allocation)) throw new Error("Verteile genau 6 Attributpunkte.");
-    const weapon = world.classes[role].weapon;
-    return {
-      version, name: cleanName, origin, appearance, variant, role, scene: "wake",
-      allocation, health: maxHealth(origin, allocation ?? undefined), ember: maxEmber(origin, allocation ?? undefined),
-      balance: 0, inventory: allocation ? [weapon, "lederwams", "galgenwurz"] : [],
-      equipment: { ...emptyEquipment(), weapon: allocation ? weapon : null, armor: allocation ? "lederwams" : null },
+    const setup = build ?? defaultBuild(faction, role);
+    const problem = buildProblem(faction, role, setup);
+    if (problem) throw new Error(problem);
+    const weapon = kit({ faction, role }).weapon;
+    const state = {
+      version, name: cleanName, faction, origin, appearance, variant, role, scene: "wake",
+      build: structuredClone({ ...setup, spez: setup.spez ?? null, meister: setup.meister ?? null }),
+      questStufe: 0, vereinigt: false, umschulung: false, rausch: false,
+      health: 0, ember: 0, balance: 0, inventory: [weapon, "lederwams", "galgenwurz"],
+      equipment: { ...emptyEquipment(), weapon, armor: "lederwams" },
       storage: [],
       xp: 0, silver: 5, training: {}, rewards: [],
       party: [],
       relationships: {}, factionRuf: {},
       marks: [], journal: [], combat: null,
     };
+    state.health = healthLimit(state);
+    state.ember = emberLimit(state);
+    return state;
+  }
+
+  // ---- Alte Spielstände (Version 1, neun Klassen, sechs verteilte Attributpunkte) ----
+
+  const legacyFaction = { valmarcher: "kronreich", waldelf: "hueter", bergzwerg: "tiefes-koenigreich",
+    gruenhaut: "gruene-banner", vampir: "erinnernde", untot: "hof" };
+  const legacyRole = { knight: "waechter", mage: "magier", priest: "heiler", ranger: "spaeher", thief: "schurke",
+    necromancer: "magier", paladin: "krieger", druid: "heiler", warrior: "krieger" };
+  const legacyBonus = { valmarcher: { presence: 1, will: 1 }, waldelf: { agility: 2 }, bergzwerg: { strength: 1, will: 1 },
+    gruenhaut: { strength: 2, will: 1 }, vampir: { presence: 2 }, untot: { will: 2 } };
+
+  function migrate(old) {
+    if (!own(legacyFaction, old.origin)) throw new Error("Unbekanntes Spielstandformat.");
+    const faction = legacyFaction[old.origin];
+    const role = legacyRole[old.role ?? "knight"];
+    if (!role) throw new Error("Der Spielstand ist beschädigt.");
+    const allocation = isRecord(old.allocation) ? old.allocation : null;
+    const training = isRecord(old.training) ? { ...old.training } : {};
+    const oldStrength = 2 + (legacyBonus[old.origin].strength ?? 0) + (allocation?.strength ?? 0) + (training.strength ?? 0);
+    // Die sechs alten Punkte werden zu fünf freien Punkten: der höchste Wert gibt einen Punkt ab.
+    let frei = null;
+    if (allocation && Object.keys(allocation).every((key) => own(K.grundwerte, key) && Number.isInteger(allocation[key])) &&
+        total(allocation) === 6) {
+      frei = Object.fromEntries(Object.entries(allocation).filter(([, value]) => value > 0));
+      const [highest] = Object.entries(frei).sort((a, b) => b[1] - a[1])[0];
+      frei[highest]--;
+      if (!frei[highest]) delete frei[highest];
+    }
+    let build = defaultBuild(faction, role, frei);
+    if (buildProblem(faction, role, build)) build = defaultBuild(faction, role);
+    for (const key of Object.keys(training)) {
+      if (!own(K.grundwerte, key) || !intBetween(training[key], 0, 5)) throw new Error("Der Spielstand ist beschädigt.");
+      const room = K.regeln.grundwertMax - attributes(faction, role, build)[key];
+      training[key] = Math.min(training[key], Math.max(0, room));
+      if (!training[key]) delete training[key];
+    }
+    const state = { ...old, version, faction, origin: originOf(faction), role, build, training,
+      questStufe: 0, vereinigt: false, umschulung: true, rausch: false };
+    delete state.allocation;
+    state.equipment ??= { weapon: null, armor: null };
+    state.inventory = Array.isArray(state.inventory) ? state.inventory : [];
+    if (!allocation) {
+      // Frühe Spielstände hatten noch keine Klasse gewählt und keine Ausrüstung.
+      const weapon = kit(state).weapon;
+      for (const id of [weapon, "lederwams", "galgenwurz"]) if (!state.inventory.includes(id)) state.inventory.push(id);
+      state.equipment.weapon ??= weapon;
+      state.equipment.armor ??= "lederwams";
+    }
+    const oldLimit = 22 + 3 * oldStrength;
+    if (Number.isInteger(state.health) && state.health > 0) {
+      state.health = Math.max(1, Math.min(healthLimit(state), Math.round(state.health / oldLimit * healthLimit(state))));
+    }
+    if (Number.isInteger(state.ember)) state.ember = Math.min(state.ember, emberLimit(state));
+    return state;
   }
 
   function read(serialized) {
-    const state = JSON.parse(serialized);
-    if (!state || state.version !== version || typeof state.name !== "string") {
-      throw new Error("Unbekanntes Spielstandformat.");
+    let state = JSON.parse(serialized);
+    if (!state || typeof state.name !== "string") throw new Error("Unbekanntes Spielstandformat.");
+    if (state.version === 1) {
+      if (!Object.hasOwn(state, "balance")) state.balance = 0;
+      state = migrate(state);
     }
-    if (!Object.hasOwn(state, "role")) state.role = "knight";
-    if (!Object.hasOwn(state, "balance")) state.balance = 0;
-    if (!Object.hasOwn(state, "allocation")) state.allocation = null;
+    if (state.version !== version) throw new Error("Unbekanntes Spielstandformat.");
     if (!Object.hasOwn(state, "equipment")) state.equipment = { weapon: null, armor: null };
     if (state.equipment && typeof state.equipment === "object" && !Array.isArray(state.equipment)) {
       // Vorschaustände mit dem früheren Platz "trinket" übernehmen.
@@ -78,20 +247,28 @@ const rules = (() => {
     state.party ??= [];
     state.relationships ??= {};
     state.factionRuf ??= {};
+    state.questStufe ??= 0;
+    state.vereinigt ??= false;
+    state.umschulung ??= false;
+    state.rausch ??= false;
     state.storage ??= [];
-    create(state.name, state.origin, state.appearance, state.variant, state.role, state.allocation);
+    create(state.name, state.faction, state.appearance, state.variant, state.role, state.build);
     const combat = state.combat;
     const validList = (value, check, limit) => Array.isArray(value) && value.length <= limit && value.every(check);
-    if (!own(world.scenes, state.scene) ||
+    if (state.origin !== originOf(state.faction) ||
+        !isRecord(state.training) ||
+        !Object.entries(state.training).every(([id, value]) => own(K.grundwerte, id) && intBetween(value, 0, 5)) ||
+        buildProblem(state.faction, state.role, state.build, state.training) ||
+        !intBetween(state.questStufe, 0, 10) ||
+        ![state.vereinigt, state.umschulung, state.rausch].every((flag) => typeof flag === "boolean") ||
+        !own(world.scenes, state.scene) ||
         !intBetween(state.health, 0, healthLimit(state)) ||
         !intBetween(state.ember, 0, emberLimit(state)) ||
         !intBetween(state.balance, -3, 3) ||
         !intBetween(state.xp, 0, 1000000) || !intBetween(state.silver, 0, 1000000) ||
-        typeof state.training !== "object" || Array.isArray(state.training) ||
-        !Object.entries(state.training).every(([id, value]) => own(world.attributes, id) && intBetween(value, 0, 5)) ||
         trainingLeft(state) < 0 ||
         !validList(state.rewards, (id) => typeof id === "string" && id.length <= 50, 100) ||
-        !validList(state.party, (id) => own(world.companions, id) && id !== state.role, 5) ||
+        !validList(state.party, (id) => own(world.companions, id), 5) ||
         new Set(state.party).size !== state.party.length ||
         !validRecord(state.factionRuf, world.factions, score => intBetween(score, -100, 100)) ||
         !validRecord(state.relationships, world.companions, bond => bond && intBetween(bond.score, -100, 100) &&
@@ -135,7 +312,7 @@ const rules = (() => {
   function candidates(state) {
     if (state.combat || !state.health) return [];
     return Object.entries(world.companions).filter(([id, companion]) =>
-      id !== state.role && !state.party.includes(id) && companion.scenes.includes(state.scene));
+      companion.klasse !== state.role && !state.party.includes(id) && companion.scenes.includes(state.scene));
   }
 
   function recruitment(state, id) {
@@ -222,18 +399,72 @@ const rules = (() => {
     const earned = thresholds.filter(value => value <= state.xp).length - 1;
     return earned - Object.values(state.training).reduce((total, value) => total + value, 0);
   }
-  const heroAttributes = (state) => Object.fromEntries(Object.entries(attributes(state.origin, state.allocation ?? undefined))
-    .map(([id, value]) => [id, value + (state.training[id] ?? 0)]));
-  const healthLimit = (state) => 22 + 3 * heroAttributes(state).strength;
-  const emberLimit = (state) => 1 + heroAttributes(state).will;
+  const heroAttributes = (state) => attributes(state.faction, state.role, state.build, state.training ?? {});
+  const heroSkills = (state) => ({ ...state.build.fertigkeiten });
+  const heroLimits = (state) => skillLimits(state.faction, heroAttributes(state));
+  const modifiers = (state) => Object.fromEntries(Object.entries(heroAttributes(state)).map(([id, value]) => [id, modifier(value)]));
+  // Probe und Wirkung: Fertigkeit plus Bonus oder Malus ihres Grundwerts.
+  function skillValue(state, id) {
+    return state.build.fertigkeiten[id] + modifier(heroAttributes(state)[K.fertigkeiten[id].grundwert]);
+  }
+  // Schaden: Stärke wirkt nur im Nahkampf, Geschick nur im Fernkampf.
+  function damageValue(state, id) {
+    return ["nahkampf", "fernkampf"].includes(id) ? skillValue(state, id) : state.build.fertigkeiten[id];
+  }
+  const gearSkill = (gear) => gear.skill ?? ({ strength: "nahkampf", agility: gear.airborne ? "fernkampf" : "nahkampf", mind: "magie" })[gear.stat];
+  const healthLimit = (state) => 18 + heroAttributes(state).strength + 2 * state.build.fertigkeiten.verteidigung;
+  const emberLimit = (state) => 1 + Math.floor(heroAttributes(state).will / 3);
+  // Halten und Blocken über Verteidigung, Ausweichen über Geschick.
+  const protection = (state) => Math.floor(state.build.fertigkeiten.verteidigung / 2) + modifier(heroAttributes(state).agility);
+
+  function title(state) {
+    const meister = state.build.meister && K.meisterklassen[people(state.faction)];
+    if (meister) return state.appearance === "frau" && meister.weiblich ? meister.weiblich : meister.name;
+    const klasse = K.fraktionen[state.faction].klassen[state.role];
+    return state.build.spez ? klasse[state.build.spez.variante][0] : klasse.name;
+  }
 
   function train(previous, id) {
-    if (!own(world.attributes, id) || previous.combat || !previous.health || trainingLeft(previous) < 1) return previous;
+    if (!own(K.grundwerte, id) || previous.combat || !previous.health || trainingLeft(previous) < 1 ||
+        heroAttributes(previous)[id] >= K.regeln.grundwertMax) return previous;
     const state = structuredClone(previous);
     state.training[id] = (state.training[id] ?? 0) + 1;
     state.health += healthLimit(state) - healthLimit(previous);
     state.ember += emberLimit(state) - emberLimit(previous);
-    note(state, world.attributes[id] + " dauerhaft um 1 erhöht.");
+    note(state, K.grundwerte[id] + " dauerhaft um 1 erhöht.");
+    return state;
+  }
+
+  // Spezialisierung ab Quest-Stufe 3: Titel, +1 Fertigkeitspunkt, +1 Grundwert. Die Wahl gilt für immer.
+  function specialize(previous, variante, grundwert, fertigkeit) {
+    if (previous.build.spez || previous.questStufe < K.regeln.spezialisierungStufe || previous.combat || !previous.health ||
+        !["a", "b"].includes(variante) || !own(K.fertigkeiten, fertigkeit)) return previous;
+    const build = structuredClone(previous.build);
+    build.spez = { variante, grundwert };
+    build.fertigkeiten[fertigkeit]++;
+    if (buildProblem(previous.faction, previous.role, build, previous.training)) return previous;
+    const state = structuredClone(previous);
+    state.build = build;
+    state.health += healthLimit(state) - healthLimit(previous);
+    state.ember += emberLimit(state) - emberLimit(previous);
+    const [name, ability] = K.fraktionen[state.faction].klassen[state.role][variante];
+    note(state, "Spezialisierung gewählt: " + name + ". " + ability.charAt(0).toUpperCase() + ability.slice(1) + ".");
+    return state;
+  }
+
+  // Meisterklasse nach der Vereinigung des eigenen Volkes: +1 Fertigkeitspunkt und +2 Grundwerte.
+  function ascend(previous, grundwerte, fertigkeit) {
+    if (!previous.build.spez || previous.build.meister || !previous.vereinigt || previous.combat || !previous.health ||
+        !own(K.fertigkeiten, fertigkeit)) return previous;
+    const build = structuredClone(previous.build);
+    build.meister = { grundwerte: { ...grundwerte } };
+    build.fertigkeiten[fertigkeit]++;
+    if (buildProblem(previous.faction, previous.role, build, previous.training)) return previous;
+    const state = structuredClone(previous);
+    state.build = build;
+    state.health += healthLimit(state) - healthLimit(previous);
+    state.ember += emberLimit(state) - emberLimit(previous);
+    note(state, "Du steigst zur Meisterklasse auf: " + title(state) + ".");
     return state;
   }
 
@@ -250,7 +481,7 @@ const rules = (() => {
     parts.push(...items.map(item => world.items[item]));
     const level = progression(state).level;
     if (parts.length) note(state, parts.join(" · ") +
-      (level > previousLevel ? ". Stufe " + level + " erreicht. Du hast neue Attributpunkte." : "."));
+      (level > previousLevel ? ". Stufe " + level + " erreicht. Du kannst einen Grundwert steigern." : "."));
     noteOverflow(state, overflow);
   }
 
@@ -342,9 +573,8 @@ const rules = (() => {
     const preview = { ...state, equipment };
     const weaponId = weapon(preview);
     const held = world.gear[weaponId];
-    const stats = heroAttributes(state);
     return {
-      damage: held.power + stats[held.stat], pierce: held.pierce ?? 0, armor: gearBonus(preview, "armor"),
+      damage: held.power + damageValue(state, gearSkill(held)), pierce: held.pierce ?? 0, armor: gearBonus(preview, "armor"),
       magic: gearBonus(preview, "magic"), travel: gearBonus(preview, "travel"), airborne: held.airborne ?? 0,
     };
   }
@@ -556,14 +786,13 @@ const rules = (() => {
     const choice = choices(previous).find((item) => item.id === id);
     if (!choice) return previous;
     const state = structuredClone(previous);
-    const stats = heroAttributes(state);
     if (choice.check) {
       const [key, target] = choice.check;
-      const bonus = stats[key] + (state.marks.includes(choice.advantage) ? 2 : 0) +
-        (key === "agility" ? gearBonus(state, "travel") : 0);
+      const bonus = skillValue(state, key) + (state.marks.includes(choice.advantage) ? 2 : 0) +
+        (key === "list" ? gearBonus(state, "travel") : 0);
       const roll = 1 + Math.floor(dice() * 20);
       const passed = roll + bonus >= target;
-      note(state, world.attributes[key] + " " + roll + " + " + bonus + " gegen " + target + ". " +
+      note(state, K.fertigkeiten[key].name + " " + roll + " + " + bonus + " gegen " + target + ". " +
         (passed ? choice.pass : choice.fail));
       if (passed && choice.item) receive(state, [choice.item]);
       if (passed && choice.mark) markDeed(state, choice.mark);
@@ -677,9 +906,14 @@ const rules = (() => {
     const foe = world.creatures[fight.id];
     const result = world.fights[fight.id];
     const [, attack, armor, speed] = foe.stats;
-    const stats = heroAttributes(state);
-    const role = world.classes[state.role];
+    const role = kit(state);
     const turn = state.combat;
+    // Orks: Nach einer gewonnenen Schlacht trägt sie der Kampfrausch durch den ersten Angriff der nächsten.
+    const rage = state.rausch && ["spear", "ember", "torch"].includes(action) ? 2 : 0;
+    if (rage) {
+      state.rausch = false;
+      note(state, "Kampfrausch: +2 Schaden.");
+    }
     let ward = 0;
     let stabilized = false;
     let usedFire = false;
@@ -701,7 +935,7 @@ const rules = (() => {
     if (action === "flee") {
       const roll = 1 + Math.floor(dice() * 20);
       const target = 8 + Math.floor(speed / 2);
-      if (roll + stats.agility >= target) {
+      if (roll + skillValue(state, "list") >= target) {
         note(state, "Du entkommst und setzt deinen Weg fort.");
         if (result.escape && !state.marks.includes(result.escape)) state.marks.push(result.escape);
         arrive(state, result.retreatTo ?? result.to);
@@ -715,8 +949,8 @@ const rules = (() => {
       if (state.health > before) events.push({ kind: "heal", actor: "hero", value: state.health - before });
     } else if (action === "ember" && cast(state, 2)) {
       usedFire = true;
-      const damage = role.attack.power + stats[role.attack.stat] + (result.emberBonus ?? 0) +
-        gearBonus(state, "magic");
+      const damage = role.attack.power + damageValue(state, role.attack.skill) + (result.emberBonus ?? 0) +
+        gearBonus(state, "magic") + rage;
       hit(damage);
       note(state, role.attack.name + " verursacht " + damage + " Schaden.");
     } else if (action === "restore" && cast(state, -2)) {
@@ -735,14 +969,15 @@ const rules = (() => {
       const equippedWeapon = world.gear[weaponId];
       const pierce = weaponId === "speer" ? (result.spearPierce ?? 0) : (equippedWeapon.pierce ?? 0);
       const range = fight.id === "felsgreif" ? (equippedWeapon.airborne ?? 0) : 0;
-      const damage = Math.max(1, equippedWeapon.power + stats[equippedWeapon.stat] + range + Math.floor(dice() * 4) -
+      const damage = Math.max(1, equippedWeapon.power + damageValue(state, gearSkill(equippedWeapon)) + range + rage +
+        Math.floor(dice() * 4) -
         Math.max(0, (armor ?? 0) - pierce) - (fight.stunned ? 2 : 0));
       hit(damage);
       note(state, world.items[weaponId] + " trifft für " + damage + " Schaden.");
     } else if (action === "torch") {
       usedFire = true;
       ward = 7;
-      const damage = 6 + stats.strength;
+      const damage = 6 + damageValue(state, "nahkampf") + rage;
       hit(damage);
       note(state, "Die Fackel verursacht " + damage + " Schaden. Der Troll weicht vor dem Feuer zurück und heilt in dieser Runde nicht.");
     } else if (action === "guard") {
@@ -791,6 +1026,7 @@ const rules = (() => {
         }
       }
       markDeed(state, result.victory);
+      if (people(state.faction) === "orks") state.rausch = true;
       if (result.unlock) markDeed(state, result.unlock);
       note(state, (result.victoryText ?? "Die Begegnung ist gewonnen.") + " Du nimmst " +
         result.loot.map((id) => world.items[id]).join(" und ") + " mit.");
@@ -816,11 +1052,13 @@ const rules = (() => {
     const leaderAttack = current.health > 0 ? attack + (current.max ? Math.floor(state.party.length / 2) : 0) : 0;
     const defense = action === "guard" ? Math.max(6, ward) : ward;
     const damage = Math.max(guarding ? 0 : 1, leaderAttack + extraAttack + (special?.damage ?? 0) -
-      Math.floor(stats.will / 2) - gearBonus(state, "armor") - defense);
+      protection(state) - gearBonus(state, "armor") - defense);
     current.stunned = Boolean(special?.stuns && !guarding);
     const startsBleeding = special?.bleeds && !guarding;
     if (startsBleeding) current.bleeding = 2;
-    const stolenEmber = Boolean(special?.drainsEmber && !guarding && state.ember > 0);
+    // Willenskraft ab 16 widersteht dem Fluch der Irrglut.
+    const resisted = Boolean(special?.drainsEmber && !guarding && modifier(heroAttributes(state).will) > 0);
+    const stolenEmber = Boolean(special?.drainsEmber && !guarding && !resisted && state.ember > 0);
     if (stolenEmber) state.ember--;
     const loss = Math.min(state.health, damage + bleedingDamage);
     state.health -= loss;
@@ -829,6 +1067,7 @@ const rules = (() => {
       (current.stunned ? " Du bist benommen. Dein nächster Waffenangriff ist schwächer." : "") +
       (startsBleeding ? " Die Wunde blutet zwei Runden lang." : "") +
       (stolenEmber ? " Die Irrglut entzieht dir 1 Glut." : "") +
+      (resisted ? " Deine Willenskraft hält die Irrglut fern." : "") +
       (stabilized ? " Du bringst deine Glut näher ans Gleichgewicht." : "") +
       (bleedingDamage ? " Die Blutung kostet 1 LP." : ""));
     if (!state.health) arrive(state, "defeat");
@@ -841,7 +1080,7 @@ const rules = (() => {
   }
 
   function weapon(state) {
-    return state.equipment?.weapon ?? (state.allocation ? "faeuste" : "speer");
+    return state.equipment?.weapon ?? "faeuste";
   }
 
   function route(state, target) {
@@ -863,20 +1102,24 @@ const rules = (() => {
     return null;
   }
 
-  function buildLegacy(previous, role, allocation) {
-    if (previous.allocation || previous.combat || !previous.health) return previous;
-    if (!validAllocation(allocation)) throw new Error("Verteile genau 6 Attributpunkte.");
-    const setup = create(previous.name, previous.origin, previous.appearance, previous.variant, role, allocation);
+  // Einmalige Umschulung für Spielstände aus der Zeit vor dem Klassensystem.
+  // Volk und Herkunft bleiben, Fraktion, Klasse, Grundwerte und Fertigkeiten werden neu gewählt.
+  function retrain(previous, faction, role, build) {
+    if (!previous.umschulung || previous.combat || !previous.health) return previous;
+    if (!own(K.fraktionen, faction) || originOf(faction) !== previous.origin) throw new Error("Die Fraktion muss zu deiner Herkunft passen.");
+    const setup = { ...structuredClone(build), spez: null, meister: null };
+    const problem = buildProblem(faction, role, setup, previous.training);
+    if (problem) throw new Error(problem);
     const state = structuredClone(previous);
-    state.role = role;
-    state.party = state.party.filter(id => id !== role);
-    state.allocation = allocation;
-    const overflow = receive(state, setup.inventory.filter(id => !state.inventory.includes(id)), false);
-    state.equipment.weapon ??= setup.equipment.weapon;
-    state.equipment.armor ??= setup.equipment.armor;
-    state.health += healthLimit(state) - healthLimit(previous);
-    state.ember += emberLimit(state) - emberLimit(previous);
-    note(state, "Klasse und Attributpunkte festgelegt. Deine bisherige Reise und Beute bleiben erhalten.");
+    Object.assign(state, { faction, role, build: setup, umschulung: false });
+    const weapon = kit(state).weapon;
+    const overflow = state.inventory.includes(weapon) ? [] : receive(state, [weapon], false);
+    // Die Startwaffe der alten Klasse weicht der Startwaffe der neuen. Gefundene Waffen bleiben angelegt.
+    if (state.inventory.includes(weapon) &&
+        (!state.equipment.weapon || state.equipment.weapon === kit(previous).weapon)) state.equipment.weapon = weapon;
+    state.health = Math.max(1, Math.min(healthLimit(state), state.health + healthLimit(state) - healthLimit(previous)));
+    state.ember = Math.min(emberLimit(state), Math.max(0, state.ember + emberLimit(state) - emberLimit(previous)));
+    note(state, "Du bist nun " + title(state) + " (" + K.fraktionen[faction].name + "). Deine bisherige Reise und Beute bleiben erhalten.");
     noteOverflow(state, overflow);
     return state;
   }
@@ -913,7 +1156,9 @@ const rules = (() => {
   }
 
   return { create, read, choices, unequip, equipmentSlots, slotKinds, targetSlot, gearStats, equipPreview, gearBonus, bagSlots, category, slotsUsed, fits, storageSite, storageOpen, canStore, canRetrieve,
-    store, retrieve, isQuestItem: id => questItems.has(id), choose, route, buildLegacy, weapon, equip, use, canUse, strike, attributes, maxHealth, maxEmber,
+    store, retrieve, isQuestItem: id => questItems.has(id), choose, route, retrain, specialize, ascend, weapon, equip, use, canUse, strike,
+    attributes, baseAttributes, defaultBuild, suggestSkills, buildProblem, skillLimits, skillPoints, cap, modifier, originOf, profile,
+    className, title, gearSkill, heroSkills, heroLimits, modifiers, skillValue, protection,
     progression, train, trade, candidates, recruit, dismiss, targets,
     relationship, reputation, recruitment, promise, bondActions, bondWith,
     healthLimit, emberLimit, heroAttributes, ending, moorConsequences };

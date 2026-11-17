@@ -14,6 +14,13 @@
 .lore .cities { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: .45rem 1.35rem; padding-left: 1.2rem; }
 .lore .chronik { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .65rem 1.4rem; }
 .lore .chronik dt, .lore .chronik dd { margin: 0; }
+.lore .tabelle { overflow-x: auto; max-width: 100%; margin-block: .75rem; }
+.lore .tabelle table { border-collapse: collapse; min-width: 32rem; }
+.lore .tabelle caption { text-align: left; font-weight: bold; padding-bottom: .35rem; }
+.lore .tabelle th, .lore .tabelle td { border: 1px solid var(--line); padding: .35rem .55rem; text-align: left; vertical-align: top; line-height: 1.4; }
+.lore .tabelle thead th { color: var(--accent); }
+.lore #klassen ol li { line-height: 1.55; max-width: 75ch; margin-bottom: .35rem; }
+.lore #klassen h4 { margin-bottom: .2rem; }
 @media (max-width: 34rem) {
   .lore .chronik { display: block; }
   .lore .chronik dd { margin-bottom: .65rem; }
