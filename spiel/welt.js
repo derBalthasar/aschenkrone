@@ -13,8 +13,8 @@ const world = (() => {
   };
   const origins = {
     "valmarcher": { name: "Mensch aus dem Kronreich", bonuses: { presence: 1, will: 1 }, portrait: 1, path: "wake-road", lead: "Dem Licht am Feldweg folgen" },
-    "waldelf": { name: "Waldelfen", bonuses: { agility: 2 }, portrait: 2, path: "wake-wood", lead: "Durch die Hecke zu den Eichen gehen" },
-    "bergzwerg": { name: "Bergzwerge", bonuses: { strength: 1, will: 1 }, portrait: 3, path: "wake-stone", lead: "Den alten Grenzstein untersuchen" },
+    "waldelf": { name: "Elfen", bonuses: { agility: 2 }, portrait: 2, path: "wake-wood", lead: "Durch die Hecke zu den Eichen gehen" },
+    "bergzwerg": { name: "Zwerge", bonuses: { strength: 1, will: 1 }, portrait: 3, path: "wake-stone", lead: "Den alten Grenzstein untersuchen" },
     "gruenhaut": { name: "Orks", bonuses: { strength: 2, will: 1 }, portrait: 4, path: "wake-cart", lead: "Den Rufen am Graben nachgehen" },
     "vampir": { name: "Vampire · Die Erinnernden", bonuses: { presence: 2 }, portrait: 5, path: "wake-shade", lead: "Im Schatten dem Herzschlag folgen" },
     "untot": { name: "Untote · Erwachte", bonuses: { will: 2 }, portrait: 6, path: "wake-grave", lead: "Zu den Steinen am Rand des Gräberfelds gehen" },
@@ -197,7 +197,7 @@ const world = (() => {
     start: {
       place: "Kornwik · Ackerland", title: "Die Warnung", objective: "Bereite den Aufbruch vor.",
       illustration: "lager.png",
-      text: "Die Laterne hängt an einem Kornwagen. Eine Fuhrfrau reicht dir Wasser und erzählt von der grauen Asche am Eispass. Die Fuhrleute wollen noch vor Dunkelheit nach Heidvang. Sie bitten dich, vorauszugehen und einen freien Weg zu finden.",
+      text: "Die Laterne hängt an einem Kornwagen. Eine Fuhrfrau aus Garbenfeld reicht dir Wasser und erzählt von der grauen Asche am Eispass. Die Fuhrleute wollen noch vor Dunkelheit nach Heidvang. Sie bitten dich, vorauszugehen und einen freien Weg zu finden.",
       choices: [
         { id: "talk", label: "Die Fuhrleute nach sicheren Wegen fragen", check: ["presence", 11], advantage: "fuhrleute-vertrauen",
           pass: "Sie zeigen dir einen trockenen Graben am Acker. Darin kannst du ungesehen näher heran.", fail: "Niemand war seit dem letzten Regen draußen.", mark: "ditch", to: "field" },
@@ -407,7 +407,7 @@ const world = (() => {
     toll: {
       place: "Eispass · Alte Zollstelle", map: "toll", title: "Ein Zoll ohne Siegel",
       objective: "Kläre den Streit um Adas Wagen.",
-      text: "Die Händlerin Ada steht vor einer quer gelegten Stange. Ein Deserteur verlangt die Hälfte ihrer Ladung und behauptet, für die Wache zu kassieren. Sein Gegenüber betrachtet die Stange, als suche er einen Vorwand, sie selbst aus dem Weg zu räumen.",
+      text: "Die Händlerin Ada steht vor einer quer gelegten Stange. Ein Deserteur verlangt die Hälfte ihrer Ladung und behauptet, für den Zoll von Passhütte zu kassieren. Sein Gegenüber betrachtet die Stange, als suche er einen Vorwand, sie selbst aus dem Weg zu räumen.",
       creature: "deserteure",
       choices: [
         { id: "toll-talk", label: "Mit dem Fährsiegel aushandeln, dass Ada passieren darf", requiresItem: "flusssiegel",
@@ -783,19 +783,19 @@ const world = (() => {
     glutkaefer: [30, 0], felsgreif: [55, 0], schlundtroll: [85, 0], deserteure: [50, 14], frostbaer: [75, 0],
   };
   const destinations = {
-    weidenkamm: { name: "Kornwik", position: [15, 88], note: "Ackerland" },
-    rotwaelder: { name: "Eichenwald", position: [28, 77], note: "Wagenweg bei Heidvang" },
-    kraehenfurt: { name: "Heidvang", position: [53, 86], note: "Fährhaus" },
-    schwarzmoor: { name: "Bohlenweg", position: [81, 89], note: "Moor bei Eiswacht" },
-    hochwacht: { name: "Eiswacht", position: [28, 60], note: "Wachhof und Rast" },
-    mine: { name: "Alte Glutmine", position: [23, 38], note: "Glutkäfer · Stollen" },
-    ridge: { name: "Felsrippe", position: [53, 49], note: "Felsgreif · Steig" },
-    ravine: { name: "Trollschlund", position: [78, 68], note: "Schlundtroll · Schwerer Kampf" },
-    pass: { name: "Eispass", position: [72, 33], note: "Grenzsteine · Auftragsziel" },
-    toll: { name: "Zollstelle", position: [53, 68], note: "Adas Wagen · Menschliche Begegnung" },
-    "skarn-gate": { name: "Glutberg", position: [83, 48], note: "Unteres Grenzlager · Naldas Lager" },
-    "skarn-cliffs": { name: "Klippenweg", position: [82, 18], note: "Glutberg · Frostbär" },
-    "skarn-runes": { name: "Runentor", position: [56, 9], note: "Glutberg · Torben suchen" },
+    weidenkamm: { name: "Kornwik", position: [42, 88], note: "Ackerland" },
+    rotwaelder: { name: "Eichenwald", position: [27, 76], note: "Wagenweg bei Heidvang" },
+    kraehenfurt: { name: "Heidvang", position: [12, 87], note: "Fährhaus" },
+    schwarzmoor: { name: "Bohlenweg", position: [14, 60], note: "Moor bei Eiswacht" },
+    hochwacht: { name: "Eiswacht", position: [38, 52], note: "Wachhof und Rast" },
+    mine: { name: "Alte Glutmine", position: [20, 34], note: "Glutkäfer · Stollen" },
+    ridge: { name: "Felsrippe", position: [46, 33], note: "Felsgreif · Steig" },
+    ravine: { name: "Trollschlund", position: [68, 63], note: "Schlundtroll · Schwerer Kampf" },
+    pass: { name: "Eispass", position: [56, 16], note: "Grenzsteine · Auftragsziel" },
+    toll: { name: "Zollstelle", position: [50, 74], note: "Passhütte · Adas Wagen · Menschliche Begegnung" },
+    "skarn-gate": { name: "Glutberg", position: [84, 42], note: "Unteres Grenzlager · Naldas Lager" },
+    "skarn-cliffs": { name: "Klippenweg", position: [88, 22], note: "Glutberg · Frostbär" },
+    "skarn-runes": { name: "Runentor", position: [76, 7], note: "Glutberg · Torben suchen" },
   };
   const routes = [
     ["weidenkamm", "rotwaelder"], ["weidenkamm", "kraehenfurt"], ["rotwaelder", "kraehenfurt"], ["kraehenfurt", "schwarzmoor"],
@@ -845,7 +845,7 @@ const world = (() => {
     },
     paladin: {
       name: "Mira", scenes: ["watch-yard"], place: "Wachfeuer von Eiswacht",
-      introduction: "Mira teilt ihr Brot mit den Wachen. Sie hat ihren Eid auf Menschen geschworen, die den Pass überqueren müssen, und will mit dir hinauf.",
+      introduction: "Mira teilt ihr Brot mit den Wachen. Sie hat im Aschenkloster ihren Eid auf Menschen geschworen, die den Pass überqueren müssen, und will mit dir hinauf.",
       ability: "Schutzsegen", heal: 6, guard: 6,
     },
     druid: {
@@ -862,12 +862,12 @@ const world = (() => {
   const factions = {
     watch: "Grenzwache von Eiswacht",
     skarn: "Bergwacht von Glutberg",
-    groves: "Ewige Haine",
+    groves: "Kronreich",
     houses: "Die Erinnernden",
     order: "Orden der Flamme",
-    conclave: "Konklave",
-    legion: "Knochenlegion",
-    league: "Splitterliga",
+    conclave: "Hüter des Weltenbaums",
+    legion: "Hof der Bleichen Krone",
+    league: "Freie Häfen",
   };
   const loyalties = {
     knight: { request: "Iven versprechen, die Vermissten am Pass zu suchen", proof: ["joren-gerettet"], broken: ["joren-verloren"], gift: "harzverband",
