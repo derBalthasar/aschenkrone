@@ -20,18 +20,22 @@
   <script defer src="spiel/karte.js"></script>
   <script defer src="spiel/prolog.js"></script>
   <script defer src="spiel/spiel.js"></script>
+  <script defer src="spiel/oberflaeche.js"></script>
 </head>
 <body>
   <header class="game-header">
     <div class="game-wrap header-inner">
       <div><p class="wordmark">Aschenkrone</p><h1>Der Weg nach Heidvang</h1></div>
       <div class="header-controls">
-        <nav aria-label="Nachschlagewerke">
-          <a href="lore/index.html">Weltbuch</a>
-          <a href="bestiarium/index.html">Bestiarium</a>
-          <a href="profilbilder/index.html">Porträts</a>
-        </nav>
-        <label class="layout-picker" for="layout-mode">Ansicht
+        <div class="header-row">
+          <nav aria-label="Nachschlagewerke">
+            <a href="lore/index.html">Weltbuch</a>
+            <a href="bestiarium/index.html">Bestiarium</a>
+            <a href="profilbilder/index.html">Porträts</a>
+          </nav>
+          <span id="turn-badge" class="turn-badge" hidden></span>
+        </div>
+        <label class="layout-picker" for="layout-mode">Ansicht:
           <select id="layout-mode">
             <option value="auto">Automatisch</option>
             <option value="compact">Kompakt</option>
@@ -132,71 +136,89 @@
         <div id="scene-actions" class="actions scene-actions"></div>
       </section>
       <div class="travel-tools">
-        <details id="travel-map" class="travel-map" open>
-          <summary id="map-title">Karte</summary>
-          <p id="map-status" class="map-status"></p>
-          <div id="map-destinations" class="actions map-destinations" role="group" aria-label="Erreichbare Reiseziele"></div>
-          <div id="map-plan" class="actions map-plan"></div>
-          <div class="map-zoom" role="group" aria-label="Kartenstufe">
-            <button type="button" data-map-level="gebiet" aria-pressed="true">1 · Gebiet</button>
-            <button type="button" data-map-level="fraktion" aria-pressed="false">2 · Fraktion</button>
-            <button type="button" data-map-level="welt" aria-pressed="false">3 · Welt</button>
-          </div>
-          <div class="map-scroll" role="region" aria-labelledby="map-title" tabindex="0">
-            <div id="map-board" class="map-board">
-              <img id="map-image" class="map-image" alt="" decoding="async">
-              <svg id="map-routes" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
-              <div id="map-places"></div>
+        <aside id="character-panel" class="sidebar" aria-label="Charakter und Reise" tabindex="-1" data-side-tab="karte">
+          <section class="hero-head" aria-label="Charakter">
+            <div class="party">
+              <div id="avatar" class="avatar" role="img"></div>
+              <div><h2 id="hero-name"></h2><p id="hero-origin"></p>
+                <button type="button" class="action primary hub-launch" data-sheet-open>Charakterfenster öffnen</button></div>
             </div>
-          </div>
-          <p id="map-caption" class="map-caption"></p>
-        </details>
-        <aside id="character-panel" class="sidebar" aria-label="Charakter und Reise" tabindex="-1">
-          <div class="party">
-            <div id="avatar" class="avatar" role="img"></div>
-            <div><h2 id="hero-name"></h2><p id="hero-origin"></p></div>
-          </div>
-          <button type="button" class="action primary hub-launch" data-sheet-open>Charakterfenster öffnen</button>
-          <dl id="vitals" class="stat-line"></dl>
-          <section class="progression" aria-labelledby="level-heading">
-            <h3 id="level-heading"></h3>
-            <progress id="xp-bar" max="75" value="0" aria-label="Erfahrung bis zur nächsten Stufe"></progress>
-            <p id="xp-label"></p>
-            <div id="training" class="actions"></div>
+            <dl id="vitals" class="stat-line vitals"></dl>
+            <section class="progression" aria-labelledby="level-heading">
+              <h3 id="level-heading"></h3>
+              <progress id="xp-bar" max="75" value="0" aria-label="Erfahrung bis zur nächsten Stufe"></progress>
+              <p id="xp-label"></p>
+              <div id="training" class="actions"></div>
+            </section>
+            <details class="glut-help">
+              <summary>Glutgleichgewicht</summary>
+            <p>Deine Glut ist eine eigene Gabe. In Glutberg stützt sich die Flammenmagie des Ordens auf Glauben und Runen. Angriffszauber verschieben deine Glut um 2 Richtung Zerstörung. Schützen, Binden oder Heilen verschiebt sie um 2 Richtung Erneuerung. Bei +4 oder −4 schlägt die Glut zurück. Deckung bewegt dich einen Schritt zur Mitte.</p>
+            </details>
           </section>
-          <details>
-            <summary>Glutgleichgewicht</summary>
-          <p>Deine Glut ist eine eigene Gabe. In Glutberg stützt sich die Flammenmagie des Ordens auf Glauben und Runen. Angriffszauber verschieben deine Glut um 2 Richtung Zerstörung. Schützen, Binden oder Heilen verschiebt sie um 2 Richtung Erneuerung. Bei +4 oder −4 schlägt die Glut zurück. Deckung bewegt dich einen Schritt zur Mitte.</p>
-          </details>
-          <section class="travel-objective" aria-labelledby="objective-heading">
-            <h3 id="objective-heading">Reiseauftrag</h3>
-            <p id="objective"></p>
-            <ul id="quest-clues" hidden></ul>
-          </section>
-          <details><summary>Eigenschaften</summary>
-            <h4 class="sheet-heading">Grundwerte</h4><dl id="attributes" class="stat-line"></dl>
-            <h4 class="sheet-heading">Fertigkeiten</h4><dl id="skills" class="stat-line"></dl>
-            <div id="class-sheet"></div>
-          </details>
-          <details open><summary>Gruppenvorrat und deine Ausrüstung</summary><p id="equipment"></p>
-            <p id="bag-summary" class="bag-summary"></p>
-            <button type="button" class="action primary hub-launch" data-hub-open>Inventar öffnen</button><ul id="inventory" class="inventory-list"></ul></details>
-          <details open><summary id="questlog-summary">Questlog</summary>
-            <p id="quest-clock" class="quest-clock"></p>
-            <p class="quest-help">Fristen laufen in Spielzügen: Entscheidungen, Reisen, Kampfrunden, Herstellung und Auftragsaktionen. Lesen, Ausrüsten, Handel und Pausen kosten keine Zeit. Begleiteraufträge müssen vor Ablauf am Treffpunkt abgegeben werden.</p>
-            <div id="quest-filters" class="actions" role="group" aria-label="Aufträge filtern"></div>
-            <ul id="companion-quests" class="inventory-list"></ul></details>
-          <details open><summary id="party-count">Gefährten</summary><ul id="party-members" class="inventory-list"></ul>
-            <details><summary>Mögliche Treffpunkte</summary><ul id="party-leads"></ul></details>
-          </details>
-          <details><summary>Fraktionsruf</summary><ul id="faction-ruf" class="inventory-list"></ul></details>
-          <details open><summary>Reisejournal</summary><ol id="journal"></ol></details>
-          <div class="actions save-actions">
-            <button id="legacy-build" class="action" hidden>Held an das neue Klassensystem anpassen</button>
-            <button id="export" class="action">Spielstand exportieren</button>
-            <button id="menu" class="action">Hauptmenü</button>
+          <div class="side-tabs" role="tablist" aria-label="Kompendium">
+            <button type="button" role="tab" id="side-tab-karte" aria-controls="side-karte" aria-selected="true" tabindex="0" data-side-tab="karte"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z M9 4v14 M15 6v14"/></svg><span class="side-tab-label">Karte</span></button>
+            <button type="button" role="tab" id="side-tab-beutel" aria-controls="side-beutel" aria-selected="false" tabindex="-1" data-side-tab="beutel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7c0-2 1.5-3 4-3s4 1 4 3 M6 8h12l1 11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z M10 4l-1-2 M14 4l1-2"/></svg><span class="side-tab-label">Beutel</span></button>
+            <button type="button" role="tab" id="side-tab-chronik" aria-controls="side-chronik" aria-selected="false" tabindex="-1" data-side-tab="chronik"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z M5 17a3 3 0 0 1 3-3h10 M9 8h6 M9 11h4"/></svg><span class="side-tab-label">Chronik</span></button>
+            <button type="button" role="tab" id="side-tab-gefaehrten" aria-controls="side-gefaehrten" aria-selected="false" tabindex="-1" data-side-tab="gefaehrten"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6 M16 11a2.5 2.5 0 1 0 0-5 M17 14c2.5.5 4 2.6 4 5.5"/></svg><span class="side-tab-label">Gefährten</span></button>
           </div>
-          <p id="save-status" role="status"></p>
+          <div id="side-karte" class="side-panel" role="tabpanel" aria-labelledby="side-tab-karte">
+            <details id="travel-map" class="travel-map" open>
+              <summary id="map-title">Karte</summary>
+              <p id="map-status" class="map-status"></p>
+              <div id="map-destinations" class="actions map-destinations" role="group" aria-label="Erreichbare Reiseziele"></div>
+              <div id="map-plan" class="actions map-plan"></div>
+              <div class="map-zoom" role="group" aria-label="Kartenstufe">
+                <button type="button" data-map-level="gebiet" aria-pressed="true">1 · Gebiet</button>
+                <button type="button" data-map-level="fraktion" aria-pressed="false">2 · Fraktion</button>
+                <button type="button" data-map-level="welt" aria-pressed="false">3 · Welt</button>
+              </div>
+              <div class="map-scroll" role="region" aria-labelledby="map-title" tabindex="0">
+                <div id="map-board" class="map-board">
+                  <img id="map-image" class="map-image" alt="" decoding="async">
+                  <svg id="map-routes" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
+                  <div id="map-places"></div>
+                </div>
+              </div>
+              <p id="map-caption" class="map-caption"></p>
+            </details>
+          </div>
+          <div id="side-beutel" class="side-panel" role="tabpanel" aria-labelledby="side-tab-beutel">
+            <details open><summary>Gruppenvorrat und deine Ausrüstung</summary><p id="equipment"></p>
+              <p id="bag-summary" class="bag-summary"></p>
+              <button type="button" class="action primary hub-launch" data-hub-open>Inventar öffnen</button><ul id="inventory" class="inventory-list"></ul></details>
+          </div>
+          <div id="side-chronik" class="side-panel" role="tabpanel" aria-labelledby="side-tab-chronik">
+            <section class="travel-objective" aria-labelledby="objective-heading">
+              <h3 id="objective-heading">Reiseauftrag</h3>
+              <p id="objective"></p>
+              <ul id="quest-clues" hidden></ul>
+            </section>
+            <details open><summary id="questlog-summary">Questlog</summary>
+              <div class="quest-clock-row"><p id="quest-clock" class="quest-clock"></p>
+                <details class="help-tip"><summary aria-label="Wie Fristen zählen" title="Wie Fristen zählen">?</summary>
+                <p class="quest-help">Fristen laufen in Spielzügen: Entscheidungen, Reisen, Kampfrunden, Herstellung und Auftragsaktionen. Lesen, Ausrüsten, Handel und Pausen kosten keine Zeit. Begleiteraufträge müssen vor Ablauf am Treffpunkt abgegeben werden.</p></details>
+              </div>
+              <div id="quest-filters" class="actions" role="group" aria-label="Aufträge filtern"></div>
+              <ul id="companion-quests" class="inventory-list"></ul></details>
+            <details open><summary>Reisejournal</summary><ol id="journal"></ol></details>
+          </div>
+          <div id="side-gefaehrten" class="side-panel" role="tabpanel" aria-labelledby="side-tab-gefaehrten">
+            <details open><summary id="party-count">Gefährten</summary><ul id="party-members" class="inventory-list"></ul>
+              <details><summary>Mögliche Treffpunkte</summary><ul id="party-leads"></ul></details>
+            </details>
+            <details><summary>Fraktionsruf</summary><ul id="faction-ruf" class="inventory-list"></ul></details>
+            <details><summary>Eigenschaften</summary>
+              <h4 class="sheet-heading">Grundwerte</h4><dl id="attributes" class="stat-line"></dl>
+              <h4 class="sheet-heading">Fertigkeiten</h4><dl id="skills" class="stat-line"></dl>
+              <div id="class-sheet"></div>
+            </details>
+            <div class="actions save-actions">
+              <button id="legacy-build" class="action" hidden>Held an das neue Klassensystem anpassen</button>
+              <button id="export" class="action">Spielstand exportieren</button>
+              <button id="menu" class="action">Hauptmenü</button>
+            </div>
+            <p id="save-status" role="status"></p>
+          </div>
         </aside>
       </div>
     </div>

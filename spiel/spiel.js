@@ -65,6 +65,7 @@
 
   function show(id) {
     for (const view of ["home", "creation", "prologue", "play"]) el(view).hidden = view !== id;
+    el("turn-badge").hidden = id !== "play";
   }
 
   function applyLayout() {
@@ -569,6 +570,8 @@
     const site = rules.storageSite(state);
     el("bag-summary").textContent = "Rucksack " + rules.slotsUsed(state) + " / " + rules.bagLimit(state) + " Plätze · Zentrallager " +
       state.storage.length + " Gegenstände" + (site && !state.combat ? " · hier erreichbar." : "");
+    el("side-tab-beutel").querySelector(".side-tab-label").textContent =
+      "Beutel (" + rules.slotsUsed(state) + "/" + rules.bagLimit(state) + ")";
     const inventory = el("inventory");
     inventory.replaceChildren();
     const picker = element("li"); picker.append(allyPicker("Vorrat")); inventory.append(picker);
@@ -1478,6 +1481,7 @@
       [status, entries.filter(entry => entry.status === status).length]));
     el("questlog-summary").textContent = "Questlog · " + counts.active + " offen";
     el("quest-clock").textContent = "Spielzug " + (state.questClock ?? 0);
+    el("turn-badge").textContent = "Spielzug " + (state.questClock ?? 0);
     const filters = el("quest-filters");
     filters.replaceChildren();
     for (const [id, title] of [["active", "Offen"], ["done", "Erfüllt"], ["failed", "Gescheitert"], ["all", "Alle"]]) {
@@ -2348,6 +2352,37 @@
     }
   }
 
+  // Kopf der Seitenleiste: Balken für Lebenspunkte, Ausdauer, Mana und Glut, darunter Vorrat und Gleichgewicht.
+  function renderVitals() {
+    const values = rules.kampfwerte(state);
+    const bars = [
+      ["hp", "Lebenspunkte", state.health, rules.healthLimit(state)],
+      ["ausdauer", "Ausdauer", values.ausdauer, values.ausdauerMax],
+      ...(values.manaMax ? [["mana", "Mana", values.mana, values.manaMax]] : []),
+      ["glut", "Glut", state.ember, rules.emberLimit(state)],
+    ];
+    const vitals = el("vitals");
+    vitals.replaceChildren(...bars.map(([kind, label, value, max]) => {
+      const block = element("div");
+      block.className = "vital vital-" + kind + (kind === "hp" && value <= max * .3 ? " vital-low" : "");
+      block.style.setProperty("--fill", (max ? Math.max(0, Math.min(1, value / max)) * 100 : 0) + "%");
+      block.append(element("dt", label), element("dd", value + " / " + max));
+      return block;
+    }));
+    const stock = element("div");
+    stock.className = "vital-stock";
+    stock.append(element("dt", values.ressourceName), element("dd", values.ressource + " / " + rules.vorratMax));
+    const balance = element("div");
+    balance.className = "vital-balance";
+    balance.style.setProperty("--mark", (Math.max(-4, Math.min(4, state.balance)) + 4) / 8 * 100 + "%");
+    const scale = element("span");
+    scale.className = "balance-scale";
+    scale.setAttribute("aria-hidden", "true");
+    balance.append(element("dt", "Gleichgewicht"), element("dd", state.balance === 0 ? "0 · Im Gleichgewicht" :
+      state.balance < 0 ? state.balance + " · Erneuerung" : "+" + state.balance + " · Zerstörung"), scale);
+    vitals.append(stock, balance);
+  }
+
   function render() {
     setPortrait(el("avatar"), state);
     el("hero-name").textContent = state.name;
@@ -2371,15 +2406,7 @@
     const cluesList = el("quest-clues");
     cluesList.hidden = !clues.length;
     cluesList.replaceChildren(...clues.map(([, text]) => element("li", text)));
-    stats(el("vitals"), [
-      ["Lebenspunkte", state.health + " / " + rules.healthLimit(state)],
-      ...((values) => [["Ausdauer", values.ausdauer + " / " + values.ausdauerMax],
-        ...(values.manaMax ? [["Mana", values.mana + " / " + values.manaMax]] : []),
-        [values.ressourceName, values.ressource + " / " + rules.vorratMax]])(rules.kampfwerte(state)),
-      ["Glut", state.ember + " / " + rules.emberLimit(state)],
-      ["Gleichgewicht", state.balance === 0 ? "0 · Im Gleichgewicht" :
-        state.balance < 0 ? state.balance + " · Erneuerung" : "+" + state.balance + " · Zerstörung"],
-    ]);
+    renderVitals();
     stats(el("attributes"), attributeValues(rules.heroAttributes(state)));
     const limits = rules.heroLimits(state);
     stats(el("skills"), Object.entries(rules.heroSkills(state)).map(([id, value]) =>
