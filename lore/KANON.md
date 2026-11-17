@@ -49,3 +49,7 @@ Die Gebiete im Bestiarium folgen seit dem 17. 11. 2026 den Kontinenten der verbi
 - **Meere und Inseln** ersetzt die Splitterinseln. Die Freien Häfen, die Riffe um die Zollinseln und die Funkeninsel der Runenschmiede bilden dieses Gebiet. Die Splitterliga entfällt.
 - Für die Zwerge gibt es noch kein eigenes Bestiarium-Gebiet.
 - Die Reisekarte ist nach der Weltkarte ausgerichtet. Heidvang liegt westlich von Kornwik, Eiswacht nördlich davon und Glutberg im Nordosten.
+
+## Quelltexte im Weltbuch
+
+Seit dem 17. November 2026 stehen das Weltbuch 2.0 und die fünf Völkerdokumente vollständig unter `lore/quellen/`. Die Seiten sind aus den Word-Dateien erzeugt und enthalten die Detailkarten, das Gleichgewicht der Welt, Spielwerte, Städte, Dörfer, Hauptquests und die Bildtafeln der Dokumente. Bilder, die schon unter `lore/` liegen, werden wiederverwendet. Neue Bilder liegen unter `lore/quellen/bilder/`. Die Spielregeln und Spielstände sind davon nicht betroffen.

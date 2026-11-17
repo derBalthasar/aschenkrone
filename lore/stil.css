@@ -18,3 +18,17 @@
   .lore .chronik { display: block; }
   .lore .chronik dd { margin-bottom: .65rem; }
 }
+
+/* Quelltexte (lore/quellen/) */
+.quelltext { padding-top: .5rem; }
+.quelltext h1 { color: var(--accent); }
+.quelltext h2 { color: var(--accent); margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+.quelltext h3 { margin-top: 1.4rem; }
+.quelltext p, .quelltext li { line-height: 1.55; max-width: 75ch; }
+.quelltext img { display: block; max-width: 100%; height: auto; margin-block: .75rem; }
+.quelltext table { border-collapse: collapse; margin-block: .75rem; display: block; overflow-x: auto; max-width: 100%; }
+.quelltext th, .quelltext td { border: 1px solid var(--line); padding: .4rem .6rem; text-align: left; vertical-align: top; }
+.quelltext th { color: var(--accent); }
+.quelltext .inhalt { border: 1px solid var(--line); padding: .5rem 1rem; margin-block: 1rem; }
+.quelltext .inhalt h2 { border: 0; margin-top: .25rem; padding-top: 0; font-size: 1.1rem; }
+.quelltext .inhalt ul { padding-left: 1.2rem; }
