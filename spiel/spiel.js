@@ -419,12 +419,56 @@
     control.addEventListener("blur", () => renderStats());
   }
 
+  // Figur: Plätze sitzen an Kopf, Hals, Brust, Händen, Fingern und Beinen einer Körpersilhouette.
+  const dollSpots = { head: [50, 10], neck: [50, 28.5], armor: [50, 47], legs: [50, 81],
+    weapon: [15, 47], offhand: [85, 47], ring1: [15, 74], ring2: [85, 74] };
+  const svgNs = "http://www.w3.org/2000/svg";
+
+  function figure(width, height) {
+    const svg = document.createElementNS(svgNs, "svg");
+    svg.setAttribute("viewBox", "0 0 " + width + " " + height);
+    svg.setAttribute("aria-hidden", "true");
+    svg.classList.add("hub-figure");
+    const add = (tag, attributes) => {
+      const shape = document.createElementNS(svgNs, tag);
+      for (const [key, value] of Object.entries(attributes)) shape.setAttribute(key, value);
+      svg.append(shape);
+    };
+    const cx = width / 2;
+    const unit = Math.min(width, height);
+    const limb = unit * 0.075;
+    const headY = height * 0.1;
+    const headR = height * 0.075;
+    const shoulderY = height * 0.25;
+    const hipY = height * 0.62;
+    const torso = Math.min(width * 0.12, unit * 0.2);
+    const hip = torso * 0.78;
+    const handY = height * 0.47;
+    const hands = [width * 0.15, width * 0.85];
+    add("line", { x1: cx, y1: headY, x2: cx, y2: shoulderY + 4, "stroke-width": headR * 0.9 });
+    add("circle", { cx, cy: headY, r: headR });
+    for (const [side, handX] of [[-1, hands[0]], [1, hands[1]]]) {
+      add("line", { x1: cx + side * torso * 0.92, y1: shoulderY + limb * 0.5, x2: handX, y2: handY, "stroke-width": limb });
+      add("circle", { cx: handX, cy: handY, r: limb * 0.85 });
+      add("line", { x1: handX, y1: handY + limb, x2: handX, y2: height * 0.68, "stroke-width": 2, "stroke-dasharray": "3 5", class: "hub-figure-guide" });
+      add("line", { x1: cx + side * hip * 0.5, y1: hipY, x2: cx + side * hip * 0.62, y2: height * 0.97, "stroke-width": limb * 1.3 });
+    }
+    add("path", { d: "M" + (cx - torso) + " " + shoulderY + " Q" + cx + " " + (shoulderY - limb) + " " + (cx + torso) + " " + shoulderY +
+      " L" + (cx + hip) + " " + hipY + " L" + (cx - hip) + " " + hipY + " Z" });
+    return svg;
+  }
+
   function renderDoll() {
     const doll = el("hub-doll");
-    doll.replaceChildren();
+    const narrow = window.matchMedia("(max-width: 42rem)").matches;
+    doll.replaceChildren(narrow ? figure(360, 470) : figure(640, 420));
     for (const slot of rules.equipmentSlots) {
       const id = state.equipment[slot];
       const shown = slot === "weapon" && !id ? rules.weapon(state) : id;
+      const spot = element("div");
+      spot.className = "hub-spot";
+      spot.style.left = dollSpots[slot][0] + "%";
+      spot.style.top = dollSpots[slot][1] + "%";
       const card = element("button");
       card.type = "button";
       card.className = "hub-slot hub-slot-" + slot + (id ? "" : " hub-slot-empty");
@@ -432,8 +476,8 @@
       card.setAttribute("aria-pressed", String(hub.slot === slot));
       card.append(element("small", slotLabels[slot]));
       card.append(element("strong", shown ? world.items[shown] : "Leer"));
-      if (id) card.append(element("span", itemDetails(id).slice(0, 2).join(" · ")));
-      else if (slot === "offhand" && world.gear[state.equipment.weapon]?.twoHanded) card.append(element("span", "Durch Zweihandwaffe belegt"));
+      if (!id && slot === "offhand" && world.gear[state.equipment.weapon]?.twoHanded) card.append(element("span", "Zweihandwaffe"));
+      if (id) card.title = world.items[id] + ": " + itemDetails(id).join(" · ");
       card.setAttribute("aria-label", slotLabels[slot] + ": " + (id ? world.items[id] : "leer") + ". Passende Gegenstände zeigen.");
       card.addEventListener("click", () => {
         hub.slot = hub.slot === slot ? null : slot;
@@ -441,8 +485,24 @@
         renderHub();
         doll.querySelector(".hub-slot-" + slot)?.focus();
       });
-      doll.append(card);
+      spot.append(card);
+      if (id) {
+        const off = element("button", "✕");
+        off.type = "button";
+        off.className = "hub-unequip";
+        off.title = world.items[id] + " ablegen";
+        off.setAttribute("aria-label", world.items[id] + " ablegen");
+        off.disabled = Boolean(state.combat) || !state.health;
+        off.addEventListener("click", () => {
+          hubAction(rules.unequip(state, slot));
+          doll.querySelector(".hub-slot-" + slot)?.focus();
+        });
+        spot.append(off);
+      }
+      doll.append(spot);
     }
+    const all = el("hub-unequip-all");
+    all.disabled = Boolean(state.combat) || !state.health || !rules.equipmentSlots.some(slot => state.equipment[slot]);
   }
 
   function itemTile(id, count) {
@@ -593,6 +653,13 @@
 
   for (const opener of document.querySelectorAll("[data-hub-open]")) opener.addEventListener("click", openHub);
   el("hub-close").addEventListener("click", () => el("inventory-hub").close());
+  el("hub-unequip-all").addEventListener("click", () => {
+    hubAction(rules.unequip(state));
+    el("hub-unequip-all").focus();
+  });
+  window.matchMedia("(max-width: 42rem)").addEventListener("change", () => {
+    if (state && el("inventory-hub").open) renderDoll();
+  });
   el("inventory-hub").addEventListener("click", event => {
     if (event.target === event.currentTarget) event.currentTarget.close();
   });

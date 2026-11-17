@@ -325,6 +325,18 @@ const rules = (() => {
     return state;
   }
 
+  // Legt den Gegenstand eines Platzes ab oder, ohne Angabe, die gesamte Ausrüstung. Er bleibt im Rucksack.
+  function unequip(previous, slot = null) {
+    const slots = slot ? [slot] : equipmentSlots;
+    if (previous.combat || !previous.health || !slots.every(entry => equipmentSlots.includes(entry)) ||
+        !slots.some(entry => previous.equipment[entry])) return previous;
+    const state = structuredClone(previous);
+    const removed = slots.filter(entry => state.equipment[entry]).map(entry => state.equipment[entry]);
+    for (const entry of slots) state.equipment[entry] = null;
+    note(state, slot ? world.items[removed[0]] + " abgelegt." : "Gesamte Ausrüstung abgelegt: " + removed.map(id => world.items[id]).join(", ") + ".");
+    return state;
+  }
+
   // Werte des Helden mit der aktuellen oder einer probeweise geänderten Ausrüstung.
   function gearStats(state, equipment = state.equipment) {
     const preview = { ...state, equipment };
@@ -900,7 +912,7 @@ const rules = (() => {
     return { bridge, news, messengers: marks.includes("boten-unterwegs") };
   }
 
-  return { create, read, choices, equipmentSlots, slotKinds, targetSlot, gearStats, equipPreview, gearBonus, bagSlots, category, slotsUsed, fits, storageSite, storageOpen, canStore, canRetrieve,
+  return { create, read, choices, unequip, equipmentSlots, slotKinds, targetSlot, gearStats, equipPreview, gearBonus, bagSlots, category, slotsUsed, fits, storageSite, storageOpen, canStore, canRetrieve,
     store, retrieve, isQuestItem: id => questItems.has(id), choose, route, buildLegacy, weapon, equip, use, canUse, strike, attributes, maxHealth, maxEmber,
     progression, train, trade, candidates, recruit, dismiss, targets,
     relationship, reputation, recruitment, promise, bondActions, bondWith,

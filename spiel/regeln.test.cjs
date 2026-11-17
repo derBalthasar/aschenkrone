@@ -617,6 +617,19 @@ console.log("Gefährtenaufträge, Beziehungsfolgen, Geschenke, Romanze, Fraktion
   assert.equal(rules.equipPreview(armored, "eisenhelm").armor, 2);
   assert.equal(rules.equipPreview(armored, "lederwams").armor, -2);
   assert.ok(rules.equipPreview(shielded, "bogen").armor < 0);
+  // Ablegen: einzelner Platz oder alles, Gegenstände bleiben im Rucksack
+  const bare = rules.unequip(kitted, "head");
+  assert.equal(bare.equipment.head, null);
+  assert.ok(bare.inventory.includes("eisenhelm"));
+  assert.equal(rules.unequip(bare, "head"), bare);
+  const naked = rules.unequip(kitted);
+  assert.ok(rules.equipmentSlots.every(slot => naked.equipment[slot] === null));
+  assert.equal(naked.inventory.length, kitted.inventory.length);
+  assert.equal(rules.weapon(naked), "faeuste");
+  assert.equal(rules.unequip(naked), naked);
+  assert.equal(rules.unequip(kitted, "trinket"), kitted);
+  assert.equal(rules.unequip(trial(kitted)).equipment.head, "eisenhelm");
+  assert.equal(reload(naked).equipment.armor, null);
   // Frühere Vorschaustände mit "trinket" werden übernommen
   const oldPreview = JSON.parse(JSON.stringify(kitted));
   oldPreview.equipment = { weapon: kitted.equipment.weapon, armor: "glutpanzer", offhand: null, trinket: "spurenring" };
