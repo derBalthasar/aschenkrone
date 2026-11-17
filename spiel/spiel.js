@@ -804,7 +804,7 @@
     const progress = rules.progression(state);
     const xp = element("p");
     xp.className = "sheet-big";
-    xp.textContent = progress.next === null ? progress.xp + " EP · Höchststufe dieses Abschnitts"
+    xp.textContent = progress.next === null ? progress.xp + " EP · Höchste Erfahrungsstufe"
       : progress.xp + " / " + progress.next + " EP · noch " + (progress.next - progress.xp) + " bis Stufe " + (progress.level + 1);
     const ladder = element("ol");
     ladder.className = "sheet-ladder";
@@ -817,7 +817,7 @@
     const training = element("div");
     training.className = "actions sheet-training";
     if (progress.points) {
-      training.append(element("p", progress.points + (progress.points === 1 ? " Grundwertpunkt" : " Grundwertpunkte") + " aus Stufenaufstiegen zu verteilen:"));
+      training.append(element("p", progress.points + (progress.points === 1 ? " Grundwertpunkt" : " Grundwertpunkte") + " aus früheren Stufenaufstiegen zu verteilen:"));
       const values = rules.heroAttributes(state);
       for (const [id, label] of Object.entries(world.attributes)) {
         button(training, "+1 " + label, () => update(rules.train(state, id)),
@@ -826,9 +826,12 @@
     }
     const fight = state.combat ? rules.targets(state).filter(enemy => enemy.health > 0) : [];
     panel.append(
-      sheetSection("Erfahrung · Stufe " + progress.level, xp, ladder, training),
-      sheetSection("Lebenspunkte und Glut", sheetStats([
+      sheetSection("Erfahrungsstufe " + progress.level, xp, ladder, training),
+      sheetSection("Lebenspunkte, Kraft und Glut", sheetStats([
         ["Lebenspunkte", state.health + " / " + rules.healthLimit(state)],
+        ...((values) => [["Ausdauer", values.ausdauer + " / " + values.ausdauerMax],
+          ...(values.manaMax ? [["Mana", values.mana + " / " + values.manaMax]] : []),
+          [values.ressourceName, String(values.ressource)]])(rules.kampfwerte(state)),
         ["Glut", state.ember + " / " + rules.emberLimit(state)],
         ["Schutz im Kampf", String(rules.protection(state) + rules.gearBonus(state, "armor"))],
         ["Silber", String(state.silver)],
@@ -837,7 +840,7 @@
       sheetSection("Lage", sheetStats([
         ["Ort", world.scenes[state.scene].place ?? "Unterwegs"],
         ["Kampf", fight.length ? "Gegen " + fight.map(enemy => enemy.name + " (" + enemy.health + " LP)").join(", ") : "Kein Kampf"],
-        ["Gefährten", state.party.length + " / 5"],
+        ["Gefährten", state.party.length + " / " + rules.partyLimit],
         ["Quest-Stufe", String(state.questStufe)],
       ])),
     );
@@ -865,7 +868,9 @@
         ["Waffe", world.items[rules.weapon(state)] ?? "—"],
         ...statLabels.map(([key, label]) => [label, String(gear[key])]),
         ["Abwehr", String(rules.protection(state))],
+        ["Grundangriff", "+" + rules.kampfwerte(state).grundangriff + " ab Stufe 4, 8, 12, 16, 20"],
       ])),
+      sheetSection(rules.kampfwerte(state).manaMax ? "Angriffe und Zauber" : "Angriffe und Techniken", abilityListing()),
     );
   }
 
@@ -1578,6 +1583,24 @@
   }
 
   // Klasse, Ressource, Spezialisierung und Meisterklasse im Charakterbereich.
+  // Angriffe, Zauber und Techniken der Klasse (Kampfdokument, 17. 11. 2026), für Seitenleiste und Charakterfenster.
+  function abilityListing() {
+    const ressource = klassen.fraktionen[state.faction].ressource;
+    const abilityList = element("ul");
+    abilityList.className = "ability-list";
+    for (const f of rules.abilities(state)) {
+      const item = element("li");
+      const cost = f.kostenWert ? f.kostenWert + " " + f.zahlung : "kostenlos";
+      const extra = [cost, f.einmal ? "1 × pro Schlacht" : f.abklingzeitWert ? "AK " + f.abklingzeitWert : "",
+        f.ressource ? f.ressource + " " + ressource : "", f.spezialisiert ? "Spezialisierung +50 %" : ""].filter(Boolean).join(" · ");
+      item.append(element("strong", f.id[0] === "m" ? "Meister · " + f.name : "Stufe " + f.stufe + " · " + f.name),
+        element("span", " " + f.wirkung + " (" + extra + ")" + (f.frei ? "" : " · noch gesperrt")));
+      if (!f.frei) item.className = "locked";
+      abilityList.append(item);
+    }
+    return abilityList;
+  }
+
   function renderClassSheet() {
     const sheet = el("class-sheet");
     const faction = klassen.fraktionen[state.faction];
@@ -1590,19 +1613,7 @@
       element("p", "Ressource " + faction.ressource + ": " + data.ressource + ". Im Kampf verstärkt 1 " + faction.ressource +
         " eine Fähigkeit ab Stufe 3 um 25 %, die Stufe-20-Fähigkeit kostet 3."),
     ];
-    // Angriffe, Zauber und Techniken der Klasse (Kampfdokument, 17. 11. 2026).
-    const abilityList = element("ul");
-    abilityList.className = "ability-list";
-    for (const f of rules.abilities(state)) {
-      const item = element("li");
-      const cost = f.kostenWert ? f.kostenWert + " " + f.zahlung : "kostenlos";
-      const extra = [cost, f.einmal ? "1 × pro Schlacht" : f.abklingzeitWert ? "AK " + f.abklingzeitWert : "",
-        f.ressource ? f.ressource + " " + faction.ressource : "", f.spezialisiert ? "Spezialisierung +50 %" : ""].filter(Boolean).join(" · ");
-      item.append(element("strong", f.id[0] === "m" ? "Meister · " + f.name : "Stufe " + f.stufe + " · " + f.name),
-        element("span", " " + f.wirkung + " (" + extra + ")" + (f.frei ? "" : " · noch gesperrt")));
-      if (!f.frei) item.className = "locked";
-      abilityList.append(item);
-    }
+    const abilityList = abilityListing();
     lines.push(element("h4", rules.kampfwerte(state).manaMax ? "Angriffe und Zauber" : "Angriffe und Techniken"), abilityList);
     if (people === "orks") lines.push(element("p", state.rausch ? "Kampfrausch bereit · +2 Schaden beim nächsten Angriff."
       : "Nach jeder gewonnenen Schlacht trägt dich eine Runde Kampfrausch."));
