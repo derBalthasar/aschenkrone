@@ -167,20 +167,24 @@
       <div><p class="overline" id="hub-place"></p><h2 id="hub-title">Inventar</h2></div>
       <button type="button" id="hub-close" class="action">Schließen</button>
     </div>
-    <section class="hub-equipment" aria-label="Ausrüstung">
-      <div id="hub-slots" class="hub-slots"></div>
-      <p id="hub-silver" class="hub-silver"></p>
+    <section class="hub-gear" aria-labelledby="hub-gear-title">
+      <h3 id="hub-gear-title" class="hub-section-title">Ausrüstung</h3>
+      <div class="hub-gear-body">
+        <div id="hub-doll" class="hub-doll"></div>
+        <div class="hub-stats-box">
+          <dl id="hub-stats" class="hub-stats"></dl>
+          <p id="hub-compare" class="hub-compare" aria-live="polite"></p>
+          <p id="hub-silver" class="hub-silver"></p>
+        </div>
+      </div>
     </section>
     <div class="hub-tabs" role="tablist" aria-label="Aufbewahrung">
       <button type="button" role="tab" id="hub-tab-bag" aria-controls="hub-items" data-tab="bag"></button>
       <button type="button" role="tab" id="hub-tab-storage" aria-controls="hub-items" data-tab="storage"></button>
     </div>
-    <p id="hub-hint" class="hub-hint"></p>
-    <div id="hub-filters" class="hub-filters" role="group" aria-label="Nach Art filtern"></div>
-    <div class="hub-body">
-      <ul id="hub-items" class="hub-grid" role="tabpanel" aria-label="Gegenstände"></ul>
-      <section id="hub-detail" class="hub-detail" aria-live="polite"></section>
-    </div>
+    <div class="hub-bar"><progress id="hub-capacity" max="20" value="0" aria-label="Belegte Rucksackplätze"></progress><p id="hub-hint" class="hub-hint"></p></div>
+    <div id="hub-slot-filter" class="hub-slot-filter" hidden></div>
+    <div id="hub-items" class="hub-items" role="tabpanel" aria-label="Gegenstände"></div>
     <p id="hub-status" class="hub-status" role="status"></p>
   </dialog>
 </body>
