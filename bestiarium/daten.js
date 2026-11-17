@@ -1,5 +1,5 @@
 const lands = [
-  { id: "valmarch", name: "Kronreich und Eispass", subtitle: "Westliches Grenzland", level: "1–25", regions: [
+  { id: "valmarch", name: "Kronreich und Eispass", subtitle: "Menschen · Nordwesten · Kronreich und Orden der Flamme", level: "1–25", regions: [
     ["Kornwik", "Felder, Hecken, verbrannte Dörfer"],
     ["Heidvang", "Flussauen, Furten, Galgen, Schilf"],
     ["Eichenwald bei Heidvang", "Wagenwege und Bachläufe"],
@@ -19,7 +19,7 @@ const lands = [
     ["Rotfuchs, Feldhase, Rothirsch", "überall", "Scheu", "fliehen", "", "Fell, Fleisch, Geweih", "rothirsch.png", null, "", "Rothirsch"],
   ], alpha: [
     ["Die Alte vom Moor bei Eiswacht", "ein Moorschlinger, so groß wie ein Boot, unter dem ein ganzes Dorf versank.", "Revier", [110, 11, 2, 2], "saugt Leben, Gift"],
-    ["Graufang", "ein weißer Leitwolf, der sein Rudel seit Kriegsbeginn auf Schlachtfelder führt.", "Jäger", [60, 11, 2, 8], "Heulen stärkt das Rudel; stirbt er, flieht das Rudel"],
+    ["Graufang", "ein weißer Leitwolf, der sein Rudel seit dem letzten Grenzkrieg auf Schlachtfelder führt.", "Jäger", [60, 11, 2, 8], "Heulen stärkt das Rudel; stirbt er, flieht das Rudel"],
     ["Der Kronenkeiler", "ein Keiler mit einem rostigen Ritterhelm im Nacken, den niemand erlegen konnte.", "Revier", [80, 12, 6, 4], "wird bei halber Kraft wütend (Angriff +4)", "kronenkeiler.png"],
   ], flora: [
     ["Galgenwurz", "unter Galgen und auf Schlachtfeldern", "starkes Heilkraut, das nur dort wächst, wo Blut floss"],
@@ -27,15 +27,15 @@ const lands = [
     ["Krähenbeere", "Hecken", "giftig, Grundstoff für Klingengift"],
     ["Moorlicht-Moos", "Moor bei Eiswacht", "glimmt im Dunkeln, lindert Brand"],
   ] },
-  { id: "eryndor", name: "Eryndor", subtitle: "Gebiet der Erinnernden", level: "—", regions: [
-    ["Täler um Eryndor", "Nebeltäler und Gruften der Erinnernden"],
+  { id: "eryndor", name: "Eryndor", subtitle: "Untote · Hoher Norden · Gebiet der Erinnernden", level: "—", regions: [
+    ["Täler um Eryndor", "Nebeltäler, Gruften der Erinnernden und Dörfer der Blutholden"],
   ], fauna: [
     ["Grufthäuter", "Täler um Eryndor", "Jäger (nachts)", "Fledermäuse, so groß wie Hunde, Blutsog", "Licht, Feuer", "Hautflügel"],
   ], alpha: [], flora: [
     ["Blutdorn", "Täler um Eryndor", "von den Erinnernden gezüchtet, stärkt kurz, macht süchtig"],
   ] },
-  { id: "skarnheim", name: "Ordensland", subtitle: "Gebirge und Küste im Norden", level: "50–100", regions: [
-    ["Die Frostklippen", "Klippensteige am Glutberg und eisige Steilküsten im Norden"],
+  { id: "skarnheim", name: "Ordensland", subtitle: "Menschen · Orden der Flamme · Gebirge und Nordküste", level: "50–100", regions: [
+    ["Die Frostklippen", "Klippensteige am Glutberg und eisige Steilküsten an der Nordwacht"],
     ["Die Runenpässe", "Bergpässe und Wegzeichen in den Bergen des Ordens"],
     ["Die Tiefen", "Stollen und Glut-Adern unter den Bergen"],
     ["Das Weiße Schweigen", "Hochplateau unter Schnee und Eis"],
@@ -60,36 +60,34 @@ const lands = [
     ["Glutpilz", "Tiefen", "gibt Glut zurück, verbrennt aber leicht"],
     ["Grauweide", "Aschefelder", "stirbt nicht in der Asche, Zutat für Aschenschutz"],
   ] },
-  { id: "sulkhar", name: "Sulkhar", subtitle: "Süden", level: "30–70", regions: [
-    ["Die Rotsteppe", "Grasland der Ork-Stämme"],
-    ["Das Glasödland", "Wüste aus geschmolzenem Sand"],
-    ["Die Kettenminen", "Glut-Minen des Konklaves"],
-    ["Der Schattensumpf", "Sumpf unter der Dunkelelfen-Zitadelle"],
-    ["Die Knochenschlucht", "Canyon mit Götterknochen"],
+  { id: "sulkhar", name: "Ghor-Mahr und die Ork-Lande", subtitle: "Orks · Südwesten", level: "30–70", regions: [
+    ["Die Weiten", "Grasland und Weidegründe der Grünen Banner"],
+    ["Die Glasebene", "Ebene aus geschmolzenem Sand am Rand der Lavafelder, Land der Staubreiter"],
+    ["Die Schlackenschmieden", "Werkstätten an den Glutspalten von Ghor-Mahr, Gebiet des Aschenclans"],
+    ["Die Knochenschlucht", "Canyon mit riesigen alten Knochen, die die Orks Götterknochen nennen"],
+    ["Die Knocheninseln", "Inseln vor der Südwestküste, Versteck der Staubreiter für Beute und Gefangene"],
   ], fauna: [
-    ["Steppenhyänen", "Rotsteppe", "Jäger (Rudel)", "fressen Verwundete zuerst (greifen die schwächste Figur an)", "Feuer, Lärm", "Hyänenfell"],
-    ["Hornläufer", "Rotsteppe", "Scheu (Herde)", "riesige Laufvögel, die Orks reiten", "", "Federn, Fleisch"],
-    ["Glasskorpion", "Glasödland", "Revier", "durchsichtiger Panzer, Gift, Stachel ignoriert Rüstung", "Stumpfe Waffen", "Skorpionstachel"],
-    ["Sandschlund", "Glasödland", "Revier", "lauert im Sand, verschlingt eine Figur", "Fernkampf, Lärm", "Schlundzahn"],
-    ["Schlackenhund", "Kettenminen", "Jäger", "von Sklaventreibern gezüchtet, Glut im Blut, Brand", "Wasser", "Schlackenpelz"],
-    ["Glutmotte", "Kettenminen", "Scheu (Schwarm)", "Staub macht verwirrt", "Wind, Feuer", "Mottenstaub"],
-    ["Schattenschlange", "Schattensumpf", "Jäger", "unsichtbar, Gift, Hinterhalt", "Licht", "Schlangengift"],
+    ["Steppenhyänen", "Weiten", "Jäger (Rudel)", "fressen Verwundete zuerst (greifen die schwächste Figur an)", "Feuer, Lärm", "Hyänenfell"],
+    ["Hornläufer", "Weiten", "Scheu (Herde)", "riesige Laufvögel, die neben den Hornbüffeln der Grünen Banner weiden", "", "Federn, Fleisch"],
+    ["Glasskorpion", "Glasebene", "Revier", "durchsichtiger Panzer, Gift, Stachel ignoriert Rüstung", "Stumpfe Waffen", "Skorpionstachel"],
+    ["Sandschlund", "Glasebene", "Revier", "lauert im Sand, verschlingt eine Figur", "Fernkampf, Lärm", "Schlundzahn"],
+    ["Schlackenhund", "Schlackenschmieden", "Jäger", "von den Schmieden des Aschenclans gezüchtet, Glut im Blut, Brand", "Wasser", "Schlackenpelz"],
+    ["Glutmotte", "Schlackenschmieden", "Scheu (Schwarm)", "Staub macht verwirrt", "Wind, Feuer", "Mottenstaub"],
     ["Knochengeier", "Knochenschlucht", "Jäger", "fressen Götterknochen, ihr Schrei lähmt", "Bögen", "Geierschädel"],
   ], alpha: [
-    ["Kharrak, der Sandfürst", "ein Sandschlund, den die Orks als Gott verehren."],
-    ["Die Bleiche Königin", "eine Schattenschlange, die nur in Vollmondnächten sichtbar wird."],
+    ["Kharrak, der Sandfürst", "ein Sandschlund, den die Staubreiter als Gott verehren."],
     ["Der Götterfresser", "ein Knochengeier, so groß wie ein Haus, der einen ganzen Götterknochen bewacht."],
   ], flora: [
-    ["Feuerdorn", "Rotsteppe", "Orks kauen ihn vor dem Kampf, mehr Zorn"],
-    ["Glasblume", "Glasödland", "wächst aus geschmolzenem Sand, verstärkt Glutzauber"],
-    ["Sklavenkraut", "Kettenminen", "betäubt Schmerz, die Aufseher verteilen es"],
-    ["Schattenlotus", "Schattensumpf", "Grundstoff für Dunkelelfengifte"],
+    ["Feuerdorn", "Weiten", "Orks kauen ihn vor dem Kampf, mehr Zorn"],
+    ["Glasblume", "Glasebene", "wächst aus geschmolzenem Sand, verstärkt Glutzauber"],
+    ["Sklavenkraut", "Knocheninseln", "betäubt Schmerz, die Staubreiter geben es ihren Gefangenen"],
   ] },
-  { id: "ylvenhain", name: "Ylvenhain", subtitle: "Westen", level: "15–50", regions: [
-    ["Der Saum", "Waldrand mit Rodungen der Menschen"],
-    ["Das Herzholz", "uralter Kernwald"],
-    ["Die Weißen Höhen", "Hochebene der Turmstädte"],
+  { id: "ylvenhain", name: "Land des Weltenbaums", subtitle: "Elfen · Osten", level: "15–50", regions: [
+    ["Der Saum", "Waldrand am Inneren Meer beim Laubmarkt, wo fremde Händler und Holzfäller anlanden"],
+    ["Das Herzholz", "uralter Kernwald um den Weltenbaum, Gebiet der Hüter"],
+    ["Die Weißen Höhen", "Hochland unter den Gipfeln von Hochdorn, Gebiet der Dornenklingen"],
     ["Die Versunkenen Tempel", "überflutete Ruinen im Wald"],
+    ["Die Nebelmarschen", "Sümpfe und Dschungel der Schattenblüte im Süden"],
   ], fauna: [
     ["Rindenhirsch", "Herzholz", "Scheu", "wer ihn tötet, verliert Ruf bei den Elfen", "", "Rindengeweih"],
     ["Dornwölfe", "Saum", "Jäger (Rudel)", "Ranken statt Fell, greifen Holzfäller an", "Feuer", "Dornfell"],
@@ -98,35 +96,38 @@ const lands = [
     ["Spiegelluchs", "Weiße Höhen", "Jäger", "erzeugt Trugbilder, schwer zu treffen", "Wissen-Probe enttarnt", "Luchsauge"],
     ["Tempelaale", "Versunkene Tempel", "Revier", "elektrische Schläge, betäuben", "Fernkampf", "Aalhaut"],
     ["Schlickwächter", "Versunkene Tempel", "Revier", "Krabbenwesen in Tempelrüstung", "Stumpfe Waffen", "Wächterpanzer"],
+    ["Schattenschlange", "Nebelmarschen", "Jäger", "unsichtbar, Gift, Hinterhalt", "Licht", "Schlangengift"],
   ], alpha: [
-    ["Der Weiße Hirsch", "wer ihn sieht, darf den Wald ungestraft durchqueren. Wer ihn tötet, hat die Ewigen Haine für immer zum Feind."],
+    ["Der Weiße Hirsch", "wer ihn sieht, darf den Wald ungestraft durchqueren. Wer ihn tötet, hat die Hüter des Weltenbaums für immer zum Feind."],
     ["Altholz", "der älteste Moosriese, der sich nur bewegt, wenn eine Axt in seine Nähe kommt."],
+    ["Die Bleiche Königin", "eine Schattenschlange, die nur in Vollmondnächten sichtbar wird."],
   ], flora: [
     ["Elfenblatt", "Herzholz", "starkes Heilkraut, die Elfen verkaufen es nicht"],
     ["Silberfarn", "Weiße Höhen", "stärkt Verstand und Zauberkraft"],
     ["Tränenmoos", "Versunkene Tempel", "Gegengift gegen jedes Gift"],
     ["Würgranke", "Saum", "fesselt, wer sie berührt, Fallen für Holzfäller"],
+    ["Schattenlotus", "Nebelmarschen", "Grundstoff für die Gifte der Schattenblüte"],
   ] },
-  { id: "splitterinseln", name: "Die Splitterinseln", subtitle: "Osten", level: "15–50", regions: [
-    ["Die Freihäfen", "Hafenstädte, Kais, Lagerhäuser"],
-    ["Die Riffe", "Korallenriffe, Wracks, seichte Lagunen"],
-    ["Die Glutinseln", "Vulkane, Schwefelquellen"],
-    ["Die Offene See", "Seereisen zwischen den Inseln"],
+  { id: "splitterinseln", name: "Meere und Inseln", subtitle: "Inneres Meer · Freie Häfen, Zollinseln und Funkeninsel", level: "15–50", regions: [
+    ["Die Freien Häfen", "Hafenstädte, Kais und Lagerhäuser an der Ostküste der Menschen"],
+    ["Die Riffe", "Korallenriffe, Wracks und seichte Lagunen um die Zollinseln"],
+    ["Die Funkeninsel", "schwarz verbrannte Felsen und Schwefelquellen vor der Ostküste der Zwerge"],
+    ["Die Offene See", "Seewege über das Innere Meer und zwischen den Inseln"],
   ], fauna: [
-    ["Hafenratten", "Freihäfen", "Jäger (Schwarm)", "Seuche (Gift, das nicht von allein heilt)", "Feuer", "Rattenschwänze"],
+    ["Hafenratten", "Freie Häfen", "Jäger (Schwarm)", "Seuche (Gift, das nicht von allein heilt)", "Feuer", "Rattenschwänze"],
     ["Riffhaie", "Riffe", "Jäger", "wittern Blut, stärker gegen blutende Ziele", "Kein Wasser", "Haizähne"],
     ["Wrackkrabben", "Riffe", "Revier", "hohe Rüstung, Zangengriff", "Stumpfe Waffen", "Krabbenpanzer"],
-    ["Schwefelsalamander", "Glutinseln", "Revier", "Feuer, immun gegen Brand", "Kälte, Wasser", "Salamanderhaut"],
-    ["Aschemöwen", "Glutinseln", "Scheu (Schwarm)", "stehlen Gegenstände", "", "Möwenfedern"],
+    ["Schwefelsalamander", "Funkeninsel", "Revier", "Feuer, immun gegen Brand", "Kälte, Wasser", "Salamanderhaut"],
+    ["Aschemöwen", "Funkeninsel", "Scheu (Schwarm)", "stehlen Gegenstände", "", "Möwenfedern"],
     ["Tiefenkrake", "Offene See", "Jäger", "greift Schiffe an, packt Besatzung", "Feuer, Harpunen", "Krakenauge"],
     ["Sturmrochen", "Offene See", "Revier", "Blitz, betäubt mehrere", "Fernkampf", "Rochenhaut"],
   ], alpha: [
-    ["Mutter Tiefe", "der größte Tiefenkrake, dem die Splitterliga jedes Jahr ein Schiff opfert."],
+    ["Mutter Tiefe", "der größte Tiefenkrake. Die Seeleute der Freien Häfen halten ihn für einen Boten der Wellenmutter und opfern ihm jedes Jahr ein Schiff."],
     ["Der Kapitän", "eine Wrackkrabbe, die einen Admiralshut trägt und ein ganzes Wrack verteidigt."],
   ], flora: [
     ["Salzkraut", "Riffe", "Grundstoff für Heiltränke auf See"],
-    ["Schwefelblüte", "Glutinseln", "Sprengstoff, Zutat für Glutbomben"],
-    ["Seemannstabak", "Freihäfen", "Händlerware, hebt Moral der Gruppe"],
+    ["Schwefelblüte", "Funkeninsel", "Sprengstoff, Zutat für Glutbomben und das Donnerpulver der Runenschmiede"],
+    ["Seemannstabak", "Freie Häfen", "Händlerware, hebt Moral der Gruppe"],
     ["Perlalge", "Lagunen", "sehr wertvoll, für Verzauberungen"],
   ] },
 ];

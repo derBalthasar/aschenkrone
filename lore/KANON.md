@@ -2,6 +2,8 @@
 
 ## Quellenstand
 
+Die Welt heißt **Odris** (Festlegung von Henry, 17. 11. 2026). Das Bestiarium heißt deshalb „Bestiarium von Odris“.
+
 Das Weltbuch im Spiel verarbeitet das Weltbuch 2.0, die fünf Völkerdokumente und die sechs Karten und Bildtafeln vom Desktop. Die Fraktionsbeschreibungen und Stadtverzeichnisse stehen in `voelker.js`. Sie folgen den Völkerdokumenten. Die Karte `weltkarte-verbindlich-mit-orten.png` liefert die räumliche Übersicht. Ihr sichtbarer Titel „Entwurf 3“ stammt aus der Vorlage mit eingezeichneten Orten. Die frühere Gebietsübersicht ohne Städtebeschriftung liegt unter den Bildtafeln.
 
 - Die Untoten-Tafeln datieren die Nacht des Ersten Blutes unter anderem auf 500, 1800 oder etwa 2000 v. E. Die Völkertexte führen sie um 4400 v. E., Aldrics Ritual um 2500 v. E. und das erste Fleischritual um 900 v. E. Diese Daten gelten für die Spielchronik.
@@ -25,7 +27,28 @@ Das Weltbuch führt fünf Startwerte für eine künftige Kampagne um 612 n. E. a
 
 - Kornwik und Heidvang liegen im Kronreich. Eiswacht, Eispass und Glutberg gehören zum Gebiet des Ordens der Flamme. Der Eichenwald, der Bohlenweg und die Nebenwege am Pass sind Schauplätze der regionalen Reisekarte. Das untere Runentor am Glutberg ist eine Signalstation. Die Ewige Flamme brennt weiterhin.
 - Die Glut der Spielfigur ist eine besondere Gabe für alle Herkünfte und Klassen. Sie wirkt über das Gleichgewicht zwischen Erneuerung und Zerstörung. Die Flammenmagie des Ordens stützt sich auf Glauben und Runen. Die genaue Herkunft der Gabe bleibt in der Handlung offen.
-- Die Grenzwache von Eiswacht und die Bergwacht von Glutberg haben jeweils eigenen Ruf. Die bisherigen Rufwerte für den Orden und die Vampirhäuser werden als Orden der Flamme und Die Erinnernden angezeigt. Ewige Haine, Knochenlegion, Konklave und Splitterliga brauchen noch eine Zuordnung, falls sie in die neue Kontinent-Lore eingebunden werden.
+- Die Grenzwache von Eiswacht und die Bergwacht von Glutberg haben jeweils eigenen Ruf. Die übrigen sechs Rufwerte zeigen Fraktionen aus den Völkerdokumenten. Die internen Schlüssel bleiben gleich, damit alte Spielstände gültig bleiben:
+
+| Schlüssel | Früherer Name | Angezeigte Fraktion | Begründung |
+| --- | --- | --- | --- |
+| `groves` | Ewige Haine | Kronreich | Saat bei Kornwik und Holzrechte bei Heidvang betreffen Kornkammer und Grundherren des Kronreichs. |
+| `houses` | Vampirhäuser | Die Erinnernden | Kennwort der Erinnernden aus Eryndor. |
+| `order` | Orden | Orden der Flamme | Runentor und Flammenrunen am Glutberg. |
+| `conclave` | Konklave | Hüter des Weltenbaums | bisher ohne Rufereignis |
+| `legion` | Knochenlegion | Hof der Bleichen Krone | bisher ohne Rufereignis |
+| `league` | Splitterliga | Freie Häfen | bisher ohne Rufereignis |
+
+## Bestiarium und Völker
+
+Die Gebiete im Bestiarium folgen seit dem 17. 11. 2026 den Kontinenten der verbindlichen Karte. Namen und Spielwerte der Kreaturen sind unverändert.
+
+- **Kronreich und Eispass** sowie **Ordensland** liegen auf dem Kontinent der Menschen.
+- **Eryndor** gehört zum Kontinent der Untoten.
+- **Ghor-Mahr und die Ork-Lande** ersetzt Sulkhar. Rotsteppe, Glasödland und Kettenminen heißen jetzt Weiten, Glasebene und Schlackenschmieden. Die Knocheninseln kommen als Gebiet hinzu. Das Konklave und die Dunkelelfen entfallen.
+- **Land des Weltenbaums** ersetzt Ylvenhain und liegt im Osten. Die Schattenschlange, die Bleiche Königin und der Schattenlotus sind aus dem früheren Schattensumpf in die Nebelmarschen der Schattenblüte umgezogen.
+- **Meere und Inseln** ersetzt die Splitterinseln. Die Freien Häfen, die Riffe um die Zollinseln und die Funkeninsel der Runenschmiede bilden dieses Gebiet. Die Splitterliga entfällt.
+- Für die Zwerge gibt es noch kein eigenes Bestiarium-Gebiet.
+- Die Reisekarte ist nach der Weltkarte ausgerichtet. Heidvang liegt westlich von Kornwik, Eiswacht nördlich davon und Glutberg im Nordosten.
 
 ## Quelltexte im Weltbuch
 
