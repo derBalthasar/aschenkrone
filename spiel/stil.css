@@ -418,3 +418,10 @@ button.map-marker { min-height: 2rem; color: #fff0d6; border-color: #e1b677; }
   .battle-portrait { width: 2.5rem; }
   .ally-card .ability-badge, .ally-card .fighter-stats, .ally-card .fighter-details, .ally-card .fighter-vitals { grid-column: 1 / -1; }
 }
+
+.ally-picker { display: grid; gap: .3rem; font-size: .85rem; }
+.ally-picker select { width: 100%; min-width: 0; }
+#hub-ally-picker { margin: .8rem; color: #eddbb9; }
+.ally-status { margin: .2rem 0; color: #eeb098; font-size: .78rem; grid-column: 1 / -1; }
+.ally-card.is-fallen { border-color: #9b655b; }
+.ally-card.is-fallen .battle-portrait { filter: grayscale(1); opacity: .6; }
