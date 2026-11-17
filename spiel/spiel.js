@@ -21,6 +21,7 @@
   let target = null;
   let enemyTarget = null;
   let animating = false;
+  let lastBattleMessages = [];
   const battleStepMs = 248;
   let editingLegacy = false;
   const pointControls = new Map();
@@ -258,6 +259,7 @@
       }
     });
     parent.append(control);
+    return control;
   }
 
   function creatureImage(foe) {
@@ -409,17 +411,28 @@
         item.append(quality);
       }
       if (equipped) item.append(element("small", " Ausgerüstet"));
+      const holders = state.party.filter(member => Object.values(rules.memberEquipment(state, member)).includes(id));
+      if (holders.length) item.append(element("small", " · Bei " + holders.map(member => world.companions[member].name).join(", ")));
+      if (gear?.slot) item.append(element("small", " · Frei: " + (count - rules.assigned(state, id))));
       const details = itemDetails(id).filter(text => !text.startsWith("Wert") && !text.startsWith("Für eine"));
       if (details.length) item.append(element("div", details.join(" · ")));
       if (gear?.slot) button(item, equipped ? "Ablegen" : "Ausrüsten", () => {
         const slot = rules.equipmentSlots.find(entry => equipment[entry] === id);
         update(rules.equip(state, id, slot ?? null));
-      }, { disabled: Boolean(state.combat) || !state.health });
+      }, { disabled: Boolean(state.combat) || !state.health || (!equipped && rules.assigned(state, id) >= count) });
       if (supply) button(item, "Verwenden", () => state.combat ? battleAction("herb", id) : update(rules.use(state, id)),
         { disabled: !rules.canUse(state, id) });
       inventory.append(item);
     }
     if (!counts.size) inventory.append(element("li", "Leer"));
+    for (const [id, recipe] of Object.entries(world.recipes)) {
+      const row = element("li");
+      row.append(element("strong", "Herstellen: " + world.items[id]), element("p", recipe.text));
+      const enough = Object.entries(recipe.ingredients).every(([item, count]) => state.inventory.filter(entry => entry === item).length >= count);
+      button(row, "Herstellen · " + Object.entries(recipe.ingredients).map(([item, count]) => count + " × " + world.items[item]).join(", "),
+        () => update(rules.craft(state, id)), { disabled: Boolean(state.combat) || !state.health || !enough || state.inventory.length >= 200 });
+      inventory.append(row);
+    }
     if (el("inventory-hub").open) renderHub();
   }
 
@@ -754,8 +767,106 @@
     return effects.join(" · ");
   }
 
+  function equipmentText(member) {
+    const kit = rules.memberEquipment(state, member);
+    return "Waffe: " + (world.items[kit.weapon] ?? "Eigener Kampfstil") +
+      " · Rüstung: " + (world.items[kit.armor] ?? "Keine") +
+      " · Angriff +" + (world.gear[kit.weapon]?.power ?? 0) +
+      " · Gruppenschutz +" + (world.gear[kit.armor]?.armor ?? 0);
+  }
+
+  const openEquipment = new Set();
+
+  function renderMemberEquipment(row, member) {
+    row.append(element("p", equipmentText(member)));
+    const details = element("details");
+    details.className = "member-equipment";
+    details.open = openEquipment.has(member);
+    details.addEventListener("toggle", () => {
+      if (!details.isConnected) return;
+      if (details.open) openEquipment.add(member);
+      else openEquipment.delete(member);
+    });
+    details.append(element("summary", "Ausrüstung ändern"));
+    const kit = rules.memberEquipment(state, member);
+    for (const [slot, title] of [["weapon", "Waffe"], ["armor", "Rüstung"]]) {
+      const label = element("label", title);
+      const select = element("select");
+      select.setAttribute("aria-label", world.companions[member].name + " · " + title);
+      select.append(new Option(slot === "weapon" ? "Eigener Kampfstil" : "Keine Rüstung", ""));
+      for (const id of new Set(state.inventory)) {
+        if (world.gear[id]?.slot !== slot) continue;
+        const free = state.inventory.filter(item => item === id).length - rules.assigned(state, id);
+        const option = new Option(world.items[id] + (free === 0 && kit[slot] !== id ? " · Vergeben" : ""), id);
+        option.disabled = free === 0 && kit[slot] !== id;
+        select.append(option);
+      }
+      select.value = kit[slot] ?? "";
+      select.disabled = Boolean(state.combat) || !state.health;
+      select.addEventListener("change", () => {
+        const id = select.value || kit[slot];
+        if (id && select.value !== (kit[slot] ?? "")) {
+          openEquipment.add(member);
+          update(rules.equip(state, id, member));
+          const label = world.companions[member].name + " · " + title;
+          [...el("party-members").querySelectorAll("select")].find(control => control.getAttribute("aria-label") === label)?.focus();
+        }
+      });
+      label.append(select);
+      details.append(label);
+    }
+    if (state.combat) details.append(element("p", "Umrüsten ist nach dem Kampf möglich."));
+    row.append(details);
+  }
+
+  let questFilter = "active";
+  function renderQuestLog() {
+    const entries = rules.questEntries(state);
+    const counts = Object.fromEntries(["active", "done", "failed"].map(status =>
+      [status, entries.filter(entry => entry.status === status).length]));
+    el("questlog-summary").textContent = "Questlog · " + counts.active + " offen";
+    el("quest-clock").textContent = "Spielzug " + (state.questClock ?? 0);
+    const filters = el("quest-filters");
+    filters.replaceChildren();
+    for (const [id, title] of [["active", "Offen"], ["done", "Erfüllt"], ["failed", "Gescheitert"], ["all", "Alle"]]) {
+      const control = button(filters, title + " (" + (id === "all" ? entries.length : counts[id]) + ")", () => {
+        questFilter = id;
+        renderQuestLog();
+        [...el("quest-filters").children].find(entry => entry.dataset.filter === id)?.focus();
+      });
+      control.dataset.filter = id;
+      control.setAttribute("aria-pressed", questFilter === id);
+    }
+    const list = el("companion-quests");
+    list.replaceChildren();
+    for (const quest of entries.filter(entry => questFilter === "all" || entry.status === questFilter)) {
+      const row = element("li");
+      row.className = "quest-card";
+      row.dataset.status = quest.status;
+      row.append(element("small", quest.type + " · " + quest.giver), element("strong", quest.title), element("p", quest.text));
+      const label = { active: "Offen", done: "Erfüllt", failed: "Gescheitert" }[quest.status];
+      const status = element("p", label + (quest.status === "active" ? " · Noch " + quest.remaining + (quest.remaining === 1 ? " Spielzug" : " Spielzüge") : ""));
+      status.className = "quest-status";
+      if (quest.status === "active" && quest.remaining <= 5) status.classList.add("quest-urgent");
+      row.append(status);
+      if (quest.status === "active") {
+        const timer = element("progress");
+        timer.max = quest.deadline - quest.started;
+        timer.value = quest.remaining;
+        timer.setAttribute("aria-label", "Verbleibende Spielzüge für " + quest.title);
+        row.append(timer);
+        if (quest.companion && rules.questReady(state, quest.companion)) row.append(element("p", "Ziel erreicht · Vor Fristablauf am Treffpunkt abgeben."));
+      }
+      if (quest.companion) row.append(element("small", "Abgabe: " + world.companions[quest.companion].place + " oder Wachhof von Eiswacht"));
+      if (quest.reason) row.append(element("p", quest.reason));
+      if (quest.salary) row.append(element("p", quest.debt ? "Offener Sold: " + quest.debt + " Silber." : "Sold inzwischen bezahlt."));
+      list.append(row);
+    }
+    if (!list.children.length) list.append(element("li", "Keine Aufträge in dieser Ansicht."));
+  }
+
   function renderParty() {
-    el("party-count").textContent = "Gefährten · " + state.party.length + " / 5";
+    el("party-count").textContent = "Gefährten · " + state.party.length + " / " + rules.partyLimit;
     const members = el("party-members");
     members.replaceChildren();
     for (const id of state.party) {
@@ -763,11 +874,15 @@
       const row = element("li");
       row.append(element("strong", companion.name + " · " + klassen.grundklassen[companion.klasse].name));
       row.append(element("div", companion.ability + " · " + companionEffect(companion) + " · Einmal pro Kampf"));
+      renderMemberEquipment(row, id);
+      const debt = state.companionQuests?.[id]?.debt ?? 0;
+      if (debt) button(row, "Offenen Sold bezahlen · " + debt + " Silber", () => update(rules.paySalary(state, id)),
+        { disabled: Boolean(state.combat) || !state.health || state.silver < debt });
       const relation = rules.relationship(state, id);
       const oath = { none: "", promised: "Versprechen offen", fulfilled: "Versprechen gehalten", broken: "Versprechen gebrochen" };
       const bond = { none: "", romance: "Romanze", friendship: "Enge Freundschaft" };
-      row.append(element("p", ["Persönlicher Ruf " + relation.score + " %", oath[relation.oath], bond[relation.bond]].filter(Boolean).join(" · ")));
-      if (relation.oath === "promised") row.append(element("p", world.loyalties[id].request + "."));
+      row.append(element("p", ["Sympathie " + relation.score, oath[relation.oath], bond[relation.bond]].filter(Boolean).join(" · ")));
+      if (relation.oath === "promised") row.append(element("p", world.recruitmentQuests[id].text));
       const labels = { talk: "Am Rastplatz sprechen", gift: "Geschenk annehmen", romance: "Über Gefühle sprechen", friendship: "Freundschaft vertiefen" };
       for (const action of rules.bondActions(state, id)) {
         button(row, labels[action], () => update(rules.bondWith(state, id, action)));
@@ -778,6 +893,7 @@
       members.append(row);
     }
     if (!state.party.length) members.append(element("li", "Du reist allein."));
+    renderQuestLog();
     const leads = Object.entries(world.companions).filter(([id, companion]) => companion.klasse !== state.role && !state.party.includes(id))
       .map(([id, companion]) => companion.name + " · " + klassen.grundklassen[companion.klasse].name + " · " +
         (rules.relationship(state, id).left ? "Hat die Gruppe verlassen" : companion.place));
@@ -789,17 +905,66 @@
     }), "Keine Fraktionen bekannt.");
   }
 
-  function fighterCard(name, detail) {
-    const card = element("div");
-    card.className = "fighter-card";
-    card.append(element("strong", name), element("small", detail));
+  const companionPortraits = {
+    knight: ["mann-01", 2], mage: ["frau-01", 0], priest: ["frau-01", 2],
+    ranger: ["frau-01", 1], thief: ["mann-01", 0], necromancer: ["mann-01", 3],
+    paladin: ["frau-01", 3], druid: ["mann-01", 1], warrior: ["frau-01", 1],
+  };
+
+  function fighterCard(name, detail, member = null) {
+    const card = element("article");
+    card.className = "fighter-card ally-card";
+    const portrait = element("div");
+    portrait.className = "battle-portrait";
+    portrait.setAttribute("aria-hidden", "true");
+    if (member === null) {
+      setPortrait(portrait, state);
+      portrait.removeAttribute("aria-label");
+    } else {
+      const [id, variant] = companionPortraits[member];
+      const art = portraits.get(id, variant);
+      portrait.style.backgroundImage = 'url("profilbilder/bilder/' + art.file + '")';
+      portrait.style.backgroundPosition = art.position;
+    }
+    const identity = element("div");
+    identity.className = "fighter-identity";
+    identity.append(element("strong", name), element("small", detail));
+    const initial = element("span", name.charAt(0));
+    initial.className = "portrait-initial";
+    portrait.append(initial);
+    card.append(portrait, identity);
     return card;
+  }
+
+  function battleMessage(event, previous) {
+    const name = event.actor === "hero" ? previous.name : world.companions[event.actor]?.name;
+    if (event.kind === "retaliate") return "Gegenangriff · " + (event.value ? "−" + event.value + " LP" : "Abgewehrt");
+    if (event.kind === "heal") return name + " heilt " + previous.name + ": +" + event.value + " LP";
+    if (event.kind === "cover") return name + " sichert die Gruppe.";
+    const target = rules.targets(previous).find(enemy => enemy.id === event.target)?.name ?? "Gegner";
+    return name + " trifft " + target + ": −" + event.value + " LP";
   }
 
   function renderBattle(content) {
     const battlefield = element("section");
     battlefield.className = "battlefield";
+    battlefield.setAttribute("aria-label", "Kampfübersicht");
     battlefield.style.setProperty("--battle-step", battleStepMs + "ms");
+    const header = element("div");
+    header.className = "battle-header";
+    header.append(element("strong", "Runde " + (state.combat.round + 1)), element("span", "Dein Zug"));
+    const sequence = element("ol");
+    sequence.className = "battle-sequence";
+    sequence.setAttribute("aria-label", "Aktionsfolge einer Runde");
+    for (const [id, name] of [["hero", state.name], ...state.party.map(id => [id, world.companions[id].name]), ["enemies", "Gegner"]]) {
+      const chip = element("li", name);
+      chip.dataset.turnActor = id;
+      if (id === "hero") { chip.className = "is-current"; chip.setAttribute("aria-current", "step"); }
+      sequence.append(chip);
+    }
+    const group = element("section");
+    group.className = "battle-side battle-allies";
+    group.append(element("h3", "Deine Gruppe"));
     const formation = element("div");
     formation.className = "battle-formation";
     const hero = fighterCard(state.name, rules.title(state));
@@ -808,22 +973,45 @@
     heroMeter.max = rules.healthLimit(state);
     heroMeter.value = state.health;
     heroMeter.setAttribute("aria-label", "Deine Lebenspunkte");
-    hero.append(heroMeter);
+    const health = element("div");
+    health.className = "fighter-vitals";
+    health.append(element("small", state.health + " / " + rules.healthLimit(state) + " LP"), heroMeter);
+    hero.append(health);
     formation.append(hero);
     for (const id of state.party) {
       const companion = world.companions[id];
-      const card = fighterCard(companion.name, klassen.grundklassen[companion.klasse].name);
+      const card = fighterCard(companion.name, klassen.grundklassen[companion.klasse].name, id);
       card.dataset.actor = id;
+      const used = (state.combat.supportUsed ?? []).includes(id);
+      const badge = element("span", used ? "✓ Verbraucht" : "✦ Bereit");
+      badge.className = "ability-badge" + (used ? " is-used" : "");
+      badge.title = companion.ability;
+      badge.setAttribute("aria-label", companion.ability + (used ? " · Verbraucht" : " · Bereit"));
+      card.append(badge);
+      const gear = rules.memberEquipment(state, id);
+      const held = world.gear[gear.weapon];
+      const damage = 3 + Math.floor((companion.damage ?? 0) / 4) + (held?.power ?? 0) +
+        (state.combat.id === "felsgreif" ? held?.airborne ?? 0 : 0);
+      const stats = element("small", "Angriff " + damage + " · Schutz " + (world.gear[gear.armor]?.armor ?? 0));
+      stats.className = "fighter-stats";
+      card.append(stats);
+      const details = element("details");
+      details.className = "fighter-details";
+      details.append(element("summary", "Details"), element("p", companion.ability + " · " + companionEffect(companion)),
+        element("p", equipmentText(id)), element("p", "Greift nach deinem Zug automatisch an. Spezialfähigkeit einmal pro Kampf."));
+      card.append(details);
       formation.append(card);
     }
+    group.append(formation);
+    const opponents = element("section");
+    opponents.className = "battle-side";
+    opponents.append(element("h3", "Gegner · Ziel wählen"));
     const enemies = element("div");
     enemies.className = "battle-enemies";
     enemies.setAttribute("role", "group");
     enemies.setAttribute("aria-label", "Angriffsziel");
     const targets = rules.targets(state);
-    if (!targets.some(enemy => enemy.id === enemyTarget && enemy.health > 0)) {
-      enemyTarget = targets.find(enemy => enemy.health > 0)?.id;
-    }
+    if (!targets.some(enemy => enemy.id === enemyTarget && enemy.health > 0)) enemyTarget = targets.find(enemy => enemy.health > 0)?.id;
     for (const enemy of targets) {
       const card = element("button");
       card.type = "button";
@@ -841,23 +1029,31 @@
       const meter = element("progress");
       meter.max = enemy.max;
       meter.value = enemy.health;
-      meter.setAttribute("aria-label", "Lebenspunkte");
-      card.append(element("strong", enemy.name), meter, element("small",
-        enemy.health ? enemy.health + " / " + enemy.max + " LP" : "Besiegt"));
+      meter.setAttribute("aria-label", enemy.name + " · Lebenspunkte");
+      card.append(element("strong", enemy.name), meter, element("small", enemy.health ? enemy.health + " / " + enemy.max + " LP" : "Besiegt"));
       card.addEventListener("click", () => {
         if (animating) return;
         enemyTarget = enemy.id;
-        for (const entry of enemies.children) {
-          entry.setAttribute("aria-pressed", Number(entry.dataset.enemy) === enemyTarget);
-        }
+        for (const entry of enemies.children) entry.setAttribute("aria-pressed", Number(entry.dataset.enemy) === enemyTarget);
         summary.textContent = "Ziel: " + enemy.name;
       });
       enemies.append(card);
     }
+    opponents.append(enemies);
     const summary = element("p", "Ziel: " + targets.find(enemy => enemy.id === enemyTarget)?.name);
     summary.className = "battle-target";
     summary.setAttribute("aria-live", "polite");
-    battlefield.append(formation, enemies, summary);
+    const announcement = element("p", lastBattleMessages.at(-1) ?? "Wähle ein Ziel und deine Aktion. Danach handeln deine Begleiter.");
+    announcement.className = "battle-announcement";
+    announcement.setAttribute("role", "status");
+    const log = element("details");
+    log.className = "battle-round-log";
+    log.append(element("summary", "Letzte Runde · " + lastBattleMessages.length + " Aktionen"));
+    const messages = element("ol");
+    for (const message of lastBattleMessages) messages.append(element("li", message));
+    log.append(messages);
+    log.hidden = !lastBattleMessages.length;
+    battlefield.append(header, sequence, group, opponents, summary, announcement, log);
     content.append(battlefield);
   }
 
@@ -867,6 +1063,7 @@
     const events = [];
     const next = rules.strike(previous, action, Math.random, item, enemyTarget, events);
     if (next === previous) return;
+    lastBattleMessages = events.map(event => battleMessage(event, previous));
     if (!events.length || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       update(next);
       return;
@@ -884,6 +1081,15 @@
         const actor = panel.querySelector(retaliates ? '[data-enemy="' + event.actor + '"]' : '[data-actor="' + event.actor + '"]');
         const target = retaliates || event.kind === "heal" ? panel.querySelector('[data-actor="hero"]') :
           panel.querySelector('[data-enemy="' + event.target + '"]');
+        for (const chip of panel.querySelectorAll("[data-turn-actor]")) {
+          const current = chip.dataset.turnActor === (retaliates ? "enemies" : event.actor);
+          chip.classList.toggle("is-current", current);
+          if (current) chip.setAttribute("aria-current", "step"); else chip.removeAttribute("aria-current");
+        }
+        panel.querySelector(".battle-header span").textContent = retaliates ? "Gegnerzug" :
+          (event.actor === "hero" ? previous.name : world.companions[event.actor].name) + " handelt";
+        panel.querySelector(".battle-announcement").textContent = battleMessage(event, previous);
+        actor?.classList.add("is-acting");
         actor?.classList.add(retaliates ? "enemy-lunge" : event.kind === "cover" ? "fighter-cover" : "fighter-lunge");
         let marker;
         if (target && event.value > 0) {
@@ -898,7 +1104,7 @@
           if (meter) meter.value = Math.min(meter.max, Math.max(0, meter.value + (healing ? event.value : -event.value)));
         }
         await new Promise(resolve => setTimeout(resolve, battleStepMs));
-        actor?.classList.remove("enemy-lunge", "fighter-cover", "fighter-lunge");
+        actor?.classList.remove("is-acting", "enemy-lunge", "fighter-cover", "fighter-lunge");
         target?.classList.remove("fighter-hit");
         marker?.remove();
       }
@@ -920,6 +1126,7 @@
     const content = el("scene-content");
     const actions = el("scene-actions");
     actions.classList.toggle("battle-actions", Boolean(combat));
+    if (!combat || combat.round === 0) lastBattleMessages = [];
     el("location").textContent = scene.place;
     const opponent = combat && (world.fights[combat.id].name ?? world.creatures[combat.id].name);
     el("scene-title").textContent = combat ? "Kampf · " + opponent : scene.title;
@@ -946,9 +1153,11 @@
       ]) {
         const risk = shift && Math.abs(state.balance + shift) >= 4;
         const cost = shift ? " · 1 Glut" : "";
-        button(actions, label + cost + (risk ? " · Rückschlag" : ""),
+        const control = button(actions, label + cost + (risk ? " · Rückschlag" : ""),
           () => battleAction(id), { disabled: Boolean(shift && !state.ember) });
+        control.dataset.battleAction = id;
       }
+      button(actions, "Gegenstand", () => openHub());
       if (world.fights[combat.id].regeneration) {
         button(actions, "Mit Fackel angreifen · schwächt den Gegenangriff und stoppt Regeneration", () => battleAction("torch"));
       }
@@ -1071,7 +1280,7 @@
         const recruitment = element("section");
         recruitment.className = "recruitment";
         recruitment.append(element("h3", "Gefährten vor Ort"));
-        if (state.party.length === 5) {
+        if (state.party.length >= rules.partyLimit) {
           recruitment.append(element("p", "Deine Gruppe ist voll. Am Wachhof kannst du jemanden verabschieden."));
         }
         for (const [id, companion] of candidates) {
@@ -1079,16 +1288,32 @@
           candidate.append(element("h4", companion.name + " · " + klassen.grundklassen[companion.klasse].name),
             element("p", companion.introduction),
             element("p", companion.ability + " · " + companionEffect(companion)));
+          candidate.append(element("p", "Sympathie: " + rules.relationship(state, id).score));
           const status = rules.recruitment(state, id);
           if (status === "ready") {
             button(candidate, companion.name + " mitnehmen", () => update(rules.recruit(state, id)),
-              { disabled: state.party.length === 5 });
+              { disabled: state.party.length >= rules.partyLimit });
           } else if (status === "promise") {
-            button(candidate, world.loyalties[id].request, () => update(rules.promise(state, id)));
+            candidate.append(element("p", world.recruitmentQuests[id].text + " Frist: " + world.recruitmentQuests[id].turns + " Spielzüge ab Annahme."));
+            button(candidate, "Auftrag annehmen · " + world.recruitmentQuests[id].title, () => update(rules.promise(state, id)));
+          } else if (status === "task") {
+            const plan = world.recruitmentQuests[id];
+            candidate.append(element("p", plan.text + " Noch " + (rules.questEntries(state).find(quest => quest.id === "companion-" + id)?.remaining ?? plan.turns) + " Spielzüge."));
+            if (plan.salary) {
+              button(candidate, "Sold zahlen · " + plan.salary + " Silber", () => update(rules.completeQuest(state, id)),
+                { disabled: state.silver < plan.salary });
+              button(candidate, "Sold später zahlen · " + plan.salary + " Silber in 30 Spielzügen", () => update(rules.completeQuest(state, id, true)));
+            } else {
+              button(candidate, "Auftrag abschließen" + (plan.item ? " · " + world.items[plan.item] + " abgeben" : ""),
+                () => update(rules.completeQuest(state, id)), { disabled: !rules.questReady(state, id) });
+            }
           } else {
-            candidate.append(element("p", status === "task" ? world.loyalties[id].request :
+            candidate.append(element("p", status === "failed" ? "Der Aufnahmeauftrag ist gescheitert. Eine Aufnahme ist nicht mehr möglich." : ["blocked", "wary"].includes(status) ? world.companionAttitudes[id].reason :
               companion.name + " lehnt es ab, dich zu begleiten."));
           }
+          const debt = state.companionQuests?.[id]?.debt ?? 0;
+          if (debt) button(candidate, "Offenen Sold begleichen · " + debt + " Silber", () => update(rules.paySalary(state, id)),
+            { disabled: state.silver < debt });
           recruitment.append(candidate);
         }
         content.append(recruitment);

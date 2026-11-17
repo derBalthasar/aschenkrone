@@ -163,9 +163,14 @@
             <h4 class="sheet-heading">Fertigkeiten</h4><dl id="skills" class="stat-line"></dl>
             <div id="class-sheet"></div>
           </details>
-          <details open><summary>Inventar und Ausrüstung</summary><p id="equipment"></p>
+          <details open><summary>Gruppenvorrat und deine Ausrüstung</summary><p id="equipment"></p>
             <p id="bag-summary" class="bag-summary"></p>
             <button type="button" class="action primary hub-launch" data-hub-open>Inventar öffnen</button><ul id="inventory" class="inventory-list"></ul></details>
+          <details open><summary id="questlog-summary">Questlog</summary>
+            <p id="quest-clock" class="quest-clock"></p>
+            <p class="quest-help">Fristen laufen in Spielzügen: Entscheidungen, Reisen, Kampfrunden, Herstellung und Auftragsaktionen. Lesen, Ausrüsten, Handel und Pausen kosten keine Zeit. Begleiteraufträge müssen vor Ablauf am Treffpunkt abgegeben werden.</p>
+            <div id="quest-filters" class="actions" role="group" aria-label="Aufträge filtern"></div>
+            <ul id="companion-quests" class="inventory-list"></ul></details>
           <details open><summary id="party-count">Gefährten</summary><ul id="party-members" class="inventory-list"></ul>
             <details><summary>Mögliche Treffpunkte</summary><ul id="party-leads"></ul></details>
           </details>
