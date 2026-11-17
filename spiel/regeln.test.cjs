@@ -13,6 +13,8 @@ for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/faehigkeit
 }
 
 const rules = vm.runInContext("rules", context);
+// Reisebegegnungen (Errata 8) würfeln hier immer „ruhige Reise“, damit die Abläufe gleich bleiben.
+rules.setTravelDice(() => 0);
 const world = vm.runInContext("world", context);
 const plain = (value) => JSON.parse(JSON.stringify(value));
 const highRoll = () => 0.99;
@@ -633,7 +635,9 @@ const atYard = reload({ ...group, scene: "watch-yard" });
 assert.equal(rules.recruit(atYard, "knight"), atYard);
 assert.throws(() => reload({ ...atYard, party: ["ranger", "ranger"] }));
 assert.throws(() => reload({ ...atYard, party: ["unbekannt"] }));
-assert.equal(rules.dismiss(group, "mage"), group);
+// Verabschieden geht am Wachhof und in jeder Stadt mit Zentrallager (Errata 9), nicht unterwegs.
+const awayFromTown = reload({ ...group, scene: "forest" });
+assert.equal(rules.dismiss(awayFromTown, "mage"), awayFromTown);
 const released = rules.dismiss(atYard, "mage");
 const knightContract = rules.completeQuest(rules.promise({ ...released, factionRuf: { watch: 25 } }, "paladin"), "paladin");
 assert.equal(rules.recruit(knightContract, "paladin").party.length, 3);
@@ -920,7 +924,7 @@ console.log('Gruppenausrüstung, Besitz, Kampfboni und Spielstandmigration gepr�
 
 // Aufnahme erst nach angenommenem und abgegebenem Auftrag; kein mehrfacher Rufgewinn.
 const questStart = { ...rules.create("Tala", "kronreich", "frau", 1, "magier"), scene: "watch-yard", silver: 30 };
-for (const id of Object.keys(world.companions).filter(id => id !== questStart.role)) {
+for (const id of Object.keys(world.companions).filter(id => id !== questStart.role && !world.companions[id].soeldner)) {
   const applicant = { ...rules.create("Tala", "kronreich", "frau", 1, world.companions[id].klasse === "waechter" ? "heiler" : "waechter"), scene: "watch-yard", silver: 30 };
   const accepted = rules.promise(applicant, id);
   assert.equal(rules.recruit(accepted, id), accepted, id + ': Auftrag noch nicht abgegeben');
@@ -1175,3 +1179,157 @@ assert.ok(world.shop.lebensfunke > 0 && world.shop.brandbalsam > 0 && world.shop
   assert.equal(rules.levelThresholds[19], 19000);
 }
 console.log("Charakterfenster: Effekte (Benommen, Blutung, Kampfrausch, Glut, Stufenpunkte, Umschulung) und alte Spielstände geprüft.");
+
+// ---- Errata 8–10 (Henry, 17. 11. 2026): Rucksack, Gürtel, Begleiter, Söldner und Reisebegegnungen ----
+const same = (actual, expected, message) => assert.deepEqual(JSON.parse(JSON.stringify(actual)), JSON.parse(JSON.stringify(expected)), message);
+{
+  // Rucksack: 20 Plätze + Stärke-Bonus, Stapel zu 10, Ausbau auf 30/40/50.
+  const base = { ...rules.create("Tala", "kronreich", "frau", 1, "krieger"), scene: "watch-yard", silver: 300 };
+  const strength = rules.heroAttributes(base).strength;
+  assert.equal(rules.bagLimit(base), 20 + Math.max(0, rules.modifier(strength)));
+  const strong = { ...base, build: { ...base.build }, training: { strength: 20 - strength } };
+  assert.equal(rules.bagLimit(strong), 22, "Stärke 20 gibt +2 Plätze");
+  const herbs = { ...base, inventory: [...base.inventory.filter(id => id !== "galgenwurz"), ...Array(10).fill("galgenwurz")] };
+  const before = rules.slotsUsed(herbs);
+  const eleven = rules.read(JSON.stringify({ ...herbs, inventory: [...herbs.inventory, "galgenwurz"] }));
+  assert.equal(rules.slotsUsed(eleven), before + 1, "Der elfte Galgenwurz beginnt einen neuen Stapel");
+  assert.equal(rules.bagUpgrade(base).plaetze, 30);
+  const upgraded = rules.upgradeBag(base, "silver");
+  assert.equal(upgraded.rucksack, 1);
+  assert.equal(upgraded.silver, 270);
+  assert.equal(rules.bagLimit(upgraded), rules.bagLimit(base) + 10);
+  assert.equal(rules.upgradeBag({ ...base, scene: "forest" }, "silver").rucksack, 0, "Ausbau nur in Städten mit Zentrallager");
+  const pelts = { ...base, inventory: [...base.inventory, "wolfspelz", "wolfspelz"] };
+  const byMaterial = rules.upgradeBag(pelts, "material");
+  assert.equal(byMaterial.rucksack, 1);
+  assert.ok(!byMaterial.inventory.includes("wolfspelz"));
+  const second = rules.upgradeBag(upgraded, "silver");
+  assert.equal(second.rucksack, 2);
+  const third = rules.bagUpgrade(second);
+  assert.equal(third.plaetze, 50);
+  assert.equal(third.trade, false, "Stufe 3 braucht Handel mit Zwergen oder Freien Häfen");
+  assert.equal(rules.upgradeBag(second, "silver"), second);
+  const trader = { ...second, factionRuf: { league: 25 } };
+  assert.equal(rules.upgradeBag(trader, "silver").rucksack, 3);
+  assert.equal(rules.bagUpgrade(rules.upgradeBag(trader, "silver")), null);
+  assert.throws(() => reload({ ...base, rucksack: 4 }));
+  // Alte Spielstände ohne Ausbau und Gürtel bleiben ladbar.
+  const legacyBag = JSON.parse(JSON.stringify(base));
+  delete legacyBag.rucksack; delete legacyBag.guertel; delete legacyBag.companionXp;
+  const loaded = reload(legacyBag);
+  assert.equal(loaded.rucksack, 0);
+  same(loaded.guertel, [null, null]);
+
+  // Gürtel: 2 Ladungen. Im Kampf wirkt ein Gürtelgegenstand, ohne die Runde zu verbrauchen.
+  const belted = rules.setBelt(rules.setBelt({ ...base, inventory: [...base.inventory, "harzverband"] }, 0, "galgenwurz"), 1, "harzverband");
+  same(rules.belt(belted), ["galgenwurz", "harzverband"]);
+  assert.equal(rules.setBelt(belted, 0, "axt"), belted, "Nur Verbrauchsgüter passen in den Gürtel");
+  assert.equal(rules.setBelt(belted, 1, "galgenwurz"), belted, "Nur so viele Ladungen, wie Gegenstände vorhanden sind");
+  same(reload(belted).guertel, ["galgenwurz", "harzverband"]);
+  const hurt = rules.read(JSON.stringify({ ...belted, health: 5 }));
+  const quick = rules.quickUse(hurt, 1);
+  assert.equal(quick.health, 5 + 16);
+  same(rules.belt(quick), ["galgenwurz", null]);
+  assert.equal(quick.inventory.filter(id => id === "harzverband").length, 0);
+  // Verbraucht man den Gegenstand anders, ist der Gürtelplatz leer.
+  same(rules.belt({ ...belted, inventory: belted.inventory.filter(id => id !== "galgenwurz") }), [null, "harzverband"]);
+}
+console.log("Rucksack (20–50 Plätze, Stapel zu 10, Ausbau) und Gürtel geprüft.");
+
+{
+  // Söldner: 50 Silber, Charisma-Rabatt, Volksgrenzen, Begleiter-EP.
+  const town = { ...rules.create("Tala", "kronreich", "frau", 1, "krieger"), scene: "watch-yard", silver: 120, xp: 400 };
+  const offered = rules.candidates(town).map(([id]) => id);
+  assert.ok(offered.includes("grenzbogner") && offered.includes("flammenknecht") && offered.includes("feldscherin"));
+  assert.ok(!offered.includes("steppenreiter"), "Arne wartet in Kornwik und Heidvang");
+  assert.equal(rules.recruitment(town, "flammenknecht"), "hire");
+  assert.equal(rules.hireCost(town, "flammenknecht"), 50);
+  assert.equal(rules.hireCost({ ...town, training: { presence: 16 - rules.heroAttributes(town).presence } }, "flammenknecht"), 45);
+  assert.equal(rules.hireCost({ ...town, training: { presence: 20 - rules.heroAttributes(town).presence } }, "flammenknecht"), 40);
+  const hired = rules.hire(town, "flammenknecht");
+  assert.equal(hired.silver, 70);
+  assert.ok(hired.party.includes("flammenknecht"));
+  assert.equal(rules.memberLevel(hired, "flammenknecht"), rules.level(town) - 1, "Begleiter starten eine Stufe unter der Spielfigur");
+  assert.equal(rules.memberHealthLimit("flammenknecht", hired), 32 + 2 * (rules.memberLevel(hired, "flammenknecht") - 1));
+  assert.equal(rules.hire({ ...town, silver: 49 }, "flammenknecht").party.length, 0);
+  // Gemeinsame EP nach einem Questakt.
+  const awarded = rules.awardXp(hired, "test-akt");
+  assert.equal(awarded.companionXp.flammenknecht, hired.companionXp.flammenknecht + 300);
+  // Entlassen und kostenlos wieder aufnehmen.
+  const released = rules.dismiss(hired, "flammenknecht");
+  assert.equal(released.party.length, 0);
+  assert.equal(rules.recruitment(released, "flammenknecht"), "ready");
+  assert.equal(rules.recruit(released, "flammenknecht").silver, released.silver);
+  // Untote nehmen keine lebenden Söldner auf, die Story-Gefährten bleiben erreichbar.
+  const undead = { ...rules.create("Morn", "hof", "mann", 1, "magier"), scene: "watch-yard", silver: 120 };
+  assert.equal(rules.recruitment(undead, "flammenknecht"), "incompatible");
+  assert.equal(rules.hire(undead, "flammenknecht"), undead);
+  assert.notEqual(rules.recruitment(undead, "warrior"), "incompatible");
+  // Begleiter tragen alle acht Plätze, Ringe nehmen den ersten freien Ringplatz.
+  const kitted = rules.read(JSON.stringify({ ...hired, inventory: [...hired.inventory, "eisenring", "eisenring", "eisenhelm", "wachschild"] }));
+  let gear = rules.equip(kitted, "eisenring", "flammenknecht");
+  gear = rules.equip(gear, "eisenring", "flammenknecht");
+  gear = rules.equip(gear, "eisenhelm", "flammenknecht");
+  gear = rules.equip(gear, "wachschild", "flammenknecht");
+  const worn = rules.memberEquipment(gear, "flammenknecht");
+  assert.equal(worn.ring1, "eisenring");
+  assert.equal(worn.ring2, "eisenring");
+  assert.equal(worn.head, "eisenhelm");
+  assert.equal(worn.offhand, "wachschild");
+  same(reload(gear).companionEquipment.flammenknecht, gear.companionEquipment.flammenknecht);
+  assert.throws(() => reload({ ...gear, companionEquipment: { flammenknecht: { head: "eisenring" } } }));
+}
+console.log("Söldner, Volksgrenzen, Begleiter-EP und Begleiterausrüstung geprüft.");
+
+{
+  // Reisebegegnungen: ein Wurf pro Kante, nur auf bekannten Wegen der Reisekarte.
+  const atYard = { ...rules.create("Tala", "kronreich", "frau", 1, "krieger"), scene: "watch-yard", xp: 300 };
+  atYard.health = rules.healthLimit(atYard);
+  const toFord = rules.choices(atYard).find(choice => choice.destination === "kraehenfurt");
+  assert.ok(toFord, "Der Wachhof hat einen Weg nach Heidvang");
+  assert.equal(world.edgeType("hochwacht", "kraehenfurt"), "kernland");
+  assert.equal(world.edgeType("hochwacht", "ravine"), "spezial");
+  const roll = (values) => { let index = 0; rules.setTravelDice(() => values[Math.min(index++, values.length - 1)]); };
+  roll([0]);
+  const quiet = rules.choose(atYard, toFord.id);
+  assert.equal(quiet.scene, toFord.to);
+  assert.equal(quiet.combat, null);
+  assert.match(quiet.journal.at(-1), /Unterwegs/);
+  // Kernland 95: Jäger-Hinterhalt (dritter Wert wählt den Gegner, kein Alphatier).
+  roll([0.95, 0.5, 0.5]);
+  const ambushed = rules.choose(atYard, toFord.id);
+  assert.ok(ambushed.combat, "Hinterhalt startet einen Kampf");
+  assert.ok(world.fights[ambushed.combat.id].random);
+  assert.equal(ambushed.combat.weiter, toFord.to);
+  same(reload(ambushed).combat.weiter, toFord.to);
+  // Ausweichen ab List 3 oder als Späher/Schurke, sonst nicht.
+  assert.equal(rules.canEvade(ambushed), rules.skillValue(ambushed, "list") >= 3);
+  const scout = { ...rules.create("Tala", "kronreich", "frau", 1, "spaeher"), scene: "watch-yard" };
+  roll([0.95, 0.5, 0.5]);
+  const scoutAmbush = rules.choose(scout, toFord.id);
+  const evaded = rules.strike(scoutAmbush, "evade");
+  assert.equal(evaded.combat, null);
+  assert.equal(evaded.scene, toFord.to);
+  assert.equal(evaded.xp, scoutAmbush.xp, "Ausweichen bringt keine Kampf-EP");
+  // Gewonnene Zufallskämpfe geben jedes Mal EP und setzen keine Handlungsmarken.
+  rules.setTravelDice(() => 0);
+  let fight = ambushed;
+  for (let round = 0; fight.combat && round < 40; round++) fight = rules.strike(fight, "spear", highRoll);
+  assert.equal(fight.combat, null);
+  assert.equal(fight.scene, toFord.to);
+  assert.ok(fight.xp > ambushed.xp);
+  assert.ok(!fight.marks.includes("woelfe-besiegt"));
+  assert.ok(!fight.rewards.some(id => id.startsWith("kampf-jagd")));
+  // Alphatier zu 10 %: Graufang kämpft als Anführer.
+  roll([0.95, 0.05, 0]);
+  const alpha = rules.choose(atYard, toFord.id);
+  assert.equal(alpha.combat.id, "jagd-graufang");
+  assert.equal(alpha.combat.feinde[0].rang, "anfuehrer");
+  // Scheue Tiere: Probe auf List oder Fernkampf, Erfolg bringt Galgenwurz.
+  roll([0.75, 0.99]);
+  const shy = rules.choose(atYard, toFord.id);
+  assert.equal(shy.combat, null);
+  assert.equal(shy.inventory.filter(id => id === "galgenwurz").length, atYard.inventory.filter(id => id === "galgenwurz").length + 1);
+  rules.setTravelDice(() => 0);
+}
+console.log("Reisebegegnungen (ruhig, scheu, Jäger, Alphatier, Ausweichen) geprüft.");

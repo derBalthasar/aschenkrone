@@ -12,6 +12,8 @@ for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/faehigkeit
   vm.runInContext(fs.readFileSync(path.join(root, file), "utf8"), context, { filename: file });
 }
 const rules = vm.runInContext("rules", context);
+// Reisebegegnungen (Errata 8) würfeln hier immer „ruhige Reise“, damit die Abläufe gleich bleiben.
+rules.setTravelDice(() => 0);
 const kampf = vm.runInContext("kampf", context);
 const F = vm.runInContext("faehigkeiten", context);
 const K = vm.runInContext("klassen", context);

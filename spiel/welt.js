@@ -157,6 +157,13 @@ const world = (() => {
   const shop = { lebensfunke: 20, brandbalsam: 6, gegengift: 6, klartrank: 8, harzverband: 8, glutampulle: 12, eisenkeil: 22, rostklaue: 24, grenzmantel: 40,
     holzschild: 14, wachschild: 34, glutamulett: 26, spurenring: 24, eisenring: 24,
     lederhaube: 10, eisenhelm: 28, lederbeinlinge: 10, kettenbeinlinge: 28 };
+  // Errata 10: Rucksack in drei Ausbaustufen (+10 Plätze) bei Sattlern und Gildenhändlern der Städte mit Zentrallager.
+  // Statt Silber gehen auch Materialien. Stufe 3 braucht Handel mit Zwergen oder den Freien Häfen.
+  const bagUpgrades = [
+    { name: "Verstärkte Reisetasche", plaetze: 30, silber: 30, material: { wolfspelz: 2 } },
+    { name: "Gilden-Packtasche", plaetze: 40, silber: 75, material: { borstenfell: 2 } },
+    { name: "Zwergischer Runen-Tornister", plaetze: 50, silber: 150, material: { trollblut: 1 }, handel: true },
+  ];
   const salePrices = { keilerhauer: 5, wolfszahn: 4, kraehenfedern: 2, greifenfeder: 10, greifenklaue: 14, trollblut: 18 };
 
   const scenes = {
@@ -839,6 +846,35 @@ const world = (() => {
     ["mine", "pass"], ["ridge", "pass"], ["ravine", "pass"], ["hochwacht", "toll"],
     ["hochwacht", "skarn-gate"], ["skarn-gate", "skarn-cliffs"], ["skarn-cliffs", "skarn-runes"],
   ];
+  // Errata 8: Reise- und Zufallsbegegnungsregel. Jede Kante der Reisekarte hat einen Typ.
+  // Kernland: 70 % ruhig, 20 % scheue Tiere, 10 % Jäger. Grenzland: 40 % ruhig, 40 % Jäger, 20 % scheue Tiere oder Gerüchte.
+  // Spezialkanten (Pässe, Stollen, Klippen) haben feste Revier-Gegner aus der Handlung und keinen Zufallswurf.
+  const edgeTypes = {
+    "weidenkamm|kraehenfurt": "kernland", "kraehenfurt|hochwacht": "kernland", "hochwacht|skarn-gate": "kernland",
+    "weidenkamm|rotwaelder": "grenzland", "rotwaelder|kraehenfurt": "grenzland", "kraehenfurt|schwarzmoor": "grenzland",
+    "schwarzmoor|hochwacht": "grenzland", "hochwacht|toll": "grenzland", "skarn-gate|skarn-cliffs": "grenzland",
+  };
+  const edgeType = (from, to) => edgeTypes[from + "|" + to] ?? edgeTypes[to + "|" + from] ?? "spezial";
+  const encounterTables = {
+    kernland: [[70, "ruhig"], [20, "scheu"], [10, "jaeger"]],
+    grenzland: [[40, "ruhig"], [40, "jaeger"], [20, "scheu"]],
+  };
+  // Regionale Pools nach dem Bestiarium (Kronreich und Eispass). Alphatiere ersetzen zu 10 % einen Jäger.
+  const encounterPools = {
+    jaeger: { weidenkamm: ["jagd-galgenkraehe", "jagd-grauwolf"], rotwaelder: ["jagd-grauwolf"], kraehenfurt: ["jagd-galgenkraehe"],
+      schwarzmoor: ["jagd-irrglut"], hochwacht: ["jagd-grauwolf"], toll: ["jagd-grauwolf"], "skarn-gate": ["jagd-grauwolf"],
+      "skarn-cliffs": ["jagd-grauwolf"] },
+    alpha: ["jagd-graufang"],
+  };
+  const quietTexts = [
+    "Die Straße bleibt ruhig. Nur der Wind treibt Asche über die Furchen.",
+    "Ein Fuhrmann grüßt dich vom Bock. Ihr tauscht Neuigkeiten über das Wetter am Pass.",
+    "Nieselregen begleitet dich. Unterwegs begegnet dir niemand.",
+  ];
+  const rumorTexts = [
+    "An einem Wegkreuz flüstern Reisende von Kultisten, die nachts Gräber öffnen.",
+    "Ein Händler erzählt von Rostsegel-Piraten vor der Westküste.",
+  ];
   const travelScenes = {
     hochwacht: ["watch-yard"], kraehenfurt: ["return-ford"], weidenkamm: ["return-field"],
     rotwaelder: ["return-forest"], schwarzmoor: ["return-moor"], mine: ["mine", "mine-cleared"],
@@ -964,9 +1000,37 @@ const world = (() => {
   const recipes = {
     harzverband: { ingredients: { galgenwurz: 2 }, text: "Zwei Galgenwurz zu einem haltbaren Wundverband verarbeiten." },
   };
+  // Errata 9 (17. 11. 2026): Söldner werden in Städten mit Zentrallager gegen Silber angeworben.
+  // Volk zählt für die Volksgrenzen (Untote und Lebende, Orks und Zwerge). Werte sind Vorschlagswerte.
+  Object.assign(companions, {
+    steppenreiter: {
+      klasse: "krieger", name: "Steppenreiter Arne", volk: "menschen", health: 30, scenes: [],
+      soeldner: { kosten: 50, orte: ["weidenkamm", "kraehenfurt"] }, place: "Söldner in Kornwik und Heidvang",
+      introduction: "Arne hat sein Pferd an der Grenze verloren, nicht aber seinen Säbel. Für Sold reitet er mit, wohin du willst.",
+      ability: "Sturmangriff", damage: 10,
+    },
+    grenzbogner: {
+      klasse: "spaeher", name: "Grenzbognerin Ylva", volk: "menschen", health: 26, scenes: [],
+      soeldner: { kosten: 50, orte: ["weidenkamm", "kraehenfurt", "hochwacht"] }, place: "Söldnerin in Kornwik, Heidvang und Eiswacht",
+      introduction: "Ylva zählt die Pfeile in ihrem Köcher zweimal. Sie hat für die Grenzwache gejagt, bis der Sold ausblieb.",
+      ability: "Pfeilhagel", damage: 9, airborne: 3,
+    },
+    flammenknecht: {
+      klasse: "waechter", name: "Flammenknecht Hal", volk: "menschen", health: 32, scenes: [],
+      soeldner: { kosten: 50, orte: ["hochwacht", "skarn-gate"] }, place: "Söldner in Eiswacht und Glutberg",
+      introduction: "Hal trägt das Zeichen des Ordens der Flamme auf dem Schild, aber keinen Eid mehr. Er schützt, wer ihn bezahlt.",
+      ability: "Flammenschild", guard: 9,
+    },
+    feldscherin: {
+      klasse: "heiler", name: "Feldscherin Ute", volk: "menschen", health: 24, scenes: [],
+      soeldner: { kosten: 50, orte: ["hochwacht", "skarn-gate"] }, place: "Söldnerin in Eiswacht und Glutberg",
+      introduction: "Ute rollt ihre Verbände so fest, dass sie wie Kerzen aussehen. Für Silber flickt sie jeden, der noch atmet.",
+      ability: "Feldverband", heal: 8,
+    },
+  });
   // Gemeinsamer Treffpunkt, damit Aufnahmeaufträge nach Reisen abgegeben werden können.
   for (const companion of Object.values(companions)) {
-    if (!companion.scenes.includes("watch-yard")) companion.scenes.push("watch-yard");
+    if (!companion.soeldner && !companion.scenes.includes("watch-yard")) companion.scenes.push("watch-yard");
   }
   const factionEffects = {
     "joren-gerettet": { watch: 30 }, "joren-verloren": { watch: -35 },
@@ -989,6 +1053,27 @@ const world = (() => {
     "pass-mine": { warrior: 25, mage: 15 }, "frostbaer-besiegt": { ranger: -25, druid: -25 },
     "klippen-beruhigt": { ranger: 15, druid: 15 },
   };
+  // Zufallskämpfe der Reiseregel. Sie nutzen Werte und Bilder der bestehenden Gegner, setzen aber keine Handlungsmarken.
+  const randomFight = (id, base, gegner, extra = {}) => {
+    creatures[id] = { ...creatures[base] };
+    if (enemyGroups[base]) enemyGroups[id] = { ...enemyGroups[base] };
+    if (enemyAilments[base]) enemyAilments[id] = enemyAilments[base];
+    const { to, victory, escape, retreatTo, unlock, preparation, ...rest } = fights[base];
+    fights[id] = { ...rest, gegner, random: true, victoryText: "Der Hinterhalt ist abgewehrt.", ...extra };
+    battleRewards[id] = [10, 0];
+  };
+  randomFight("jagd-grauwolf", "grauwolf", { rang: "mitlaeufer", stufe: 3, anzahl: 3, tags: ["spaeher"] },
+    { name: "Grauwölfe im Hinterhalt", loot: ["wolfspelz"] });
+  randomFight("jagd-galgenkraehe", "galgenkraehe", { rang: "mitlaeufer", stufe: 3, anzahl: 3 },
+    { name: "Galgenkrähen im Sturzflug", loot: ["kraehenfedern"] });
+  randomFight("jagd-irrglut", "irrglut", { rang: "elite", stufe: 3 }, { name: "Irrglut über den Bohlen", loot: ["glutfunke"] });
+  // Graufang, Alphatier des Kronreichs: Anführer auf Gebietsstufe (Errata 4).
+  randomFight("jagd-graufang", "grauwolf", { rang: "anfuehrer", stufe: 4 },
+    { name: "Graufang, der weiße Leitwolf", loot: ["wolfspelz", "wolfszahn", "wolfszahn"], alpha: true,
+      victoryText: "Graufang fällt. Ohne seinen Ruf zerstreut sich das Rudel." });
+  delete enemyGroups["jagd-graufang"];
+  creatures["jagd-graufang"].name = "Graufang";
+  battleRewards["jagd-graufang"] = [40, 0];
   // Prologe der Nacht des Erwachens je Fraktion (spiel/startpunkte.js) und ihre Zentrallager.
   Object.assign(scenes, startpunkte.scenes);
   Object.assign(storageSites, startpunkte.storageSites);
@@ -1008,5 +1093,6 @@ const world = (() => {
   }
   return { ailments, enemyAilments, attributes, skills, origins, classes, items, gear, supplies, rarity, lootTables, milestones, deeds, shop, salePrices, storageSites,
     storyQuests, recruitmentQuests, companionAttitudes, recipes, battleRewards, enemyGroups, companions, loyalties, factions, factionEffects, relationshipEffects,
-    scenes, creatures, fights, destinations, routes, travelScenes };
+    scenes, creatures, fights, destinations, routes, travelScenes, bagUpgrades, edgeType, encounterTables, encounterPools,
+    quietTexts, rumorTexts };
 })();
