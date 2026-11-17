@@ -14,6 +14,8 @@
   <script defer src="spiel/startpunkte.js"></script>
   <script defer src="spiel/welt.js"></script>
   <script defer src="spiel/regeln.js"></script>
+  <script defer src="spiel/karte-daten.js"></script>
+  <script defer src="spiel/karte.js"></script>
   <script defer src="spiel/prolog.js"></script>
   <script defer src="spiel/spiel.js"></script>
 </head>
@@ -115,7 +117,7 @@
     <div class="game-grid" id="play" hidden>
       <nav class="play-shortcuts" aria-label="Spielbereiche">
         <a href="#scene-title">Szene</a>
-        <a href="#travel-map">Reisekarte</a>
+        <a href="#travel-map">Karte</a>
         <a href="#character-panel">Charakter</a>
         <button type="button" class="hub-open" data-sheet-open>Charakterfenster</button>
         <button type="button" class="hub-open" data-hub-open>Inventar</button>
@@ -129,16 +131,23 @@
       </section>
       <div class="travel-tools">
         <details id="travel-map" class="travel-map" open>
-          <summary>Reisekarte · Kronreich und Ordensland</summary>
+          <summary id="map-title">Karte</summary>
           <p id="map-status" class="map-status"></p>
           <div id="map-destinations" class="actions map-destinations" role="group" aria-label="Erreichbare Reiseziele"></div>
           <div id="map-plan" class="actions map-plan"></div>
-          <div class="map-scroll" role="region" aria-label="Grafische Reisekarte" tabindex="0">
+          <div class="map-zoom" role="group" aria-label="Kartenstufe">
+            <button type="button" data-map-level="gebiet" aria-pressed="true">1 · Gebiet</button>
+            <button type="button" data-map-level="fraktion" aria-pressed="false">2 · Fraktion</button>
+            <button type="button" data-map-level="welt" aria-pressed="false">3 · Welt</button>
+          </div>
+          <div class="map-scroll" role="region" aria-labelledby="map-title" tabindex="0">
             <div id="map-board" class="map-board">
+              <img id="map-image" class="map-image" alt="" decoding="async">
               <svg id="map-routes" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
               <div id="map-places"></div>
             </div>
           </div>
+          <p id="map-caption" class="map-caption"></p>
         </details>
         <aside id="character-panel" class="sidebar" aria-label="Charakter und Reise" tabindex="-1">
           <div class="party">
