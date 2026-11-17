@@ -42,9 +42,17 @@ button.map-marker { min-height: 2rem; color: #fff0d6; border-color: #e1b677; }
 .map-destinations button[aria-pressed="true"] { background: #694623; }
 .map-plan p { margin: 0; flex-basis: 100%; }
 .map-marker[aria-pressed="true"] { background: #694623; }
-#point-buy { min-width: 0; margin: .75rem 0; padding: .6rem; border: 1px solid #96734c; }
+#point-buy, #skill-buy { min-width: 0; margin: .75rem 0; padding: .6rem; border: 1px solid #96734c; }
 #points-left { margin: 0 0 .45rem; }
-.point-row { display: grid; grid-template-columns: minmax(0, 1fr) auto 2rem auto; gap: .35rem; align-items: center; margin: .15rem 0; }
+.point-row { display: grid; grid-template-columns: minmax(0, 1fr) 2.6rem auto 2rem auto minmax(4.5rem, auto); gap: .35rem; align-items: center; margin: .15rem 0; }
+.point-row small { font-variant-numeric: tabular-nums; }
+#points-left, #skills-left { margin: 0 0 .45rem; }
+#skill-suggest { margin-top: .45rem; }
+.creation .hint, .class-description p { margin: .3rem 0; font-size: .92rem; }
+.sheet-heading { margin: .6rem 0 .2rem; font-size: .9rem; }
+#class-sheet h4 { margin: .7rem 0 .2rem; }
+#class-sheet p { margin: .25rem 0; font-size: .92rem; }
+#class-sheet select { margin: .2rem .3rem .2rem 0; }
 .point-row output { text-align: center; font-variant-numeric: tabular-nums; }
 .point-row .action, .inventory-list .action { padding: .3rem .5rem; }
 .sidebar .inventory-list { padding-left: 0; list-style: none; }
@@ -215,4 +223,8 @@ button.map-marker { min-height: 2rem; color: #fff0d6; border-color: #e1b677; }
   .enemy-card { min-height: 2.75rem; }
   .travel-map > summary { padding-block: .55rem; }
   main.game-wrap { padding-bottom: env(safe-area-inset-bottom); }
+}
+@media (max-width: 42rem) {
+  .point-row { grid-template-columns: minmax(0, 1fr) 2.6rem auto 2rem auto; }
+  .point-row > :last-child { grid-column: 1 / -1; margin-top: -.2rem; }
 }

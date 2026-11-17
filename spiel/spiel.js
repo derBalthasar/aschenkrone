@@ -7,20 +7,25 @@
   const layoutMode = el("layout-mode");
   const narrowLayout = window.matchMedia("(max-width: 51.99rem)");
   const name = el("character-name");
+  const volk = el("volk");
   const origin = el("origin");
   const role = el("class");
+  const volkWahl = el("volk-wahl");
   const mapPlaces = el("map-places");
   const appearance = el("appearance");
   const variant = el("variant");
   let state = null;
   let importRequest = 0;
   let allocation = {};
+  let skills = {};
   let target = null;
   let enemyTarget = null;
   let animating = false;
   const battleStepMs = 248;
   let editingLegacy = false;
   const pointControls = new Map();
+  const skillControls = new Map();
+  const signed = (value) => (value > 0 ? "+" : value < 0 ? "−" : "±") + Math.abs(value);
 
   function element(tag, text) {
     const result = document.createElement(tag);
@@ -40,9 +45,20 @@
     }));
   }
 
-  function attributeValues(id, points) {
-    return Object.entries(rules.attributes(id, points)).map(([stat, value]) => [world.attributes[stat], value]);
+  function attributeValues(values) {
+    return Object.entries(values).map(([stat, value]) => {
+      const bonus = rules.modifier(value);
+      return [world.attributes[stat], value + (bonus ? " (" + signed(bonus) + ")" : "")];
+    });
   }
+
+  // Aktuelle Auswahl im Formular als Bauplan für rules.create.
+  function draftBuild() {
+    const people = klassen.fraktionen[origin.value].volk;
+    return { frei: { ...allocation }, wahl: klassen.voelker[people].wahl ? volkWahl.value : null,
+      fertigkeiten: { ...skills }, spez: null, meister: null };
+  }
+  const draftAttributes = () => rules.attributes(origin.value, role.value, draftBuild(), editingLegacy ? state.training : {});
 
   function show(id) {
     for (const view of ["home", "creation", "prologue", "play"]) el(view).hidden = view !== id;
@@ -90,45 +106,92 @@
 
   function portraitPreview(reset = false) {
     if (reset) {
-      const id = appearance.value + "-0" + world.origins[origin.value].portrait;
+      const id = appearance.value + "-0" + world.origins[rules.originOf(origin.value)].portrait;
       variant.replaceChildren(...portraits.styles(id).map((label, index) => new Option(label, index)));
     }
     el("preview-caption").textContent = setPortrait(el("preview"), {
-      origin: origin.value, appearance: appearance.value, variant: Number(variant.value),
+      origin: rules.originOf(origin.value), appearance: appearance.value, variant: Number(variant.value),
     });
-    stats(el("preview-stats"), attributeValues(origin.value, allocation));
+    const problem = rules.buildProblem(origin.value, role.value, draftBuild(), editingLegacy ? state.training : {});
+    el("creation-status").textContent = problem && !problem.startsWith("Verteile") ? problem : creationNote;
   }
+  let creationNote = "";
 
   function renderPoints() {
-    const remaining = 6 - Object.values(allocation).reduce((sum, value) => sum + value, 0);
-    el("points-left").textContent = remaining + " von 6 Punkten verfügbar";
+    const freePoints = klassen.regeln.freiePunkte;
+    const remaining = freePoints - Object.values(allocation).reduce((sum, value) => sum + value, 0);
+    el("points-left").textContent = remaining + " von " + freePoints + " freien Punkten verfügbar · Höchstwert 20";
+    const base = rules.baseAttributes(origin.value, role.value, draftBuild().wahl);
+    const values = draftAttributes();
     for (const [key, controls] of pointControls) {
       const spent = allocation[key] ?? 0;
+      const bonus = rules.modifier(values[key]);
+      controls.base.textContent = base[key] + (editingLegacy && state.training[key] ? " + " + state.training[key] : "");
       controls.value.textContent = "+" + spent;
+      controls.total.textContent = "= " + values[key] + (bonus ? " (" + signed(bonus) + ")" : "");
       controls.minus.disabled = spent === 0;
-      controls.plus.disabled = remaining === 0;
+      controls.plus.disabled = remaining === 0 || values[key] >= klassen.regeln.grundwertMax;
+    }
+    // Sinkt ein Grundwert, sinkt auch die Grenze der Fertigkeit.
+    const limits = rules.skillLimits(origin.value, values);
+    for (const id of Object.keys(skills)) skills[id] = Math.min(skills[id], limits[id]);
+    renderSkills();
+  }
+
+  function renderSkills() {
+    const values = draftAttributes();
+    const limits = rules.skillLimits(origin.value, values);
+    const main = klassen.grundklassen[rules.profile(origin.value, role.value)].haupt;
+    const points = klassen.regeln.fertigkeitsPunkte;
+    const remaining = points - Object.values(skills).reduce((sum, value) => sum + value, 0);
+    el("skills-left").textContent = remaining + " von " + points + " Punkten verfügbar · Hauptfertigkeiten mindestens 3";
+    for (const [id, controls] of skillControls) {
+      const skill = klassen.fertigkeiten[id];
+      controls.label.textContent = skill.name + (main.includes(id) ? " ★" : "");
+      controls.label.title = skill.zweck;
+      controls.value.textContent = String(skills[id] ?? 0);
+      controls.limit.textContent = "max " + limits[id] + " · " + world.attributes[skill.grundwert] + " " + values[skill.grundwert];
+      controls.minus.disabled = !skills[id];
+      controls.plus.disabled = remaining <= 0 || (skills[id] ?? 0) >= limits[id];
     }
     portraitPreview();
   }
 
-  for (const [key, label] of Object.entries(world.attributes)) {
+  function controlRow(parent, label, change, extra = []) {
     const row = element("div");
     row.className = "point-row";
     const value = element("output");
     const minus = element("button", "−");
     const plus = element("button", "+");
-    for (const [control, change] of [[minus, -1], [plus, 1]]) {
+    for (const [control, delta] of [[minus, -1], [plus, 1]]) {
       control.type = "button";
       control.className = "action";
-      control.setAttribute("aria-label", label + (change > 0 ? " erhöhen" : " senken"));
-      control.addEventListener("click", () => {
-        allocation[key] = (allocation[key] ?? 0) + change;
-        renderPoints();
-      });
+      control.setAttribute("aria-label", label + (delta > 0 ? " erhöhen" : " senken"));
+      control.addEventListener("click", () => change(delta));
     }
-    row.append(element("span", label), minus, value, plus);
-    el("point-controls").append(row);
-    pointControls.set(key, { value, minus, plus });
+    const name = element("span", label);
+    row.append(name, ...extra.slice(0, 1), minus, value, plus, ...extra.slice(1));
+    parent.append(row);
+    return { name, value, minus, plus };
+  }
+
+  for (const [key, label] of Object.entries(world.attributes)) {
+    const base = element("small");
+    const total = element("small");
+    const controls = controlRow(el("point-controls"), label, (delta) => {
+      allocation[key] = (allocation[key] ?? 0) + delta;
+      if (!allocation[key]) delete allocation[key];
+      renderPoints();
+    }, [base, total]);
+    pointControls.set(key, { ...controls, base, total });
+  }
+  for (const [id, skill] of Object.entries(klassen.fertigkeiten)) {
+    const limit = element("small");
+    const controls = controlRow(el("skill-controls"), skill.name, (delta) => {
+      skills[id] = (skills[id] ?? 0) + delta;
+      renderSkills();
+    }, [element("span"), limit]);
+    skillControls.set(id, { ...controls, label: controls.name, limit });
   }
 
   function save() {
@@ -304,9 +367,10 @@
       }
       if (equipped) item.append(element("small", " Ausgerüstet"));
       const details = [];
-      if (gear?.power) details.push(gear.power + " Grundschaden + " + world.attributes[gear.stat]);
+      if (gear?.power) details.push(gear.power + " Grundschaden + " + klassen.fertigkeiten[gear.skill ??
+        ({ strength: "nahkampf", agility: gear.airborne ? "fernkampf" : "nahkampf", mind: "magie" })[gear.stat]].name);
       if (gear?.armor) details.push(gear.armor + " Rüstung");
-      if (gear?.travel) details.push("+" + gear.travel + " auf Geschickproben unterwegs");
+      if (gear?.travel) details.push("+" + gear.travel + " auf Proben mit List unterwegs");
       if (gear?.magic) details.push("+" + gear.magic + " Glutschaden");
       if (supply?.heal) details.push("Stellt bis zu " + supply.heal + " LP wieder her");
       if (supply?.ember) details.push("Stellt bis zu " + supply.ember + " Glut wieder her");
@@ -338,7 +402,7 @@
     for (const id of state.party) {
       const companion = world.companions[id];
       const row = element("li");
-      row.append(element("strong", companion.name + " · " + world.classes[id].name));
+      row.append(element("strong", companion.name + " · " + klassen.grundklassen[companion.klasse].name));
       row.append(element("div", companion.ability + " · " + companionEffect(companion) + " · Einmal pro Kampf"));
       const relation = rules.relationship(state, id);
       const oath = { none: "", promised: "Versprechen offen", fulfilled: "Versprechen gehalten", broken: "Versprechen gebrochen" };
@@ -355,8 +419,8 @@
       members.append(row);
     }
     if (!state.party.length) members.append(element("li", "Du reist allein."));
-    const leads = Object.entries(world.companions).filter(([id]) => id !== state.role && !state.party.includes(id))
-      .map(([id, companion]) => companion.name + " · " + world.classes[id].name + " · " +
+    const leads = Object.entries(world.companions).filter(([id, companion]) => companion.klasse !== state.role && !state.party.includes(id))
+      .map(([id, companion]) => companion.name + " · " + klassen.grundklassen[companion.klasse].name + " · " +
         (rules.relationship(state, id).left ? "Hat die Gruppe verlassen" : companion.place));
     list(el("party-leads"), leads, "Keine weiteren Treffpunkte.");
     list(el("faction-ruf"), Object.entries(world.factions).map(([id, label]) => {
@@ -379,7 +443,7 @@
     battlefield.style.setProperty("--battle-step", battleStepMs + "ms");
     const formation = element("div");
     formation.className = "battle-formation";
-    const hero = fighterCard(state.name, world.classes[state.role].name);
+    const hero = fighterCard(state.name, rules.title(state));
     hero.dataset.actor = "hero";
     const heroMeter = element("progress");
     heroMeter.max = rules.healthLimit(state);
@@ -389,7 +453,7 @@
     formation.append(hero);
     for (const id of state.party) {
       const companion = world.companions[id];
-      const card = fighterCard(companion.name, world.classes[id].name);
+      const card = fighterCard(companion.name, klassen.grundklassen[companion.klasse].name);
       card.dataset.actor = id;
       formation.append(card);
     }
@@ -516,7 +580,7 @@
       const special = world.fights[combat.id].special;
       if (combat.health > 0 && combat.round % 2 === 1) content.append(element("p", special.warning + " Deckung schützt vor dem Zusatzeffekt."));
       if (combat.bleeding > 0) content.append(element("p", "Blutung · " + combat.bleeding + " Runden"));
-      const abilities = world.classes[state.role];
+      const abilities = world.classes[rules.profile(state.faction, state.role)];
       for (const [id, label, shift] of [
         ["spear", "Angriff · " + world.items[rules.weapon(state)], 0], ["ember", abilities.attack.name, 2],
         ["restore", abilities.restore.name, -2], ["guard", "Deckung und Sammlung", 0], ["flee", "Fliehen", 0],
@@ -637,7 +701,7 @@
       }
       const choices = rules.choices(state);
       for (const choice of choices) {
-        const attribute = choice.check ? world.attributes[choice.check[0]] : "";
+        const attribute = choice.check ? klassen.fertigkeiten[choice.check[0]].name : "";
         const risk = choice.emberRescue && state.balance <= -2 ? " · Rückschlag" : "";
         button(actions, choice.label + (attribute ? " · Probe auf " + attribute : "") + risk,
           () => update(rules.choose(state, choice.id)), { story: true });
@@ -652,7 +716,7 @@
         }
         for (const [id, companion] of candidates) {
           const candidate = element("article");
-          candidate.append(element("h4", companion.name + " · " + world.classes[id].name),
+          candidate.append(element("h4", companion.name + " · " + klassen.grundklassen[companion.klasse].name),
             element("p", companion.introduction),
             element("p", companion.ability + " · " + companionEffect(companion)));
           const status = rules.recruitment(state, id);
@@ -673,10 +737,58 @@
     }
   }
 
+  // Klasse, Ressource, Spezialisierung und Meisterklasse im Charakterbereich.
+  function renderClassSheet() {
+    const sheet = el("class-sheet");
+    const faction = klassen.fraktionen[state.faction];
+    const data = faction.klassen[state.role];
+    const people = faction.volk;
+    const master = klassen.meisterklassen[people];
+    const lines = [
+      element("h4", "Klasse · " + rules.title(state)),
+      element("p", data.spielweise + "."),
+      element("p", "Ressource " + faction.ressource + ": " + data.ressource + ". Die Fraktionsressource ist noch nicht spielwirksam."),
+    ];
+    if (people === "orks") lines.push(element("p", state.rausch ? "Kampfrausch bereit · +2 Schaden beim nächsten Angriff."
+      : "Nach jeder gewonnenen Schlacht trägt dich eine Runde Kampfrausch."));
+    const spez = state.build.spez;
+    if (spez) {
+      lines.push(element("p", "Spezialisierung " + data[spez.variante][0] + ": " + data[spez.variante][1] + "."));
+    } else {
+      lines.push(element("p", "Spezialisierung ab Quest-Stufe " + klassen.regeln.spezialisierungStufe + " (derzeit " + state.questStufe + "): " +
+        data.a[0] + " oder " + data.b[0] + "."));
+    }
+    lines.push(element("p", state.build.meister ? "Meisterklasse " + rules.title(state) + " · " + master.faehigkeit + "."
+      : "Meisterklasse nach der " + master.vereinigung + ": " + master.name + "."));
+    sheet.replaceChildren(...lines);
+    if (!spez && state.questStufe >= klassen.regeln.spezialisierungStufe && !state.combat && state.health) {
+      const values = rules.heroAttributes(state);
+      const limits = rules.heroLimits(state);
+      const target = Object.keys(world.attributes).find((id) => values[id] < klassen.regeln.grundwertMax);
+      const skill = Object.keys(klassen.fertigkeiten).find((id) => state.build.fertigkeiten[id] < limits[id]) ??
+        Object.keys(klassen.fertigkeiten).find((id) => id !== "magie" || faction.magie);
+      for (const variante of ["a", "b"]) {
+        button(sheet, data[variante][0] + " werden", () => update(rules.specialize(state, variante,
+          el("spez-grundwert").value || target, el("spez-fertigkeit").value || skill)));
+      }
+      const pick = (id, options, value) => {
+        const select = element("select");
+        select.id = id;
+        for (const [key, label] of options) select.add(new Option(label, key));
+        select.value = value;
+        return select;
+      };
+      sheet.append(element("p", "+1 Grundwert und +1 Fertigkeitspunkt:"),
+        pick("spez-grundwert", Object.entries(world.attributes), target),
+        pick("spez-fertigkeit", Object.entries(klassen.fertigkeiten).map(([id, item]) => [id, item.name]), skill));
+    }
+  }
+
   function render() {
     setPortrait(el("avatar"), state);
     el("hero-name").textContent = state.name;
-    el("hero-origin").textContent = world.origins[state.origin].name + " · " + world.classes[state.role].name;
+    el("hero-origin").textContent = klassen.voelker[klassen.fraktionen[state.faction].volk].name + " · " +
+      klassen.fraktionen[state.faction].name + " · " + rules.title(state);
     const finishedRescue = state.marks.includes("joren-gerettet") || state.marks.includes("joren-verloren");
     const skarnDone = state.marks.includes("runen-geschuetzt") || state.marks.includes("runen-verbrannt");
     el("objective").textContent = state.scene === "watch-yard" && finishedRescue
@@ -701,7 +813,11 @@
       ["Gleichgewicht", state.balance === 0 ? "0 · Im Gleichgewicht" :
         state.balance < 0 ? state.balance + " · Erneuerung" : "+" + state.balance + " · Zerstörung"],
     ]);
-    stats(el("attributes"), attributeValues(state.origin, state.allocation ?? undefined));
+    stats(el("attributes"), attributeValues(rules.heroAttributes(state)));
+    const limits = rules.heroLimits(state);
+    stats(el("skills"), Object.entries(rules.heroSkills(state)).map(([id, value]) =>
+      [klassen.fertigkeiten[id].name, value + " / " + limits[id]]));
+    renderClassSheet();
     renderInventory();
     renderParty();
     const progress = rules.progression(state);
@@ -715,53 +831,112 @@
     const training = el("training");
     training.replaceChildren();
     if (progress.points) {
-      training.append(element("p", progress.points + " freie Attributpunkte"));
+      training.append(element("p", progress.points + (progress.points === 1 ? " Grundwertpunkt" : " Grundwertpunkte") + " aus Stufenaufstiegen"));
+      const values = rules.heroAttributes(state);
       for (const [id, label] of Object.entries(world.attributes)) {
-        button(training, "+1 " + label, () => update(rules.train(state, id)), { disabled: Boolean(state.combat) || !state.health });
+        button(training, "+1 " + label, () => update(rules.train(state, id)),
+          { disabled: Boolean(state.combat) || !state.health || values[id] >= klassen.regeln.grundwertMax });
       }
     }
-    el("legacy-build").hidden = Boolean(state.allocation) || Boolean(state.combat) || !state.health;
+    el("legacy-build").hidden = !state.umschulung || Boolean(state.combat) || !state.health;
     list(el("journal"), [...state.journal].reverse(), "Deine Reise beginnt.");
     renderScene();
     renderMap();
   }
 
-  for (const [id, data] of Object.entries(world.origins)) origin.add(new Option(data.name, id));
-  for (const [id, data] of Object.entries(world.classes)) role.add(new Option(data.name, id));
-  function updateClassDescription() {
-    el("class-description").textContent = world.classes[role.value].description;
+  for (const [id, data] of Object.entries(klassen.voelker)) volk.add(new Option(data.name, id));
+  for (const [id, label] of Object.entries(world.attributes)) volkWahl.add(new Option(label, id));
+
+  function fillFactions() {
+    const allowed = Object.entries(klassen.fraktionen).filter(([id, data]) => data.volk === volk.value &&
+      (!editingLegacy || rules.originOf(id) === state.origin));
+    const previous = origin.value;
+    origin.replaceChildren(...allowed.map(([id, data]) =>
+      new Option(data.name + " · " + data.schwierigkeit + " · " + data.ressource, id)));
+    if (allowed.some(([id]) => id === previous)) origin.value = previous;
+    const people = klassen.voelker[volk.value];
+    el("volk-description").textContent = people.text;
+    el("volk-choice").hidden = !people.wahl;
+    fillClasses();
   }
+
+  function fillClasses() {
+    const previous = role.value;
+    role.replaceChildren(...klassen.klassenFolge.map((id) => new Option(
+      rules.className(origin.value, id) + " · " + klassen.grundklassen[rules.profile(origin.value, id)].name, id)));
+    if (previous) role.value = previous;
+    const faction = klassen.fraktionen[origin.value];
+    el("faction-description").textContent = "Ressource " + faction.ressource + " · Schwierigkeit " + faction.schwierigkeit +
+      " · Grundwerte " + bonusText(faction.bonus) + (faction.magie ? "" : " · keine Magie") + (faction.hinweis ? ". " + faction.hinweis : "");
+    if (!editingLegacy || portraitNeedsReset) portraitPreview(true);
+    updateClassDescription();
+  }
+  let portraitNeedsReset = true;
+
+  const bonusText = (bonus) => Object.entries(bonus).map(([id, value]) => world.attributes[id] + " " + signed(value)).join(", ");
+
+  function updateClassDescription() {
+    const data = klassen.fraktionen[origin.value].klassen[role.value];
+    const profile = klassen.grundklassen[rules.profile(origin.value, role.value)];
+    const kit = world.classes[rules.profile(origin.value, role.value)];
+    const box = el("class-description");
+    box.replaceChildren(
+      element("p", data.spielweise + ". " + profile.rolle + "."),
+      element("p", "Grundwerte " + bonusText(profile.bonus) + " · Hauptfertigkeiten " +
+        profile.haupt.map((id) => klassen.fertigkeiten[id].name).join(" und ") + "."),
+      element("p", "Nutzt " + klassen.fraktionen[origin.value].ressource + ": " + data.ressource + "."),
+      element("p", "Im Kampf: " + kit.description),
+      element("p", "Spezialisierung ab Quest-Stufe 3: " + data.a[0] + " (" + data.a[1] + ") oder " + data.b[0] + " (" + data.b[1] + ")."),
+    );
+    suggest();
+  }
+
+  // Vorschlag aus den Regeln: freie Punkte auf die Grundwerte der Hauptfertigkeiten, Fertigkeiten passend verteilt.
+  function suggest(keepPoints = false) {
+    const proposal = rules.defaultBuild(origin.value, role.value, keepPoints ? { ...allocation } : null, volkWahl.value);
+    if (!keepPoints) allocation = { ...proposal.frei };
+    if (proposal.wahl) volkWahl.value = proposal.wahl;
+    skills = editingLegacy
+      ? rules.suggestSkills(origin.value, role.value, { ...proposal, frei: allocation })
+      : { ...proposal.fertigkeiten };
+    renderPoints();
+  }
+
+  volk.addEventListener("change", fillFactions);
+  origin.addEventListener("change", fillClasses);
   role.addEventListener("change", updateClassDescription);
-  origin.addEventListener("change", () => portraitPreview(true));
+  volkWahl.addEventListener("change", () => renderPoints());
+  el("skill-suggest").addEventListener("click", () => suggest(true));
   appearance.addEventListener("change", () => portraitPreview(true));
   variant.addEventListener("change", () => portraitPreview());
   el("new-game").addEventListener("click", () => {
     editingLegacy = false;
+    portraitNeedsReset = true;
     el("character-form").reset();
-    for (const input of [name, origin, appearance, variant]) input.disabled = false;
+    for (const input of [name, volk, appearance, variant]) input.disabled = false;
     el("character-submit").textContent = "Prolog starten";
-    allocation = {};
-    el("creation-status").textContent = state ? "Beim Start des Prologs wird der bisherige lokale Spielstand ersetzt." : "";
-    portraitPreview(true);
-    renderPoints();
-    updateClassDescription();
+    creationNote = state ? "Beim Start des Prologs wird der bisherige lokale Spielstand ersetzt." : "";
+    fillFactions();
     show("creation");
     el("creation-title").focus();
   });
   el("legacy-build").addEventListener("click", () => {
     editingLegacy = true;
-    allocation = {};
+    portraitNeedsReset = false;
     name.value = state.name;
-    origin.value = state.origin;
+    volk.value = klassen.fraktionen[state.faction].volk;
     appearance.value = state.appearance;
+    fillFactions();
+    origin.value = state.faction;
     role.value = state.role;
-    portraitPreview(true);
+    fillClasses();
+    const id = state.appearance + "-0" + world.origins[state.origin].portrait;
+    variant.replaceChildren(...portraits.styles(id).map((label, index) => new Option(label, index)));
     variant.value = String(state.variant);
-    renderPoints();
-    for (const input of [name, origin, appearance, variant]) input.disabled = true;
-    el("character-submit").textContent = "Charakter aktualisieren";
-    el("creation-status").textContent = "Verteile 6 Punkte. Dein Spielstand wird an derselben Stelle fortgesetzt.";
-    updateClassDescription();
+    for (const input of [name, volk, appearance, variant]) input.disabled = true;
+    el("character-submit").textContent = "Held anpassen";
+    creationNote = "Das Klassensystem ist neu. Wähle einmal Fraktion, Klasse, Grundwerte und Fertigkeiten. Reise, Beute und Stufenaufstiege bleiben erhalten.";
+    portraitPreview();
     show("creation");
     el("creation-title").focus();
   });
@@ -771,10 +946,10 @@
     try {
       if (el("creation").hidden) return;
       if (editingLegacy) {
-        showPlay(rules.buildLegacy(state, role.value, allocation));
+        showPlay(rules.retrain(state, origin.value, role.value, draftBuild()));
         return;
       }
-      const next = rules.create(name.value, origin.value, appearance.value, Number(variant.value), role.value, allocation);
+      const next = rules.create(name.value, origin.value, appearance.value, Number(variant.value), role.value, draftBuild());
       state = next;
       save();
       setPortrait(el("intro-portrait"), next);

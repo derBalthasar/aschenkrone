@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="spiel/stil.css">
   <script defer src="bestiarium/daten.js"></script>
   <script defer src="profilbilder/portraets.js"></script>
+  <script defer src="spiel/klassen.js"></script>
   <script defer src="spiel/welt.js"></script>
   <script defer src="spiel/regeln.js"></script>
   <script defer src="spiel/prolog.js"></script>
@@ -53,18 +54,31 @@
         <h2 id="creation-title" tabindex="-1">Charakter erstellen</h2>
         <label for="character-name">Name</label>
         <input id="character-name" required maxlength="40" autocomplete="off">
-        <label for="origin">Herkunft</label>
-        <select id="origin"></select>
+        <label for="volk">Volk</label>
+        <select id="volk" aria-describedby="volk-description"></select>
+        <p id="volk-description" class="hint"></p>
+        <label for="origin">Fraktion</label>
+        <select id="origin" aria-describedby="faction-description"></select>
+        <p id="faction-description" class="hint"></p>
         <label for="class">Klasse</label>
         <select id="class" aria-describedby="class-description"></select>
-        <p id="class-description"></p>
+        <div id="class-description" class="class-description"></div>
+        <div id="volk-choice" hidden>
+          <label for="volk-wahl">Vielseitig · +1 auf einen Grundwert nach Wahl</label>
+          <select id="volk-wahl"></select>
+        </div>
         <label for="appearance">Porträt</label>
         <select id="appearance"><option value="mann">Männlich</option><option value="frau">Weiblich</option></select>
         <label for="variant">Variante</label>
         <select id="variant"></select>
-        <fieldset id="point-buy"><legend>Attributpunkte</legend>
+        <fieldset id="point-buy"><legend>Grundwerte</legend>
           <p id="points-left" aria-live="polite"></p>
           <div id="point-controls"></div>
+        </fieldset>
+        <fieldset id="skill-buy" class="point-buy"><legend>Fertigkeiten</legend>
+          <p id="skills-left" aria-live="polite"></p>
+          <div id="skill-controls"></div>
+          <button id="skill-suggest" class="action" type="button">Vorschlag übernehmen</button>
         </fieldset>
         <dl id="preview-stats" class="stat-line"></dl>
         <p id="creation-status" role="status"></p>
@@ -142,7 +156,11 @@
             <p id="objective"></p>
             <ul id="quest-clues" hidden></ul>
           </section>
-          <details><summary>Eigenschaften</summary><dl id="attributes" class="stat-line"></dl></details>
+          <details><summary>Eigenschaften</summary>
+            <h4 class="sheet-heading">Grundwerte</h4><dl id="attributes" class="stat-line"></dl>
+            <h4 class="sheet-heading">Fertigkeiten</h4><dl id="skills" class="stat-line"></dl>
+            <div id="class-sheet"></div>
+          </details>
           <details open><summary>Inventar und Ausrüstung</summary><p id="equipment"></p><ul id="inventory" class="inventory-list"></ul></details>
           <details open><summary id="party-count">Gefährten</summary><ul id="party-members" class="inventory-list"></ul>
             <details><summary>Mögliche Treffpunkte</summary><ul id="party-leads"></ul></details>
@@ -150,7 +168,7 @@
           <details><summary>Fraktionsruf</summary><ul id="faction-ruf" class="inventory-list"></ul></details>
           <details open><summary>Reisejournal</summary><ol id="journal"></ol></details>
           <div class="actions save-actions">
-            <button id="legacy-build" class="action" hidden>Klasse und Attribute nachtragen</button>
+            <button id="legacy-build" class="action" hidden>Held an das neue Klassensystem anpassen</button>
             <button id="export" class="action">Spielstand exportieren</button>
             <button id="menu" class="action">Hauptmenü</button>
           </div>
