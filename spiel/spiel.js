@@ -352,8 +352,10 @@
       target = null;
     }
 
-    // Ausschnitt und Kartenbild der gewählten Stufe
-    const here = karte.lage(scene, world.destinations);
+    // Ausschnitt und Kartenbild der gewählten Stufe. In der Weltreise steht der Held auf einem Knoten.
+    const node = state.scene === "weltknoten" ? knoten.get(state.knoten) : null;
+    const here = node ? { punkt: node.punkt, name: node.name, fraktion: node.fraktion, reise: false } : karte.lage(scene, world.destinations);
+    el("map-routes").classList.toggle("map-routes-off", Boolean(node));
     const view = karte.ansicht(mapLevel, here, state.faction);
     const [vx, vy, vw, vh] = view.rect;
     const picture = karte.bild(view.rect);
@@ -392,7 +394,21 @@
       area.style.height = ah / vh * 100 + "%";
       mapPlaces.append(area);
     }
-    for (const [id, location] of Object.entries(world.destinations)) {
+    if (node && mapLevel !== "welt" && !state.combat) {
+      // Nachbarknoten als Reiseziele: ein Klick reist sofort (eine Runde).
+      for (const weg of rules.reiseZiele(state)) {
+        const marker = element("button", weg.ziel.name);
+        const x = karte.prozent(view.rect, weg.ziel.punkt)?.[0] ?? 50;
+        marker.type = "button";
+        marker.className = "map-marker map-node map-" + weg.sicherheit + " map-side-" + (x > 70 ? "l" : "r") + (weg.ziel.typ === "dorf" ? " map-village" : "");
+        marker.disabled = Boolean(weg.grund);
+        marker.title = knoten.kantenNamen[weg.kantenTyp] + " · " + knoten.sicherheitNamen[weg.sicherheit] + (weg.grund ? " · " + weg.grund : "");
+        marker.setAttribute("aria-label", "Reise nach " + weg.ziel.name + " · " + marker.title);
+        marker.addEventListener("click", () => update(rules.reise(state, weg.zielId)));
+        placeOnMap(marker, view, weg.ziel.punkt);
+      }
+    }
+    for (const [id, location] of Object.entries(node ? {} : world.destinations)) {
       const reachable = travels.has(id);
       if (reachable) {
         const choice = element("button", location.name);
@@ -426,7 +442,8 @@
       pin.className = "map-pin";
       pin.setAttribute("aria-hidden", "true");
       placeOnMap(pin, view, here.punkt);
-      if (!here.reise || mapLevel === "welt") {
+      // In der Weltreise stehen Nachbarorte dicht am Standort; dort genügt die Nadel, außer auf der Weltkarte.
+      if ((!here.reise && !node) || mapLevel === "welt") {
         const label = element("span", "Du bist hier · " + here.name);
         const right = (karte.prozent(view.rect, here.punkt)?.[0] ?? 0) > 62;
         label.className = "map-marker map-current map-here" + (right ? " map-side-l" : " map-side-r");
@@ -449,12 +466,13 @@
     el("map-caption").textContent = here ? levelText + " · Du bist in " + here.name +
       (klassen.fraktionen[here.fraktion] ? ", Land der Fraktion " + klassen.fraktionen[here.fraktion].name : "") + "." : levelText + ".";
     el("map-status").textContent = state.combat ? "Im Kampf kannst du die Karte ansehen. Reiseoptionen öffnen sich nach der Begegnung." :
+      node ? "Standort: " + node.name + " · Wähle einen Nachbarort auf der Karte oder unter „D · Aufbruch“." :
       location ? "Standort: " + location + (travels.size ? " · Wähle ein Reiseziel, um die Route zu sehen." : " · Folge den Optionen in der Szene.") :
       far ? "Standort: " + far + " · Folge den Optionen in der Szene." :
       "Deine Reise ist beendet.";
 
     // Auf schmalen Bildschirmen ist die Karte breiter als der Rahmen: den eigenen Standort in die Mitte rücken.
-    const centerKey = state.scene + "|" + mapLevel;
+    const centerKey = state.scene + "|" + (state.knoten ?? "") + "|" + mapLevel;
     if (here && mapCentered !== centerKey) {
       mapCentered = centerKey;
       const scroller = board.parentElement;
@@ -982,7 +1000,7 @@
 
   // Charakterfenster: Stand (Erfahrung, Lebenspunkte, Glut), Werte und wirkende Effekte als Reiter in einem Pop-up.
   const sheet = { tab: "stand" };
-  const sheetTabs = ["stand", "werte", "effekte"];
+  const sheetTabs = ["stand", "werte", "aufstieg", "effekte"];
 
   function sheetMeter(id, value, max) {
     const meter = el("sheet-" + id);
@@ -1038,12 +1056,8 @@
     const training = element("div");
     training.className = "actions sheet-training";
     if (progress.points) {
-      training.append(element("p", progress.points + (progress.points === 1 ? " Grundwertpunkt" : " Grundwertpunkte") + " aus früheren Stufenaufstiegen zu verteilen:"));
-      const values = rules.heroAttributes(state);
-      for (const [id, label] of Object.entries(world.attributes)) {
-        button(training, "+1 " + label, () => update(rules.train(state, id)),
-          { disabled: Boolean(state.combat) || !state.health || values[id] >= klassen.regeln.grundwertMax });
-      }
+      training.append(element("p", progress.points + (progress.points === 1 ? " Grundwertpunkt" : " Grundwertpunkte") + " aus früheren Stufenaufstiegen zu verteilen."));
+      button(training, "Im Entwurf verteilen", () => { sheet.tab = "aufstieg"; renderSheet(); el("sheet-tab-aufstieg").focus(); });
     }
     const fight = state.combat ? rules.targets(state).filter(enemy => enemy.health > 0) : [];
     panel.append(
@@ -1052,12 +1066,13 @@
         ["Lebenspunkte", state.health + " / " + rules.healthLimit(state)],
         ...((values) => [["Ausdauer", values.ausdauer + " / " + values.ausdauerMax],
           ...(values.manaMax ? [["Mana", values.mana + " / " + values.manaMax]] : []),
-          [values.ressourceName, String(values.ressource)]])(rules.kampfwerte(state)),
+          [values.ressourceName, values.ressource + " / " + rules.vorratMax]])(rules.kampfwerte(state)),
         ["Glut", state.ember + " / " + rules.emberLimit(state)],
         ["Schutz im Kampf", String(rules.protection(state) + rules.gearBonus(state, "armor"))],
         ["Silber", String(state.silver)],
       ])),
       sheetSection("Glutgleichgewicht", ...sheetBalance()),
+      sheetSection("Gleichgewicht der Welt · Runde " + (state.runde ?? 0), weltLeistenBlock()),
       sheetSection("Lage", sheetStats([
         ["Ort", world.scenes[state.scene].place ?? "Unterwegs"],
         ["Kampf", fight.length ? "Gegen " + fight.map(enemy => enemy.name + " (" + enemy.health + " LP)").join(", ") : "Kein Kampf"],
@@ -1137,6 +1152,205 @@
     }
   }
 
+  // ---- Aufstieg im Entwurfsmodus (Technische Spezifikation, Abschnitt 4) ----
+  // Die Plus- und Minus-Knöpfe ändern nur den Entwurf. Erst „Änderungen speichern“ schreibt die Punkte fest.
+  const entwurf = { quelle: "stufe", training: {}, spez: null, meister: null };
+  function entwurfLeeren() {
+    Object.assign(entwurf, { quelle: "stufe", training: {}, spez: null, meister: null });
+  }
+  const entwurfSumme = (record) => Object.values(record ?? {}).reduce((sum, value) => sum + value, 0);
+  function entwurfQuellen() {
+    const quellen = [];
+    if (state.stufenpunkte) quellen.push(["stufe", "Stufenpunkte"]);
+    if (!state.build.spez && state.questStufe >= klassen.regeln.spezialisierungStufe) quellen.push(["spez", "Spezialisierung"]);
+    if (state.build.spez && !state.build.meister && state.vereinigt) quellen.push(["meister", "Meisterklasse"]);
+    return quellen;
+  }
+  // Build und Training so, wie sie nach dem Speichern wären.
+  function entwurfStand() {
+    const build = structuredClone(state.build);
+    const training = { ...state.training };
+    for (const [id, count] of Object.entries(entwurf.training)) training[id] = (training[id] ?? 0) + count;
+    if (entwurf.spez?.variante) {
+      build.spez = { variante: entwurf.spez.variante, grundwert: entwurf.spez.grundwert ?? null };
+      if (entwurf.spez.fertigkeit) build.fertigkeiten[entwurf.spez.fertigkeit]++;
+    }
+    if (entwurf.meister) {
+      build.meister = { grundwerte: { ...entwurf.meister.grundwerte } };
+      if (entwurf.meister.fertigkeit) build.fertigkeiten[entwurf.meister.fertigkeit]++;
+    }
+    const values = rules.attributes(state.faction, state.role, build, training);
+    return { build, training, values, limits: rules.skillLimits(state.faction, values) };
+  }
+  function entwurfPlan() {
+    const plan = { training: { ...entwurf.training } };
+    const spez = entwurf.spez;
+    if (spez && (spez.variante || spez.grundwert || spez.fertigkeit)) {
+      if (!spez.variante) return { fehlt: "Wähle Spezialisierung A oder B." };
+      if (!spez.grundwert || !spez.fertigkeit) return { fehlt: "Die Spezialisierung bringt +1 Grundwert und +1 Fertigkeit. Verteile beide." };
+      plan.spez = { ...spez };
+    }
+    const meister = entwurf.meister;
+    if (meister && (entwurfSumme(meister.grundwerte) || meister.fertigkeit)) {
+      if (entwurfSumme(meister.grundwerte) !== 2 || !meister.fertigkeit) return { fehlt: "Die Meisterklasse bringt +2 Grundwerte und +1 Fertigkeit. Verteile alle." };
+      plan.meister = { grundwerte: { ...meister.grundwerte }, fertigkeit: meister.fertigkeit };
+    }
+    if (!entwurfSumme(plan.training) && !plan.spez && !plan.meister) return { fehlt: "Noch keine Änderung im Entwurf." };
+    return { plan };
+  }
+
+  function entwurfGrundwert(id, delta) {
+    const { values } = entwurfStand();
+    if (delta > 0 && values[id] >= klassen.regeln.grundwertMax) return;
+    if (entwurf.quelle === "stufe") {
+      const next = (entwurf.training[id] ?? 0) + delta;
+      if (next < 0 || (delta > 0 && entwurfSumme(entwurf.training) >= state.stufenpunkte)) return;
+      if (next) entwurf.training[id] = next; else delete entwurf.training[id];
+    } else if (entwurf.quelle === "spez") {
+      entwurf.spez ??= { variante: null, grundwert: null, fertigkeit: null };
+      if (delta > 0) entwurf.spez.grundwert = id;
+      else if (entwurf.spez.grundwert === id) entwurf.spez.grundwert = null;
+    } else {
+      entwurf.meister ??= { grundwerte: {}, fertigkeit: null };
+      const next = (entwurf.meister.grundwerte[id] ?? 0) + delta;
+      if (next < 0 || next > 2 || (delta > 0 && entwurfSumme(entwurf.meister.grundwerte) >= 2)) return;
+      if (next) entwurf.meister.grundwerte[id] = next; else delete entwurf.meister.grundwerte[id];
+    }
+  }
+  function entwurfFertigkeit(id, delta) {
+    const key = entwurf.quelle === "spez" ? "spez" : "meister";
+    entwurf[key] ??= key === "spez" ? { variante: null, grundwert: null, fertigkeit: null } : { grundwerte: {}, fertigkeit: null };
+    if (delta > 0) entwurf[key].fertigkeit = id;
+    else if (entwurf[key].fertigkeit === id) entwurf[key].fertigkeit = null;
+  }
+
+  function renderSheetAufstieg(panel) {
+    const quellen = entwurfQuellen();
+    if (!quellen.length) {
+      const note = element("p", "Zurzeit ist nichts zu verteilen. Grundwertpunkte aus früheren Stufenaufstiegen, die Spezialisierung ab Quest-Stufe " +
+        klassen.regeln.spezialisierungStufe + " (derzeit " + state.questStufe + ") und die Meisterklasse nach der Vereinigung deines Volkes erscheinen hier.");
+      note.className = "sheet-note";
+      panel.append(note);
+      return;
+    }
+    if (!quellen.some(([id]) => id === entwurf.quelle)) entwurf.quelle = quellen[0][0];
+    const locked = Boolean(state.combat) || !state.health;
+    const rerender = (focus) => { renderSheet(); if (focus) el("sheet-panel").querySelector(focus)?.focus(); };
+    const stand = entwurfStand();
+    const faction = klassen.fraktionen[state.faction];
+    const klasse = faction.klassen[state.role];
+
+    // Herkunft der Punkte
+    const pick = element("div");
+    pick.className = "entwurf-quellen actions";
+    pick.setAttribute("role", "group");
+    pick.setAttribute("aria-label", "Punkte verteilen aus");
+    for (const [id, label] of quellen) {
+      const rest = id === "stufe" ? state.stufenpunkte - entwurfSumme(entwurf.training) :
+        id === "spez" ? (entwurf.spez?.grundwert ? 0 : 1) + (entwurf.spez?.fertigkeit ? 0 : 1) :
+        2 - entwurfSumme(entwurf.meister?.grundwerte) + (entwurf.meister?.fertigkeit ? 0 : 1);
+      const control = button(pick, label + " · " + rest + " offen", () => { entwurf.quelle = id; rerender('[data-quelle="' + id + '"]'); });
+      control.dataset.quelle = id;
+      control.setAttribute("aria-pressed", String(entwurf.quelle === id));
+    }
+    const intro = element("p", entwurf.quelle === "stufe" ? "Stufenpunkte erhöhen je einen Grundwert um 1 (höchstens 20)." :
+      entwurf.quelle === "spez" ? "Spezialisierung: Wähle A oder B. Sie bringt +1 Grundwert und +1 Fertigkeitspunkt." :
+      "Meisterklasse " + klassen.meisterklassen[faction.volk].name + ": +2 Grundwerte und +1 Fertigkeitspunkt.");
+    intro.className = "sheet-note";
+    panel.append(sheetSection("Punkte verteilen", pick, intro));
+
+    if (entwurf.quelle === "spez") {
+      const varianten = element("div");
+      varianten.className = "entwurf-varianten actions";
+      for (const variante of ["a", "b"]) {
+        const [name, text] = klasse[variante];
+        const control = button(varianten, (variante === "a" ? "A · " : "B · ") + name + " · " + text, () => {
+          entwurf.spez ??= { variante: null, grundwert: null, fertigkeit: null };
+          entwurf.spez.variante = variante;
+          rerender('[data-variante="' + variante + '"]');
+        }, { disabled: locked });
+        control.dataset.variante = variante;
+        control.setAttribute("aria-pressed", String(entwurf.spez?.variante === variante));
+      }
+      panel.append(sheetSection("Spezialisierung", varianten));
+    }
+
+    // Grundwerte mit Live-Werten
+    const rows = element("div");
+    rows.className = "entwurf-rows";
+    const before = rules.heroAttributes(state);
+    for (const [id, label] of Object.entries(world.attributes)) {
+      const row = element("div");
+      row.className = "entwurf-row";
+      const value = stand.values[id];
+      const change = value - before[id];
+      const bonus = rules.modifier(value);
+      const name = element("span", label);
+      const shown = element("strong", value + (bonus ? " (" + signed(bonus) + ")" : ""));
+      if (change) shown.append(element("em", " " + signed(change)));
+      const own = entwurf.quelle === "stufe" ? entwurf.training[id] ?? 0 : entwurf.quelle === "spez" ? (entwurf.spez?.grundwert === id ? 1 : 0)
+        : entwurf.meister?.grundwerte?.[id] ?? 0;
+      const minus = button(row, "−", () => { entwurfGrundwert(id, -1); rerender('[data-minus="' + id + '"]'); }, { disabled: locked || !own });
+      minus.dataset.minus = id;
+      minus.setAttribute("aria-label", label + " im Entwurf senken");
+      const plus = button(row, "+", () => { entwurfGrundwert(id, 1); rerender('[data-plus="' + id + '"]'); }, { disabled: locked || value >= klassen.regeln.grundwertMax });
+      plus.dataset.plus = id;
+      plus.setAttribute("aria-label", label + " im Entwurf erhöhen");
+      row.prepend(name, shown);
+      rows.append(row);
+    }
+    panel.append(sheetSection("Grundwerte", rows));
+
+    // Fertigkeiten mit Grenzen durch den Grundwert (Magie bleibt ohne Magie der Fraktion bei 0)
+    const skills = element("div");
+    skills.className = "entwurf-rows";
+    const skillSource = entwurf.quelle !== "stufe";
+    for (const [id, skill] of Object.entries(klassen.fertigkeiten)) {
+      const row = element("div");
+      row.className = "entwurf-row";
+      const value = stand.build.fertigkeiten[id];
+      const change = value - state.build.fertigkeiten[id];
+      const shown = element("strong", value + " / " + stand.limits[id]);
+      if (change) shown.append(element("em", " +" + change));
+      if (value > stand.limits[id]) shown.className = "entwurf-over";
+      row.append(element("span", skill.name), shown);
+      if (skillSource) {
+        const key = entwurf.quelle;
+        const chosen = entwurf[key]?.fertigkeit === id;
+        const minus = button(row, "−", () => { entwurfFertigkeit(id, -1); rerender('[data-skill-minus="' + id + '"]'); }, { disabled: locked || !chosen });
+        minus.dataset.skillMinus = id;
+        minus.setAttribute("aria-label", skill.name + " im Entwurf senken");
+        const plus = button(row, "+", () => { entwurfFertigkeit(id, 1); rerender('[data-skill-plus="' + id + '"]'); },
+          { disabled: locked || chosen || value >= stand.limits[id] });
+        plus.dataset.skillPlus = id;
+        plus.setAttribute("aria-label", skill.name + " im Entwurf erhöhen");
+      }
+      skills.append(row);
+    }
+    panel.append(sheetSection("Fertigkeiten", skills));
+
+    // Prüfen, speichern, zurücksetzen
+    const result = entwurfPlan();
+    const preview = result.plan ? rules.entwurf(state, result.plan) : state;
+    const message = result.fehlt ?? (preview === state
+      ? rules.buildProblem(state.faction, state.role, stand.build, stand.training) ?? "Der Entwurf ist so nicht gültig."
+      : "Der Entwurf ist gültig. Speichere ihn, um die Punkte festzuschreiben.");
+    const status = element("p", locked ? "Im Kampf und ohne Lebenspunkte kannst du nichts festschreiben." : message);
+    status.className = "sheet-note entwurf-status";
+    status.setAttribute("role", "status");
+    const footer = element("div");
+    footer.className = "actions entwurf-actions";
+    const save = button(footer, "Änderungen speichern", () => {
+      if (preview === state) return;
+      entwurfLeeren();
+      update(preview);
+      el("sheet-panel").querySelector(".entwurf-actions button")?.focus();
+    }, { disabled: locked || preview === state });
+    save.classList.add("primary");
+    button(footer, "Zurücksetzen", () => { entwurfLeeren(); rerender(".entwurf-actions button:last-child"); });
+    panel.append(sheetSection("Entwurf", status, footer));
+  }
+
   function renderSheet() {
     setPortrait(el("sheet-avatar"), state);
     el("sheet-title").textContent = state.name;
@@ -1160,13 +1374,16 @@
     const panel = el("sheet-panel");
     panel.setAttribute("aria-labelledby", "sheet-tab-" + sheet.tab);
     panel.replaceChildren();
-    ({ stand: renderSheetStand, werte: renderSheetWerte, effekte: renderSheetEffekte })[sheet.tab](panel);
+    const offen = entwurfQuellen().length;
+    el("sheet-tab-aufstieg").textContent = "Aufstieg" + (offen ? " (" + offen + ")" : "");
+    ({ stand: renderSheetStand, werte: renderSheetWerte, aufstieg: renderSheetAufstieg, effekte: renderSheetEffekte })[sheet.tab](panel);
   }
 
   function openSheet(tab = "stand") {
     if (!state) return;
     if (el("inventory-hub").open) el("inventory-hub").close();
     sheet.tab = tab;
+    entwurfLeeren();
     renderSheet();
     el("character-sheet").showModal();
     el("sheet-close").focus();
@@ -1616,7 +1833,7 @@
       if (combat.feinde[0].lp > 0 && combat.round % 2 === 1) content.append(element("p", special.warning + " Deckung schützt vor dem Zusatzeffekt."));
       if (combat.bleeding > 0) content.append(element("p", "Blutung · " + combat.bleeding + " Runden"));
       // Eine Aktion pro Runde: Grundangriff oder eine freigeschaltete Fähigkeit.
-      const canBoost = values.ressource >= 1;
+      const canBoost = values.ressource >= 2;
       const boost = element("label");
       boost.className = "boost-toggle";
       const boostBox = element("input");
@@ -1663,6 +1880,10 @@
       }
     } else {
       enemyTarget = null;
+      if (state.scene === "weltknoten") {
+        renderWeltHub(content, actions);
+        return;
+      }
       let sceneText = scene.text;
       if (state.scene === "watch-yard" && state.marks.includes("joren-gerettet")) {
         sceneText = "Unter der Torlaube hängt Jorens Laterne. Er sitzt mit geschientem Bein am Wachfeuer. Lene hat ihren Schal zum Trocknen über die Bank gelegt. Runa hält den Seilwagen für die Grenzwache bereit.";
@@ -1675,6 +1896,11 @@
           : "Nalda und Torben tragen die Säcke auf den unteren Steig. Über dem eingestürzten Tor stehen die Familiennamen nur noch auf ihren Zetteln.";
       }
       content.append(element("p", sceneText));
+      if (state.scene === "weltende" && state.niederlage) {
+        const reason = element("p", rules.niederlagen[state.niederlage]);
+        reason.className = "chapter-result";
+        content.append(reason, weltLeistenBlock());
+      }
       if (state.scene === "skarn-gate" && state.marks.includes("pass-gesperrt")) {
         content.append(element("p", "Von der Ziegenstiege siehst du unten die Schranke. Ins Kronreich gelangt die Bergwacht derzeit nur über den schmalen Umweg."));
       }
@@ -1775,59 +2001,301 @@
         button(actions, choice.label + (attribute ? " · Probe auf " + attribute : "") + risk,
           () => update(rules.choose(state, choice.id)), { story: true });
       }
-      const candidates = rules.candidates(state);
-      if (candidates.length) {
-        const recruitment = element("section");
-        recruitment.className = "recruitment";
-        recruitment.append(element("h3", "Gefährten vor Ort"));
-        if (state.party.length >= rules.partyLimit) {
-          recruitment.append(element("p", "Deine Gruppe ist voll. Am Wachhof oder in einer Stadt mit Zentrallager kannst du jemanden verabschieden."));
-        }
-        for (const [id, companion] of candidates) {
-          const candidate = element("article");
-          candidate.append(element("h4", companion.name + " · " + klassen.grundklassen[companion.klasse].name),
-            element("p", companion.introduction),
-            element("p", companion.ability + " · " + companionEffect(companion)));
-          if (!companion.soeldner) candidate.append(element("p", "Sympathie: " + rules.relationship(state, id).score));
-          const status = rules.recruitment(state, id);
-          if (status === "hire") {
-            const cost = rules.hireCost(state, id);
-            candidate.append(element("p", "Söldner · startet auf Erfahrungsstufe " + Math.max(1, rules.level(state) - 1) +
-              (cost < companion.soeldner.kosten ? " · Charisma-Rabatt" : "")));
-            button(candidate, companion.name + " anwerben · " + cost + " Silber", () => update(rules.hire(state, id)),
-              { disabled: state.party.length >= rules.partyLimit || state.silver < cost });
-          } else if (status === "incompatible") {
-            candidate.append(element("p", "Volksgrenzen: Untote und Lebende reisen nicht zusammen, Orks und Zwerge ebenso wenig."));
-          } else if (status === "ready") {
-            button(candidate, companion.name + " mitnehmen", () => update(rules.recruit(state, id)),
-              { disabled: state.party.length >= rules.partyLimit });
-          } else if (status === "promise") {
-            candidate.append(element("p", world.recruitmentQuests[id].text + " Frist: " + world.recruitmentQuests[id].turns + " Spielzüge ab Annahme."));
-            button(candidate, "Auftrag annehmen · " + world.recruitmentQuests[id].title, () => update(rules.promise(state, id)));
-          } else if (status === "task") {
-            const plan = world.recruitmentQuests[id];
-            candidate.append(element("p", plan.text + " Noch " + (rules.questEntries(state).find(quest => quest.id === "companion-" + id)?.remaining ?? plan.turns) + " Spielzüge."));
-            if (plan.salary) {
-              button(candidate, "Sold zahlen · " + plan.salary + " Silber", () => update(rules.completeQuest(state, id)),
-                { disabled: state.silver < plan.salary });
-              button(candidate, "Sold später zahlen · " + plan.salary + " Silber in 30 Spielzügen", () => update(rules.completeQuest(state, id, true)));
-            } else {
-              button(candidate, "Auftrag abschließen" + (plan.item ? " · " + world.items[plan.item] + " abgeben" : ""),
-                () => update(rules.completeQuest(state, id)), { disabled: !rules.questReady(state, id) });
-            }
-          } else {
-            candidate.append(element("p", status === "failed" ? "Der Aufnahmeauftrag ist gescheitert. Eine Aufnahme ist nicht mehr möglich." : ["blocked", "wary"].includes(status) ? world.companionAttitudes[id].reason :
-              companion.name + " lehnt es ab, dich zu begleiten."));
-          }
-          const debt = state.companionQuests?.[id]?.debt ?? 0;
-          if (debt) button(candidate, "Offenen Sold begleichen · " + debt + " Silber", () => update(rules.paySalary(state, id)),
-            { disabled: state.silver < debt });
-          recruitment.append(candidate);
-        }
-        content.append(recruitment);
+      renderCandidates(content);
+      if (rules.weltOffen(state)) {
+        const ort = knoten.get(rules.aktuellerKnoten(state));
+        button(actions, "Stadt-Hub von " + ort.name + " öffnen · Weltreise", () => {
+          welt.tab = "aufbruch";
+          update(rules.betreteWelt(state));
+        });
       }
       if (!choices.length) button(actions, "Zum Hauptmenü", () => showHome());
     }
+  }
+
+  // ---- Stadt-Hub (Technische Spezifikation, Abschnitt 2): Statusleiste, Krise und Aufhänger, vier Bereiche ----
+  const welt = { tab: "aufbruch" };
+  const weltTabs = [["hofstaat", "A · Hofstaat"], ["lager", "B · Rast und Lager"], ["held", "C · Held"], ["aufbruch", "D · Aufbruch"]];
+
+  function weltMeter(name, wert, max, schwelle = null) {
+    const row = element("div");
+    row.className = "welt-meter" + (schwelle !== null && wert >= schwelle ? " welt-warn" : "") + (schwelle !== null && wert >= 80 ? " welt-danger" : "");
+    const head = element("div");
+    head.className = "welt-meter-head";
+    head.append(element("span", name), element("strong", wert + " / " + max));
+    const bar = element("progress");
+    bar.max = max;
+    bar.value = wert;
+    bar.setAttribute("aria-label", name);
+    row.append(head, bar);
+    if (schwelle !== null) row.title = "Gegenkraft ab " + schwelle;
+    return row;
+  }
+
+  function weltLeistenBlock() {
+    const box = element("div");
+    box.className = "welt-meters";
+    for (const leiste of rules.weltLeisten(state)) box.append(weltMeter(leiste.name, leiste.wert, 100, leiste.schwelle));
+    box.append(weltMeter(rules.resourceName(state) + " (Vorrat)", state.ressource, rules.vorratMax));
+    return box;
+  }
+
+  function weltKrisen() {
+    const lines = [];
+    const wert = Object.fromEntries(rules.weltLeisten(state).map(leiste => [leiste.id, leiste.wert]));
+    if (wert.erzfieber >= 50) lines.push("Erzfieber " + wert.erzfieber + ": Der Zollpass ist gesperrt, und die Glut steigt jede Runde schneller.");
+    if (wert.glut >= 50) lines.push("Glut " + wert.glut + ": Ascheregen fällt über die Länder der Lebenden.");
+    if (wert.welke >= 50) lines.push("Welke " + wert.welke + ": Der Weltenbaum wirft sein Laub.");
+    if (wert.untote >= 50) lines.push("Untoten-Bedrohung " + wert.untote + ": Der Kult breitet sich aus.");
+    if (wert.orks >= 55) lines.push("Ork-Bedrohung " + wert.orks + ": Raubzüge an den Küsten.");
+    if (state.ressource <= 5) lines.push(rules.resourceName(state) + " fast aufgebraucht: Bei 0 zerfällt deine Fraktion. Hol Ertrag aus deinen Dörfern.");
+    return lines;
+  }
+
+  function renderWeltHub(content, actions) {
+    const ort = knoten.get(state.knoten);
+    const fraktion = klassen.fraktionen[ort.fraktion];
+    el("location").textContent = knoten.typNamen[ort.typ] + " · " + fraktion.name;
+    el("scene-title").textContent = ort.name;
+
+    // Statusleiste
+    const status = element("section");
+    status.className = "welt-status";
+    status.setAttribute("aria-label", "Statusleiste");
+    const facts = element("dl");
+    facts.className = "welt-facts";
+    for (const [label, value] of [["Ort", ort.name], ["Typ", knoten.typNamen[ort.typ] + (ort.hatHafen && ort.typ !== "hafenstadt" ? " mit Hafen" : "")],
+      ["Fraktion", fraktion.name + (ort.fraktion === state.faction ? " · eigene" : (state.vertraege ?? []).includes(ort.fraktion) ? " · Vertragspartner" : "")],
+      ["Zeit", "Herbst 612 n. E. · Runde " + state.runde], ["Silber", String(state.silver)],
+      ["Marken", state.marks.length ? String(state.marks.length) : "keine"]]) {
+      const item = element("div");
+      item.append(element("dt", label), element("dd", value));
+      facts.append(item);
+    }
+    status.append(facts, weltLeistenBlock());
+    if (state.marks.length) {
+      const marks = element("details");
+      marks.className = "welt-marks";
+      marks.append(element("summary", "Aktive Marken"), element("p", state.marks.join(", ")));
+      status.append(marks);
+    }
+    content.append(status);
+
+    // Krise und Aufhänger
+    const krise = element("section");
+    krise.className = "welt-krise";
+    krise.append(element("h3", "Krise und Aufhänger"));
+    const reihe = startpunkte.fraktionen[state.faction];
+    if (reihe) krise.append(element("p", "Fraktionsreihe „" + reihe.motto + "“ · Akt 1, „" + reihe.akte[0] + "“ · Die Akte werden noch gebaut."));
+    for (const line of weltKrisen()) {
+      const warn = element("p", line);
+      warn.className = "welt-alarm";
+      krise.append(warn);
+    }
+    const volk = klassen.fraktionen[ort.fraktion].volk;
+    const hooks = knoten.aufhaenger[volk] ?? [];
+    const seed = [...ort.id].reduce((sum, char) => sum + char.charCodeAt(0), 0);
+    const local = element("ul");
+    local.className = "welt-hooks";
+    for (let index = 0; index < Math.min(2, hooks.length); index++) {
+      const [title, text] = hooks[(seed + index * 3) % hooks.length];
+      const item = element("li");
+      item.append(element("strong", title + ": "), text);
+      local.append(item);
+    }
+    if (hooks.length) krise.append(local);
+    if (state.handlung) {
+      const back = knoten.get(state.handlung.knoten);
+      krise.append(element("p", rules.handlungHier(state) ? "Hier wartet die Handlung auf dich." : "Die Handlung wartet in " + back.name + "."));
+      if (rules.handlungHier(state)) button(krise, "Zur Handlung zurückkehren", () => update(rules.zurHandlung(state)), { story: true });
+    }
+    content.append(krise);
+
+    // Bereiche A bis D
+    const tabs = element("div");
+    tabs.className = "welt-tabs";
+    tabs.setAttribute("role", "tablist");
+    tabs.setAttribute("aria-label", "Stadt-Hub");
+    const panel = element("section");
+    panel.className = "welt-panel";
+    panel.setAttribute("role", "tabpanel");
+    panel.id = "welt-panel";
+    weltTabs.forEach(([id, label], index) => {
+      const tab = element("button", label);
+      tab.type = "button";
+      tab.id = "welt-tab-" + id;
+      tab.setAttribute("role", "tab");
+      tab.setAttribute("aria-selected", String(welt.tab === id));
+      tab.setAttribute("aria-controls", "welt-panel");
+      tab.tabIndex = welt.tab === id ? 0 : -1;
+      tab.addEventListener("click", () => { welt.tab = id; renderScene(); el("welt-tab-" + id)?.focus(); });
+      tab.addEventListener("keydown", event => {
+        if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+        event.preventDefault();
+        const next = weltTabs[(index + (event.key === "ArrowRight" ? 1 : weltTabs.length - 1)) % weltTabs.length][0];
+        welt.tab = next;
+        renderScene();
+        el("welt-tab-" + next)?.focus();
+      });
+      tabs.append(tab);
+    });
+    panel.setAttribute("aria-labelledby", "welt-tab-" + welt.tab);
+    ({ hofstaat: weltHofstaat, lager: weltLager, held: weltHeld, aufbruch: weltAufbruch })[welt.tab](panel, ort);
+    content.append(tabs, panel);
+  }
+
+  function weltHofstaat(panel, ort) {
+    panel.append(element("h3", "Hofstaat und Diplomatie"));
+    const vertraege = (state.vertraege ?? []).map(id => klassen.fraktionen[id].name);
+    panel.append(element("p", "Handelsverträge: " + (vertraege.length ? vertraege.join(", ") : "noch keine") +
+      ". Ein Vertrag öffnet die Häfen des Partners für deine Überfahrten."));
+    if (ort.typ === "hauptstadt" && ort.fraktion !== state.faction) {
+      const grund = rules.vertragGrund(state);
+      button(panel, "Handelsvertrag mit " + klassen.fraktionen[ort.fraktion].name + " schließen · " + rules.vertragKosten + " " +
+        rules.resourceName(state) + (grund ? " · " + grund : ""), () => update(rules.vertragSchliessen(state)), { disabled: Boolean(grund) });
+    } else if (ort.fraktion !== state.faction) {
+      panel.append(element("p", "Verträge schließt du am Hof der Hauptstadt " + karte.daten.fraktionen[ort.fraktion].hauptstadt + "."));
+    }
+    panel.append(element("p", "Bündnisse, Vasallen und Eroberung folgen in den nächsten Bauschritten."));
+    panel.append(element("h3", "Rekrutierung"));
+    panel.append(element("p", "Gruppe: " + (state.party.length + 1) + " von " + (rules.partyLimit + 1) + " Helden. " +
+      "Untote und Lebende reisen nicht zusammen, Orks und Zwerge ebenso wenig."));
+    if (!renderCandidates(panel)) {
+      panel.append(element("p", "Hier wartet niemand auf Anwerbung. Söldner warten in Kornwik, Heidvang, Eiswacht und Glutberg."));
+    }
+  }
+
+  function weltLager(panel, ort) {
+    panel.append(element("h3", "Rasten"));
+    const rastGrund = rules.rastGrund(state);
+    panel.append(element("p", "LP " + state.health + " / " + rules.healthLimit(state) + " · Glut " + state.ember + " / " + rules.emberLimit(state) +
+      ". Die Rast stellt die ganze Gruppe wieder her."));
+    button(panel, "Rasten · 1 " + rules.resourceName(state) + (rastGrund ? " · " + rastGrund : ""), () => update(rules.rast(state)),
+      { disabled: Boolean(rastGrund) });
+    if (ort.typ === "dorf") {
+      panel.append(element("h3", "Ertrag des Dorfes"));
+      panel.append(element("p", ort.name + " liefert " + ort.ertrag + " an " + knoten.get(ort.stadt).name + "."));
+      const grund = rules.ertragGrund(state);
+      button(panel, "Ertrag einholen · +" + rules.ertragMenge + " " + rules.resourceName(state) + (grund ? " · " + grund : ""),
+        () => update(rules.ertragEinholen(state)), { disabled: Boolean(grund) });
+    } else {
+      const doerfer = knoten.doerfer(ort.id).map(id => knoten.get(id));
+      panel.append(element("h3", "Dörfer"), element("p", doerfer.map(dorf => dorf.name + " (" + dorf.ertrag + ")").join(", ") +
+        (ort.fraktion === state.faction ? ". Dörfer deiner Fraktion liefern alle " + rules.ertragPause + " Runden +" + rules.ertragMenge + " " +
+          rules.resourceName(state) + "." : ".")));
+    }
+    panel.append(element("h3", "Zentrallager und Rucksack"));
+    const lager = rules.storageSite(state);
+    panel.append(element("p", lager ? lager + ". Hier kannst du Gegenstände einlagern und den Rucksack ausbauen."
+      : "Kein Zentrallager. Es steht in allen Hauptstädten und in den Städten deiner Fraktion."));
+    button(panel, lager ? "Zentrallager und Rucksack öffnen" : "Rucksack öffnen", () => openHub());
+    panel.append(element("h3", "Schmied und Heiler"));
+    panel.append(element("p", "Handwerk aus Trophäen und Flora folgt mit der Flora-und-Fauna-Ausarbeitung für alle Gebiete."));
+  }
+
+  function weltHeld(panel) {
+    const progress = rules.progression(state);
+    panel.append(element("h3", "Held und Stufenaufstieg"));
+    panel.append(element("p", rules.title(state) + " · Erfahrungsstufe " + progress.level + " · " + progress.xp + " EP"));
+    const open = [];
+    if (progress.points) open.push(progress.points + " Grundwertpunkte");
+    if (!state.build.spez && state.questStufe >= klassen.regeln.spezialisierungStufe) open.push("Spezialisierung");
+    if (state.build.spez && !state.build.meister && state.vereinigt) open.push("Meisterklasse");
+    panel.append(element("p", open.length ? "Offen: " + open.join(", ") + "." : "Zurzeit ist nichts zu verteilen."));
+    button(panel, "Charakterfenster öffnen", () => openSheet(open.length ? "aufstieg" : "werte"));
+  }
+
+  function weltAufbruch(panel, ort) {
+    panel.append(element("h3", "Aufbruch"));
+    panel.append(element("p", "Jede Reise ist eine Runde: Die Weltleisten ändern sich, und unterwegs würfelt das Land eine Begegnung aus. " +
+      "Kernland ist zu 70 % ruhig, Grenzland, Pässe und Seewege nur zu 40 %."));
+    const list = element("ul");
+    list.className = "welt-ziele";
+    const ziele = rules.reiseZiele(state).sort((a, b) => (a.ziel.typ === "dorf") - (b.ziel.typ === "dorf") || a.ziel.name.localeCompare(b.ziel.name, "de"));
+    for (const weg of ziele) {
+      const item = element("li");
+      item.className = "welt-ziel welt-" + weg.sicherheit;
+      const head = element("div");
+      head.className = "welt-ziel-head";
+      head.append(element("strong", weg.ziel.name), element("span", knoten.typNamen[weg.ziel.typ] + " · " + klassen.fraktionen[weg.ziel.fraktion].name));
+      const kosten = [weg.kostenRessource ? weg.kostenRessource + " " + rules.resourceName(state) : "", weg.kostenGold ? weg.kostenGold + " Silber" : ""].filter(Boolean).join(" + ");
+      const risiko = weg.sicherheit === "kernland" ? "Risiko gering" : "Risiko hoch";
+      const info = element("p", knoten.kantenNamen[weg.kantenTyp] + (weg.pass ? " (" + weg.pass + ")" : "") + " · " +
+        knoten.sicherheitNamen[weg.sicherheit] + " · " + risiko + " · " + kosten +
+        (weg.probe ? " · Probe auf Willenskraft oder Intelligenz, Glut +" + weg.glut : ""));
+      item.append(head, info);
+      if (weg.letzterVorrat && !weg.grund) {
+        const warn = element("p", "Achtung: Diese Reise braucht deinen letzten Vorrat. Bei 0 ist das Spiel verloren.");
+        warn.className = "welt-alarm";
+        item.append(warn);
+      }
+      button(item, "Reise nach " + weg.ziel.name + (weg.grund ? " · " + weg.grund : ""), () => {
+        update(rules.reise(state, weg.zielId));
+        welt.tab = "aufbruch";
+      }, { disabled: Boolean(weg.grund), story: true });
+      list.append(item);
+    }
+    panel.append(list);
+  }
+
+  // Gefährten und Söldner vor Ort, in Szenen der Handlung und im Hofstaat des Stadt-Hubs.
+  function renderCandidates(parent) {
+    const candidates = rules.candidates(state);
+    if (candidates.length) {
+      const recruitment = element("section");
+      recruitment.className = "recruitment";
+      recruitment.append(element("h3", "Gefährten vor Ort"));
+      if (state.party.length >= rules.partyLimit) {
+        recruitment.append(element("p", "Deine Gruppe ist voll. Am Wachhof oder in einer Stadt mit Zentrallager kannst du jemanden verabschieden."));
+      }
+      for (const [id, companion] of candidates) {
+        const candidate = element("article");
+        candidate.append(element("h4", companion.name + " · " + klassen.grundklassen[companion.klasse].name),
+          element("p", companion.introduction),
+          element("p", companion.ability + " · " + companionEffect(companion)));
+        if (!companion.soeldner) candidate.append(element("p", "Sympathie: " + rules.relationship(state, id).score));
+        const status = rules.recruitment(state, id);
+        if (status === "hire") {
+          const cost = rules.hireCost(state, id);
+          candidate.append(element("p", "Söldner · startet auf Erfahrungsstufe " + Math.max(1, rules.level(state) - 1) +
+            (cost < companion.soeldner.kosten ? " · Charisma-Rabatt" : "")));
+          button(candidate, companion.name + " anwerben · " + cost + " Silber", () => update(rules.hire(state, id)),
+            { disabled: state.party.length >= rules.partyLimit || state.silver < cost });
+          // Technische Spezifikation: alternativ 15 Fraktionsvorrat (mit Charisma-Rabatt), der Vorrat bleibt über 0.
+          const supply = rules.hireCost(state, id, rules.vorratAnwerbung);
+          button(candidate, companion.name + " anwerben · " + supply + " " + rules.resourceName(state), () => update(rules.hire(state, id, "vorrat")),
+            { disabled: state.party.length >= rules.partyLimit || state.ressource - supply < 1 });
+        } else if (status === "incompatible") {
+          candidate.append(element("p", "Volksgrenzen: Untote und Lebende reisen nicht zusammen, Orks und Zwerge ebenso wenig."));
+        } else if (status === "ready") {
+          button(candidate, companion.name + " mitnehmen", () => update(rules.recruit(state, id)),
+            { disabled: state.party.length >= rules.partyLimit });
+        } else if (status === "promise") {
+          candidate.append(element("p", world.recruitmentQuests[id].text + " Frist: " + world.recruitmentQuests[id].turns + " Spielzüge ab Annahme."));
+          button(candidate, "Auftrag annehmen · " + world.recruitmentQuests[id].title, () => update(rules.promise(state, id)));
+        } else if (status === "task") {
+          const plan = world.recruitmentQuests[id];
+          candidate.append(element("p", plan.text + " Noch " + (rules.questEntries(state).find(quest => quest.id === "companion-" + id)?.remaining ?? plan.turns) + " Spielzüge."));
+          if (plan.salary) {
+            button(candidate, "Sold zahlen · " + plan.salary + " Silber", () => update(rules.completeQuest(state, id)),
+              { disabled: state.silver < plan.salary });
+            button(candidate, "Sold später zahlen · " + plan.salary + " Silber in 30 Spielzügen", () => update(rules.completeQuest(state, id, true)));
+          } else {
+            button(candidate, "Auftrag abschließen" + (plan.item ? " · " + world.items[plan.item] + " abgeben" : ""),
+              () => update(rules.completeQuest(state, id)), { disabled: !rules.questReady(state, id) });
+          }
+        } else {
+          candidate.append(element("p", status === "failed" ? "Der Aufnahmeauftrag ist gescheitert. Eine Aufnahme ist nicht mehr möglich." : ["blocked", "wary"].includes(status) ? world.companionAttitudes[id].reason :
+            companion.name + " lehnt es ab, dich zu begleiten."));
+        }
+        const debt = state.companionQuests?.[id]?.debt ?? 0;
+        if (debt) button(candidate, "Offenen Sold begleichen · " + debt + " Silber", () => update(rules.paySalary(state, id)),
+          { disabled: state.silver < debt });
+        recruitment.append(candidate);
+      }
+      parent.append(recruitment);
+    }
+    return candidates.length > 0;
   }
 
   // Klasse, Ressource, Spezialisierung und Meisterklasse im Charakterbereich.
@@ -1859,7 +2327,7 @@
       element("h4", "Klasse · " + rules.title(state)),
       element("p", data.spielweise + "."),
       element("p", "Ressource " + faction.ressource + ": " + data.ressource + ". Im Kampf verstärkt 1 " + faction.ressource +
-        " eine Fähigkeit ab Stufe 3 um 25 %, die Stufe-20-Fähigkeit kostet 3."),
+        " eine Fähigkeit ab Stufe 3 um 25 %, die Stufe-20-Fähigkeit kostet 3. Derselbe Vorrat (0 bis 100) bezahlt Reisen, Rast und Verträge; im Kampf sinkt er nie unter 1."),
     ];
     const abilityList = abilityListing();
     lines.push(element("h4", rules.kampfwerte(state).manaMax ? "Angriffe und Zauber" : "Angriffe und Techniken"), abilityList);
@@ -1875,26 +2343,8 @@
     lines.push(element("p", state.build.meister ? "Meisterklasse " + rules.title(state) + " · " + master.faehigkeit + "."
       : "Meisterklasse nach der " + master.vereinigung + ": " + master.name + "."));
     sheet.replaceChildren(...lines);
-    if (!spez && state.questStufe >= klassen.regeln.spezialisierungStufe && !state.combat && state.health) {
-      const values = rules.heroAttributes(state);
-      const limits = rules.heroLimits(state);
-      const target = Object.keys(world.attributes).find((id) => values[id] < klassen.regeln.grundwertMax);
-      const skill = Object.keys(klassen.fertigkeiten).find((id) => state.build.fertigkeiten[id] < limits[id]) ??
-        Object.keys(klassen.fertigkeiten).find((id) => id !== "magie" || faction.magie);
-      for (const variante of ["a", "b"]) {
-        button(sheet, data[variante][0] + " werden", () => update(rules.specialize(state, variante,
-          el("spez-grundwert").value || target, el("spez-fertigkeit").value || skill)));
-      }
-      const pick = (id, options, value) => {
-        const select = element("select");
-        select.id = id;
-        for (const [key, label] of options) select.add(new Option(label, key));
-        select.value = value;
-        return select;
-      };
-      sheet.append(element("p", "+1 Grundwert und +1 Fertigkeitspunkt:"),
-        pick("spez-grundwert", Object.entries(world.attributes), target),
-        pick("spez-fertigkeit", Object.entries(klassen.fertigkeiten).map(([id, item]) => [id, item.name]), skill));
+    if (entwurfQuellen().some(([id]) => id !== "stufe") && !state.combat && state.health) {
+      button(sheet, !spez ? "Spezialisierung wählen" : "Zur Meisterklasse aufsteigen", () => openSheet("aufstieg"));
     }
   }
 
@@ -1925,7 +2375,7 @@
       ["Lebenspunkte", state.health + " / " + rules.healthLimit(state)],
       ...((values) => [["Ausdauer", values.ausdauer + " / " + values.ausdauerMax],
         ...(values.manaMax ? [["Mana", values.mana + " / " + values.manaMax]] : []),
-        [values.ressourceName, String(values.ressource)]])(rules.kampfwerte(state)),
+        [values.ressourceName, values.ressource + " / " + rules.vorratMax]])(rules.kampfwerte(state)),
       ["Glut", state.ember + " / " + rules.emberLimit(state)],
       ["Gleichgewicht", state.balance === 0 ? "0 · Im Gleichgewicht" :
         state.balance < 0 ? state.balance + " · Erneuerung" : "+" + state.balance + " · Zerstörung"],
@@ -1949,11 +2399,7 @@
     training.replaceChildren();
     if (progress.points) {
       training.append(element("p", progress.points + (progress.points === 1 ? " Grundwertpunkt" : " Grundwertpunkte") + " aus früheren Stufenaufstiegen"));
-      const values = rules.heroAttributes(state);
-      for (const [id, label] of Object.entries(world.attributes)) {
-        button(training, "+1 " + label, () => update(rules.train(state, id)),
-          { disabled: Boolean(state.combat) || !state.health || values[id] >= klassen.regeln.grundwertMax });
-      }
+      button(training, "Punkte verteilen", () => openSheet("aufstieg"));
     }
     el("legacy-build").hidden = !state.umschulung || Boolean(state.combat) || !state.health;
     list(el("journal"), [...state.journal].reverse(), "Deine Reise beginnt.");

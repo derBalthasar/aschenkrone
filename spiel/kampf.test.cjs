@@ -8,7 +8,7 @@ const vm = require("node:vm");
 
 const root = path.join(__dirname, "..");
 const context = vm.createContext({ structuredClone });
-for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/faehigkeiten.js", "spiel/kampf.js", "spiel/startpunkte.js", "spiel/welt.js", "spiel/regeln.js"]) {
+for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/faehigkeiten.js", "spiel/kampf.js", "spiel/startpunkte.js", "spiel/welt.js", "spiel/knoten-daten.js", "spiel/knoten.js", "spiel/regeln.js"]) {
   vm.runInContext(fs.readFileSync(path.join(root, file), "utf8"), context, { filename: file });
 }
 const rules = vm.runInContext("rules", context);
@@ -92,7 +92,8 @@ same(rules.kraft({ ...huskarl, xp: 19000 }), { ausdauer: 19, mana: 0 });
 const priest = rules.create("Tala", "orden", "frau", 1, "magier");
 assert.equal(rules.kraft(priest).mana, 2 * priest.build.fertigkeiten.magie);
 assert.equal(rules.resourceName(priest), "Glaube");
-assert.equal(priest.ressource, 3);
+// Fraktionsressource und Kampfressource sind ein Vorrat von 0 bis 100, Start 42 (Technische Spezifikation).
+assert.equal(priest.ressource, 42);
 
 // ---- Gegnerwerte ----
 const foe = (rang, stufe, helden) => ({ ...kampf.gegnerWerte(rang, stufe, helden) });
@@ -151,6 +152,10 @@ assert.equal(boosted.ressource, level3.ressource - 1);
 assert.ok(boosted.combat.feinde[0].lp < shove.combat.feinde[0].lp);
 const poor = { ...level3, ressource: 0 };
 assert.equal(rules.strike(poor, "f3+"), poor);
+// Verstärken drückt den Vorrat nie unter 1.
+const last = { ...level3, ressource: 1 };
+assert.equal(rules.strike(last, "f3+"), last);
+assert.equal(rules.strike({ ...level3, ressource: 2 }, "f3+", highRoll).ressource, 1);
 assert.equal(rules.strike(level3, "f1+"), level3);
 
 // Stufe 20: einmal pro Schlacht, 8 Ausdauer und 3 Fraktionsressource.
@@ -160,6 +165,8 @@ const storm = rules.strike(legendStart, "f20", highRoll);
 assert.equal(storm.ressource, legendStart.ressource - 3);
 assert.equal(rules.abilityState(storm, "f20"), "schon genutzt");
 assert.equal(rules.abilityState({ ...legendStart, ressource: 2 }, "f20"), "zu wenig Korn");
+assert.equal(rules.abilityState({ ...legendStart, ressource: 3 }, "f20"), "zu wenig Korn");
+assert.equal(rules.abilityState({ ...legendStart, ressource: 4 }, "f20"), null);
 // Grundangriff steigt auf den Stufen 4, 8, 12, 16 und 20 um je +1.
 assert.equal(rules.kampfwerte(legend).grundangriff, 5);
 
@@ -245,17 +252,19 @@ const xpBefore = won.xp;
 for (let turn = 0; turn < 20 && won.combat; turn++) won = rules.strike(won, "spear", highRoll);
 assert.equal(won.scene, "ford");
 assert.equal(won.xp - xpBefore, 50 + 10 * 2);
-assert.equal(won.ressource, 4);
+assert.equal(won.ressource, 43);
 
 // Alte Spielstände (Version 2): EP bleiben, Stufe ergibt sich neu, offene Grundwertpunkte bleiben erhalten.
 const old = { ...rules.create("Tala", "kronreich", "frau", 1, "waechter"), version: 2, xp: 410, training: { strength: 1 }, health: 20 };
 delete old.stufenpunkte;
 delete old.ressource;
+delete old.weltLeisten;
 const upgraded = reload(old);
 assert.equal(upgraded.version, 3);
 assert.equal(rules.progression(upgraded).level, 3);
 assert.equal(upgraded.stufenpunkte, 3);
-assert.equal(upgraded.ressource, 3);
+assert.equal(upgraded.ressource, 42);
+same(upgraded.weltLeisten, { untote: 35, orks: 40, glut: 30, erzfieber: 45, welke: 30 });
 assert.ok(upgraded.health > 0 && upgraded.health <= rules.healthLimit(upgraded));
 const trained = rules.train(upgraded, "will");
 assert.equal(trained.stufenpunkte, 2);

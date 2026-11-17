@@ -749,6 +749,15 @@ const world = (() => {
       place: "Kronreich", title: "Der Weg endet hier", objective: "Deine Reise ist beendet.",
       text: "Du gehst zu Boden. Dein Auftrag bleibt unerledigt.",
     },
+    // Weltebene (Technische Spezifikation): Ort, Text und Aktionen liefert der Stadt-Hub des aktuellen Knotens.
+    weltknoten: {
+      place: "Weltreise", title: "Unterwegs in Odris", objective: "Reise von Knoten zu Knoten. Jede Reise ist eine Runde der Weltleisten.",
+      text: "",
+    },
+    weltende: {
+      place: "Odris", title: "Die Welt fällt", objective: "Das Spiel ist verloren.",
+      text: "Das Gleichgewicht der Welt ist gebrochen. Deine Reise endet hier.",
+    },
   };
   // Gegnerwerte nach dem Kampfdokument (17. 11. 2026): Rang und Stufe bestimmen LP und Schaden (spiel/kampf.js).
   // Namen und Bilder bleiben, die alten Bestiariumswerte gelten im Kampf nicht mehr. Prolog: Gegnerstufe 1 bis 2, Akt 1: 3 bis 5.
