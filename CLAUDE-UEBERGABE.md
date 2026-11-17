@@ -12,6 +12,8 @@ Arbeite im Ordner `C:\Users\afisc\Documents\ChatGPT\Pen and Paper - Aschenkrone`
 | --- | --- |
 | `index.html`, `spiel/stil.css` | Hauptmenü, Charaktererstellung, Prolog, Szene, Reisekarte, Seitenleiste und responsive Ansichten |
 | `spiel/klassen.js` | Klassensystem: Völker, Fraktionen, Grundklassen, Spezialisierungen, Meisterklassen |
+| `spiel/faehigkeiten.js` | Kampfdokument (17. 11. 2026): sechs Fähigkeiten je Klasse für alle 90 Klassen sowie Meisterfähigkeiten, wörtlich übernommen |
+| `spiel/kampf.js` | Kampfregeln: Erfahrungsstufen 1–20, EP, LP je Rolle, Ausdauer/Mana, Machtbudget, Übersetzung der Fähigkeitstexte in Regelwirkungen, Gegnerformeln, Gebundene, Kult und Morbius |
 | `spiel/welt.js` | Szenen und Entscheidungen, Kampfwerte der Klassen, Herkünfte, Reiseziele und Routen, Kämpfe, Gegenstände, Loot-Tabellen, Gefährten und Fraktionen |
 | `spiel/regeln.js` | Zustandswechsel, Regeln für Proben, Reisen und Kampf, Inventar, EP und Stufen, Beziehungen, Fraktionsruf und Spielstandvalidierung |
 | `spiel/spiel.js` | DOM und Ereignisse, Kampfanzeige und Animationen, Routenplanung, lokale Speicherung und JSON-Spielstandimport/-export |
@@ -19,6 +21,7 @@ Arbeite im Ordner `C:\Users\afisc\Documents\ChatGPT\Pen and Paper - Aschenkrone`
 | `bestiarium/daten.js`, `bestiarium/bilder/` | Bestehendes Bestiarium und Kreaturenbilder. Für einen spielbaren Gegner zusätzlich Kampfregeln, Loot und Szenenanbindung in `spiel/welt.js` ergänzen. |
 | `profilbilder/portraets.js`, `profilbilder/bilder/` | Porträts und Varianten. Fünf Grundfiguren pro Geschlecht sowie ein eigenes Untotenmotiv. |
 | `quellen/arbeitsanweisung-modelle.pdf` | Arbeitsanweisung für Bestiarium-Modelle |
+| `lore/kampfbuch.js` | Weltbuch-Abschnitt „Angriffe, Zauber und Techniken“ aus denselben Daten |
 | `lore/index.html`, `lore/voelker.js`, `lore/KANON.md` | Weltkarte, Chronik und Fraktionsregister mit 150 Städten sowie Quellenentscheidungen und Kampagnenanschlüsse |
 
 ## Spielstand der Entwicklung
@@ -26,7 +29,8 @@ Arbeite im Ordner `C:\Users\afisc\Documents\ChatGPT\Pen and Paper - Aschenkrone`
 - **Start und Glutmagie.** Nach der Charaktererstellung zeigt der Prolog das Erwachen aus der Asche. Sechs Herkünfte einschließlich Vampirgeschlechtern und Untoten beginnen mit jeweils einer eigenen Szene. Seit 17. 11. 2026 gilt das Klassensystem aus [lore/KLASSEN.md](lore/KLASSEN.md): Volk, eine von 15 Fraktionen und eine von sechs Grundklassen (Krieger, Wächter, Späher, Magier, Heiler/Priester, Schurke) mit eigenem Namen je Fraktion. Fünf Grundwerte (Start 10, 5 freie Punkte, höchstens 20) und sieben Fertigkeiten (18 Punkte, 0 bis 5). Die Daten stehen in `spiel/klassen.js`, die Regeln in `spiel/regeln.js`. Jede Klasse nutzt Glut anders. Glut steht zwischen Erneuerung und Zerstörung und kann Land beleben oder verbrennen. Zu starke Ausschläge lösen einen Rückschlag aus.
 - **Reise und Konsequenzen.** Spielbar sind unter anderem Kornwik, Heidvang, Moor bei Eiswacht, Eiswacht, Eispass und der Abschnitt in Glutberg bis zu Torbens Rettung am Runentor. Die Karte wählt erreichbare Ziele und zeigt Zwischenstopps. Die Route wird über die jeweils nächste Etappe gespielt. Entscheidungen am Acker, bei Jorens Rettung und am Runentor haben Folgen für spätere Szenen, Ruf und Belohnungen. Die Zollstelle hat Verhandlung, Umgehung und Kampf gegen menschliche Deserteure.
 - **Gruppe und Kampf.** Bis zu fünf Gefährten mit unterschiedlichen Klassen, jeweils aus den anderen Klassen als der Spielfigur. Gruppenmitglieder wirken im Kampf mit. Begegnungen können mit der Truppenstärke skalieren. Gegner werden einzeln ausgewählt, Animationen zeigen Aktionen und Treffer. Das zuletzt abgestimmte Animationstempo liegt bei 248 ms pro Schritt. Reduzierte Bewegung wird berücksichtigt.
-- **Fortschritt und Beute.** EP, Stufen, Grundwertpunkte aus Stufenaufstiegen, Silber, Inventar, Waffen- und Rüstungsslots, Verbrauchsgüter, Handel, Trophäen und Beutetabellen mit Qualitätsstufen sind vorhanden.
+- **Kampfsystem (17. 11. 2026).** Rundenkampf ohne Raster nach dem Kampfdokument: eine Aktion pro Runde, höheres Geschick handelt zuerst. Erfahrungsstufen 1–20 (100 × n EP), LP je Rolle, Ausdauer und Mana (+2 je Runde), Fraktionsressource (Verstärkung +25 % für 1, Stufe 20 kostet 3, +1 je gewonnener Schlacht). Gegnerwerte folgen den Rangformeln (Mitläufer, Elite, Anführer, Endgegner); Namen und Bilder der Gegner blieben. EP-Schnittstelle für Prologe und Questakte: `rules.awardXp(state, kennung, ep = 300)` vergibt EP einmal je Kennung.
+- **Fortschritt und Beute.** EP, Stufen, Grundwertpunkte aus früheren Stufenaufstiegen (Altstände), Silber, Inventar, Waffen- und Rüstungsslots, Verbrauchsgüter, Handel, Trophäen und Beutetabellen mit Qualitätsstufen sind vorhanden.
 - **Gefährtenruf.** Jeder Gefährte verlangt vor der Anwerbung ein Versprechen oder eine erledigte Aufgabe. Tovin wartet, bis du Ada geholfen hast. Entscheidungen und Rastgespräche verändern den persönlichen Ruf. Bei ≤ −25 kann ein Gefährte dauerhaft gehen. Bei 100 % werden ein einmaliges Geschenk und die Wahl zwischen enger Freundschaft und Romanze freigeschaltet.
 - **Fraktionsruf.** Acht Rufwerte sind eingetragen: Grenzwache von Eiswacht, Bergwacht von Glutberg, Kronreich, Die Erinnernden, Orden der Flamme, Hüter des Weltenbaums, Hof der Bleichen Krone und Freie Häfen. Die Zuordnung zu den alten Schlüsseln steht in `lore/KANON.md`. Grenzwache und Bergwacht bieten ab +25 Ruf zusätzliche Vorräte. Hüter des Weltenbaums, Hof der Bleichen Krone und Freie Häfen haben bislang keine Rufereignisse.
 - **Bildschirmformate.** Im Kopfbereich gibt es Automatisch, Kompakt, Breitbild (16:9) und Ultrawide. Das Layout passt sich gleichzeitig dem verfügbaren Platz an. Auf dem Handy gibt es eine Schnellleiste für Szene, Karte und Charakter sowie eine Liste antippbarer Reiseziele. Auf Ultrawide können alle drei Bereiche nebeneinander stehen. Die Ansicht wird separat vom Spielstand gespeichert.
@@ -36,10 +40,11 @@ Arbeite im Ordner `C:\Users\afisc\Documents\ChatGPT\Pen and Paper - Aschenkrone`
 ```powershell
 node --check spiel/spiel.js
 node --test spiel/regeln.test.cjs
+node --test spiel/kampf.test.cjs
 ```
 
 Die Regeltests waren bei der Übergabe grün. Ansichtswechsel, Speicherung und Kartenbedienung wurden zuletzt mit simuliertem DOM geprüft. Die visuelle Browserprüfung auf einem Handy steht aus. Ein sinnvoller erster Durchlauf geht von der Charaktererstellung über Kartenauswahl und Kampf bis zum Charakterbereich, jeweils im Hoch- und Querformat, bei 1920 × 1080 und bei 2560 × 1080. Auf Handybreite besonders prüfen, ob die Schnellleiste den fokussierten Inhalt freilässt und mehrere Gegner leicht antippbar sind.
 
-Spielstandschlüssel: `aschenkrone.valmarch.v1` (Spielstandformat Version 2, ältere Stände werden beim Laden umgewandelt). Ansichtsschlüssel: `aschenkrone.layout`. Spielstände waren für den Nutzer bisher nachrangig. Ein frischer Spielstand ist für Tests geeignet.
+Spielstandschlüssel: `aschenkrone.valmarch.v1` (Spielstandformat Version 3, ältere Stände werden beim Laden umgewandelt). Ansichtsschlüssel: `aschenkrone.layout`. Spielstände waren für den Nutzer bisher nachrangig. Ein frischer Spielstand ist für Tests geeignet.
 
 Für neue Inhalte will der Nutzer eine Welt mit echten Abzweigungen und Konsequenzen über mehrere Szenen hinweg. Gute Beute soll es bei Kämpfen, Erkundung und menschlichen Begegnungen geben. Der nächste inhaltliche Ausbau kann an das Runentor anknüpfen und frühere Entscheidungen, Gefährtenversprechen und Fraktionsruf in einer späteren Begegnung wieder aufgreifen. Steam und Unreal Engine 5 wurden als mögliche Zukunft diskutiert. Der aktuelle Arbeitsstand ist das lokale Browser-Rollenspiel.

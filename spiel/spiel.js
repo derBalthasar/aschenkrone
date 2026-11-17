@@ -20,6 +20,7 @@
   let skills = {};
   let target = null;
   let enemyTarget = null;
+  let boostAbility = false;
   let animating = false;
   const battleStepMs = 248;
   let editingLegacy = false;
@@ -258,6 +259,7 @@
       }
     });
     parent.append(control);
+    return control;
   }
 
   function creatureImage(foe) {
@@ -814,6 +816,12 @@
       card.dataset.actor = id;
       formation.append(card);
     }
+    for (const summon of state.combat.diener) {
+      const card = fighterCard(summon.name, summon.lp + " / " + summon.max + " LP · " +
+        (summon.schaden ? summon.schaden + " Schaden" : "zieht Angriffe") + " · noch " + summon.runden + (summon.runden === 1 ? " Runde" : " Runden"));
+      card.dataset.actor = "summon";
+      formation.append(card);
+    }
     const enemies = element("div");
     enemies.className = "battle-enemies";
     enemies.setAttribute("role", "group");
@@ -840,8 +848,9 @@
       meter.max = enemy.max;
       meter.value = enemy.health;
       meter.setAttribute("aria-label", "Lebenspunkte");
+      const rank = kampf.raenge[enemy.rang].name + " · Stufe " + enemy.stufe;
       card.append(element("strong", enemy.name), meter, element("small",
-        enemy.health ? enemy.health + " / " + enemy.max + " LP" : "Besiegt"));
+        enemy.health ? enemy.health + " / " + enemy.max + " LP · " + rank + (enemy.status ? " · " + enemy.status : "") : "Besiegt"));
       card.addEventListener("click", () => {
         if (animating) return;
         enemyTarget = enemy.id;
@@ -933,14 +942,43 @@
     }
     if (combat) {
       renderBattle(content);
-      if (combat.stunned) content.append(element("p", "Benommen · Dein nächster Waffenangriff ist schwächer."));
+      const values = rules.kampfwerte(state);
+      const held = combat.held;
+      const line = element("p", "Erfahrungsstufe " + values.stufe + " · Ausdauer " + values.ausdauer + " / " + values.ausdauerMax +
+        (values.manaMax ? " · Mana " + values.mana + " / " + values.manaMax : "") + " · " + values.ressourceName + " " + values.ressource +
+        (held.schild ? " · Schild " + held.schild : "") + (held.unsichtbar ? " · Unsichtbar" : "") +
+        (held.staerkung ? " · +" + held.staerkung.wert + " Schaden" : "") + (held.naechster ? " · Nächster Angriff +" + held.naechster : ""));
+      line.className = "battle-resources";
+      content.append(line);
+      if (combat.stunned) content.append(element("p", "Benommen · Dein nächster Angriff ist schwächer."));
       const special = world.fights[combat.id].special;
-      if (combat.health > 0 && combat.round % 2 === 1) content.append(element("p", special.warning + " Deckung schützt vor dem Zusatzeffekt."));
+      if (combat.feinde[0].lp > 0 && combat.round % 2 === 1) content.append(element("p", special.warning + " Deckung schützt vor dem Zusatzeffekt."));
       if (combat.bleeding > 0) content.append(element("p", "Blutung · " + combat.bleeding + " Runden"));
+      // Eine Aktion pro Runde: Grundangriff oder eine freigeschaltete Fähigkeit.
+      const canBoost = values.ressource >= 1;
+      const boost = element("label");
+      boost.className = "boost-toggle";
+      const boostBox = element("input");
+      boostBox.type = "checkbox";
+      boostBox.checked = boostAbility && canBoost;
+      boostBox.disabled = !canBoost;
+      boostBox.addEventListener("change", () => { boostAbility = boostBox.checked; renderScene(); });
+      boost.append(boostBox, " Mit 1 " + values.ressourceName + " verstärken (+25 %)");
+      for (const f of rules.abilities(state).filter((entry) => entry.frei)) {
+        const reason = rules.abilityState(state, f.id);
+        const boostable = boostAbility && canBoost && f.stufe >= 3 && f.stufe < 20 && f.id[0] !== "m";
+        const cost = f.id === "f1" ? "Grundangriff · " + world.items[rules.weapon(state)] :
+          f.kostenWert + " " + (f.zahlung === "M" ? "Mana" : "Ausdauer") + (f.ressource ? " + " + f.ressource + " " + values.ressourceName : "") +
+          (boostable ? " + 1 " + values.ressourceName : "");
+        const label = f.name + " · " + cost + (reason ? " · " + reason : "");
+        const node = button(actions, label, () => battleAction(f.id + (boostable ? "+" : "")), { disabled: Boolean(reason) });
+        if (node) node.title = f.wirkung;
+      }
+      actions.append(boost);
       const abilities = world.classes[rules.profile(state.faction, state.role)];
       for (const [id, label, shift] of [
-        ["spear", "Angriff · " + world.items[rules.weapon(state)], 0], ["ember", abilities.attack.name, 2],
-        ["restore", abilities.restore.name, -2], ["guard", "Deckung und Sammlung", 0], ["flee", "Fliehen", 0],
+        ["ember", "Glutgabe · " + abilities.attack.name, 2],
+        ["restore", "Glutgabe · " + abilities.restore.name, -2], ["guard", "Deckung und Sammlung", 0], ["flee", "Fliehen", 0],
       ]) {
         const risk = shift && Math.abs(state.balance + shift) >= 4;
         const cost = shift ? " · 1 Glut" : "";
@@ -1105,8 +1143,23 @@
     const lines = [
       element("h4", "Klasse · " + rules.title(state)),
       element("p", data.spielweise + "."),
-      element("p", "Ressource " + faction.ressource + ": " + data.ressource + ". Die Fraktionsressource ist noch nicht spielwirksam."),
+      element("p", "Ressource " + faction.ressource + ": " + data.ressource + ". Im Kampf verstärkt 1 " + faction.ressource +
+        " eine Fähigkeit ab Stufe 3 um 25 %, die Stufe-20-Fähigkeit kostet 3."),
     ];
+    // Angriffe, Zauber und Techniken der Klasse (Kampfdokument, 17. 11. 2026).
+    const abilityList = element("ul");
+    abilityList.className = "ability-list";
+    for (const f of rules.abilities(state)) {
+      const item = element("li");
+      const cost = f.kostenWert ? f.kostenWert + " " + f.zahlung : "kostenlos";
+      const extra = [cost, f.einmal ? "1 × pro Schlacht" : f.abklingzeitWert ? "AK " + f.abklingzeitWert : "",
+        f.ressource ? f.ressource + " " + faction.ressource : "", f.spezialisiert ? "Spezialisierung +50 %" : ""].filter(Boolean).join(" · ");
+      item.append(element("strong", f.id[0] === "m" ? "Meister · " + f.name : "Stufe " + f.stufe + " · " + f.name),
+        element("span", " " + f.wirkung + " (" + extra + ")" + (f.frei ? "" : " · noch gesperrt")));
+      if (!f.frei) item.className = "locked";
+      abilityList.append(item);
+    }
+    lines.push(element("h4", rules.kampfwerte(state).manaMax ? "Angriffe und Zauber" : "Angriffe und Techniken"), abilityList);
     if (people === "orks") lines.push(element("p", state.rausch ? "Kampfrausch bereit · +2 Schaden beim nächsten Angriff."
       : "Nach jeder gewonnenen Schlacht trägt dich eine Runde Kampfrausch."));
     const spez = state.build.spez;
@@ -1167,6 +1220,9 @@
     cluesList.replaceChildren(...clues.map(([, text]) => element("li", text)));
     stats(el("vitals"), [
       ["Lebenspunkte", state.health + " / " + rules.healthLimit(state)],
+      ...((values) => [["Ausdauer", values.ausdauer + " / " + values.ausdauerMax],
+        ...(values.manaMax ? [["Mana", values.mana + " / " + values.manaMax]] : []),
+        [values.ressourceName, String(values.ressource)]])(rules.kampfwerte(state)),
       ["Glut", state.ember + " / " + rules.emberLimit(state)],
       ["Gleichgewicht", state.balance === 0 ? "0 · Im Gleichgewicht" :
         state.balance < 0 ? state.balance + " · Erneuerung" : "+" + state.balance + " · Zerstörung"],
@@ -1179,17 +1235,17 @@
     renderInventory();
     renderParty();
     const progress = rules.progression(state);
-    el("level-heading").textContent = "Stufe " + progress.level;
+    el("level-heading").textContent = "Erfahrungsstufe " + progress.level;
     const bar = el("xp-bar");
     bar.hidden = progress.next === null;
     bar.max = (progress.next ?? progress.floor + 1) - progress.floor;
     bar.value = progress.xp - progress.floor;
-    el("xp-label").textContent = progress.next === null ? progress.xp + " EP · Höchststufe dieses Abschnitts" :
+    el("xp-label").textContent = progress.next === null ? progress.xp + " EP · Höchste Erfahrungsstufe" :
       progress.xp + " EP · Noch " + (progress.next - progress.xp) + " bis Stufe " + (progress.level + 1);
     const training = el("training");
     training.replaceChildren();
     if (progress.points) {
-      training.append(element("p", progress.points + (progress.points === 1 ? " Grundwertpunkt" : " Grundwertpunkte") + " aus Stufenaufstiegen"));
+      training.append(element("p", progress.points + (progress.points === 1 ? " Grundwertpunkt" : " Grundwertpunkte") + " aus früheren Stufenaufstiegen"));
       const values = rules.heroAttributes(state);
       for (const [id, label] of Object.entries(world.attributes)) {
         button(training, "+1 " + label, () => update(rules.train(state, id)),

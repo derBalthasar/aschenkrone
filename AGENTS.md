@@ -12,4 +12,4 @@
 
 Öffne die [aktuelle index.html](index.html) im Browser. Die ältere Upload-Kopie und das Vorschau-ZIP sind lokale Exporte. Die [technische Übergabe](CLAUDE-UEBERGABE.md) beschreibt den Aufbau. Der [Quellenabgleich zur Lore](lore/KANON.md) hält die Entscheidungen zu Spielwelt und Prolog fest.
 
-Für Bestiarium-Modelle gilt die [Arbeitsanweisung für Modelle](quellen/arbeitsanweisung-modelle.pdf). Bei Änderungen am Spiel führe `node --test spiel/regeln.test.cjs` aus.
+Für Bestiarium-Modelle gilt die [Arbeitsanweisung für Modelle](quellen/arbeitsanweisung-modelle.pdf). Bei Änderungen am Spiel führe `node --test spiel/regeln.test.cjs` und `node --test spiel/kampf.test.cjs` aus.

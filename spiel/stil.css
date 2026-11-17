@@ -349,3 +349,9 @@ button.map-marker { min-height: 2rem; color: #fff0d6; border-color: #e1b677; }
   .hub-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: .6rem; }
   .hub-status { position: sticky; bottom: 0; padding-top: .5rem; background: #1d1813; }
 }
+
+/* Kampfdokument (17. 11. 2026): Verstärkung und Fähigkeitenliste. */
+.boost-toggle { display: inline-flex; align-items: center; gap: 0.4rem; flex-basis: 100%; font-size: 0.95rem; }
+.ability-list { padding-left: 1.1rem; display: grid; gap: 0.45rem; }
+.ability-list li.locked { opacity: 0.6; }
+.battle-resources { font-variant-numeric: tabular-nums; }
