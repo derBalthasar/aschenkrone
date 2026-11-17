@@ -907,6 +907,50 @@ const world = (() => {
     warrior: { request: "Kelda versprechen, die alte Glutmine wieder begehbar zu machen", proof: ["pass-mine", "kaefer-besiegt"], gift: "eisenkeil",
       talk: ["Kelda erzählt, wie sie ihre erste Axt verloren hat.", "Kelda zeigt dir die Macke, die sie am Griff belassen hat.", "Kelda erzählt, warum ihr die Zeugkammer zu eng geworden ist.", "Kelda fragt, wo ihr nach dem Eispass als Nächstes hingehen wollt."] },
   };
+  // Persönliche Haltungen, keine pauschale Feindschaft ganzer Völker.
+  // Fraktionen und Orte folgen lore/voelker.js und lore/KANON.md.
+  const recruitmentQuests = {
+    knight: { title: "Ein Leben am Pass", text: "Rette Joren am Nordpass und kehre zu Iven zurück.", marks: ["joren-gerettet"] },
+    mage: { title: "Wärme im Stein", text: "Finde einen Glutfunken (zum Beispiel im Moor) und übergib ihn Sela.", item: "glutfunke" },
+    priest: { title: "Ein Verband für die Vermissten", text: "Fertige aus zwei Galgenwurz einen Harzverband und bringe ihn Heda.", item: "harzverband", crafted: "harzverband" },
+    ranger: { title: "Sichere Waldwege", text: "Besiege oder vertreibe die Wölfe bei Heidvang und berichte Neri.", marks: ["woelfe-besiegt", "woelfe-vertrieben"] },
+    thief: { title: "Eine Schuld bei Ada", text: "Hilf Ada mit ihrem Wagen an der Zollstelle und sprich wieder mit Tovin.", marks: ["haendlerin-geholfen"] },
+    necromancer: { title: "Bewahrte Namen", text: "Schütze die Grabschrift am Runentor und berichte Oren.", marks: ["runen-geschuetzt"] },
+    paladin: { title: "Vertrauen der Grenzwache", text: "Erreiche mindestens 25 Ruf bei der Grenzwache von Eiswacht.", faction: "watch", reputation: 25 },
+    druid: { title: "Die erste grüne Saat", text: "Erneuere die Saat bei Kornwik, ohne sie zu verbrennen, und berichte Bryn.", marks: ["saat-erholt"] },
+    warrior: { title: "Sold für den Aufbruch", text: "Vereinbare mit Kelda 15 Silber Sold. Zahle sofort oder sage die Zahlung für später zu.", salary: 15 },
+  };
+  const questTurns = { knight: 80, mage: 50, priest: 50, ranger: 40, thief: 35, necromancer: 100, paladin: 80, druid: 35, warrior: 25 };
+  for (const [id, quest] of Object.entries(recruitmentQuests)) quest.turns = questTurns[id];
+  const storyQuests = {
+    "runa-rescue": { title: "Joren am Nordpass", giver: "Runa · Eiswacht", type: "Weltauftrag", turns: 80,
+      text: "Finde Joren am Pass und rette ihn, bevor seine Zeit abläuft.",
+      scenes: ["watch-yard", "pass", "pass-shelter"], success: ["joren-gerettet"], failure: ["joren-verloren"] },
+    "ada-cart": { title: "Adas Wagen", giver: "Ada · Alte Zollstelle", type: "Weltauftrag", turns: 40,
+      text: "Überwinde die Zollstelle und hilf Ada mit ihrem Wagen.",
+      scenes: ["toll", "toll-resolved"], success: ["haendlerin-geholfen"] },
+    "forest-book": { title: "Das verlorene Forstbuch", giver: "Enna · Wald bei Heidvang", type: "Weltauftrag", turns: 40,
+      text: "Finde das Forstbuch und bringe es zu Enna zurück.",
+      scenes: ["return-forest", "forest-cache"], success: ["forstbuch-zurueckgegeben"] },
+    "torben-runes": { title: "Torben am Runentor", giver: "Torben · Glutberg", type: "Weltauftrag", turns: 60,
+      text: "Befreie Torben am Runentor. Bewahren oder Verbrennen der Runen hat unterschiedliche Folgen.",
+      scenes: ["skarn-gate", "skarn-runes"], success: ["runen-geschuetzt", "runen-verbrannt"] },
+  };
+  const companionAttitudes = {
+    knight: { wary: ["untot", "vampir"], faction: "watch", reputation: 25,
+      reason: "Iven fürchtet den Kult der Bleichen Ewigkeit. Als Untoter oder Vampir musst du zuerst 25 Ruf bei der Grenzwache gewinnen." },
+    paladin: { blocked: ["untot"], wary: ["vampir"], faction: "order", reputation: 15,
+      reason: "Mira lehnt für sich die Reise mit Erwachten ab. Vampiren vertraut sie erst ab 15 Ruf beim Orden der Flamme." },
+    ranger: { wary: ["gruenhaut"], faction: "groves", reputation: 15,
+      reason: "Neri misstraut dir als Ork nach einem persönlichen Grenzkonflikt. 15 Ruf beim Kronreich überzeugen sie." },
+  };
+  const recipes = {
+    harzverband: { ingredients: { galgenwurz: 2 }, text: "Zwei Galgenwurz zu einem haltbaren Wundverband verarbeiten." },
+  };
+  // Gemeinsamer Treffpunkt, damit Aufnahmeaufträge nach Reisen abgegeben werden können.
+  for (const companion of Object.values(companions)) {
+    if (!companion.scenes.includes("watch-yard")) companion.scenes.push("watch-yard");
+  }
   const factionEffects = {
     "joren-gerettet": { watch: 30 }, "joren-verloren": { watch: -35 },
     "pass-bewacht": { watch: 20, skarn: 10 }, "pass-gesperrt": { watch: 10, skarn: -15 },
@@ -937,6 +981,6 @@ const world = (() => {
     })[region];
   }
   return { attributes, skills, origins, classes, items, gear, supplies, rarity, lootTables, milestones, deeds, shop, salePrices, storageSites,
-    battleRewards, enemyGroups, companions, loyalties, factions, factionEffects, relationshipEffects,
+    storyQuests, recruitmentQuests, companionAttitudes, recipes, battleRewards, enemyGroups, companions, loyalties, factions, factionEffects, relationshipEffects,
     scenes, creatures, fights, destinations, routes, travelScenes };
 })();
