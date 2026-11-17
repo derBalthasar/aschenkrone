@@ -106,7 +106,8 @@ assert.equal(kampf.morbius.phasen.reduce((sum, phase) => sum + phase.lp, 0), kam
 // ---- Kampf ----
 const fightAs = (character) =>
   rules.choose(rules.choose(rules.choose(rules.choose(character, "lantern"), "move"), "go", highRoll), "fight");
-const hero = (faction, role, xp = 0) => ({ ...rules.create("Tala", faction, "frau", 1, role), xp });
+// Alle Kampftests laufen an der Kornwik-Begegnung, unabhängig vom Startpunkt der Fraktion.
+const hero = (faction, role, xp = 0) => ({ ...rules.create("Tala", faction, "frau", 1, role), scene: "start", xp });
 const full = (state) => ({ ...state, health: rules.healthLimit(state) });
 const keilerFight = (faction, role, xp = 0) => {
   const state = fightAs(full(hero(faction, role, xp)));
