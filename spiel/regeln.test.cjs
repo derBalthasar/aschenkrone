@@ -1062,3 +1062,36 @@ const groupStored = rules.store(protectedMember, 'runenbeil');
 assert.equal(rules.memberEquipment(groupStored, 'ranger').weapon, null);
 assert.equal(reload(groupStored).storage.includes('runenbeil'), true);
 console.log('Questlog, Fristen, letzte Abgabe, Scheitern, Soldverzug und Spielzugmigration geprüft.');
+
+// Charakterfenster: wirkende Effekte werden nur gelesen, der Spielstand bleibt unverändert.
+{
+  const effectIds = (state) => rules.effects(state).map(effect => effect.id);
+  const fresh = hero();
+  const before = JSON.stringify(fresh);
+  assert.ok(Array.isArray(rules.effects(fresh)));
+  assert.equal(JSON.stringify(fresh), before);
+  assert.ok(!effectIds(fresh).includes("benommen"));
+  assert.ok(!effectIds(fresh).includes("blutung"));
+  const hurt = { ...fresh, combat: { id: "keiler", round: 2, stunned: true, bleeding: 2, feinde: [], diener: [], held: { schild: 0 } }, rausch: true, balance: 3, ember: 0 };
+  const listed = rules.effects(hurt);
+  assert.deepEqual(["benommen", "blutung", "kampfrausch", "glut-unruhig", "glut-erschoepft"].filter(id => !listed.some(e => e.id === id)), []);
+  assert.equal(listed.find(e => e.id === "blutung").dauer, "Noch 2 Runden");
+  assert.equal(listed.find(e => e.id === "kampfrausch").art, "gut");
+  assert.equal(listed.find(e => e.id === "benommen").art, "schlecht");
+  assert.ok(listed.every(e => ["gut", "schlecht", "hinweis"].includes(e.art) && e.name && e.text && e.dauer));
+  assert.ok(!effectIds({ ...fresh, balance: 1 }).includes("glut-unruhig"));
+  assert.ok(effectIds({ ...fresh, balance: -2 }).includes("glut-unruhig"));
+  assert.ok(effectIds({ ...fresh, marks: ["steinrhythmus"] }).includes("steinrhythmus"));
+  assert.ok(effectIds({ ...fresh, health: 0 }).includes("gefallen"));
+  assert.ok(effectIds({ ...fresh, stufenpunkte: 1 }).includes("stufenpunkte"));
+  assert.ok(effectIds({ ...fresh, umschulung: true }).includes("umschulung"));
+  // Alte Spielstände (Version 1) laden weiter und liefern Effekte.
+  const legacy = rules.read(JSON.stringify({ version: 1, name: "Alt", origin: "bergzwerg", appearance: "mann", variant: 0, scene: "start",
+    role: "knight", allocation: { strength: 2, agility: 1, mind: 1, presence: 1, will: 1 }, health: 20, ember: 1, xp: 90, silver: 3,
+    inventory: [], equipment: { weapon: null, armor: null }, marks: ["steinrhythmus"], journal: [], combat: null }));
+  assert.ok(effectIds(legacy).includes("umschulung"));
+  assert.ok(effectIds(legacy).includes("steinrhythmus"));
+  assert.equal(rules.levelThresholds.length, 20);
+  assert.equal(rules.levelThresholds[19], 19000);
+}
+console.log("Charakterfenster: Effekte (Benommen, Blutung, Kampfrausch, Glut, Stufenpunkte, Umschulung) und alte Spielstände geprüft.");

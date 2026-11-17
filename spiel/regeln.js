@@ -1859,6 +1859,44 @@ const rules = (() => {
     return { field, ford, delivery };
   }
 
+  // Wirkende Effekte für das Charakterfenster. Liest nur den Spielstand und ändert keine Regel.
+  // art: "gut" (Vorteil), "schlecht" (Nachteil) oder "hinweis"; dauer beschreibt, wie lange er anhält.
+  function effects(state) {
+    const list = [];
+    const add = (id, name, art, text, dauer) => list.push({ id, name, art, text, dauer });
+    const fight = state.combat;
+    if (!state.health) add("gefallen", "Gefallen", "schlecht", "Deine Lebenspunkte sind aufgebraucht.", "Bis zum Neubeginn");
+    if (fight?.stunned) add("benommen", "Benommen", "schlecht", "Dein nächster Waffenangriff verursacht 2 Schaden weniger.", "Nächster Zug");
+    if (fight?.bleeding > 0) {
+      add("blutung", "Blutung", "schlecht", "Jede Runde kostet 1 LP. Ein Gefährte mit Wundpflege kann sie stoppen.",
+        fight.bleeding === 1 ? "Noch 1 Runde" : "Noch " + fight.bleeding + " Runden");
+    }
+    if (fight?.held?.schild) add("schild", "Schild", "gut", "Fängt " + fight.held.schild + " Schaden ab.", "Noch " + fight.held.schildRunden + " Runden");
+    if (fight?.held?.unsichtbar) add("unsichtbar", "Unsichtbar", "gut", "Gegner greifen dich nicht an. Endet mit deinem ersten Angriff.", "Noch " + fight.held.unsichtbar + " Runden");
+    if (fight?.held?.staerkung) add("staerkung", "Gestärkt", "gut", "+" + fight.held.staerkung.wert + " Schaden.", "Noch " + fight.held.staerkung.runden + " Runden");
+    if (state.rausch) add("kampfrausch", "Kampfrausch", "gut", "+2 Schaden beim nächsten Angriff.", "Nächster Angriff");
+    if (Math.abs(state.balance) >= 2) {
+      const richtung = state.balance > 0 ? "Zerstörung (Angriffszauber)" : "Erneuerung (Schützen, Binden, Heilen)";
+      add("glut-unruhig", "Unruhige Glut", "schlecht", "Der nächste Zauber Richtung " + richtung + " löst einen Rückstoß aus. Deckung beruhigt die Glut.",
+        "Bis die Glut zur Mitte findet");
+    }
+    if (state.ember < 1) add("glut-erschoepft", "Glut erschöpft", "schlecht", "Ohne Glut sind keine Glutfähigkeiten möglich. Glutfunken und Glutampullen füllen sie auf.", "Bis zur Auffüllung");
+    if (state.marks.includes("steinrhythmus")) {
+      add("steinrhythmus", "Rhythmus der Glut", "gut", "Ein Rückstoß der Glut kostet nur 3 statt 6 LP.", "Dauerhaft");
+    }
+    if (modifier(heroAttributes(state).will) > 0) {
+      add("fester-wille", "Fester Wille", "gut", "Deine Willenskraft widersteht dem Glutentzug der Irrglut.", "Dauerhaft");
+    }
+    const gear = gearStats(state);
+    const parts = [["armor", "Rüstung"], ["magic", "Glutschaden"], ["travel", "List unterwegs"], ["pierce", "Durchschlag"],
+      ["airborne", "gegen Flieger"]].filter(([key]) => gear[key]).map(([key, label]) => "+" + gear[key] + " " + label);
+    if (parts.length) add("ausruestung", "Ausrüstung", "gut", parts.join(" · ") + ".", "Solange angelegt");
+    const points = trainingLeft(state);
+    if (points > 0) add("stufenpunkte", "Stufenaufstieg", "hinweis", points + (points === 1 ? " Grundwertpunkt" : " Grundwertpunkte") + " zu verteilen.", "Bis verteilt");
+    if (state.umschulung) add("umschulung", "Umschulung offen", "hinweis", "Dein Held kann einmal an das neue Klassensystem angepasst werden.", "Einmalig");
+    return list;
+  }
+
   function moorConsequences(state) {
     const marks = state.marks;
     const bridge = marks.includes("moorpassage-offen")
@@ -1880,5 +1918,6 @@ const rules = (() => {
     className, title, gearSkill, heroSkills, heroLimits, modifiers, skillValue, protection,
     memberEquipment, assigned, progression, train, trade, candidates, recruit, dismiss, targets,
     questEntries, questPlans, partyLimit, attitude, questReady, completeQuest, paySalary, craft, relationship, reputation, recruitment, promise, bondActions, bondWith,
-    healthLimit, emberLimit, heroAttributes, ending, moorConsequences };
+    healthLimit, emberLimit, heroAttributes, ending, moorConsequences, effects,
+    levelThresholds: Array.from({ length: kampf.maxStufe }, (_, index) => kampf.epFuer(index + 1)) };
 })();

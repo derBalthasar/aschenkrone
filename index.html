@@ -117,6 +117,7 @@
         <a href="#scene-title">Szene</a>
         <a href="#travel-map">Reisekarte</a>
         <a href="#character-panel">Charakter</a>
+        <button type="button" class="hub-open" data-sheet-open>Charakterfenster</button>
         <button type="button" class="hub-open" data-hub-open>Inventar</button>
       </nav>
       <section class="paper encounter">
@@ -144,6 +145,7 @@
             <div id="avatar" class="avatar" role="img"></div>
             <div><h2 id="hero-name"></h2><p id="hero-origin"></p></div>
           </div>
+          <button type="button" class="action primary hub-launch" data-sheet-open>Charakterfenster öffnen</button>
           <dl id="vitals" class="stat-line"></dl>
           <section class="progression" aria-labelledby="level-heading">
             <h3 id="level-heading"></h3>
@@ -213,6 +215,29 @@
     <div id="hub-slot-filter" class="hub-slot-filter" hidden></div>
     <div id="hub-items" class="hub-items" role="tabpanel" aria-label="Gegenstände"></div>
     <p id="hub-status" class="hub-status" role="status"></p>
+  </dialog>
+  <dialog id="character-sheet" class="inventory-hub character-sheet" aria-labelledby="sheet-title">
+    <div class="hub-head">
+      <div class="sheet-who">
+        <div id="sheet-avatar" class="avatar sheet-avatar" role="img"></div>
+        <div><p class="overline" id="sheet-origin"></p><h2 id="sheet-title">Charakter</h2></div>
+      </div>
+      <button type="button" id="sheet-close" class="action">Schließen</button>
+    </div>
+    <div class="sheet-vitals">
+      <div class="sheet-meter sheet-meter-xp"><div class="sheet-meter-head"><span id="sheet-level"></span><strong id="sheet-xp-text"></strong></div>
+        <progress id="sheet-xp" max="1" value="0" aria-label="Erfahrung bis zur nächsten Stufe"></progress></div>
+      <div class="sheet-meter sheet-meter-hp"><div class="sheet-meter-head"><span>Lebenspunkte</span><strong id="sheet-hp-text"></strong></div>
+        <progress id="sheet-hp" max="1" value="0" aria-label="Lebenspunkte"></progress></div>
+      <div class="sheet-meter sheet-meter-ember"><div class="sheet-meter-head"><span>Glut</span><strong id="sheet-ember-text"></strong></div>
+        <progress id="sheet-ember" max="1" value="0" aria-label="Glut"></progress></div>
+    </div>
+    <div class="hub-tabs" role="tablist" aria-label="Charakter">
+      <button type="button" role="tab" id="sheet-tab-stand" aria-controls="sheet-panel" data-sheet-tab="stand">Stand</button>
+      <button type="button" role="tab" id="sheet-tab-werte" aria-controls="sheet-panel" data-sheet-tab="werte">Werte</button>
+      <button type="button" role="tab" id="sheet-tab-effekte" aria-controls="sheet-panel" data-sheet-tab="effekte">Effekte</button>
+    </div>
+    <div id="sheet-panel" class="sheet-panel" role="tabpanel" tabindex="0"></div>
   </dialog>
 </body>
 </html>
