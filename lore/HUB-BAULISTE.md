@@ -74,6 +74,14 @@ Spielstände bleiben in jedem Schritt ladbar. Bestehende Szenen, Kämpfe, Gefäh
 
 ## Schon erledigt (17. 11. 2026)
 
+- Technische Spezifikation (Henry, 17. 11. 2026), Schritte 1 bis 3 im Kern:
+  - Fünf Weltleisten im Spielstand (Start 35/40/30/45/30). Eine Runde ist eine Reise im Knotennetz. Glut, Welke und Erzfieber steigen je Runde um 1 („jede Runde ein wenig“), Erzfieber ab 50 hebt die Glut um 1 mehr (ab 75 um 2), Glut über 50 die Welke. Danach greifen die Gegenkräfte (Untote ab 50 −5, Orks ab 55 −3, Glut ab 45 −3, Erzfieber ab 50 −3, Welke ab 45 −3), unter 20 steigt eine Leiste um 1, unter 10 um 2.
+  - Fraktionsressource und Kampfressource sind ein Vorrat von 0 bis 100 (Start 42, alte Stände: 42 + bisheriger Kampfvorrat − 3). Im Kampf sinkt er nie unter 1. Niederlage bei Leiste 100 oder Vorrat 0 mit eigener Abschlussszene.
+  - Knotennetz mit 510 Knoten aus der verbindlichen Karte; Dörfer mit Henrys Namen und Erträgen aus den Völkerdokumenten. Kanten automatisch aus den Kartennachbarn, dazu Seewege (15 Silber), Pässe (Zollpass ab Erzfieber 50 gesperrt) und der Tiefe Stollen (Probe, Glut +1).
+  - Stadt-Hub mit Statusleiste, Krise und Aufhängern, Hofstaat (Handelsverträge, Söldner für Silber oder 15 Vorrat), Rast und Lager (Rast, Dorfertrag, Zentrallager, Rucksack), Held (Charakterfenster) und Aufbruch (Nachbarn mit Weg, Risiko und Kosten). Die vier Orte der Handlung (Kornwik, Heidvang, Eiswacht, Glutberg) führen zurück in ihre Szenen.
+  - Charakterfenster: Reiter „Aufstieg“ mit Entwurfsmodus (Plus und Minus, „Änderungen speichern“, „Zurücksetzen“) für Stufenpunkte, Spezialisierung und Meisterklasse.
+- Noch offen aus diesen Schritten: Hungeraufstand, Bankrott und Zerfall bei knappem Vorrat, Häfen eroberter Städte (Errata 6), Bündnisse und Vasallen, Revier-Gegner auf Knotenkanten.
+
 - Errata 1–7 im Weltbuch, Meisterklasse im Einzelspiel immer erlaubt, Alphatier-Formel, Tagschwäche als Regeldaten.
 - Reisebegegnungen auf der Reisekarte Kornwik bis Glutberg, Ausweichen ab List 3.
 - Söldner mit Charisma-Rabatt und Volksgrenzen, Begleiter-EP, acht Ausrüstungsplätze für Begleiter.

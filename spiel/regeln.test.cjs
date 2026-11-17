@@ -8,7 +8,7 @@ const vm = require("node:vm");
 const root = path.join(__dirname, "..");
 const context = vm.createContext({ structuredClone });
 
-for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/faehigkeiten.js", "spiel/kampf.js", "spiel/startpunkte.js", "spiel/welt.js", "spiel/regeln.js"]) {
+for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/faehigkeiten.js", "spiel/kampf.js", "spiel/startpunkte.js", "spiel/welt.js", "spiel/knoten-daten.js", "spiel/knoten.js", "spiel/regeln.js"]) {
   vm.runInContext(fs.readFileSync(path.join(root, file), "utf8"), context, { filename: file });
 }
 
@@ -1333,3 +1333,175 @@ console.log("Söldner, Volksgrenzen, Begleiter-EP und Begleiterausrüstung gepr�
   rules.setTravelDice(() => 0);
 }
 console.log("Reisebegegnungen (ruhig, scheu, Jäger, Alphatier, Ausweichen) geprüft.");
+
+// ---- Weltebene: Knotennetz, Weltleisten, Fraktionsvorrat und Stadt-Hub (Technische Spezifikation) ----
+{
+  const knoten = vm.runInContext("knoten", context);
+  const alle = Object.values(knoten.alle);
+  assert.equal(alle.length, 510);
+  assert.equal(alle.filter(k => k.typ === "hauptstadt").length, 15);
+  assert.equal(alle.filter(k => k.typ === "stadt" || k.typ === "hafenstadt").length, 150);
+  assert.equal(alle.filter(k => k.typ === "dorf").length, 345);
+  // Jede Hauptstadt hat 3, jede Stadt 2 Dörfer mit Namen und Ertrag aus den Völkerdokumenten.
+  for (const ort of alle.filter(k => k.typ !== "dorf")) {
+    const doerfer = knoten.doerfer(ort.id);
+    assert.equal(doerfer.length, ort.typ === "hauptstadt" ? 3 : 2, ort.name);
+    for (const id of doerfer) assert.ok(knoten.get(id).ertrag && knoten.get(id).fraktion === ort.fraktion, id);
+  }
+  same(knoten.doerfer("kornwik").map(id => knoten.get(id).name), ["Garbenfeld", "Hopfendal"]);
+  // Kanten sind symmetrisch, und das ganze Netz hängt zusammen.
+  for (const ort of alle) for (const weg of ort.verbindungen) {
+    const rueck = knoten.verbindung(weg.zielId, ort.id);
+    assert.ok(rueck && rueck.kantenTyp === weg.kantenTyp, ort.id + " → " + weg.zielId);
+    if (weg.kantenTyp === "seeweg") assert.ok(ort.hatHafen && knoten.get(weg.zielId).hatHafen && weg.kostenGold === 15);
+    if (weg.kantenTyp === "strasse") assert.equal(weg.kostenRessource, weg.sicherheit === "kernland" ? 1 : 2);
+  }
+  const seen = new Set(["kronhall"]);
+  for (const id of seen) for (const weg of knoten.get(id).verbindungen) seen.add(weg.zielId);
+  assert.equal(seen.size, 510);
+  assert.equal(knoten.verbindung("stollenmund", "aschenthron").kantenTyp, "tiefer_stollen");
+  assert.ok(alle.some(k => k.verbindungen.some(weg => weg.pass === "Zollpass")));
+  assert.ok(knoten.verbindung("heidvang", "eiswacht") && knoten.verbindung("eiswacht", "glutberg"));
+  assert.equal(knoten.get("ambossheim").hatHafen, false);
+
+  // Neue Helden starten mit den Weltleisten und 42 Fraktionsvorrat.
+  const fresh = rules.create("Tala", "kronreich", "frau", 2, "waechter", heroBuild);
+  same(fresh.weltLeisten, { untote: 35, orks: 40, glut: 30, erzfieber: 45, welke: 30 });
+  assert.equal(fresh.ressource, 42);
+  assert.equal(fresh.knoten, null);
+
+  // Aus der Handlung in Kornwik in die Weltreise und zurück.
+  const atField = { ...hero(), scene: "return-field" };
+  assert.equal(rules.aktuellerKnoten(atField), "kornwik");
+  const hub = rules.betreteWelt(atField);
+  assert.equal(hub.scene, "weltknoten");
+  assert.equal(hub.knoten, "kornwik");
+  same(hub.handlung, { szene: "return-field", knoten: "kornwik" });
+  assert.equal(rules.storageSite(hub), "Zentrallager · Kornwik");
+  assert.equal(rules.read(JSON.stringify(hub)).knoten, "kornwik");
+  assert.equal(rules.zurHandlung(hub).scene, "return-field");
+  assert.equal(rules.zurHandlung(hub).knoten, null);
+  // Prologe enden an einem Zufluchtsort, auch dort öffnet sich die Weltreise.
+  const dwarf = { ...rules.create("Brom", "tiefgraeber", "mann", 0, "krieger"), scene: "morgen-tiefgraeber" };
+  assert.ok(rules.aktuellerKnoten(dwarf), "Zufluchtsort der Tiefgräber liegt im Knotennetz");
+
+  // Eine Reise ist eine Runde: Kosten, Anstieg und Gegenkräfte der Weltleisten.
+  const toHeidvang = rules.reise(hub, "heidvang");
+  assert.equal(toHeidvang.knoten, "heidvang");
+  assert.equal(toHeidvang.runde, 1);
+  assert.equal(toHeidvang.ressource, 41, "Kernland kostet 1 Vorrat");
+  same(toHeidvang.weltLeisten, { untote: 35, orks: 40, glut: 31, erzfieber: 46, welke: 31 });
+  assert.equal(rules.zurHandlung(toHeidvang), toHeidvang, "Die Handlung wartet in Kornwik");
+  assert.equal(rules.reise(hub, "glutberg"), hub, "Keine direkte Verbindung");
+  const grenz = rules.reise(toHeidvang, "eiswacht");
+  assert.equal(grenz.ressource, 39, "Pass kostet 2 Vorrat");
+  // Gegenkräfte ab der Schwelle, Erholung unter 20.
+  const hot = { ...hub, weltLeisten: { untote: 60, orks: 55, glut: 45, erzfieber: 50, welke: 10 } };
+  same(rules.reise(hot, "heidvang").weltLeisten, { untote: 55, orks: 52, glut: 44, erzfieber: 48, welke: 12 });
+
+  // Niederlage: eine Leiste auf 100 oder der Vorrat auf 0 führt zur Abschlussszene.
+  const doom = rules.reise({ ...hub, weltLeisten: { ...hub.weltLeisten, glut: 99 } }, "heidvang");
+  assert.equal(doom.scene, "weltende");
+  assert.equal(doom.niederlage, "glut");
+  assert.equal(rules.read(JSON.stringify(doom)).scene, "weltende");
+  const hunger = rules.reise({ ...hub, ressource: 1 }, "heidvang");
+  assert.equal(hunger.niederlage, "vorrat");
+  assert.throws(() => rules.read(JSON.stringify({ ...hub, scene: "weltende" })), /beschädigt/);
+
+  // Seewege: eigener Hafen oder Handelsvertrag, 15 Silber je Überfahrt.
+  const westvik = { ...hub, knoten: "westvik", silver: 40 };
+  const see = rules.reiseZiele(westvik).find(weg => weg.kantenTyp === "seeweg");
+  assert.equal(see.grund, null);
+  const sailed = rules.reise(westvik, see.zielId);
+  assert.equal(sailed.silver, 25);
+  assert.equal(sailed.ressource, 42, "Seewege kosten Silber statt Vorrat");
+  assert.equal(rules.reiseGrund({ ...westvik, silver: 10 }, see.zielId), "zu wenig Silber");
+  const perlvik = { ...hub, knoten: "perlvik", silver: 40 };
+  const perlSee = rules.reiseZiele(perlvik).find(weg => weg.kantenTyp === "seeweg");
+  assert.match(perlSee.grund, /Handelsvertrag mit Freie Häfen/);
+  assert.equal(rules.vertragGrund(perlvik), null);
+  const treaty = rules.vertragSchliessen(perlvik);
+  same(treaty.vertraege, ["haefen"]);
+  assert.equal(treaty.ressource, 32);
+  assert.equal(rules.reiseGrund(treaty, perlSee.zielId), null);
+  assert.equal(rules.read(JSON.stringify(treaty)).vertraege[0], "haefen");
+  // Volksgrenzen in der Diplomatie, Wirkung auf die Leisten.
+  assert.equal(rules.vertragGrund({ ...hub, knoten: "eryndor" }), "Untote verhandeln nicht mit den Lebenden");
+  assert.equal(rules.vertragGrund({ ...dwarf, scene: "weltknoten", knoten: "aschenthron" }), "Orks und Zwerge verhandeln nicht miteinander");
+  assert.equal(rules.vertragSchliessen({ ...hub, knoten: "ambossheim" }).weltLeisten.erzfieber, 40);
+  assert.equal(rules.vertragSchliessen({ ...hub, knoten: "kragmar" }).weltLeisten.orks, 35);
+
+  // Pässe: Der Zollpass schließt ab Erzfieber 50.
+  const zoll = knoten.get("zollburg").verbindungen.find(weg => weg.pass === "Zollpass");
+  const zollburg = { ...hub, knoten: "zollburg" };
+  assert.equal(rules.reiseGrund(zollburg, zoll.zielId), null);
+  assert.match(rules.reiseGrund({ ...zollburg, weltLeisten: { ...hub.weltLeisten, erzfieber: 50 } }, zoll.zielId), /Zollpass gesperrt/);
+  // Tiefer Stollen: Probe auf Willenskraft oder Intelligenz und Glut +1.
+  rules.setTravelDice(() => 0.99);
+  const stollen = rules.reise({ ...hub, knoten: "stollenmund", health: 30 }, "aschenthron");
+  rules.setTravelDice(() => 0);
+  assert.equal(stollen.knoten, "aschenthron");
+  assert.ok(stollen.health < 30 && stollen.health > 0, "Misslungene Probe kostet LP");
+  assert.equal(stollen.weltLeisten.glut, 30 + 1 + 1, "Stollen +1 und Rundenanstieg +1");
+
+  // Rast: volle LP, kostet 1 Vorrat, nie den letzten.
+  const tired = { ...hub, health: 3 };
+  const rested = rules.rast(tired);
+  assert.equal(rested.health, rules.healthLimit(rested));
+  assert.equal(rested.ressource, 41);
+  assert.equal(rules.rast({ ...tired, ressource: 1 }).health, 3);
+  // Dörfer der eigenen Fraktion liefern +5, danach 10 Runden Pause.
+  const garbenfeld = rules.reise(hub, "garbenfeld");
+  assert.equal(rules.ertragGrund(garbenfeld), null);
+  const harvested = rules.ertragEinholen(garbenfeld);
+  assert.equal(harvested.ressource, garbenfeld.ressource + 5);
+  assert.match(rules.ertragGrund(harvested), /wieder bereit in 10 Runden/);
+  assert.equal(rules.read(JSON.stringify(harvested)).ertraege.garbenfeld, 1);
+  assert.equal(rules.ertragGrund({ ...hub, knoten: "netzby" }), null);
+  assert.equal(rules.ertragGrund({ ...hub, knoten: "perlstrand" }), "nur in Dörfern der eigenen Fraktion");
+  // Zentrallager: Hauptstädte und eigene Städte, keine Dörfer.
+  assert.equal(rules.storageSite({ ...hub, knoten: "eryndor" }), "Zentrallager · Eryndor");
+  assert.equal(rules.storageSite({ ...hub, knoten: "salzwacht" }), null);
+  assert.equal(rules.storageSite({ ...hub, knoten: "garbenfeld" }), null);
+  // Söldner in Kornwik: Silber oder 15 Vorrat.
+  const arne = rules.candidates(hub).find(([id]) => id === "steppenreiter");
+  assert.ok(arne, "Söldner warten auch im Hub von Kornwik");
+  const paid = rules.hire(hub, "steppenreiter", "vorrat");
+  assert.equal(paid.ressource, 42 - rules.hireCost(hub, "steppenreiter", 15));
+  assert.ok(paid.party.includes("steppenreiter"));
+  assert.equal(rules.hire({ ...hub, ressource: 15 }, "steppenreiter", "vorrat").party.length, 0);
+
+  // Hinterhalt auf einer Grenzlandkante im Kronreich: Kampf, danach zurück in den Hub.
+  rules.setTravelDice(() => 0.5);
+  const ambush = rules.reise({ ...toHeidvang, xp: 300, health: 60 }, "eiswacht");
+  rules.setTravelDice(() => 0);
+  assert.equal(ambush.combat.id, "jagd-grauwolf");
+  assert.equal(ambush.combat.weiter, "weltknoten");
+  assert.equal(rules.read(JSON.stringify(ambush)).combat.weiter, "weltknoten");
+  const evaded = rules.strike(ambush, "evade");
+  if (evaded !== ambush) assert.equal(evaded.scene, "weltknoten");
+  let won = ambush;
+  for (let turn = 0; won.combat && turn < 40; turn++) won = rules.strike(won, "spear", highRoll);
+  assert.equal(won.scene, "weltknoten");
+  assert.equal(won.knoten, "eiswacht");
+  // Elfenland hat noch keine Tierwerte: Ein Jäger-Wurf bleibt dort ein Hinweis ohne Kampf.
+  rules.setTravelDice(() => 0.5);
+  const elves = rules.reise({ ...hub, knoten: "hochdorn" }, knoten.get("hochdorn").verbindungen.find(weg => weg.sicherheit === "grenzland" && weg.kantenTyp === "strasse")?.zielId ?? "nordkap");
+  rules.setTravelDice(() => 0);
+  assert.equal(elves.combat, null);
+}
+console.log("Weltebene (Knotennetz, Weltleisten, Vorrat, Seewege, Pässe, Stollen, Rast, Ertrag, Verträge) geprüft.");
+
+// ---- Charakter-Entwurf: mehrere Punkte auf einmal festschreiben ----
+{
+  const ready = { ...hero(), stufenpunkte: 2 };
+  const plan = rules.entwurf(ready, { training: { strength: 1, will: 1 } });
+  assert.equal(plan.stufenpunkte, 0);
+  same(plan.training, { strength: 1, will: 1 });
+  assert.equal(rules.entwurf(ready, { training: { strength: 3 } }), ready, "Zu viele Punkte: nichts wird gespeichert");
+  const spez = rules.entwurf({ ...ready, questStufe: 3 }, { training: { strength: 2 }, spez: { variante: "a", grundwert: "will", fertigkeit: "mut" } });
+  assert.equal(spez.build.spez.variante, "a");
+  assert.equal(spez.build.fertigkeiten.mut, ready.build.fertigkeiten.mut + 1);
+  assert.equal(rules.entwurf(ready, { spez: { variante: "a", grundwert: "will", fertigkeit: "mut" } }), ready, "Spezialisierung erst ab Quest-Stufe 3");
+}
+console.log("Charakter-Entwurf geprüft.");

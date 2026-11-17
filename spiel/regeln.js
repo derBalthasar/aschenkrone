@@ -15,6 +15,24 @@ const rules = (() => {
   const itemCap = 600;
   const stackLimit = 10;
   const beltSize = 2;
+  // Technische Spezifikation (17. 11. 2026): Weltleisten, Fraktionsvorrat und Knotennetz.
+  const N = knoten;
+  const leistenFolge = ["untote", "orks", "glut", "erzfieber", "welke"];
+  const leistenStart = { untote: 35, orks: 40, glut: 30, erzfieber: 45, welke: 30 };
+  const leistenNamen = { untote: "Untoten-Bedrohung", orks: "Ork-Bedrohung", glut: "Glut des Mutterbergs",
+    erzfieber: "Erzfieber", welke: "Welke" };
+  // Gegenkräfte (Gleichgewicht der Welt): ab der Schwelle sinkt die Leiste jede Runde ohne Zutun des Spielers.
+  const gegenkraefte = { untote: [50, 5], orks: [55, 3], glut: [45, 3], erzfieber: [50, 3], welke: [45, 3] };
+  // Völkerdokumente: Glut, Welke und Erzfieber steigen „jede Runde ein wenig“.
+  const leistenAnstieg = { glut: 1, welke: 1, erzfieber: 1 };
+  const vorratStart = 42;
+  const vorratMax = 100;
+  const seewegSilber = 15;
+  const vorratAnwerbung = 15;
+  const vertragKosten = 10;
+  const ertragMenge = 5;
+  const ertragPause = 10;
+  const stollenSchaden = 5;
   // Errata 8: Würfel für Reisebegegnungen. Tests und Werkzeuge können ihn austauschen.
   let travelDice = Math.random;
   const setTravelDice = (dice) => { travelDice = typeof dice === "function" ? dice : Math.random; };
@@ -166,7 +184,8 @@ const rules = (() => {
       health: 0, ember: 0, balance: 0, inventory: [weapon, "lederwams", "galgenwurz"],
       equipment: { ...emptyEquipment(), weapon, armor: "lederwams" },
       storage: [],
-      xp: 0, silver: 5, training: {}, stufenpunkte: 0, ressource: 3, rewards: [],
+      xp: 0, silver: 5, training: {}, stufenpunkte: 0, ressource: vorratStart, rewards: [],
+      weltLeisten: { ...leistenStart }, runde: 0, knoten: null, handlung: null, vertraege: [], ertraege: {}, niederlage: null,
       party: [], companionEquipment: {}, partyVitals: {}, heroStatus: {}, companionXp: {},
       rucksack: 0, guertel: Array(beltSize).fill(null),
       relationships: {}, factionRuf: {}, companionQuests: {}, crafted: [], questClock: 0, questLog: {},
@@ -318,6 +337,18 @@ const rules = (() => {
     }
     state.stufenpunkte ??= 0;
     state.ressource ??= 3;
+    // Spielstände vor der Weltebene: Fraktionsressource und Kampfressource werden ein Vorrat von 0 bis 100.
+    // Der alte Kampfvorrat (Start 3) kommt auf den neuen Startwert 42 obendrauf.
+    if (!isRecord(state.weltLeisten)) {
+      state.weltLeisten = { ...leistenStart };
+      if (Number.isInteger(state.ressource)) state.ressource = Math.max(1, Math.min(vorratMax, vorratStart + Math.max(0, state.ressource - 3)));
+    }
+    state.runde ??= 0;
+    state.knoten ??= null;
+    state.handlung ??= null;
+    state.vertraege ??= [];
+    state.ertraege ??= {};
+    state.niederlage ??= null;
     create(state.name, state.faction, state.appearance, state.variant, state.role, state.build);
     const combat = state.combat;
     const validList = (value, check, limit) => Array.isArray(value) && value.length <= limit && value.every(check);
@@ -332,7 +363,17 @@ const rules = (() => {
         !intBetween(state.ember, 0, emberLimit(state)) ||
         !intBetween(state.balance, -3, 3) ||
         !intBetween(state.xp, 0, 1000000) || !intBetween(state.silver, 0, 1000000) ||
-        !intBetween(state.stufenpunkte, 0, 40) || !intBetween(state.ressource, 0, 99) ||
+        !intBetween(state.stufenpunkte, 0, 40) || !intBetween(state.ressource, 0, vorratMax) ||
+        !isRecord(state.weltLeisten) || Object.keys(state.weltLeisten).length !== leistenFolge.length ||
+        !leistenFolge.every(id => intBetween(state.weltLeisten[id], 0, 100)) ||
+        !intBetween(state.runde, 0, 1000000000) ||
+        (state.knoten !== null && !N.get(state.knoten)) || (state.scene === "weltknoten" && state.knoten === null) ||
+        (state.handlung !== null && !(isRecord(state.handlung) && own(world.scenes, state.handlung.szene) &&
+          !["weltknoten", "weltende", "defeat"].includes(state.handlung.szene) && N.get(state.handlung.knoten))) ||
+        !validList(state.vertraege, id => own(K.fraktionen, id) && id !== state.faction, 14) ||
+        new Set(state.vertraege).size !== state.vertraege.length ||
+        !isRecord(state.ertraege) || !Object.entries(state.ertraege).every(([id, runde]) => N.get(id)?.typ === "dorf" && intBetween(runde, 0, state.runde)) ||
+        (state.niederlage !== null && !own(niederlagen, state.niederlage)) || ((state.scene === "weltende") !== (state.niederlage !== null)) ||
         !validList(state.rewards, (id) => typeof id === "string" && id.length <= 50, 100) ||
         !validList(state.party, (id) => own(world.companions, id), 5) ||
         new Set(state.party).size !== state.party.length ||
@@ -471,8 +512,9 @@ const rules = (() => {
   const departureThreshold = -25;
 
   // Söldner warten in den Städten mit Zentrallager, Story-Gefährten an ihren Treffpunkten.
+  const sceneMap = (state) => state.scene === "weltknoten" ? N.knotenZuKarte(state.knoten) : world.scenes[state.scene]?.map;
   const mercenaryHere = (state, companion) => Boolean(companion.soeldner && storageSite(state) &&
-    companion.soeldner.orte.includes(world.scenes[state.scene].map));
+    companion.soeldner.orte.includes(sceneMap(state)));
   function candidates(state) {
     if (state.combat || !state.health) return [];
     return Object.entries(world.companions).filter(([id, companion]) =>
@@ -493,8 +535,8 @@ const rules = (() => {
     return !peopleClash(people(state.faction), volk) && state.party.every(member => !peopleClash(memberPeople(member), volk));
   }
   // Anwerbegebühr mit Charisma-Rabatt: 16–19 senkt um 10 %, 20 um 20 %.
-  function hireCost(state, id) {
-    const base = world.companions[id]?.soeldner?.kosten ?? 0;
+  function hireCost(state, id, fest = null) {
+    const base = fest ?? world.companions[id]?.soeldner?.kosten ?? 0;
     const presence = heroAttributes(state).presence;
     return Math.round(base * (presence >= 20 ? 0.8 : presence >= 16 ? 0.9 : 1));
   }
@@ -606,15 +648,19 @@ const rules = (() => {
   }
 
   // Söldner anwerben: einmalige Gebühr, danach warten sie in jeder Stadt mit Zentrallager auf einen Austausch.
-  function hire(previous, id) {
-    const cost = hireCost(previous, id);
+  // Statt Silber geht auch Fraktionsvorrat (15, mit demselben Charisma-Rabatt). Der Vorrat bleibt dabei über 0.
+  function hire(previous, id, zahlung = "silber") {
+    const cost = zahlung === "vorrat" ? hireCost(previous, id, vorratAnwerbung) : hireCost(previous, id);
     if (previous.party.length >= partyLimit || !candidates(previous).some(([candidate]) => candidate === id) ||
-        recruitment(previous, id) !== "hire" || previous.silver < cost) return previous;
+        recruitment(previous, id) !== "hire" ||
+        (zahlung === "vorrat" ? previous.ressource - cost < 1 : zahlung !== "silber" || previous.silver < cost)) return previous;
     const state = structuredClone(previous);
-    state.silver -= cost;
+    if (zahlung === "vorrat") state.ressource -= cost;
+    else state.silver -= cost;
     (state.companionQuests ??= {})[id] = { status: "done", debt: 0 };
     join(state, id);
-    note(state, world.companions[id].name + " wird für " + cost + " Silber angeworben und schließt sich deiner Gruppe an.");
+    note(state, world.companions[id].name + " wird für " + cost + " " + (zahlung === "vorrat" ? resourceName(state) : "Silber") +
+      " angeworben und schließt sich deiner Gruppe an.");
     return state;
   }
 
@@ -1047,6 +1093,11 @@ const rules = (() => {
   }
 
   function storageSite(state) {
+    // Weltebene: Zentrallager in allen Hauptstädten und in den Städten der eigenen Fraktion.
+    if (state.scene === "weltknoten") {
+      const ort = N.get(state.knoten);
+      return ort && (ort.typ === "hauptstadt" || (ort.typ !== "dorf" && ort.fraktion === state.faction)) ? "Zentrallager · " + ort.name : null;
+    }
     const scene = world.scenes[state.scene];
     return world.storageSites[scene?.map] ?? world.storageSites[scene?.lager] ?? null;
   }
@@ -1379,6 +1430,294 @@ const rules = (() => {
     if (world.deeds[mark]) grant(state, mark, world.deeds[mark]);
   }
 
+  // ---- Weltebene: Weltleisten, Fraktionsvorrat, Stadt-Hub und Knotennetz (Technische Spezifikation) ----
+  // Eine Runde der Weltleisten ist eine Reise von Knoten zu Knoten (Henry, 17. 11. 2026). Die Handlung der
+  // Reisekarte Kornwik bis Glutberg bleibt erhalten: Wer aus ihr in die Weltreise wechselt, hinterlegt eine
+  // Rückkehrmarke (handlung) und setzt die Handlung am selben Ort fort.
+
+  const niederlagen = {
+    untote: "Die Untoten-Bedrohung erreicht 100. Die Lange Nacht kehrt zurück, und die Lebenden fallen.",
+    orks: "Die Ork-Bedrohung erreicht 100. Die Clans überrennen die Küsten der Lebenden.",
+    glut: "Die Glut des Mutterbergs erreicht 100. Der zweite Aschenwinter verdunkelt die Welt.",
+    erzfieber: "Das Erzfieber erreicht 100. Die Häuser der Zwerge fallen übereinander her.",
+    welke: "Die Welke erreicht 100. Der Weltenbaum stirbt.",
+    vorrat: "Der Fraktionsvorrat ist aufgebraucht. Ohne Nachschub zerfällt deine Fraktion.",
+  };
+
+  const leiste = (state, id) => state.weltLeisten?.[id] ?? leistenStart[id];
+  function weltLeisten(state) {
+    return leistenFolge.map((id) => ({ id, name: leistenNamen[id], wert: leiste(state, id), schwelle: gegenkraefte[id][0] }));
+  }
+  const setzeLeiste = (state, id, wert) => { state.weltLeisten[id] = Math.max(0, Math.min(100, wert)); };
+
+  // Eine Weltrunde: Anstieg, Kopplungen der Völkerdokumente, dann Gegenkräfte und Erholung unter 20.
+  function weltRunde(state) {
+    state.weltLeisten ??= { ...leistenStart };
+    const vorher = { ...state.weltLeisten };
+    for (const [id, wert] of Object.entries(leistenAnstieg)) setzeLeiste(state, id, leiste(state, id) + wert);
+    if (vorher.erzfieber >= 75) setzeLeiste(state, "glut", leiste(state, "glut") + 2);
+    else if (vorher.erzfieber >= 50) setzeLeiste(state, "glut", leiste(state, "glut") + 1);
+    if (vorher.glut > 50) setzeLeiste(state, "welke", leiste(state, "welke") + 1);
+    state.runde = (state.runde ?? 0) + 1;
+    // Erreicht eine Leiste 100, greift keine Gegenkraft mehr: die Niederlage-Prüfung folgt.
+    if (leistenFolge.some((id) => leiste(state, id) >= 100)) return;
+    for (const id of leistenFolge) {
+      const [schwelle, senkung] = gegenkraefte[id];
+      const wert = leiste(state, id);
+      if (wert >= schwelle) setzeLeiste(state, id, wert - senkung);
+      else if (wert < 10) setzeLeiste(state, id, wert + 2);
+      else if (wert < 20) setzeLeiste(state, id, wert + 1);
+    }
+  }
+
+  // Niederlage-Prüfung bei jedem Rundenwechsel: eine Leiste auf 100 oder der Vorrat auf 0.
+  function pruefeNiederlage(state) {
+    const grund = leistenFolge.find((id) => leiste(state, id) >= 100) ?? ((state.ressource ?? 0) <= 0 ? "vorrat" : null);
+    if (!grund) return false;
+    state.niederlage = grund;
+    state.combat = null;
+    state.scene = "weltende";
+    note(state, niederlagen[grund]);
+    return true;
+  }
+
+  // Der Knoten, an dem die Spielfigur gerade steht: in der Weltreise der aktuelle Knoten, sonst die Städte der
+  // Reisekarte und die Zufluchtsorte am Ende der Prologe.
+  function aktuellerKnoten(state) {
+    if (state.scene === "weltknoten") return state.knoten;
+    const scene = world.scenes[state.scene];
+    if (!scene) return null;
+    const ort = N.karteZuKnoten(scene.map);
+    if (ort && world.travelScenes[scene.map]?.includes(state.scene)) return ort;
+    if (state.scene.startsWith("morgen-") && scene.fern && N.nachName[scene.fern]) return N.nachName[scene.fern];
+    return null;
+  }
+
+  function weltOffen(state) {
+    return Boolean(!state.combat && state.health > 0 && state.scene !== "weltknoten" && aktuellerKnoten(state));
+  }
+
+  function betreteWelt(previous) {
+    if (!weltOffen(previous)) return previous;
+    const state = structuredClone(previous);
+    const ort = aktuellerKnoten(state);
+    state.handlung = { szene: state.scene, knoten: ort };
+    state.knoten = ort;
+    state.scene = "weltknoten";
+    note(state, "Du betrittst " + N.get(ort).name + ". Die Handlung wartet hier, bis du zurückkehrst.");
+    return state;
+  }
+
+  function handlungHier(state) {
+    return Boolean(state.scene === "weltknoten" && state.handlung && state.handlung.knoten === state.knoten);
+  }
+
+  function zurHandlung(previous) {
+    if (!handlungHier(previous) || previous.combat || !previous.health) return previous;
+    const state = structuredClone(previous);
+    const szene = state.handlung.szene;
+    state.handlung = null;
+    state.knoten = null;
+    state.scene = szene;
+    note(state, "Du kehrst zur Handlung zurück: " + (world.scenes[szene].place ?? world.scenes[szene].title) + ".");
+    return state;
+  }
+
+  // Seewege brauchen einen Hafen am Abfahrtsort, der dir gehört oder einem Vertragspartner.
+  function schiffBereit(state, ort) {
+    return ort.hatHafen && (ort.fraktion === state.faction || (state.vertraege ?? []).includes(ort.fraktion));
+  }
+
+  function reiseGrund(state, zielId) {
+    if (state.scene !== "weltknoten" || state.combat || !state.health) return "nur in der Weltreise";
+    const ort = N.get(state.knoten);
+    const weg = N.verbindung(state.knoten, zielId);
+    if (!ort || !weg) return "keine Verbindung";
+    if (weg.kantenTyp === "seeweg") {
+      if (!schiffBereit(state, ort)) {
+        return ort.hatHafen ? "kein Schiff: Handelsvertrag mit " + K.fraktionen[ort.fraktion].name + " nötig" : "kein Hafen";
+      }
+      if (state.silver < weg.kostenGold) return "zu wenig Silber";
+    }
+    if (weg.pass === "Zollpass" && leiste(state, "erzfieber") >= 50) return "Zollpass gesperrt (Erzfieber ab 50)";
+    return null;
+  }
+
+  function reiseZiele(state) {
+    if (state.scene !== "weltknoten") return [];
+    return N.get(state.knoten).verbindungen.map((weg) => ({ ...weg, ziel: N.get(weg.zielId), grund: reiseGrund(state, weg.zielId),
+      letzterVorrat: weg.kostenRessource >= (state.ressource ?? 0) }));
+  }
+
+  // Reisebegegnungen auf Kanten des Knotennetzes. Werte gibt es bisher nur für die Tiere der Menschenlande.
+  const jaegerNachFraktion = { kronreich: ["jagd-galgenkraehe", "jagd-grauwolf"], orden: ["jagd-grauwolf"], haefen: ["jagd-galgenkraehe"] };
+  function knotenBegegnung(state, weg, ziel) {
+    const table = world.encounterTables[weg.sicherheit === "kernland" ? "kernland" : "grenzland"];
+    const roll = Math.floor(travelDice() * 100);
+    let summe = 0;
+    const kind = table.find(([weight]) => roll < (summe += weight))?.[1] ?? "ruhig";
+    const pick = (list) => list[Math.floor(travelDice() * list.length) % list.length];
+    if (kind === "ruhig") {
+      note(state, "Unterwegs: " + pick(weg.sicherheit === "grenzland" ? [...world.quietTexts, ...world.rumorTexts] : world.quietTexts));
+      return;
+    }
+    if (kind === "scheu") {
+      const key = skillValue(state, "fernkampf") > skillValue(state, "list") ? "fernkampf" : "list";
+      const dice = 1 + Math.floor(travelDice() * 20);
+      const bonus = skillValue(state, key);
+      const passed = dice + bonus >= 12;
+      note(state, "Unterwegs kreuzt ein scheues Tier den Weg. " + K.fertigkeiten[key].name + " " + dice + " + " + bonus + " gegen 12. " +
+        (passed ? "Du sammelst am Wegrand Galgenwurz, während es äst." : "Das Tier flieht ins Unterholz."));
+      if (passed) receive(state, ["galgenwurz"]);
+      return;
+    }
+    const pool = weg.kantenTyp === "seeweg" ? null : jaegerNachFraktion[ziel.fraktion];
+    if (!pool) {
+      note(state, weg.kantenTyp === "seeweg"
+        ? "Unterwegs: Fremde Segel folgen euch bis zum Abend. Dann dreht das Schiff ab."
+        : "Unterwegs: Frische Spuren eines Jägers kreuzen den Weg. Ihr umgeht sein Revier im Bogen.");
+      return;
+    }
+    const fight = travelDice() < 0.1 ? pick(world.encounterPools.alpha) : pick(pool);
+    note(state, "Hinterhalt unterwegs: " + world.fights[fight].name + "!");
+    startFight(state, fight);
+    if (state.combat) Object.assign(state.combat, { weiter: "weltknoten", hinterhalt: true });
+    else if (!state.health) arrive(state, "defeat");
+  }
+
+  function reiseStep(previous, zielId) {
+    if (reiseGrund(previous, zielId)) return previous;
+    const state = structuredClone(previous);
+    const weg = N.verbindung(state.knoten, zielId);
+    const ziel = N.get(zielId);
+    state.ressource -= weg.kostenRessource;
+    state.silver -= weg.kostenGold;
+    if (weg.kostenGold) note(state, "Überfahrt nach " + ziel.name + " · " + weg.kostenGold + " Silber.");
+    if (weg.probe) {
+      // Tiefer Stollen: Probe auf den besseren von Willenskraft und Intelligenz (W20 unter dem Grundwert).
+      const werte = heroAttributes(state);
+      const wert = Math.max(werte.will, werte.mind);
+      const wurf = 1 + Math.floor(travelDice() * 20);
+      if (wurf <= wert) note(state, "Im Tiefen Stollen glüht das Gestein. Probe " + wurf + " gegen " + wert + ": Du findest den sicheren Weg.");
+      else {
+        const schaden = Math.min(state.health - 1, stollenSchaden);
+        state.health -= schaden;
+        note(state, "Im Tiefen Stollen glüht das Gestein. Probe " + wurf + " gegen " + wert + ": Heiße Asche verbrennt dich, " + schaden + " LP.");
+      }
+      setzeLeiste(state, "glut", leiste(state, "glut") + (weg.glut ?? 1));
+    }
+    state.knoten = zielId;
+    weltRunde(state);
+    if (pruefeNiederlage(state)) return state;
+    note(state, "Ankunft in " + ziel.name + " (" + N.typNamen[ziel.typ] + ", " + K.fraktionen[ziel.fraktion].name + ").");
+    knotenBegegnung(state, weg, ziel);
+    return state;
+  }
+  const reise = (...args) => timedAction(args[0], reiseStep(...args));
+
+  // Rast im Hub: volle LP, Glut und Zustände der Gruppe. Kostet 1 Fraktionsvorrat und darf ihn nicht aufbrauchen.
+  function rastGrund(state) {
+    if (state.scene !== "weltknoten" || state.combat || !state.health) return "nur in der Weltreise";
+    if ((state.ressource ?? 0) <= 1) return "zu wenig " + resourceName(state);
+    return null;
+  }
+  function rast(previous) {
+    if (rastGrund(previous)) return previous;
+    const state = structuredClone(previous);
+    state.ressource -= 1;
+    state.health = healthLimit(state);
+    state.ember = emberLimit(state);
+    state.heroStatus = {};
+    ensureVitals(state);
+    for (const id of state.party) state.partyVitals[id] = { health: memberHealthLimit(id, state), status: {} };
+    note(state, "Ihr rastet in " + N.get(state.knoten).name + ". Alle sind wieder bei Kräften · −1 " + resourceName(state) + ".");
+    return state;
+  }
+
+  // Dörfer der eigenen Fraktion liefern ihren Ertrag. Danach braucht das Dorf 10 Runden, bis es wieder liefert.
+  function ertragGrund(state) {
+    if (state.scene !== "weltknoten" || state.combat || !state.health) return "nur in der Weltreise";
+    const ort = N.get(state.knoten);
+    if (ort.typ !== "dorf") return "nur in Dörfern";
+    if (ort.fraktion !== state.faction) return "nur in Dörfern der eigenen Fraktion";
+    const zuletzt = state.ertraege?.[ort.id];
+    if (zuletzt !== undefined && state.runde - zuletzt < ertragPause) return "wieder bereit in " + (ertragPause - (state.runde - zuletzt)) + " Runden";
+    if ((state.ressource ?? 0) >= vorratMax) return "Vorrat ist voll";
+    return null;
+  }
+  function ertragEinholen(previous) {
+    if (ertragGrund(previous)) return previous;
+    const state = structuredClone(previous);
+    const ort = N.get(state.knoten);
+    state.ressource = Math.min(vorratMax, state.ressource + ertragMenge);
+    (state.ertraege ??= {})[ort.id] = state.runde;
+    note(state, ort.name + " liefert " + ort.ertrag + " an " + N.get(ort.stadt).name + " · +" + ertragMenge + " " + resourceName(state) + ".");
+    return state;
+  }
+
+  // Hofstaat: Handelsvertrag in der Hauptstadt einer fremden Fraktion. Untote verhandeln nicht mit Lebenden,
+  // Orks und Zwerge schließen keinen Frieden. Verträge mit Zwergen senken das Erzfieber, mit Orks die Ork-Bedrohung.
+  function vertragGrund(state) {
+    if (state.scene !== "weltknoten" || state.combat || !state.health) return "nur in der Weltreise";
+    const ort = N.get(state.knoten);
+    if (ort.typ !== "hauptstadt") return "nur in Hauptstädten";
+    if (ort.fraktion === state.faction) return "eigene Fraktion";
+    if ((state.vertraege ?? []).includes(ort.fraktion)) return "Vertrag besteht";
+    if (peopleClash(people(state.faction), people(ort.fraktion))) {
+      return people(ort.fraktion) === "untote" || people(state.faction) === "untote" ? "Untote verhandeln nicht mit den Lebenden"
+        : "Orks und Zwerge verhandeln nicht miteinander";
+    }
+    if ((state.ressource ?? 0) - vertragKosten < 1) return "zu wenig " + resourceName(state);
+    return null;
+  }
+  function vertragSchliessen(previous) {
+    if (vertragGrund(previous)) return previous;
+    const state = structuredClone(previous);
+    const ort = N.get(state.knoten);
+    state.ressource -= vertragKosten;
+    state.vertraege = [...(state.vertraege ?? []), ort.fraktion];
+    note(state, "Handelsvertrag mit " + K.fraktionen[ort.fraktion].name + " geschlossen · −" + vertragKosten + " " + resourceName(state) +
+      ". Ihre Häfen stehen dir offen.");
+    const eigenes = people(state.faction);
+    const fremdes = people(ort.fraktion);
+    if (eigenes !== fremdes && (eigenes === "zwerge" || fremdes === "zwerge") && (eigenes === "menschen" || fremdes === "menschen")) {
+      setzeLeiste(state, "erzfieber", leiste(state, "erzfieber") - 5);
+      note(state, "Ein fairer Handel mit den Zwergen senkt das Erzfieber um 5.");
+    }
+    if (eigenes !== fremdes && (eigenes === "orks" || fremdes === "orks")) {
+      setzeLeiste(state, "orks", leiste(state, "orks") - 5);
+      note(state, "Der Vertrag mit einem Ork-Clan senkt die Ork-Bedrohung um 5.");
+    }
+    return state;
+  }
+
+  // Charakter-Entwurf: Stufenpunkte, Spezialisierung und Meisterklasse in einem Schritt festschreiben.
+  // plan = { training: { grundwert: n }, spez: { variante, grundwert, fertigkeit } | null,
+  //          meister: { grundwerte: { grundwert: n }, fertigkeit } | null }
+  function entwurf(previous, plan) {
+    if (!isRecord(plan) || previous.combat || !previous.health) return previous;
+    let state = previous;
+    for (const [id, count] of Object.entries(plan.training ?? {})) {
+      if (!intBetween(count, 0, 40)) return previous;
+      for (let index = 0; index < count; index++) {
+        const next = train(state, id);
+        if (next === state) return previous;
+        state = next;
+      }
+    }
+    if (plan.spez) {
+      const next = specialize(state, plan.spez.variante, plan.spez.grundwert, plan.spez.fertigkeit);
+      if (next === state) return previous;
+      state = next;
+    }
+    if (plan.meister) {
+      const next = ascend(state, plan.meister.grundwerte, plan.meister.fertigkeit);
+      if (next === state) return previous;
+      state = next;
+    }
+    return state;
+  }
+
   // ---- Kampf nach dem Kampfdokument (17. 11. 2026): Runden, Initiative, Ausdauer, Mana und Fähigkeiten ----
   // Ohne Kampfraster: Fläche trifft alle Feinde, Verlangsamen und Zurückstoßen senken den Schaden des Ziels um 1.
 
@@ -1449,7 +1788,8 @@ const rules = (() => {
     if ((held.abklingen[f.id] ?? 0) > 0) return { f, reason: "Abklingzeit " + held.abklingen[f.id] };
     const pool = f.zahlung === "M" ? held.mana : held.ausdauer;
     if (pool < f.kostenWert) return { f, reason: "zu wenig " + (f.zahlung === "M" ? "Mana" : "Ausdauer") };
-    if ((f.ressource ?? 0) > (state.ressource ?? 0)) return { f, reason: "zu wenig " + resourceName(state) };
+    // Der Fraktionsvorrat sinkt im Kampf nie unter 1 (Henry, 17. 11. 2026).
+    if ((f.ressource ?? 0) && (state.ressource ?? 0) - f.ressource < 1) return { f, reason: "zu wenig " + resourceName(state) };
     return { f, reason: null };
   }
 
@@ -1533,7 +1873,8 @@ const rules = (() => {
       const check = abilityState(previous, abilityId);
       if (check.reason) return previous;
       ability = check.f;
-      if (boosted && (ability.stufe < 3 || ability.stufe === 20 || ability.meister || (previous.ressource ?? 0) < 1)) return previous;
+      if (boosted && (ability.stufe < 3 || ability.stufe === 20 || ability.meister ||
+        (previous.ressource ?? 0) - (ability.ressource ?? 0) - 1 < 1)) return previous;
     }
     const available = targets(previous).filter(enemy => enemy.health > 0);
     const selected = targetId === undefined ? available[0] : available.find(enemy => enemy.id === targetId);
@@ -1855,7 +2196,7 @@ const rules = (() => {
         const next = order.find((id) => turn.feinde[id].lp > 0);
         if (next !== undefined) turn.feinde[next].status.dot = { wert: scaled(r.dot.wert, factor), runden: r.dot.runden, feuer: false };
       }
-      if (rider.ressource) state.ressource = Math.min(99, (state.ressource ?? 0) + rider.ressource);
+      if (rider.ressource) state.ressource = Math.min(vorratMax, (state.ressource ?? 0) + rider.ressource);
       if (rider.heilung) healHero(state, rider.heilung, events);
       if (rider.unsichtbar) held.unsichtbar = rider.unsichtbar + 1;
       if (rider.diener && turn.diener.length < kampf.maxDiener) {
@@ -1955,7 +2296,7 @@ const rules = (() => {
     if (result.victory) markDeed(state, result.victory);
     if (people(state.faction) === "orks") state.rausch = true;
     if (result.unlock) markDeed(state, result.unlock);
-    state.ressource = Math.min(99, (state.ressource ?? 0) + 1);
+    state.ressource = Math.min(vorratMax, (state.ressource ?? 0) + 1);
     note(state, (result.victoryText ?? "Die Begegnung ist gewonnen.") + " Du nimmst " +
       result.loot.map((id) => world.items[id]).join(" und ") + " mit. +1 " + resourceName(state) + ".");
     // 50 EP für die gewonnene Schlacht und 10 EP je Stufe jedes besiegten Gegners.
@@ -2266,5 +2607,8 @@ const rules = (() => {
     memberHealthLimit, memberVitals, allies, memberEquipment, assigned, progression, train, trade, candidates, recruit, dismiss, targets,
     questEntries, questPlans, partyLimit, attitude, questReady, completeQuest, paySalary, craft, relationship, reputation, recruitment, promise, bondActions, bondWith,
     healthLimit, emberLimit, heroAttributes, ending, moorConsequences, effects,
+    weltLeisten, leistenNamen, leistenStart, gegenkraefte, niederlagen, vorratMax, vorratStart, seewegSilber, vorratAnwerbung,
+    vertragKosten, ertragMenge, ertragPause, weltRunde, aktuellerKnoten, weltOffen, betreteWelt, handlungHier, zurHandlung,
+    reiseGrund, reiseZiele, reise, rastGrund, rast, ertragGrund, ertragEinholen, vertragGrund, vertragSchliessen, entwurf,
     levelThresholds: Array.from({ length: kampf.maxStufe }, (_, index) => kampf.epFuer(index + 1)) };
 })();

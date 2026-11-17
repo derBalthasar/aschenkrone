@@ -523,3 +523,60 @@ button.map-marker[aria-pressed="true"] { background: #694623; }
   .sheet-avatar { width: 2.8rem; height: 2.8rem; }
   .sheet-stats { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Stadt-Hub der Weltreise (Technische Spezifikation): Statusleiste, Krise, vier Bereiche */
+.welt-status { display: grid; gap: .6rem; padding: .7rem .8rem; background: #f4e8d0; border: 1px solid #ad9066; border-radius: 4px; }
+.welt-facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 7.5rem), 1fr)); gap: .3rem .8rem; margin: 0; }
+.welt-facts div { min-width: 0; }
+.welt-facts dt { font-size: .72rem; letter-spacing: .07em; text-transform: uppercase; color: #69492d; }
+.welt-facts dd { margin: 0; font-weight: bold; overflow-wrap: anywhere; }
+.welt-meters { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 11rem), 1fr)); gap: .4rem .9rem; }
+.welt-meter { min-width: 0; }
+.welt-meter-head { display: flex; justify-content: space-between; gap: .4rem; font-size: .8rem; }
+.welt-meter-head strong { font-variant-numeric: tabular-nums; }
+.welt-meter progress { display: block; width: 100%; height: .6rem; accent-color: #7a5a35; }
+.welt-warn progress { accent-color: #c27a1f; }
+.welt-warn .welt-meter-head strong { color: #8a4b0b; }
+.welt-danger progress { accent-color: #b8432f; }
+.welt-danger .welt-meter-head strong { color: #8e2414; }
+.character-sheet .welt-meter-head { color: #d9c29c; }
+.character-sheet .welt-warn .welt-meter-head strong { color: #f0a443; }
+.character-sheet .welt-danger .welt-meter-head strong { color: #ff7a5c; }
+.welt-marks summary { cursor: pointer; font-size: .85rem; color: #69492d; }
+.welt-marks p { margin: .3rem 0 0; font-size: .85rem; overflow-wrap: anywhere; }
+.welt-krise { margin-top: .9rem; }
+.welt-krise h3, .welt-panel h3 { margin-top: .9rem; }
+.welt-alarm { padding: .35rem .55rem; border-left: 4px solid #b8432f; background: #f3d9c6; }
+.welt-hooks { margin: .4rem 0; padding-left: 1.1rem; }
+.welt-hooks li { margin-block: .25rem; }
+.welt-tabs { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: 1rem; border-bottom: 1px solid #ad9066; }
+.welt-tabs button { flex: 1 1 8.5rem; min-height: 2.75rem; padding: .3rem .6rem; font: inherit; color: #4b3420; background: #e0caa3;
+  border: 1px solid #ad9066; border-bottom: 0; border-radius: 4px 4px 0 0; cursor: pointer; }
+.welt-tabs button[aria-selected="true"] { color: #fff0d5; background: #4c3120; border-color: #4c3120; }
+.welt-panel { padding: .2rem 0 .4rem; }
+.welt-ziele { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: .55rem; margin: .5rem 0 0; padding: 0; list-style: none; }
+.welt-ziel { display: grid; gap: .3rem; align-content: start; padding: .55rem .7rem; border: 1px solid #ad9066; border-left: 4px solid #6f8f4e; border-radius: 4px; background: #f4e8d0; }
+.welt-ziel.welt-grenzland { border-left-color: #c27a1f; }
+.welt-ziel p { margin: 0; font-size: .88rem; }
+.welt-ziel-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: .2rem .6rem; }
+.welt-ziel-head span { font-size: .8rem; color: #69492d; }
+.welt-ziel .action { width: 100%; }
+#map-routes.map-routes-off { display: none; }
+.map-node:disabled { opacity: .55; cursor: not-allowed; }
+.map-node.map-grenzland::before { background: #f0a443; }
+.map-node.map-kernland::before { background: #9cc06b; }
+.map-node.map-village { font-size: .7rem; }
+
+/* Aufstieg im Entwurfsmodus */
+.entwurf-quellen .action[aria-pressed="true"], .entwurf-varianten .action[aria-pressed="true"] { color: #1d1813; background: #e2b678; border-color: #ffcc7a; }
+.entwurf-varianten { display: grid; gap: .4rem; }
+.entwurf-varianten .action { text-align: left; white-space: normal; }
+.entwurf-rows { display: grid; gap: .3rem; }
+.entwurf-row { display: grid; grid-template-columns: minmax(0, 1fr) auto 2.75rem 2.75rem; align-items: center; gap: .5rem;
+  padding: .2rem .5rem; background: #2b231a; border: 1px solid var(--line); border-radius: 4px; }
+.entwurf-row > span { color: #d9c29c; overflow-wrap: anywhere; }
+.entwurf-row strong { color: #fff0d5; font-variant-numeric: tabular-nums; text-align: right; }
+.entwurf-row em { font-style: normal; color: var(--good); }
+.entwurf-row .action { min-width: 2.75rem; min-height: 2.5rem; padding: 0; font-size: 1.15rem; }
+.entwurf-row strong.entwurf-over { color: var(--bad); }
+.entwurf-actions { margin-top: .5rem; }
