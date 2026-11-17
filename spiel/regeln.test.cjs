@@ -466,7 +466,7 @@ assert.ok(deserters.inventory.includes("rostklaue"));
 assert.equal(deserters.silver, toll.silver + 14);
 const ada = rules.choose(bargained, "toll-reward", lowRoll);
 assert.equal(rules.recruit(bargained, "thief"), bargained);
-const withTovin = rules.recruit(ada, "thief");
+const withTovin = rules.recruit(rules.completeQuest(rules.promise(ada, "thief"), "thief"), "thief");
 assert.ok(withTovin.party.includes("thief"));
 assert.equal(rules.relationship(withTovin, "thief").oath, "fulfilled");
 assert.ok(ada.inventory.includes("harzverband"));
@@ -531,29 +531,26 @@ assert.ok(!rules.candidates({ ...rules.create("Tala", "orden", "frau", 2, "krieg
   .some(([id]) => id === "paladin"));
 assert.equal(rules.recruit(teamLead, "mage"), teamLead);
 let group = teamLead;
-for (const [scene, id] of [
-  ["start", "druid"], ["forest", "ranger"], ["watch-yard", "paladin"],
-  ["supply-post", "mage"], ["toll-resolved", "thief"],
-]) {
+for (const [scene, id] of [["start", "druid"], ["forest", "ranger"], ["supply-post", "mage"]]) {
   group = { ...group, scene };
-  if (id === "thief") {
-    assert.equal(rules.recruit(group, id), group);
-    group = { ...group, marks: [...group.marks, "haendlerin-geholfen"] };
-  } else {
-    assert.equal(rules.recruit(group, id), group);
-    group = rules.promise(group, id);
-  }
+  assert.equal(rules.recruit(group, id), group);
+  group = rules.promise(group, id);
+  assert.equal(rules.recruit(group, id), group, "Ein Versprechen allein genügt nicht");
+  const plan = world.recruitmentQuests[id];
+  group = { ...group, marks: [...group.marks, ...(plan.marks ?? [])],
+    inventory: [...group.inventory, ...(plan.item ? [plan.item] : [])] };
+  group = rules.completeQuest(group, id);
   group = rules.recruit(group, id);
 }
-assert.equal(group.party.length, 5);
+assert.equal(group.party.length, 3);
 const atYard = reload({ ...group, scene: "watch-yard" });
 assert.equal(rules.recruit(atYard, "knight"), atYard);
-assert.throws(() => reload({ ...atYard, party: [...atYard.party, "knight"] }));
 assert.throws(() => reload({ ...atYard, party: ["ranger", "ranger"] }));
 assert.throws(() => reload({ ...atYard, party: ["unbekannt"] }));
 assert.equal(rules.dismiss(group, "mage"), group);
-const atFord = { ...rules.dismiss(atYard, "mage"), scene: "return-ford" };
-assert.equal(rules.recruit(rules.promise(atFord, "priest"), "priest").party.length, 5);
+const released = rules.dismiss(atYard, "mage");
+const knightContract = rules.completeQuest(rules.promise({ ...released, factionRuf: { watch: 25 } }, "paladin"), "paladin");
+assert.equal(rules.recruit(knightContract, "paladin").party.length, 3);
 
 const withAllies = trial(atYard);
 assert.equal(rules.recruit(withAllies, "knight"), withAllies);
@@ -565,9 +562,16 @@ assert.deepEqual(round.filter(event => event.kind === "hit").map(event => event.
 assert.equal(round.find(event => event.actor === "ranger").value, 14);
 assert.ok(foeHp(shot) < foeHp(withAllies));
 assert.equal(shot.ember, withAllies.ember);
+for (const event of round.filter(event => event.kind === "hit" && event.actor !== "hero")) {
+  const target = rules.targets(withAllies).find(enemy => enemy.id === event.target);
+  assert.ok(shot.journal.includes(world.companions[event.actor].name + " trifft " + target.name +
+    " für " + event.value + " Schaden."));
+}
 const nextRound = [];
-rules.strike(reload(shot), "guard", highRoll, undefined, 0, nextRound);
+const secondGroupTurn = rules.strike(reload(shot), "guard", highRoll, undefined, 0, nextRound);
 assert.equal(nextRound.find(event => event.actor === "ranger").value, 5);
+assert.ok(secondGroupTurn.journal.some(entry => entry.startsWith(world.companions.ranger.name + " trifft ") &&
+  entry.endsWith(" für 5 Schaden.")));
 const trollWithAllies = rules.choose(rules.choose(atYard, "ravine"), "ravine-fight");
 assert.ok(rules.strike(trollWithAllies, "guard").combat.supportUsed.includes("mage"));
 const healerTrial = trial({ ...yard, party: ["priest"], role: "krieger" });
@@ -628,7 +632,10 @@ assert.equal(rules.choose(revisitedCliffs, "skarn-runes-return").scene, "skarn-a
 assert.ok(!ids(revisitedCliffs).includes("skarn-runes"));
 
 const ivenLead = rules.create("Tala", "hueter", "frau", 1, "heiler");
-const withIven = rules.recruit(rules.promise({ ...ivenLead, scene: "watch-yard" }, "knight"), "knight");
+// Bereits mitreisender Begleiter aus einem alten Spielstand mit offenem Versprechen.
+const withIven = reload({ ...rules.promise({ ...ivenLead, scene: "watch-yard" }, "knight"),
+  party: ["knight"], companionQuests: { knight: { status: "done", debt: 0 } },
+  relationships: { knight: { score: 30, oath: "promised", talks: 0, gift: false, left: false, bond: "none" } } });
 const failingRescue = rules.choose({ ...withIven, scene: "pass-shelter" }, "rescue-leave");
 assert.ok(!failingRescue.party.includes("knight"));
 assert.equal(rules.relationship(reload(failingRescue), "knight").left, true);
@@ -792,3 +799,181 @@ console.log("Gefährtenaufträge, Beziehungsfolgen, Geschenke, Romanze, Fraktion
   assert.throws(() => reload({ ...armored, storage: ["unbekannt"] }));
 }
 console.log("Inventar-Hub: Zentrallager, Stapel, Platzgrenze, Questgegenstände, acht Ausrüstungsplätze und Vergleich geprüft.");
+// Getragene Exemplare sind eindeutig zugeordnet und bleiben nach dem Laden erhalten.
+const gearGroup = { ...atYard, inventory: [...atYard.inventory, 'runenbeil', 'aschenwaechter'] };
+const armedMember = rules.equip(gearGroup, 'runenbeil', 'ranger');
+const protectedMember = rules.equip(armedMember, 'aschenwaechter', 'ranger');
+assert.equal(rules.memberEquipment(reload(protectedMember), 'ranger').weapon, 'runenbeil');
+assert.equal(rules.equip(protectedMember, 'runenbeil', 'mage'), protectedMember);
+assert.equal(rules.equip(protectedMember, 'runenbeil'), protectedMember);
+assert.equal(rules.equip(protectedMember, 'runenbeil', 'unknown'), protectedMember);
+assert.equal(rules.trade({ ...protectedMember, scene: 'supply-post' }, 'runenbeil', false).inventory.length,
+  protectedMember.inventory.length);
+assert.throws(() => reload({ ...protectedMember, companionEquipment: {
+  ...protectedMember.companionEquipment, mage: { weapon: 'runenbeil', armor: null },
+} }));
+assert.throws(() => reload({ ...protectedMember, companionEquipment: { ranger: { weapon: 'aschenwaechter', armor: null } } }));
+const duplicateGear = rules.equip({ ...protectedMember, inventory: [...protectedMember.inventory, 'runenbeil'] }, 'runenbeil', 'mage');
+assert.equal(rules.assigned(reload(duplicateGear), 'runenbeil'), 2);
+const removedGear = rules.equip(protectedMember, 'runenbeil', 'ranger');
+assert.equal(rules.memberEquipment(removedGear, 'ranger').weapon, null);
+assert.equal(rules.memberEquipment(rules.equip(removedGear, 'runenbeil', 'mage'), 'mage').weapon, 'runenbeil');
+assert.equal(rules.assigned(rules.dismiss(protectedMember, 'ranger'), 'runenbeil'), 0);
+const gearFight = trial(protectedMember);
+assert.equal(rules.equip(gearFight, 'runenbeil', 'ranger'), gearFight);
+const plainEvents = [], gearEvents = [];
+const plainRound = rules.strike(trial(gearGroup), 'guard', highRoll, undefined, 0, plainEvents);
+const gearRound = rules.strike(gearFight, 'guard', highRoll, undefined, 0, gearEvents);
+assert.ok(gearEvents.find(e => e.actor === 'ranger' && e.kind === 'hit').value >
+  plainEvents.find(e => e.actor === 'ranger' && e.kind === 'hit').value);
+assert.ok(gearRound.health > plainRound.health);
+const legacyGroup = JSON.parse(JSON.stringify(atYard));
+delete legacyGroup.companionEquipment;
+assert.equal(Object.keys(reload(legacyGroup).companionEquipment).length, 0);
+console.log('Gruppenausrüstung, Besitz, Kampfboni und Spielstandmigration geprüft.');
+
+// Aufnahme erst nach angenommenem und abgegebenem Auftrag; kein mehrfacher Rufgewinn.
+const questStart = { ...rules.create("Tala", "kronreich", "frau", 1, "magier"), scene: "watch-yard", silver: 30 };
+for (const id of Object.keys(world.companions).filter(id => id !== questStart.role)) {
+  const applicant = { ...rules.create("Tala", "kronreich", "frau", 1, world.companions[id].klasse === "waechter" ? "heiler" : "waechter"), scene: "watch-yard", silver: 30 };
+  const accepted = rules.promise(applicant, id);
+  assert.equal(rules.recruit(accepted, id), accepted, id + ': Auftrag noch nicht abgegeben');
+  const plan = world.recruitmentQuests[id];
+  const prepared = { ...accepted,
+    marks: [...accepted.marks, ...(plan.marks ?? [])],
+    factionRuf: plan.faction ? { [plan.faction]: plan.reputation } : {},
+    inventory: [...accepted.inventory, ...(plan.item ? [plan.item] : [])],
+    crafted: plan.crafted ? [plan.crafted] : [],
+  };
+  assert.equal(rules.questReady(prepared, id), true, id);
+  const completed = rules.completeQuest(prepared, id);
+  assert.equal(rules.recruitment(reload(completed), id), 'ready', id);
+  assert.equal(rules.completeQuest(completed, id), completed, id + ': keine doppelte Belohnung');
+  const joined = rules.recruit(completed, id);
+  assert.ok(joined.party.includes(id), id);
+  if (plan.item) assert.equal(joined.inventory.filter(item => item === plan.item).length,
+    prepared.inventory.filter(item => item === plan.item).length - 1);
+}
+const capacity = { ...atYard, companionQuests: { ...atYard.companionQuests, paladin: { status: 'done', debt: 0 } } };
+assert.equal(rules.recruitment(capacity, 'paladin'), 'ready');
+assert.equal(rules.recruit(capacity, 'paladin'), capacity, 'Auch erfüllte Quests umgehen das Gruppenlimit nicht');
+const herbalist = { ...questStart, inventory: [...questStart.inventory.filter(id => id !== 'galgenwurz'), 'galgenwurz', 'galgenwurz'] };
+const craftedBandage = rules.craft(herbalist, 'harzverband');
+assert.ok(craftedBandage.inventory.includes('harzverband'));
+assert.ok(!craftedBandage.inventory.includes('galgenwurz'));
+assert.ok(reload(craftedBandage).crafted.includes('harzverband'));
+assert.equal(rules.craft(craftedBandage, 'harzverband'), craftedBandage);
+assert.equal(rules.craft(inCombat, 'harzverband'), inCombat);
+const priestApplicant = { ...questStart, role: 'krieger', inventory: ['harzverband'] };
+const priestQuest = rules.promise(priestApplicant, 'priest');
+assert.equal(rules.questReady(priestQuest, 'priest'), false, 'Nur gekaufter Verband genügt nicht');
+assert.equal(rules.questReady({ ...priestQuest, crafted: ['harzverband'] }, 'priest'), true);
+const soldierQuest = rules.promise({ ...questStart, silver: 0 }, 'warrior');
+assert.equal(rules.completeQuest(soldierQuest, 'warrior'), soldierQuest);
+const delayedSalary = rules.recruit(rules.completeQuest(soldierQuest, 'warrior', true), 'warrior');
+assert.equal(reload(delayedSalary).companionQuests.warrior.debt, 15);
+assert.equal(rules.paySalary(delayedSalary, 'warrior'), delayedSalary);
+const settledSalary = rules.paySalary({ ...delayedSalary, silver: 20 }, 'warrior');
+assert.equal(settledSalary.silver, 5);
+assert.equal(settledSalary.companionQuests.warrior.debt, 0);
+assert.equal(rules.paySalary(settledSalary, 'warrior'), settledSalary);
+assert.equal(rules.completeQuest(soldierQuest, 'warrior', true).silver, 0);
+const undeadApplicant = { ...questStart, origin: 'untot', variant: 0 };
+assert.equal(rules.recruitment(undeadApplicant, 'paladin'), 'blocked');
+assert.equal(rules.promise(undeadApplicant, 'paladin'), undeadApplicant);
+assert.equal(rules.recruitment(undeadApplicant, 'knight'), 'wary');
+assert.equal(rules.relationship(undeadApplicant, 'knight').score, -10);
+assert.equal(rules.recruitment({ ...undeadApplicant, factionRuf: { watch: 25 } }, 'knight'), 'promise');
+assert.equal(rules.recruitment({ ...questStart, origin: 'vampir', factionRuf: { order: 15 } }, 'paladin'), 'promise');
+assert.equal(rules.recruitment({ ...questStart, origin: 'gruenhaut' }, 'ranger'), 'wary');
+assert.equal(rules.recruitment({ ...questStart, origin: 'gruenhaut', factionRuf: { groves: 15 } }, 'ranger'), 'promise');
+const legacyFive = { ...questStart, party: ['druid', 'ranger', 'mage', 'knight', 'warrior'],
+  inventory: [...questStart.inventory, 'runenbeil'], companionEquipment: { warrior: { weapon: 'runenbeil', armor: null } } };
+delete legacyFive.companionQuests;
+const migratedFive = reload(legacyFive);
+assert.equal(migratedFive.party.length, 3);
+assert.equal(migratedFive.companionQuests.warrior.status, 'done');
+assert.equal(rules.assigned(migratedFive, 'runenbeil'), 0);
+assert.equal(reload(migratedFive).party.length, 3);
+const migratedFight = reload(trial(legacyFive));
+assert.equal(migratedFight.party.length, 3);
+assert.equal(JSON.stringify(reload(migratedFight).combat.feinde), JSON.stringify(migratedFight.combat.feinde));
+// Einzelgegner: +25 % LP je Begleiter, nach dem Kürzen auf drei Begleiter also +75 %.
+{
+  const fiveFight = trial({ ...legacyFive, party: ['druid', 'ranger', 'mage'] });
+  assert.equal(migratedFight.combat.feinde[0].max, fiveFight.combat.feinde[0].max);
+}
+assert.throws(() => reload({ ...questStart, companionQuests: { mage: { status: 'done', debt: 15 } } }));
+console.log('Dreierlimit, Aufnahmequests, Herstellung, Sold, Herkunftsvorbehalte und Altspeicher geprüft.');
+
+const oldGroupBattle = rules.choose(rules.choose(legacyFive, "toll"), "toll-fight");
+oldGroupBattle.combat.feinde.forEach((foe, index) => { foe.lp = index === oldGroupBattle.combat.feinde.length - 1 ? 1 : 0; });
+oldGroupBattle.combat.supportUsed = ["warrior"];
+const resizedBattle = reload(oldGroupBattle);
+assert.ok(rules.targets(resizedBattle).some(enemy => enemy.health > 0));
+assert.equal(resizedBattle.combat.supportUsed.length, 0);
+assert.ok(reload(resizedBattle).combat);
+const oldPromise = rules.promise({ ...ivenLead, scene: "watch-yard" }, "knight");
+delete oldPromise.companionQuests;
+assert.equal(reload(oldPromise).companionQuests.knight.status, "active");
+assert.ok(failingRescue.journal.some(entry => entry.includes("Iven · Sympathie -65")));
+
+// Ein gemeinsames Questlog mit gespeicherter Spielzug-Uhr und echten Fristfolgen.
+const clockBase = { ...rules.create('Uhrentest', 'kronreich', 'frau', 1, 'magier'), scene: 'watch-yard' };
+const clockAccepted = rules.promise(clockBase, 'priest');
+assert.equal(clockAccepted.questClock, 1);
+const clockQuest = clockAccepted.questLog['companion-priest'];
+assert.equal(clockQuest.deadline - clockQuest.started, world.recruitmentQuests.priest.turns);
+assert.equal(rules.questEntries(clockAccepted).find(q => q.id === 'companion-priest').remaining, 50);
+assert.equal(rules.choose(clockAccepted, 'unknown'), clockAccepted);
+assert.equal(rules.promise(clockAccepted, 'priest'), clockAccepted);
+const clockArmed = rules.equip(clockAccepted, clockAccepted.equipment.weapon);
+assert.equal(clockArmed.questClock, clockAccepted.questClock, 'Ausrüsten kostet keinen Spielzug');
+const beforeLast = { ...clockAccepted, questClock: clockQuest.deadline - 1, crafted: ['harzverband'],
+  inventory: [...clockAccepted.inventory, 'harzverband'] };
+const onTime = rules.completeQuest(beforeLast, 'priest');
+assert.equal(onTime.questClock, clockQuest.deadline);
+assert.equal(onTime.questLog['companion-priest'].status, 'done', 'Abgabe im letzten Zug zählt');
+assert.equal(rules.questEntries(reload(onTime)).find(q => q.id === 'companion-priest').status, 'done');
+const clockExpired = rules.choose({ ...clockAccepted, questClock: clockQuest.deadline - 1 }, 'supply-post');
+assert.equal(clockExpired.questLog['companion-priest'].status, 'failed');
+assert.equal(clockExpired.companionQuests.priest.status, 'failed');
+assert.equal(rules.recruitment(clockExpired, 'priest'), 'failed');
+assert.equal(rules.completeQuest({ ...clockExpired, scene: 'watch-yard', crafted: ['harzverband'],
+  inventory: [...clockExpired.inventory, 'harzverband'] }, 'priest').companionQuests.priest.status, 'failed');
+assert.equal(reload(clockExpired).questLog['companion-priest'].deadline, clockQuest.deadline);
+assert.equal(rules.relationship(reload(clockExpired), 'priest').score, rules.relationship(clockExpired, 'priest').score,
+  'Laden wiederholt keinen Sympathieverlust');
+const storyFromClock = clockAccepted.questLog['runa-rescue'];
+assert.equal(storyFromClock.status, 'active');
+const storyFailed = reload({ ...clockAccepted, questClock: storyFromClock.deadline });
+assert.equal(storyFailed.questLog['runa-rescue'].status, 'failed');
+assert.equal(reload({ ...clockBase, marks: ['joren-gerettet'] }).questLog['runa-rescue'].status, 'done');
+assert.equal(reload({ ...clockBase, marks: ['joren-verloren'] }).questLog['runa-rescue'].status, 'failed');
+const soldierClock = rules.completeQuest(rules.promise({ ...clockBase, silver: 0 }, 'warrior'), 'warrior', true);
+const salaryEntry = rules.questEntries(soldierClock).find(q => q.type === 'Soldvertrag');
+assert.equal(salaryEntry.remaining, 30);
+const lateSoldier = reload({ ...soldierClock, questClock: salaryEntry.deadline });
+assert.equal(lateSoldier.companionQuests.warrior.debt, 15);
+assert.equal(lateSoldier.questLog[salaryEntry.id].status, 'failed');
+const latePaid = rules.paySalary({ ...lateSoldier, silver: 20 }, 'warrior');
+assert.equal(latePaid.companionQuests.warrior.debt, 0);
+assert.equal(latePaid.questLog[salaryEntry.id].status, 'failed', 'Späte Zahlung tilgt Schuld, aber nicht die verpasste Frist');
+const finalSalary = rules.paySalary({ ...soldierClock, questClock: salaryEntry.deadline - 1, silver: 20 }, 'warrior');
+assert.equal(finalSalary.questLog[salaryEntry.id].status, 'done');
+const tickingBattle = rules.strike(trial(clockAccepted), 'guard', lowRoll);
+assert.equal(tickingBattle.questClock, clockAccepted.questClock + 3, 'Zwei Reiseentscheidungen und eine Kampfrunde');
+const legacyClock = JSON.parse(JSON.stringify(clockAccepted));
+delete legacyClock.questClock;
+delete legacyClock.questLog;
+const migratedClock = reload(legacyClock);
+assert.equal(migratedClock.questClock, 0);
+assert.equal(migratedClock.questLog['companion-priest'].deadline, 50);
+assert.throws(() => reload({ ...clockBase, questClock: -1 }));
+assert.throws(() => reload({ ...clockBase, questLog: { unknown: { status: 'active', started: 0, deadline: 30 } } }));
+assert.throws(() => reload({ ...clockBase, questLog: { 'runa-rescue': { status: 'active', started: 5, deadline: 1 } } }));
+// Zusammenspiel mit dem neuen Inventar-Hub: Lagerung gibt Begleiterausrüstung sicher frei.
+const groupStored = rules.store(protectedMember, 'runenbeil');
+assert.equal(rules.memberEquipment(groupStored, 'ranger').weapon, null);
+assert.equal(reload(groupStored).storage.includes('runenbeil'), true);
+console.log('Questlog, Fristen, letzte Abgabe, Scheitern, Soldverzug und Spielzugmigration geprüft.');

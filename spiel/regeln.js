@@ -9,6 +9,7 @@ const rules = (() => {
   const slotKinds = { weapon: "weapon", offhand: "offhand", head: "head", neck: "neck", armor: "armor", legs: "legs",
     ring1: "ring", ring2: "ring" };
   const emptyEquipment = () => Object.fromEntries(equipmentSlots.map(slot => [slot, null]));
+  const partyLimit = 3;
   const own = (obj, key) => typeof key === "string" && Object.hasOwn(obj, key);
   const intBetween = (value, low, high) => Number.isInteger(value) && value >= low && value <= high;
   const total = (record) => Object.values(record ?? {}).reduce((sum, value) => sum + value, 0);
@@ -158,8 +159,8 @@ const rules = (() => {
       equipment: { ...emptyEquipment(), weapon, armor: "lederwams" },
       storage: [],
       xp: 0, silver: 5, training: {}, stufenpunkte: 0, ressource: 3, rewards: [],
-      party: [],
-      relationships: {}, factionRuf: {},
+      party: [], companionEquipment: {},
+      relationships: {}, factionRuf: {}, companionQuests: {}, crafted: [], questClock: 0, questLog: {},
       marks: [], journal: [], combat: null,
     };
     state.health = healthLimit(state);
@@ -277,8 +278,18 @@ const rules = (() => {
     state.training ??= {};
     state.rewards ??= [];
     state.party ??= [];
+    state.companionEquipment ??= {};
     state.relationships ??= {};
     state.factionRuf ??= {};
+    // Bestehende Mitglieder behalten ihre bereits erworbene Aufnahmeberechtigung.
+    state.companionQuests ??= Object.fromEntries([
+      ...Object.entries(state.relationships).filter(([, bond]) => bond && bond.oath && bond.oath !== "none")
+        .map(([id, bond]) => [id, { status: bond.oath === "fulfilled" ? "done" : "active", debt: 0 }]),
+      ...(Array.isArray(state.party) ? state.party : []).map(id => [id, { status: "done", debt: 0 }]),
+    ]);
+    state.crafted ??= [];
+    state.questClock ??= 0;
+    state.questLog ??= {};
     state.questStufe ??= 0;
     state.vereinigt ??= false;
     state.umschulung ??= false;
@@ -304,6 +315,14 @@ const rules = (() => {
         !validList(state.rewards, (id) => typeof id === "string" && id.length <= 50, 100) ||
         !validList(state.party, (id) => own(world.companions, id), 5) ||
         new Set(state.party).size !== state.party.length ||
+        !validRecord(state.companionQuests, world.companions, quest => quest &&
+          ["active", "done", "failed"].includes(quest.status) && intBetween(quest.debt, 0, world.recruitmentQuests.warrior.salary)) ||
+        !Object.entries(state.companionQuests).every(([id, quest]) => !quest.debt || (id === "warrior" && quest.status === "done")) ||
+        !intBetween(state.questClock, 0, 1000000000) ||
+        !validRecord(state.questLog, questPlans, quest => quest && ["active", "done", "failed"].includes(quest.status) &&
+          intBetween(quest.started, 0, state.questClock) && intBetween(quest.deadline, quest.started, 1000000000) &&
+          (quest.reason === undefined || (typeof quest.reason === "string" && quest.reason.length <= 300))) ||
+        !validList(state.crafted, id => own(world.recipes, id), 10) ||
         !validRecord(state.factionRuf, world.factions, score => intBetween(score, -100, 100)) ||
         !validRecord(state.relationships, world.companions, bond => bond && intBetween(bond.score, -100, 100) &&
           intBetween(bond.talks, 0, 4) && ["none", "promised", "fulfilled", "broken"].includes(bond.oath) &&
@@ -316,13 +335,100 @@ const rules = (() => {
           return id === null || (own(world.gear, id) && world.gear[id].slot === slotKinds[slot] &&
             wornCount(state, id) <= state.inventory.filter(entry => entry === id).length);
         }) ||
+        !validRecord(state.companionEquipment, world.companions, equipment => equipment &&
+          ["weapon", "armor"].every(slot => equipment[slot] === null ||
+            (own(world.gear, equipment[slot]) && world.gear[equipment[slot]].slot === slot))) ||
+        !Object.keys(state.companionEquipment).every(id => state.party.includes(id)) ||
+        Object.keys(world.gear).some(id => assigned(state, id) > state.inventory.filter(item => item === id).length) ||
         !validList(state.marks, (id) => typeof id === "string" && id.length <= 40, 100) ||
         !validList(state.journal, (entry) => typeof entry === "string" && entry.length <= 300, 16) ||
         (state.health === 0) !== (state.scene === "defeat") ||
         (combat !== null && !validCombat(state, combat))) {
       throw new Error("Der Spielstand ist beschädigt.");
     }
+    if (state.party.length > partyLimit) {
+      const waiting = state.party.splice(partyLimit);
+      for (const id of waiting) if (state.companionEquipment) delete state.companionEquipment[id];
+      if (state.combat) {
+        // Die Gegnerreihe schrumpft auf die kleinere Gruppe, verlorene LP bleiben verloren.
+        const fresh = lineup(state.combat.id, state.party.length);
+        state.combat.feinde = state.combat.feinde.slice(0, fresh.length).map((foe, index) =>
+          ({ ...foe, max: fresh[index].max, lp: Math.min(foe.lp, fresh[index].max) }));
+        // Ein entfallender Gegnerplatz darf einen laufenden Kampf nicht ohne Ziel lassen.
+        if (!state.combat.feinde.some(foe => foe.lp > 0)) state.combat.feinde[state.combat.feinde.length - 1].lp = 1;
+        state.combat.supportUsed = (state.combat.supportUsed ?? []).filter(id => state.party.includes(id));
+      }
+      note(state, "Maximal drei Begleiter: " + waiting.map(id => world.companions[id].name).join(", ") +
+        " warten am Wachhof. Ihre Ausrüstung liegt im Gruppenvorrat.");
+    }
+    syncQuests(state);
     return state;
+  }
+
+  const questPlans = {
+    ...world.storyQuests,
+    ...Object.fromEntries(Object.entries(world.recruitmentQuests).map(([id, quest]) => ["companion-" + id,
+      { ...quest, giver: world.companions[id].name, type: "Begleiterauftrag", companion: id }])),
+    "kelda-salary": { title: "Keldas ausstehender Sold", giver: "Kelda", type: "Soldvertrag", turns: 30,
+      text: "Zahle Kelda die vereinbarten 15 Silber. Bei Fristablauf verliert sie Vertrauen; die Schuld bleibt bestehen.", salary: true },
+  };
+
+  function syncQuests(state, previousScene = null) {
+    state.questClock ??= 0;
+    state.questLog ??= {};
+    for (const [id, plan] of Object.entries(questPlans)) {
+      const contract = plan.companion && state.companionQuests?.[plan.companion];
+      const debt = state.companionQuests?.warrior?.debt ?? 0;
+      const success = plan.companion ? contract?.status === "done" : plan.salary ? !debt :
+        plan.success?.some(mark => state.marks.includes(mark));
+      const broken = plan.companion ? contract?.status === "failed" ||
+        (contract?.status === "active" && recruitment(state, plan.companion) === "broken") :
+        !plan.salary && plan.failure?.some(mark => state.marks.includes(mark));
+      const known = plan.companion ? Boolean(contract) : plan.salary ? Boolean(debt) :
+        success || broken || plan.scenes?.includes(state.scene) || plan.scenes?.includes(previousScene);
+      if (!state.questLog[id] && known) state.questLog[id] = { status: "active", started: state.questClock,
+        deadline: Math.min(1000000000, state.questClock + plan.turns) };
+      const entry = state.questLog[id];
+      if (!entry || entry.status !== "active") continue;
+      if (success) { entry.status = "done"; continue; }
+      const expired = state.questClock >= entry.deadline;
+      if (!broken && !expired) continue;
+      entry.status = "failed";
+      entry.reason = broken ? "Durch deine Entscheidungen gescheitert." : "Die vereinbarte Frist ist abgelaufen.";
+      if (plan.companion && contract?.status === "active") {
+        contract.status = "failed";
+        const bond = relationship(state, plan.companion);
+        state.relationships[plan.companion] = { ...bond, oath: "broken", score: clampRuf(bond.score - 15) };
+        note(state, plan.giver + " · Sympathie −15 wegen des gescheiterten Aufnahmeauftrags.");
+      }
+      if (plan.salary) {
+        const bond = relationship(state, "warrior");
+        state.relationships.warrior = { ...bond, score: clampRuf(bond.score - 20) };
+        note(state, "Kelda · Sympathie −20 wegen des überfälligen Solds. Die 15 Silber bleiben offen.");
+      }
+      note(state, "Auftrag gescheitert: " + plan.title + " · " + entry.reason);
+    }
+  }
+
+  function timedAction(previous, next) {
+    if (next === previous) return previous;
+    next.questClock = Math.min(1000000000, (previous.questClock ?? 0) + 1);
+    syncQuests(next, previous.scene);
+    return next;
+  }
+  const choose = (...args) => timedAction(args[0], chooseStep(...args));
+  const strike = (...args) => timedAction(args[0], strikeStep(...args));
+  const promise = (...args) => timedAction(args[0], promiseStep(...args));
+  const completeQuest = (...args) => timedAction(args[0], completeQuestStep(...args));
+  const paySalary = (...args) => timedAction(args[0], paySalaryStep(...args));
+  const craft = (...args) => timedAction(args[0], craftStep(...args));
+
+  function questEntries(state) {
+    return Object.entries(state.questLog ?? {}).map(([id, entry]) => ({ id, ...questPlans[id], ...entry,
+      remaining: Math.max(0, entry.deadline - (state.questClock ?? 0)),
+      debt: questPlans[id].salary ? state.companionQuests?.warrior?.debt ?? 0 : 0,
+    })).sort((a, b) => ({ active: 0, failed: 1, done: 2 }[a.status] - { active: 0, failed: 1, done: 2 }[b.status]) ||
+      a.remaining - b.remaining);
   }
 
   function validRecord(value, catalog, valid) {
@@ -332,7 +438,7 @@ const rules = (() => {
 
   const clampRuf = score => Math.max(-100, Math.min(100, score));
   const relationship = (state, id) => state.relationships[id] ??
-    { score: 0, oath: "none", talks: 0, gift: false, left: false, bond: "none" };
+    { score: world.companionAttitudes[id]?.wary?.includes(state.origin) ? -10 : 0, oath: "none", talks: 0, gift: false, left: false, bond: "none" };
   const reputation = (state, id) => state.factionRuf[id] ?? 0;
   const departureThreshold = -25;
 
@@ -342,32 +448,91 @@ const rules = (() => {
       companion.klasse !== state.role && !state.party.includes(id) && companion.scenes.includes(state.scene));
   }
 
-  function recruitment(state, id) {
-    const bond = relationship(state, id);
-    const plan = world.loyalties[id];
-    if (bond.left || bond.score <= departureThreshold) return "refused";
-    if (bond.oath === "broken" || plan.broken?.some(mark => state.marks.includes(mark))) return "broken";
-    if (bond.oath !== "none" || (plan.task && state.marks.includes(plan.task))) return "ready";
-    return plan.task ? "task" : "promise";
+  function attitude(state, id) {
+    const view = world.companionAttitudes[id];
+    if (view?.blocked?.includes(state.origin)) return "blocked";
+    if (view?.wary?.includes(state.origin) && reputation(state, view.faction) < view.reputation) return "wary";
+    return "open";
   }
 
-  function promise(previous, id) {
+  function recruitment(state, id) {
+    if (!own(world.companions, id)) return "refused";
+    const bond = relationship(state, id);
+    if (attitude(state, id) !== "open") return attitude(state, id);
+    if (state.companionQuests?.[id]?.status === "failed") return "failed";
+    if (bond.left || bond.score <= departureThreshold) return "refused";
+    if (bond.oath === "broken" || world.loyalties[id].broken?.some(mark => state.marks.includes(mark))) return "broken";
+    const quest = state.companionQuests?.[id];
+    if (quest?.status === "done") return "ready";
+    return quest ? "task" : "promise";
+  }
+
+  function promiseStep(previous, id) {
     if (!candidates(previous).some(([candidate]) => candidate === id) || recruitment(previous, id) !== "promise") return previous;
     const state = structuredClone(previous);
-    const fulfilled = world.loyalties[id].proof.some(mark => state.marks.includes(mark));
-    state.relationships[id] = { ...relationship(state, id), score: 30, oath: fulfilled ? "fulfilled" : "promised" };
-    note(state, world.companions[id].name + (fulfilled ? " weiß, dass du den Auftrag bereits erfüllt hast." : " nimmt dein Versprechen an."));
+    (state.companionQuests ??= {})[id] = { status: "active", debt: 0 };
+    state.relationships[id] = { ...relationship(state, id), oath: "promised" };
+    note(state, world.companions[id].name + ": Auftrag angenommen · " + world.recruitmentQuests[id].title + ".");
+    return state;
+  }
+
+  function questReady(state, id) {
+    const plan = world.recruitmentQuests[id];
+    return Boolean(plan && recruitment(state, id) === "task" &&
+      (!plan.marks || plan.marks.some(mark => state.marks.includes(mark))) &&
+      (!plan.item || state.inventory.includes(plan.item)) &&
+      (!plan.crafted || state.crafted?.includes(plan.crafted)) &&
+      (!plan.faction || reputation(state, plan.faction) >= plan.reputation));
+  }
+
+  function completeQuestStep(previous, id, later = false) {
+    if (!candidates(previous).some(([candidate]) => candidate === id) || !questReady(previous, id)) return previous;
+    const plan = world.recruitmentQuests[id];
+    if (later && !plan.salary) return previous;
+    if (plan.salary && !later && previous.silver < plan.salary) return previous;
+    const state = structuredClone(previous);
+    if (plan.item) state.inventory.splice(state.inventory.indexOf(plan.item), 1);
+    if (plan.salary && !later) state.silver -= plan.salary;
+    state.companionQuests[id] = { status: "done", debt: later ? plan.salary : 0 };
+    state.relationships[id] = { ...relationship(state, id), oath: "fulfilled",
+      score: clampRuf(relationship(state, id).score + 30) };
+    note(state, world.companions[id].name + ": Auftrag erfüllt · " + plan.title +
+      (later ? ". 15 Silber Sold bleiben offen." : "."));
+    return state;
+  }
+
+  function paySalaryStep(previous, id) {
+    const debt = previous.companionQuests?.[id]?.debt;
+    if (!debt || previous.combat || !previous.health || previous.silver < debt ||
+        (!previous.party.includes(id) && !candidates(previous).some(([candidate]) => candidate === id))) return previous;
+    const state = structuredClone(previous);
+    state.silver -= debt;
+    state.companionQuests[id].debt = 0;
+    state.relationships[id] = { ...relationship(state, id), score: clampRuf(relationship(state, id).score + 10) };
+    note(state, world.companions[id].name + ": Ausstehender Sold bezahlt · " + debt + " Silber.");
+    return state;
+  }
+
+  function craftStep(previous, id) {
+    const recipe = world.recipes[id];
+    if (!own(world.recipes, id) || previous.combat || !previous.health || previous.inventory.length >= 200 ||
+        !Object.entries(recipe.ingredients).every(([item, count]) => previous.inventory.filter(entry => entry === item).length >= count)) return previous;
+    const state = structuredClone(previous);
+    for (const [item, count] of Object.entries(recipe.ingredients)) {
+      for (let index = 0; index < count; index++) state.inventory.splice(state.inventory.indexOf(item), 1);
+    }
+    if (!fits(state, id)) return previous;
+    state.inventory.push(id);
+    if (!(state.crafted ??= []).includes(id)) state.crafted.push(id);
+    note(state, world.items[id] + " hergestellt.");
     return state;
   }
 
   function recruit(previous, id) {
-    if (previous.party.length >= 5 || !candidates(previous).some(([candidate]) => candidate === id) ||
+    if (previous.party.length >= partyLimit || !candidates(previous).some(([candidate]) => candidate === id) ||
         recruitment(previous, id) !== "ready") return previous;
     const state = structuredClone(previous);
     state.party.push(id);
-    const bond = relationship(state, id);
-    state.relationships[id] = { ...bond, score: Math.max(30, bond.score),
-      oath: world.loyalties[id].task ? "fulfilled" : bond.oath };
     note(state, world.companions[id].name + " schließt sich deiner Gruppe an.");
     return state;
   }
@@ -413,6 +578,7 @@ const rules = (() => {
     if (previous.scene !== "watch-yard" || previous.combat || !previous.health || !previous.party.includes(id)) return previous;
     const state = structuredClone(previous);
     state.party = state.party.filter(member => member !== id);
+    if (state.companionEquipment) delete state.companionEquipment[id];
     note(state, world.companions[id].name + " verlässt die Gruppe und kehrt zum Treffpunkt zurück.");
     return state;
   }
@@ -544,12 +710,37 @@ const rules = (() => {
     if (!own(prices, id)) return previous;
     const price = prices[id];
     const index = previous.inventory.indexOf(id);
+    if (!buying && assigned(previous, id) >= previous.inventory.filter(item => item === id).length) return previous;
     if (buying ? previous.silver < price || previous.inventory.length >= 180 : index === -1) return previous;
     const state = structuredClone(previous);
     if (!buying) state.inventory.splice(index, 1);
     state.silver += buying ? -price : price;
     note(state, world.items[id] + (buying ? " gekauft" : " verkauft") + " · " + price + " Silber.");
     if (buying) receive(state, [id]);
+    return state;
+  }
+
+  function memberEquipment(state, member) {
+    return state.companionEquipment?.[member] ?? { weapon: null, armor: null };
+  }
+
+  function assigned(state, id) {
+    return [state.equipment, ...Object.values(state.companionEquipment ?? {})]
+      .reduce((count, equipment) => count + (equipment ? Object.values(equipment).filter(item => item === id).length : 0), 0);
+  }
+
+  function equipMember(previous, id, member) {
+    const gear = world.gear[id];
+    if (!gear?.slot || previous.combat || !previous.health || !previous.inventory.includes(id) ||
+        (member !== null && !previous.party.includes(member))) return previous;
+    const current = member === null ? previous.equipment : memberEquipment(previous, member);
+    if (current[gear.slot] !== id && assigned(previous, id) >= previous.inventory.filter(item => item === id).length) return previous;
+    const state = structuredClone(previous);
+    const equipment = member === null ? state.equipment :
+      ((state.companionEquipment ??= {})[member] ??= { weapon: null, armor: null });
+    equipment[gear.slot] = equipment[gear.slot] === id ? null : id;
+    note(state, (member === null ? state.name : world.companions[member].name) + ": " + world.items[id] +
+      (equipment[gear.slot] ? " ausgerüstet." : " abgelegt."));
     return state;
   }
 
@@ -567,6 +758,7 @@ const rules = (() => {
 
   // Legt einen Gegenstand an oder, wenn er auf dem Platz liegt, ab. Zweihandwaffen räumen die linke Hand.
   function equip(previous, id, wanted = null) {
+    if (own(world.companions, wanted)) return equipMember(previous, id, wanted);
     const gear = world.gear[id];
     const slot = targetSlot(previous, id, wanted);
     if (!slot || previous.combat || !previous.health || !previous.inventory.includes(id)) return previous;
@@ -576,7 +768,7 @@ const rules = (() => {
       note(state, world.items[id] + " abgelegt.");
       return state;
     }
-    if (wornCount(state, id) >= state.inventory.filter(entry => entry === id).length) {
+    if (assigned(state, id) >= state.inventory.filter(entry => entry === id).length) {
       const other = equipmentSlots.find(entry => entry !== slot && state.equipment[entry] === id);
       if (!other) return previous;
       state.equipment[other] = null;
@@ -711,6 +903,13 @@ const rules = (() => {
         unequipped = true;
       }
     }
+    for (const equipment of Object.values(state.companionEquipment ?? {})) {
+      for (const slot of ["weapon", "armor"]) {
+        if (equipment[slot] !== id) continue;
+        if (remaining > 0) remaining--;
+        else { equipment[slot] = null; unequipped = true; }
+      }
+    }
     note(state, world.items[id] + (amount > 1 ? " ×" + amount : "") + " eingelagert" + (unequipped ? " und abgelegt." : "."));
     return state;
   }
@@ -823,7 +1022,7 @@ const rules = (() => {
     );
   }
 
-  function choose(previous, id, dice = Math.random) {
+  function chooseStep(previous, id, dice = Math.random) {
     const choice = choices(previous).find((item) => item.id === id);
     if (!choice) return previous;
     const state = structuredClone(previous);
@@ -891,8 +1090,11 @@ const rules = (() => {
       const score = clampRuf(current.score + delta);
       const left = current.left || (state.party.includes(id) && score <= departureThreshold);
       state.relationships[id] = { ...current, score, oath, left, bond: left ? "none" : current.bond };
+      if (delta) note(state, world.companions[id].name + " · Sympathie " + (delta > 0 ? "+" : "") + delta +
+        " (jetzt " + score + ").");
       if (left && state.party.includes(id)) {
         state.party = state.party.filter(member => member !== id);
+        if (state.companionEquipment) delete state.companionEquipment[id];
         note(state, world.companions[id].name + " hat das Vertrauen in dich verloren und verlässt deine Gruppe.");
       }
     }
@@ -1032,7 +1234,7 @@ const rules = (() => {
   const actionIds = ["spear", "ember", "restore", "guard", "herb", "flee", "torch"];
   // Aktion: Grundangriff (spear oder f1), eine Fähigkeit (f3 … f20, m1, m2, mit + für Verstärkung durch Ressource),
   // Glutgabe (ember, restore), Deckung, Verbrauchsgut, Flucht oder Fackel.
-  function strike(previous, action, dice = Math.random, supply = "galgenwurz", targetId, events = []) {
+  function strikeStep(previous, action, dice = Math.random, supply = "galgenwurz", targetId, events = []) {
     const fight = previous.combat;
     if (!fight || typeof action !== "string") return previous;
     const boosted = action.endsWith("+");
@@ -1146,6 +1348,7 @@ const rules = (() => {
     foe.lp -= value;
     if (fire && round) round.usedFire = true;
     round?.events.push({ kind: "hit", actor, target: id, value });
+    if (own(world.companions, actor)) note(state, world.companions[actor].name + " trifft " + foe.name + " für " + value + " Schaden.");
     if (foe.lp <= 0) foeFalls(state, id, fire);
     return value;
   }
@@ -1374,6 +1577,8 @@ const rules = (() => {
     for (const id of state.party) {
       if (!living().length) break;
       const member = world.companions[id];
+      const equipment = memberEquipment(state, id);
+      const weaponGear = world.gear[equipment.weapon];
       const ready = !(turn.supportUsed ?? []).includes(id);
       const wounded = state.health <= healthLimit(state) - (member.heal ?? 0) || (member.cleanse && turn.bleeding > 0);
       const special = ready && (member.heal ? wounded : member.guard ? turn.round % 2 === 0 : true);
@@ -1383,12 +1588,14 @@ const rules = (() => {
         if (member.fire) round.usedFire = true;
         const healing = healHero(state, member.heal ?? 0, round.events, id);
         if (member.cleanse) turn.bleeding = 0;
-        const damage = (member.damage ?? 0) + (turn.id === "felsgreif" ? (member.airborne ?? 0) : 0);
+        const damage = (member.damage ? member.damage + (weaponGear?.power ?? 0) + (weaponGear?.magic ?? 0) : 0) +
+          (turn.id === "felsgreif" ? (member.airborne ?? 0) : 0);
         if (damage) dealDamage(state, goal(), damage + extra, { fire: Boolean(member.fire), round, actor: id });
         else if (!healing) round.events.push({ kind: "cover", actor: id });
         assisted.push(member.name + " (" + member.ability + ")");
       } else {
-        dealDamage(state, goal(), 3 + Math.floor((member.damage ?? 0) / 4) + extra, { round, actor: id });
+        dealDamage(state, goal(), 3 + Math.floor((member.damage ?? 0) / 4) + (weaponGear?.power ?? 0) +
+          (turn.id === "felsgreif" ? (weaponGear?.airborne ?? 0) : 0) + extra, { round, actor: id });
       }
     }
     if (assisted.length) note(state, "Unterstützung: " + assisted.join(", ") + ".");
@@ -1439,7 +1646,9 @@ const rules = (() => {
     const held = turn.held;
     const result = world.fights[turn.id];
     const events = round.events;
-    const reduction = Math.floor((protection(state) + gearBonus(state, "armor")) / 2);
+    // Auch die Rüstungen der Begleiter schützen die Gruppe.
+    const groupArmor = state.party.reduce((total, id) => total + (world.gear[memberEquipment(state, id).armor]?.armor ?? 0), 0);
+    const reduction = Math.floor((protection(state) + gearBonus(state, "armor") + groupArmor) / 2);
     const defense = round.guarding ? Math.max(6, round.ward) : round.ward;
     const guarding = round.guarding || round.ward > 0;
     const leader = turn.feinde[0];
@@ -1666,7 +1875,7 @@ const rules = (() => {
     store, retrieve, isQuestItem: id => questItems.has(id), choose, route, retrain, specialize, ascend, weapon, equip, use, canUse, strike,
     attributes, baseAttributes, defaultBuild, suggestSkills, buildProblem, skillLimits, skillPoints, cap, modifier, originOf, profile,
     className, title, gearSkill, heroSkills, heroLimits, modifiers, skillValue, protection,
-    progression, train, trade, candidates, recruit, dismiss, targets,
-    relationship, reputation, recruitment, promise, bondActions, bondWith,
+    memberEquipment, assigned, progression, train, trade, candidates, recruit, dismiss, targets,
+    questEntries, questPlans, partyLimit, attitude, questReady, completeQuest, paySalary, craft, relationship, reputation, recruitment, promise, bondActions, bondWith,
     healthLimit, emberLimit, heroAttributes, ending, moorConsequences };
 })();

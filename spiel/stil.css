@@ -350,8 +350,79 @@ button.map-marker { min-height: 2rem; color: #fff0d6; border-color: #e1b677; }
   .hub-status { position: sticky; bottom: 0; padding-top: .5rem; background: #1d1813; }
 }
 
+/* Gefährten behalten Kampfeffekt und getragene Gegenstände im Überblick. */
+#party-members > li { padding: .8rem; margin: .6rem 0; border: 1px solid var(--line); border-radius: .5rem; }
+.member-equipment label { display: grid; gap: .3rem; margin: .5rem 0; }
+.member-equipment select { width: 100%; min-width: 0; }
+#party-members p { overflow-wrap: anywhere; }
+
+.quest-card { display: grid; gap: .3rem; padding: .7rem !important; margin: .5rem 0; border: 1px solid var(--line); border-radius: .4rem; }
+.quest-card p { margin: .2rem 0; }
+.quest-card progress { width: 100%; accent-color: #be8c52; }
+.quest-card[data-status="failed"] { border-left: 3px solid #bb6760; }
+.quest-card[data-status="done"] { border-left: 3px solid #82a875; }
+.quest-status, .quest-clock { font-weight: bold; }
+.quest-urgent { color: #f5ad87; }
+.quest-help { font-size: .85rem; color: var(--muted); }
+#quest-filters button[aria-pressed="true"] { outline: 2px solid #be8c52; outline-offset: 1px; }
+
+/* Kompakte Kampfansicht mit Aufstellung und zugänglichen Details. */
+.battlefield { grid-template-columns: minmax(0, 1fr); gap: .9rem; border-radius: .6rem; }
+.battle-header { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.battle-header strong { font-size: 1.15rem; }
+.battle-header span { color: #ffcf80; }
+.battle-sequence { display: flex; flex-wrap: wrap; gap: .35rem; margin: 0; padding: 0; list-style: none; font-size: .8rem; }
+.battle-sequence li { padding: .3rem .5rem; border: 1px solid #6d5942; border-radius: 1rem; color: #d9c29c; }
+.battle-sequence li.is-current { color: #241e18; background: #edca89; border-color: #edca89; }
+.battle-side h3 { margin: 0 0 .45rem; font-size: .85rem; letter-spacing: .05em; text-transform: uppercase; color: #d9c29c; }
+.battle-formation { grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: start; }
+.battle-enemies { grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr)); align-items: start; }
+.ally-card { display: grid; grid-template-columns: minmax(0, 1fr); gap: .45rem; align-content: start; border-radius: .4rem; padding: .6rem; }
+.battle-portrait { width: 3.4rem; aspect-ratio: 1; border-radius: 50%; border: 1px solid #ad8b59; background-size: 200% 200%; background-color: #4c3929; }
+.fighter-identity { display: grid; gap: .15rem; }
+.fighter-identity strong { font-size: 1rem; }
+.fighter-identity small { font-size: .75rem; }
+.fighter-vitals { display: grid; gap: .2rem; }
+.ability-badge { justify-self: start; padding: .2rem .4rem; border: 1px solid #899b6d; border-radius: 1rem; color: #dbedb7; font-size: .73rem; }
+.ability-badge.is-used { color: #c6b59b; border-color: #78664e; }
+.fighter-details { font-size: .78rem; }
+.fighter-details summary { cursor: pointer; padding: .35rem 0; color: #ecd1a2; }
+.fighter-details p { margin: .45rem 0; line-height: 1.45; overflow-wrap: anywhere; }
+.enemy-card { border-radius: .4rem; min-height: 5.3rem; padding: .65rem; cursor: pointer; }
+.enemy-card:disabled { cursor: default; }
+.enemy-card:focus-visible, .fighter-details summary:focus-visible { outline: 2px solid #ffe6af; outline-offset: 3px; }
+.fighter-card.is-acting { box-shadow: 0 0 0 2px #ffdc8c, 0 0 1rem #c8934d66; }
+.battle-target { font-size: .85rem; border-top: 1px solid #695138; padding-top: .6rem; }
+.battle-announcement { margin: 0; min-height: 2.5em; font-size: .9rem; }
+.battle-round-log { font-size: .82rem; color: #d9c29c; }
+.battle-round-log summary { cursor: pointer; }
+.battle-round-log ol { padding-left: 1.3rem; line-height: 1.7; }
+.scene-actions.battle-actions { position: sticky; bottom: .4rem; z-index: 6; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .4rem; padding: .6rem; background: #ead9b5; border: 1px solid #ae8753; border-radius: .5rem; box-shadow: 0 -.2rem 1rem #241e1826; }
+.battle-actions .action { min-height: 2.75rem; padding: .55rem; font-size: .85rem; }
+.battle-actions [data-battle-action="spear"] { background: #5e3d24; color: #fff0d5; border-color: #5e3d24; }
+@media (max-width: 40rem) {
+  .battle-formation, .battle-enemies { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ally-card { grid-template-columns: 2.5rem minmax(0, 1fr); align-items: center; padding: .5rem; }
+  .battle-portrait { width: 2.5rem; }
+  .ally-card .ability-badge, .ally-card .fighter-stats, .ally-card .fighter-details, .ally-card .fighter-vitals { grid-column: 1 / -1; }
+  .fighter-identity strong { font-size: .9rem; }
+  .scene-actions.battle-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); bottom: max(.35rem, env(safe-area-inset-bottom)); }
+}
+
+.battlefield { container-type: inline-size; }
+.battle-portrait { position: relative; }
+.portrait-initial { position: absolute; right: -.2rem; bottom: -.15rem; border-radius: 50%; width: 1.1rem; height: 1.1rem; display: grid; place-items: center; background: #edca89; color: #241e18; font-size: .7rem; font-weight: bold; }
+@container (max-width: 34rem) {
+  .battle-formation, .battle-enemies { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ally-card { grid-template-columns: 2.5rem minmax(0, 1fr); align-items: center; padding: .5rem; }
+  .battle-portrait { width: 2.5rem; }
+  .ally-card .ability-badge, .ally-card .fighter-stats, .ally-card .fighter-details, .ally-card .fighter-vitals { grid-column: 1 / -1; }
+}
+
 /* Kampfdokument (17. 11. 2026): Verstärkung und Fähigkeitenliste. */
-.boost-toggle { display: inline-flex; align-items: center; gap: 0.4rem; flex-basis: 100%; font-size: 0.95rem; }
+.boost-toggle { display: inline-flex; align-items: center; gap: 0.4rem; flex-basis: 100%; grid-column: 1 / -1; font-size: 0.95rem; }
 .ability-list { padding-left: 1.1rem; display: grid; gap: 0.45rem; }
 .ability-list li.locked { opacity: 0.6; }
 .battle-resources { font-variant-numeric: tabular-nums; }
+/* Mit bis zu acht Fähigkeiten bleibt die Aktionsleiste begrenzt und scrollt bei Bedarf. */
+.scene-actions.battle-actions { max-height: 45vh; overflow-y: auto; }
