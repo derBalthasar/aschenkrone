@@ -274,16 +274,53 @@
     return figure;
   }
 
-  for (const [from, to] of world.routes) {
-    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    const [x1, y1] = world.destinations[from].position;
-    const [x2, y2] = world.destinations[to].position;
-    for (const [key, value] of Object.entries({ x1, y1, x2, y2 })) line.setAttribute(key, value);
+  // Karte in drei Stufen (spiel/karte.js): Gebiet, Fraktion, Welt. Die Stufe ist eine Ansichtseinstellung dieses
+  // Browsers und gehört nicht zum Spielstand.
+  const mapLevelKey = "aschenkrone.kartenstufe";
+  let mapLevel = "gebiet";
+  let mapCentered = null;
+  try {
+    const savedLevel = localStorage.getItem(mapLevelKey);
+    if (karte.stufen.includes(savedLevel)) mapLevel = savedLevel;
+  } catch {
+    // Ohne Speicher beginnt die Karte beim Gebiet.
+  }
+  for (const control of document.querySelectorAll("[data-map-level]")) {
+    control.addEventListener("click", () => {
+      mapLevel = control.dataset.mapLevel;
+      mapCentered = null;
+      try {
+        localStorage.setItem(mapLevelKey, mapLevel);
+      } catch {
+        // Die Stufe gilt dann nur in diesem Fenster.
+      }
+      if (state) renderMap();
+    });
+  }
+
+  const svgNS = "http://www.w3.org/2000/svg";
+  const routeLines = world.routes.map(([from, to]) => {
+    const line = document.createElementNS(svgNS, "line");
+    const a = karte.daten.reise[from]?.p;
+    const b = karte.daten.reise[to]?.p;
+    if (a && b) for (const [key, value] of Object.entries({ x1: a[0], y1: a[1], x2: b[0], y2: b[1] })) line.setAttribute(key, value);
+    else line.setAttribute("visibility", "hidden");
     el("map-routes").append(line);
+    return line;
+  });
+
+  function placeOnMap(node, view, point) {
+    const pos = karte.prozent(view.rect, point);
+    if (!pos) return false;
+    node.style.left = pos[0] + "%";
+    node.style.top = pos[1] + "%";
+    mapPlaces.append(node);
+    return true;
   }
 
   function renderMap() {
-    const current = world.scenes[state.scene].map;
+    const scene = world.scenes[state.scene];
+    const current = scene.map;
     const travels = new Map();
     for (const id of Object.keys(world.destinations)) {
       const route = rules.route(state, id);
@@ -291,14 +328,14 @@
     }
     const plan = el("map-plan");
     const destinations = el("map-destinations");
-    for (const line of el("map-routes").children) line.classList.remove("route-active");
+    for (const line of routeLines) line.classList.remove("route-active");
     plan.replaceChildren();
     const selected = travels.get(target);
     if (selected) {
       const stops = selected.stops;
       for (const [index, [from, to]] of world.routes.entries()) {
         if (stops.some((stop, i) => (stop === from && stops[i + 1] === to) || (stop === to && stops[i + 1] === from))) {
-          el("map-routes").children[index].classList.add("route-active");
+          routeLines[index].classList.add("route-active");
         }
       }
       plan.append(element("p", selected.stops.map(id => world.destinations[id].name).join(" → ")));
@@ -313,6 +350,29 @@
     } else {
       target = null;
     }
+
+    // Ausschnitt und Kartenbild der gewählten Stufe
+    const here = karte.lage(scene, world.destinations);
+    const view = karte.ansicht(mapLevel, here, state.faction);
+    const [vx, vy, vw, vh] = view.rect;
+    const picture = karte.bild(view.rect);
+    const image = el("map-image");
+    if (image.getAttribute("src") !== picture.src) image.src = picture.src;
+    image.style.left = (picture.rect[0] - vx) / vw * 100 + "%";
+    image.style.top = (picture.rect[1] - vy) / vh * 100 + "%";
+    image.style.width = picture.rect[2] / vw * 100 + "%";
+    image.style.height = picture.rect[3] / vh * 100 + "%";
+    const board = el("map-board");
+    board.style.aspectRatio = vw + " / " + vh;
+    board.dataset.level = mapLevel;
+    el("map-routes").setAttribute("viewBox", view.rect.join(" "));
+    for (const control of document.querySelectorAll("[data-map-level]")) {
+      control.setAttribute("aria-pressed", control.dataset.mapLevel === mapLevel);
+    }
+    const factionName = klassen.fraktionen[view.fraktion]?.name;
+    el("map-title").textContent = "Karte · " + (mapLevel === "welt" ? "Odris" : mapLevel === "fraktion" ? factionName ?? "Odris" :
+      here ? "Gebiet um " + here.name : factionName ?? "Odris");
+
     mapPlaces.replaceChildren();
     destinations.replaceChildren();
     const selectDestination = id => {
@@ -320,20 +380,20 @@
       renderMap();
       plan.querySelector("button")?.focus();
     };
+    if (mapLevel === "welt" && factionName) {
+      // Auf der Weltkarte zeigt ein Rahmen das Fraktionsgebiet der zweiten Stufe.
+      const area = element("span");
+      area.className = "map-area";
+      const [ax, ay, aw, ah] = karte.daten.fraktionen[view.fraktion].rect;
+      area.style.left = (ax - vx) / vw * 100 + "%";
+      area.style.top = (ay - vy) / vh * 100 + "%";
+      area.style.width = aw / vw * 100 + "%";
+      area.style.height = ah / vh * 100 + "%";
+      mapPlaces.append(area);
+    }
     for (const [id, location] of Object.entries(world.destinations)) {
       const reachable = travels.has(id);
-      const marker = element(reachable ? "button" : "span", location.name);
-      marker.className = "map-marker" + (current === id ? " map-current" : "");
-      marker.style.left = location.position[0] + "%";
-      marker.style.top = location.position[1] + "%";
-      marker.title = location.note;
-      if (current === id) marker.setAttribute("aria-current", "location");
       if (reachable) {
-        marker.type = "button";
-        marker.dataset.destination = id;
-        marker.setAttribute("aria-label", location.name + " als Ziel wählen · " + location.note);
-        marker.setAttribute("aria-pressed", id === target);
-        marker.addEventListener("click", () => selectDestination(id));
         const choice = element("button", location.name);
         choice.type = "button";
         choice.className = "action";
@@ -342,14 +402,68 @@
         choice.addEventListener("click", () => selectDestination(id));
         destinations.append(choice);
       }
-      mapPlaces.append(marker);
+      const spot = karte.daten.reise[id];
+      if (!spot || mapLevel === "welt" || (!reachable && current !== id && mapLevel !== "gebiet")) continue;
+      const marker = element(reachable ? "button" : "span", location.name);
+      // Am Kartenrand steht das Namensschild zur Kartenmitte hin, damit es nicht abgeschnitten wird.
+      const x = karte.prozent(view.rect, spot.p)?.[0] ?? 50;
+      const side = x < 22 ? "r" : x > 78 ? "l" : spot.seite;
+      marker.className = "map-marker map-side-" + side + (current === id ? " map-current" : "");
+      marker.title = location.note;
+      if (current === id) marker.setAttribute("aria-current", "location");
+      if (reachable) {
+        marker.type = "button";
+        marker.dataset.destination = id;
+        marker.setAttribute("aria-label", location.name + " als Ziel wählen · " + location.note);
+        marker.setAttribute("aria-pressed", id === target);
+        marker.addEventListener("click", () => selectDestination(id));
+      }
+      placeOnMap(marker, view, spot.p);
     }
+    if (here) {
+      const pin = element("span");
+      pin.className = "map-pin";
+      pin.setAttribute("aria-hidden", "true");
+      placeOnMap(pin, view, here.punkt);
+      if (!here.reise || mapLevel === "welt") {
+        const label = element("span", "Du bist hier · " + here.name);
+        const right = (karte.prozent(view.rect, here.punkt)?.[0] ?? 0) > 62;
+        label.className = "map-marker map-current map-here" + (right ? " map-side-l" : " map-side-r");
+        label.setAttribute("aria-current", "location");
+        placeOnMap(label, view, here.punkt);
+      }
+    }
+    const homeName = startpunkte.fraktionen[state.faction]?.ort;
+    const home = homeName && karte.daten.orte[homeName];
+    if (home && mapLevel !== "gebiet" && (!here || home.p.join() !== here.punkt.join())) {
+      const label = element("span", "Heimat · " + homeName);
+      const right = (karte.prozent(view.rect, home.p)?.[0] ?? 0) > 62;
+      label.className = "map-marker map-home" + (right ? " map-side-l" : " map-side-r");
+      placeOnMap(label, view, home.p);
+    }
+
     const location = world.destinations[current]?.name;
-    const far = world.scenes[state.scene].fern;
+    const far = scene.fern;
+    const levelText = "Stufe " + (karte.stufen.indexOf(mapLevel) + 1) + " · " + karte.stufenNamen[mapLevel];
+    el("map-caption").textContent = here ? levelText + " · Du bist in " + here.name +
+      (klassen.fraktionen[here.fraktion] ? ", Land der Fraktion " + klassen.fraktionen[here.fraktion].name : "") + "." : levelText + ".";
     el("map-status").textContent = state.combat ? "Im Kampf kannst du die Karte ansehen. Reiseoptionen öffnen sich nach der Begegnung." :
       location ? "Standort: " + location + (travels.size ? " · Wähle ein Reiseziel, um die Route zu sehen." : " · Folge den Optionen in der Szene.") :
-      far ? "Standort: " + far + " · außerhalb dieser Reisekarte. Folge den Optionen in der Szene." :
+      far ? "Standort: " + far + " · Folge den Optionen in der Szene." :
       "Deine Reise ist beendet.";
+
+    // Auf schmalen Bildschirmen ist die Karte breiter als der Rahmen: den eigenen Standort in die Mitte rücken.
+    const centerKey = state.scene + "|" + mapLevel;
+    if (here && mapCentered !== centerKey) {
+      mapCentered = centerKey;
+      const scroller = board.parentElement;
+      requestAnimationFrame(() => {
+        const pos = karte.prozent(view.rect, here.punkt);
+        if (pos && scroller.scrollWidth > scroller.clientWidth) {
+          scroller.scrollLeft = pos[0] / 100 * board.clientWidth - scroller.clientWidth / 2;
+        }
+      });
+    }
   }
 
   const slotLabels = { weapon: "Rechte Hand", offhand: "Linke Hand", head: "Kopf", neck: "Hals", armor: "Körper",

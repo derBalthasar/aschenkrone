@@ -25,7 +25,10 @@ jobs:
           node --check spiel/welt.js
           node --check spiel/regeln.js
           node --check spiel/spiel.js
+          node --check spiel/karte-daten.js
+          node --check spiel/karte.js
       - name: Spielregeln testen
         run: |
           node --test spiel/regeln.test.cjs
           node --test spiel/kampf.test.cjs
+          node --test spiel/karte.test.cjs
