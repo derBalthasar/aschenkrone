@@ -2,6 +2,8 @@
 
 ## Quellenstand
 
+Die [Errata und verbindliche Regel-Checkliste](ERRATA.md) (Henry, 17. 11. 2026) geht älteren Tabellen und Entwurfsnotizen des Weltbuchs vor.
+
 Die Welt heißt **Odris** (Festlegung von Henry, 17. 11. 2026). Das Bestiarium heißt deshalb „Bestiarium von Odris“.
 
 Das Weltbuch im Spiel verarbeitet das Weltbuch 2.0, die fünf Völkerdokumente und die sechs Karten und Bildtafeln vom Desktop. Die Fraktionsbeschreibungen und Stadtverzeichnisse stehen in `voelker.js`. Sie folgen den Völkerdokumenten. Die Karte `weltkarte-verbindlich-mit-orten.png` liefert die räumliche Übersicht. Ihr sichtbarer Titel „Entwurf 3“ stammt aus der Vorlage mit eingezeichneten Orten. Die frühere Gebietsübersicht ohne Städtebeschriftung liegt unter den Bildtafeln.
@@ -9,7 +11,7 @@ Das Weltbuch im Spiel verarbeitet das Weltbuch 2.0, die fünf Völkerdokumente u
 - Die Untoten-Tafeln datieren die Nacht des Ersten Blutes unter anderem auf 500, 1800 oder etwa 2000 v. E. Die Völkertexte führen sie um 4400 v. E., Aldrics Ritual um 2500 v. E. und das erste Fleischritual um 900 v. E. Diese Daten gelten für die Spielchronik.
 - Eryndor und der Blutbrunnen gehören den Erinnernden. Der Hof der Bleichen Krone herrscht vom Palast der Tausend Stimmen. Eine Zeile in der Gleichgewichtstabelle des Weltbuchs verortet den Hof in Eryndor. Die Ortslisten und das Untoten-Dokument ordnen beide Sitze eindeutig zu.
 - Das Elfen-Dokument beschreibt den Wald der Hüter bis zur Ostküste. Auf der Karte reicht dort die Schattenblüte weiter nach Norden. Städte stehen bei ihren Fraktionen gemäß Völkerdokument. Eine verbindliche Grenzlinie für die Küste bleibt offen.
-- Die drei Weltursprünge im Weltbuch (erlöschende Sonne, toter Gott, steigende Nebelflut) stehen dort als Entwürfe. Die Legende vom Ersten Toten gehört zur Untoten-Lore und bleibt eine Legende innerhalb der Welt.
+- Die drei Weltursprünge im Weltbuch (erlöschende Sonne, toter Gott, steigende Nebelflut) sind laut [Errata](ERRATA.md) verworfen. Odris hat einen normalen Tag-Nacht-Wechsel, die Götterknochen der Orks sind ein Mythos. Die Legende vom Ersten Toten gehört zur Untoten-Lore und bleibt eine Legende innerhalb der Welt.
 
 ## Konflikte für spätere Quests
 
@@ -80,7 +82,7 @@ Seit dem 17. November 2026 stehen das Weltbuch 2.0 und die fünf Völkerdokument
 
 ## Begleiter und Aufnahmeaufträge
 
-Die Gruppe führt höchstens drei Begleiter. Alle neun Figuren können am Wachhof von Eiswacht angesprochen werden, damit Reisen für persönliche Aufnahmeaufträge keine Abgabe verhindern. Bereits absolvierte Taten zählen nach Annahme des Auftrags. Aufnahme und erneute Aufnahme erfordern einen abgeschlossenen persönlichen Auftrag; ein Versprechen allein genügt nicht. Kelda akzeptiert alternativ einen Vertrag über 15 Silber mit späterer Zahlung. Der Betrag bleibt als Schuld gespeichert.
+Die Gruppe führt höchstens drei Begleiter. Seit der Errata vom 17. 11. 2026 kommen Söldner in den Städten mit Zentrallager hinzu (siehe [ERRATA.md](ERRATA.md), Punkt 9). Alle neun Figuren können am Wachhof von Eiswacht angesprochen werden, damit Reisen für persönliche Aufnahmeaufträge keine Abgabe verhindern. Bereits absolvierte Taten zählen nach Annahme des Auftrags. Aufnahme und erneute Aufnahme erfordern einen abgeschlossenen persönlichen Auftrag; ein Versprechen allein genügt nicht. Kelda akzeptiert alternativ einen Vertrag über 15 Silber mit späterer Zahlung. Der Betrag bleibt als Schuld gespeichert.
 
 Die Herkunftsvorbehalte sind neue persönliche Charakterentscheidungen für das Spiel, keine aus den Quellen abgeleitete allgemeine Feindschaft zwischen Völkern: Iven verlangt von Vampiren und Erwachten 25 Ruf bei der Grenzwache. Mira reist nicht mit Erwachten und verlangt von Vampiren 15 Ruf beim Orden der Flamme. Neri verlangt von Orks nach einem persönlichen Grenzkonflikt 15 Ruf beim Kronreich. Grundlage der Fraktionsnamen und Hintergründe sind `voelker.js`, die Ordenssuche nach dem Kult der Bleichen Ewigkeit und die Unterscheidung von Bleicher Krone und Erinnernden. Misstrauen beginnt bei −10 Sympathie und kann durch den genannten Ruf überwunden werden; Miras persönliche Ablehnung bleibt bestehen.
 
