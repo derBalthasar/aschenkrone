@@ -26,3 +26,7 @@ Das Weltbuch führt fünf Startwerte für eine künftige Kampagne um 612 n. E. a
 - Kornwik und Heidvang liegen im Kronreich. Eiswacht, Eispass und Glutberg gehören zum Gebiet des Ordens der Flamme. Der Eichenwald, der Bohlenweg und die Nebenwege am Pass sind Schauplätze der regionalen Reisekarte. Das untere Runentor am Glutberg ist eine Signalstation. Die Ewige Flamme brennt weiterhin.
 - Die Glut der Spielfigur ist eine besondere Gabe für alle Herkünfte und Klassen. Sie wirkt über das Gleichgewicht zwischen Erneuerung und Zerstörung. Die Flammenmagie des Ordens stützt sich auf Glauben und Runen. Die genaue Herkunft der Gabe bleibt in der Handlung offen.
 - Die Grenzwache von Eiswacht und die Bergwacht von Glutberg haben jeweils eigenen Ruf. Die bisherigen Rufwerte für den Orden und die Vampirhäuser werden als Orden der Flamme und Die Erinnernden angezeigt. Ewige Haine, Knochenlegion, Konklave und Splitterliga brauchen noch eine Zuordnung, falls sie in die neue Kontinent-Lore eingebunden werden.
+
+## Quelltexte im Weltbuch
+
+Seit dem 17. November 2026 stehen das Weltbuch 2.0 und die fünf Völkerdokumente vollständig unter `lore/quellen/`. Die Seiten sind aus den Word-Dateien erzeugt und enthalten die Detailkarten, das Gleichgewicht der Welt, Spielwerte, Städte, Dörfer, Hauptquests und die Bildtafeln der Dokumente. Bilder, die schon unter `lore/` liegen, werden wiederverwendet. Neue Bilder liegen unter `lore/quellen/bilder/`. Die Spielregeln und Spielstände sind davon nicht betroffen.
