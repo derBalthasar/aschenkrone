@@ -20,6 +20,7 @@
   let skills = {};
   let target = null;
   let enemyTarget = null;
+  let boostAbility = false;
   let animating = false;
   let lastBattleMessages = [];
   const battleStepMs = 248;
@@ -240,6 +241,7 @@
 
   function showHome(message = "") {
     if (el("inventory-hub").open) el("inventory-hub").close();
+    if (el("character-sheet").open) el("character-sheet").close();
     show("home");
     el("continue").hidden = state === null;
     el("home-status").textContent = message;
@@ -343,8 +345,10 @@
       mapPlaces.append(marker);
     }
     const location = world.destinations[current]?.name;
+    const far = world.scenes[state.scene].fern;
     el("map-status").textContent = state.combat ? "Im Kampf kannst du die Karte ansehen. Reiseoptionen öffnen sich nach der Begegnung." :
       location ? "Standort: " + location + (travels.size ? " · Wähle ein Reiseziel, um die Route zu sehen." : " · Folge den Optionen in der Szene.") :
+      far ? "Standort: " + far + " · außerhalb dieser Reisekarte. Folge den Optionen in der Szene." :
       "Deine Reise ist beendet.";
   }
 
@@ -436,6 +440,7 @@
 
   function openHub() {
     if (!state) return;
+    if (el("character-sheet").open) el("character-sheet").close();
     hub.tab = "bag";
     hub.slot = null;
     el("hub-status").textContent = "";
@@ -754,6 +759,217 @@
     });
   }
 
+  // Charakterfenster: Stand (Erfahrung, Lebenspunkte, Glut), Werte und wirkende Effekte als Reiter in einem Pop-up.
+  const sheet = { tab: "stand" };
+  const sheetTabs = ["stand", "werte", "effekte"];
+
+  function sheetMeter(id, value, max) {
+    const meter = el("sheet-" + id);
+    meter.max = Math.max(1, max);
+    meter.value = Math.max(0, Math.min(value, max));
+  }
+
+  function sheetSection(title, ...children) {
+    const section = element("section");
+    section.className = "sheet-section";
+    section.append(element("h3", title), ...children);
+    return section;
+  }
+
+  function sheetStats(values) {
+    const dl = element("dl");
+    dl.className = "hub-stats sheet-stats";
+    stats(dl, values);
+    return dl;
+  }
+
+  function sheetBalance() {
+    const scale = element("div");
+    scale.className = "sheet-balance";
+    scale.setAttribute("role", "img");
+    scale.setAttribute("aria-label", "Glutgleichgewicht " + signed(state.balance) + " · Rückstoß ab ±4");
+    for (let step = -3; step <= 3; step++) {
+      const cell = element("span", step === 0 ? "0" : signed(step));
+      cell.className = "sheet-balance-step" + (step === state.balance ? " sheet-balance-now" : "") +
+        (Math.abs(step) >= 2 ? " sheet-balance-edge" : "");
+      scale.append(cell);
+    }
+    const legend = element("p");
+    legend.className = "sheet-note";
+    legend.textContent = "← Erneuerung · Zerstörung → · Bei ±4 schlägt die Glut zurück.";
+    return [scale, legend];
+  }
+
+  function renderSheetStand(panel) {
+    const progress = rules.progression(state);
+    const xp = element("p");
+    xp.className = "sheet-big";
+    xp.textContent = progress.next === null ? progress.xp + " EP · Höchste Erfahrungsstufe"
+      : progress.xp + " / " + progress.next + " EP · noch " + (progress.next - progress.xp) + " bis Stufe " + (progress.level + 1);
+    const ladder = element("ol");
+    ladder.className = "sheet-ladder";
+    rules.levelThresholds.forEach((value, index) => {
+      const step = element("li", "Stufe " + (index + 1) + " · " + value + " EP");
+      if (index + 1 < progress.level) step.className = "sheet-done";
+      if (index + 1 === progress.level) { step.className = "sheet-now"; step.setAttribute("aria-current", "step"); }
+      ladder.append(step);
+    });
+    const training = element("div");
+    training.className = "actions sheet-training";
+    if (progress.points) {
+      training.append(element("p", progress.points + (progress.points === 1 ? " Grundwertpunkt" : " Grundwertpunkte") + " aus früheren Stufenaufstiegen zu verteilen:"));
+      const values = rules.heroAttributes(state);
+      for (const [id, label] of Object.entries(world.attributes)) {
+        button(training, "+1 " + label, () => update(rules.train(state, id)),
+          { disabled: Boolean(state.combat) || !state.health || values[id] >= klassen.regeln.grundwertMax });
+      }
+    }
+    const fight = state.combat ? rules.targets(state).filter(enemy => enemy.health > 0) : [];
+    panel.append(
+      sheetSection("Erfahrungsstufe " + progress.level, xp, ladder, training),
+      sheetSection("Lebenspunkte, Kraft und Glut", sheetStats([
+        ["Lebenspunkte", state.health + " / " + rules.healthLimit(state)],
+        ...((values) => [["Ausdauer", values.ausdauer + " / " + values.ausdauerMax],
+          ...(values.manaMax ? [["Mana", values.mana + " / " + values.manaMax]] : []),
+          [values.ressourceName, String(values.ressource)]])(rules.kampfwerte(state)),
+        ["Glut", state.ember + " / " + rules.emberLimit(state)],
+        ["Schutz im Kampf", String(rules.protection(state) + rules.gearBonus(state, "armor"))],
+        ["Silber", String(state.silver)],
+      ])),
+      sheetSection("Glutgleichgewicht", ...sheetBalance()),
+      sheetSection("Lage", sheetStats([
+        ["Ort", world.scenes[state.scene].place ?? "Unterwegs"],
+        ["Kampf", fight.length ? "Gegen " + fight.map(enemy => enemy.name + " (" + enemy.health + " LP)").join(", ") : "Kein Kampf"],
+        ["Gefährten", state.party.length + " / " + rules.partyLimit],
+        ["Quest-Stufe", String(state.questStufe)],
+      ])),
+    );
+  }
+
+  function renderSheetWerte(panel) {
+    const faction = klassen.fraktionen[state.faction];
+    const klasse = faction.klassen[state.role];
+    const limits = rules.heroLimits(state);
+    const gear = rules.gearStats(state);
+    const intro = element("p", klasse.spielweise + ".");
+    intro.className = "sheet-note";
+    panel.append(
+      sheetSection("Klasse · " + rules.title(state), sheetStats([
+        ["Volk", klassen.voelker[faction.volk].name],
+        ["Fraktion", faction.name],
+        ["Grundklasse", klassen.grundklassen[rules.profile(state.faction, state.role)].name],
+        ["Spezialisierung", state.build.spez ? klasse[state.build.spez.variante][0] : "ab Quest-Stufe " + klassen.regeln.spezialisierungStufe],
+        ["Magie", faction.magie ? "Ja" : "Keine Magie"],
+      ]), intro),
+      sheetSection("Grundwerte", sheetStats(attributeValues(rules.heroAttributes(state)))),
+      sheetSection("Fertigkeiten", sheetStats(Object.entries(rules.heroSkills(state)).map(([id, value]) =>
+        [klassen.fertigkeiten[id].name, value + " / " + limits[id]]))),
+      sheetSection("Kampfwerte mit Ausrüstung", sheetStats([
+        ["Waffe", world.items[rules.weapon(state)] ?? "—"],
+        ...statLabels.map(([key, label]) => [label, String(gear[key])]),
+        ["Abwehr", String(rules.protection(state))],
+        ["Grundangriff", "+" + rules.kampfwerte(state).grundangriff + " ab Stufe 4, 8, 12, 16, 20"],
+      ])),
+      sheetSection(rules.kampfwerte(state).manaMax ? "Angriffe und Zauber" : "Angriffe und Techniken", abilityListing()),
+    );
+  }
+
+  function renderSheetEffekte(panel) {
+    const all = rules.effects(state);
+    const groupsOf = [["gut", "Vorteile"], ["schlecht", "Nachteile und Zustände"], ["hinweis", "Hinweise"]];
+    for (const [art, title] of groupsOf) {
+      const entries = all.filter(effect => effect.art === art);
+      if (!entries.length) continue;
+      const listing = element("ul");
+      listing.className = "sheet-effects";
+      for (const effect of entries) {
+        const item = element("li");
+        item.className = "sheet-effect sheet-effect-" + art;
+        item.dataset.effect = effect.id;
+        const head = element("div");
+        head.className = "sheet-effect-head";
+        head.append(element("strong", effect.name), element("span", effect.dauer));
+        item.append(head, element("p", effect.text));
+        listing.append(item);
+      }
+      panel.append(sheetSection(title, listing));
+    }
+    if (state.party.length) {
+      const listing = element("ul");
+      listing.className = "sheet-effects";
+      for (const id of state.party) {
+        const companion = world.companions[id];
+        const item = element("li");
+        item.className = "sheet-effect sheet-effect-gut";
+        const head = element("div");
+        head.className = "sheet-effect-head";
+        head.append(element("strong", companion.name), element("span", "In der Gruppe"));
+        item.append(head, element("p", companionEffect(companion) || "Kämpft an deiner Seite."));
+        listing.append(item);
+      }
+      panel.append(sheetSection("Unterstützung durch Gefährten", listing));
+    }
+    if (!panel.children.length) {
+      const empty = element("p", "Zurzeit wirkt kein besonderer Effekt auf dich.");
+      empty.className = "sheet-note";
+      panel.append(empty);
+    }
+  }
+
+  function renderSheet() {
+    setPortrait(el("sheet-avatar"), state);
+    el("sheet-title").textContent = state.name;
+    el("sheet-origin").textContent = klassen.fraktionen[state.faction].name + " · " + rules.title(state);
+    const progress = rules.progression(state);
+    el("sheet-level").textContent = "Stufe " + progress.level;
+    el("sheet-xp-text").textContent = progress.next === null ? progress.xp + " EP" : (progress.xp - progress.floor) + " / " + (progress.next - progress.floor) + " EP";
+    sheetMeter("xp", progress.next === null ? 1 : progress.xp - progress.floor, progress.next === null ? 1 : progress.next - progress.floor);
+    el("sheet-hp-text").textContent = state.health + " / " + rules.healthLimit(state);
+    sheetMeter("hp", state.health, rules.healthLimit(state));
+    el("sheet-hp").classList.toggle("sheet-low", state.health <= rules.healthLimit(state) / 4);
+    el("sheet-ember-text").textContent = state.ember + " / " + rules.emberLimit(state);
+    sheetMeter("ember", state.ember, rules.emberLimit(state));
+    const count = rules.effects(state).filter(effect => effect.art !== "hinweis").length + state.party.length;
+    for (const tab of sheetTabs) {
+      const control = el("sheet-tab-" + tab);
+      control.setAttribute("aria-selected", String(sheet.tab === tab));
+      control.tabIndex = sheet.tab === tab ? 0 : -1;
+    }
+    el("sheet-tab-effekte").textContent = "Effekte" + (count ? " (" + count + ")" : "");
+    const panel = el("sheet-panel");
+    panel.setAttribute("aria-labelledby", "sheet-tab-" + sheet.tab);
+    panel.replaceChildren();
+    ({ stand: renderSheetStand, werte: renderSheetWerte, effekte: renderSheetEffekte })[sheet.tab](panel);
+  }
+
+  function openSheet(tab = "stand") {
+    if (!state) return;
+    if (el("inventory-hub").open) el("inventory-hub").close();
+    sheet.tab = tab;
+    renderSheet();
+    el("character-sheet").showModal();
+    el("sheet-close").focus();
+  }
+
+  for (const opener of document.querySelectorAll("[data-sheet-open]")) opener.addEventListener("click", () => openSheet());
+  el("sheet-close").addEventListener("click", () => el("character-sheet").close());
+  el("character-sheet").addEventListener("click", event => {
+    if (event.target === event.currentTarget) event.currentTarget.close();
+  });
+  sheetTabs.forEach((tab, index) => {
+    const control = el("sheet-tab-" + tab);
+    control.addEventListener("click", () => {
+      sheet.tab = tab;
+      renderSheet();
+      control.focus();
+    });
+    control.addEventListener("keydown", event => {
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+      event.preventDefault();
+      el("sheet-tab-" + sheetTabs[(index + (event.key === "ArrowRight" ? 1 : sheetTabs.length - 1)) % sheetTabs.length]).click();
+    });
+  });
+
   function companionEffect(companion) {
     const effects = [];
     if (companion.damage) effects.push(companion.damage + " Schaden");
@@ -934,8 +1150,16 @@
     return card;
   }
 
+  // Wer in einem Kampfereignis handelt: Held, Begleiter, beschworenes Wesen oder eine anhaltende Wirkung.
+  function actorName(actor, previous) {
+    if (actor === "hero") return previous.name;
+    if (actor === "summon") return "Beschworenes Wesen";
+    if (actor === "dot") return "Anhaltende Wirkung";
+    return world.companions[actor]?.name ?? "Gruppe";
+  }
+
   function battleMessage(event, previous) {
-    const name = event.actor === "hero" ? previous.name : world.companions[event.actor]?.name;
+    const name = actorName(event.actor, previous);
     if (event.kind === "retaliate") return "Gegenangriff · " + (event.value ? "−" + event.value + " LP" : "Abgewehrt");
     if (event.kind === "heal") return name + " heilt " + previous.name + ": +" + event.value + " LP";
     if (event.kind === "cover") return name + " sichert die Gruppe.";
@@ -1000,6 +1224,12 @@
       card.append(details);
       formation.append(card);
     }
+    for (const summon of state.combat.diener) {
+      const card = fighterCard(summon.name, summon.lp + " / " + summon.max + " LP · " +
+        (summon.schaden ? summon.schaden + " Schaden" : "zieht Angriffe") + " · noch " + summon.runden + (summon.runden === 1 ? " Runde" : " Runden"));
+      card.dataset.actor = "summon";
+      formation.append(card);
+    }
     group.append(formation);
     const opponents = element("section");
     opponents.className = "battle-side";
@@ -1028,7 +1258,9 @@
       meter.max = enemy.max;
       meter.value = enemy.health;
       meter.setAttribute("aria-label", enemy.name + " · Lebenspunkte");
-      card.append(element("strong", enemy.name), meter, element("small", enemy.health ? enemy.health + " / " + enemy.max + " LP" : "Besiegt"));
+      const rank = kampf.raenge[enemy.rang].name + " · Stufe " + enemy.stufe;
+      card.append(element("strong", enemy.name), meter, element("small",
+        enemy.health ? enemy.health + " / " + enemy.max + " LP · " + rank + (enemy.status ? " · " + enemy.status : "") : "Besiegt"));
       card.addEventListener("click", () => {
         if (animating) return;
         enemyTarget = enemy.id;
@@ -1085,7 +1317,7 @@
           if (current) chip.setAttribute("aria-current", "step"); else chip.removeAttribute("aria-current");
         }
         panel.querySelector(".battle-header span").textContent = retaliates ? "Gegnerzug" :
-          (event.actor === "hero" ? previous.name : world.companions[event.actor].name) + " handelt";
+          actorName(event.actor, previous) + " handelt";
         panel.querySelector(".battle-announcement").textContent = battleMessage(event, previous);
         actor?.classList.add("is-acting");
         actor?.classList.add(retaliates ? "enemy-lunge" : event.kind === "cover" ? "fighter-cover" : "fighter-lunge");
@@ -1140,14 +1372,44 @@
     }
     if (combat) {
       renderBattle(content);
-      if (combat.stunned) content.append(element("p", "Benommen · Dein nächster Waffenangriff ist schwächer."));
+      const values = rules.kampfwerte(state);
+      const held = combat.held;
+      const line = element("p", "Erfahrungsstufe " + values.stufe + " · Ausdauer " + values.ausdauer + " / " + values.ausdauerMax +
+        (values.manaMax ? " · Mana " + values.mana + " / " + values.manaMax : "") + " · " + values.ressourceName + " " + values.ressource +
+        (held.schild ? " · Schild " + held.schild : "") + (held.unsichtbar ? " · Unsichtbar" : "") +
+        (held.staerkung ? " · +" + held.staerkung.wert + " Schaden" : "") + (held.naechster ? " · Nächster Angriff +" + held.naechster : ""));
+      line.className = "battle-resources";
+      content.append(line);
+      if (combat.stunned) content.append(element("p", "Benommen · Dein nächster Angriff ist schwächer."));
       const special = world.fights[combat.id].special;
-      if (combat.health > 0 && combat.round % 2 === 1) content.append(element("p", special.warning + " Deckung schützt vor dem Zusatzeffekt."));
+      if (combat.feinde[0].lp > 0 && combat.round % 2 === 1) content.append(element("p", special.warning + " Deckung schützt vor dem Zusatzeffekt."));
       if (combat.bleeding > 0) content.append(element("p", "Blutung · " + combat.bleeding + " Runden"));
+      // Eine Aktion pro Runde: Grundangriff oder eine freigeschaltete Fähigkeit.
+      const canBoost = values.ressource >= 1;
+      const boost = element("label");
+      boost.className = "boost-toggle";
+      const boostBox = element("input");
+      boostBox.type = "checkbox";
+      boostBox.checked = boostAbility && canBoost;
+      boostBox.disabled = !canBoost;
+      boostBox.addEventListener("change", () => { boostAbility = boostBox.checked; renderScene(); });
+      boost.append(boostBox, " Mit 1 " + values.ressourceName + " verstärken (+25 %)");
+      for (const f of rules.abilities(state).filter((entry) => entry.frei)) {
+        const reason = rules.abilityState(state, f.id);
+        const boostable = boostAbility && canBoost && f.stufe >= 3 && f.stufe < 20 && f.id[0] !== "m";
+        const cost = f.id === "f1" ? "Grundangriff · " + world.items[rules.weapon(state)] :
+          f.kostenWert + " " + (f.zahlung === "M" ? "Mana" : "Ausdauer") + (f.ressource ? " + " + f.ressource + " " + values.ressourceName : "") +
+          (boostable ? " + 1 " + values.ressourceName : "");
+        const label = f.name + " · " + cost + (reason ? " · " + reason : "");
+        const node = button(actions, label, () => battleAction(f.id + (boostable ? "+" : "")), { disabled: Boolean(reason) });
+        if (node) node.title = f.wirkung;
+        if (node && f.id === "f1") node.dataset.battleAction = "spear";
+      }
+      actions.append(boost);
       const abilities = world.classes[rules.profile(state.faction, state.role)];
       for (const [id, label, shift] of [
-        ["spear", "Angriff · " + world.items[rules.weapon(state)], 0], ["ember", abilities.attack.name, 2],
-        ["restore", abilities.restore.name, -2], ["guard", "Deckung und Sammlung", 0], ["flee", "Fliehen", 0],
+        ["ember", "Glutgabe · " + abilities.attack.name, 2],
+        ["restore", "Glutgabe · " + abilities.restore.name, -2], ["guard", "Deckung und Sammlung", 0], ["flee", "Fliehen", 0],
       ]) {
         const risk = shift && Math.abs(state.balance + shift) >= 4;
         const cost = shift ? " · 1 Glut" : "";
@@ -1321,6 +1583,24 @@
   }
 
   // Klasse, Ressource, Spezialisierung und Meisterklasse im Charakterbereich.
+  // Angriffe, Zauber und Techniken der Klasse (Kampfdokument, 17. 11. 2026), für Seitenleiste und Charakterfenster.
+  function abilityListing() {
+    const ressource = klassen.fraktionen[state.faction].ressource;
+    const abilityList = element("ul");
+    abilityList.className = "ability-list";
+    for (const f of rules.abilities(state)) {
+      const item = element("li");
+      const cost = f.kostenWert ? f.kostenWert + " " + f.zahlung : "kostenlos";
+      const extra = [cost, f.einmal ? "1 × pro Schlacht" : f.abklingzeitWert ? "AK " + f.abklingzeitWert : "",
+        f.ressource ? f.ressource + " " + ressource : "", f.spezialisiert ? "Spezialisierung +50 %" : ""].filter(Boolean).join(" · ");
+      item.append(element("strong", f.id[0] === "m" ? "Meister · " + f.name : "Stufe " + f.stufe + " · " + f.name),
+        element("span", " " + f.wirkung + " (" + extra + ")" + (f.frei ? "" : " · noch gesperrt")));
+      if (!f.frei) item.className = "locked";
+      abilityList.append(item);
+    }
+    return abilityList;
+  }
+
   function renderClassSheet() {
     const sheet = el("class-sheet");
     const faction = klassen.fraktionen[state.faction];
@@ -1330,8 +1610,11 @@
     const lines = [
       element("h4", "Klasse · " + rules.title(state)),
       element("p", data.spielweise + "."),
-      element("p", "Ressource " + faction.ressource + ": " + data.ressource + ". Die Fraktionsressource ist noch nicht spielwirksam."),
+      element("p", "Ressource " + faction.ressource + ": " + data.ressource + ". Im Kampf verstärkt 1 " + faction.ressource +
+        " eine Fähigkeit ab Stufe 3 um 25 %, die Stufe-20-Fähigkeit kostet 3."),
     ];
+    const abilityList = abilityListing();
+    lines.push(element("h4", rules.kampfwerte(state).manaMax ? "Angriffe und Zauber" : "Angriffe und Techniken"), abilityList);
     if (people === "orks") lines.push(element("p", state.rausch ? "Kampfrausch bereit · +2 Schaden beim nächsten Angriff."
       : "Nach jeder gewonnenen Schlacht trägt dich eine Runde Kampfrausch."));
     const spez = state.build.spez;
@@ -1392,6 +1675,9 @@
     cluesList.replaceChildren(...clues.map(([, text]) => element("li", text)));
     stats(el("vitals"), [
       ["Lebenspunkte", state.health + " / " + rules.healthLimit(state)],
+      ...((values) => [["Ausdauer", values.ausdauer + " / " + values.ausdauerMax],
+        ...(values.manaMax ? [["Mana", values.mana + " / " + values.manaMax]] : []),
+        [values.ressourceName, String(values.ressource)]])(rules.kampfwerte(state)),
       ["Glut", state.ember + " / " + rules.emberLimit(state)],
       ["Gleichgewicht", state.balance === 0 ? "0 · Im Gleichgewicht" :
         state.balance < 0 ? state.balance + " · Erneuerung" : "+" + state.balance + " · Zerstörung"],
@@ -1404,17 +1690,17 @@
     renderInventory();
     renderParty();
     const progress = rules.progression(state);
-    el("level-heading").textContent = "Stufe " + progress.level;
+    el("level-heading").textContent = "Erfahrungsstufe " + progress.level;
     const bar = el("xp-bar");
     bar.hidden = progress.next === null;
     bar.max = (progress.next ?? progress.floor + 1) - progress.floor;
     bar.value = progress.xp - progress.floor;
-    el("xp-label").textContent = progress.next === null ? progress.xp + " EP · Höchststufe dieses Abschnitts" :
+    el("xp-label").textContent = progress.next === null ? progress.xp + " EP · Höchste Erfahrungsstufe" :
       progress.xp + " EP · Noch " + (progress.next - progress.xp) + " bis Stufe " + (progress.level + 1);
     const training = el("training");
     training.replaceChildren();
     if (progress.points) {
-      training.append(element("p", progress.points + (progress.points === 1 ? " Grundwertpunkt" : " Grundwertpunkte") + " aus Stufenaufstiegen"));
+      training.append(element("p", progress.points + (progress.points === 1 ? " Grundwertpunkt" : " Grundwertpunkte") + " aus früheren Stufenaufstiegen"));
       const values = rules.heroAttributes(state);
       for (const [id, label] of Object.entries(world.attributes)) {
         button(training, "+1 " + label, () => update(rules.train(state, id)),
@@ -1425,6 +1711,7 @@
     list(el("journal"), [...state.journal].reverse(), "Deine Reise beginnt.");
     renderScene();
     renderMap();
+    if (el("character-sheet").open) renderSheet();
   }
 
   for (const [id, data] of Object.entries(klassen.voelker)) volk.add(new Option(data.name, id));
@@ -1450,7 +1737,8 @@
     if (previous) role.value = previous;
     const faction = klassen.fraktionen[origin.value];
     el("faction-description").textContent = "Ressource " + faction.ressource + " · Schwierigkeit " + faction.schwierigkeit +
-      " · Grundwerte " + bonusText(faction.bonus) + (faction.magie ? "" : " · keine Magie") + (faction.hinweis ? ". " + faction.hinweis : "");
+      " · Grundwerte " + bonusText(faction.bonus) + (faction.magie ? "" : " · keine Magie") + " · Startort " +
+      startpunkte.ort(origin.value) + " · Prolog „" + startpunkte.fraktionen[origin.value].prolog + "“" + (faction.hinweis ? ". " + faction.hinweis : "");
     if (!editingLegacy || portraitNeedsReset) portraitPreview(true);
     updateClassDescription();
   }
@@ -1537,7 +1825,7 @@
       save();
       setPortrait(el("intro-portrait"), next);
       show("prologue");
-      prologue.play(next.name, () => showPlay(next));
+      prologue.play(next.name, next.faction, () => showPlay(next));
     } catch (error) {
       el("creation-status").textContent = error.message;
     }

@@ -1,0 +1,274 @@
+"use strict";
+
+// Tests für das Kampfdokument (17. 11. 2026): Fähigkeiten aller 90 Klassen, Stufen, LP, Ausdauer, Mana, Gegnerwerte.
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const vm = require("node:vm");
+
+const root = path.join(__dirname, "..");
+const context = vm.createContext({ structuredClone });
+for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/faehigkeiten.js", "spiel/kampf.js", "spiel/startpunkte.js", "spiel/welt.js", "spiel/regeln.js"]) {
+  vm.runInContext(fs.readFileSync(path.join(root, file), "utf8"), context, { filename: file });
+}
+const rules = vm.runInContext("rules", context);
+const kampf = vm.runInContext("kampf", context);
+const F = vm.runInContext("faehigkeiten", context);
+const K = vm.runInContext("klassen", context);
+const highRoll = () => 0.99;
+// Werte aus dem vm-Kontext vergleichbar machen.
+const same = (actual, expected, message) => assert.deepEqual(JSON.parse(JSON.stringify(actual)), expected, message);
+const reload = (state) => rules.read(JSON.stringify(state));
+
+// ---- Daten: 15 Fraktionen × 6 Klassen × 6 Fähigkeiten ----
+same(Object.keys(F.fraktionen).sort(), Object.keys(K.fraktionen).sort());
+let count = 0;
+for (const [faction, data] of Object.entries(F.fraktionen)) {
+  same(Object.keys(data.klassen).sort(), [...K.klassenFolge].sort(), faction);
+  for (const role of K.klassenFolge) {
+    const list = kampf.klassenFaehigkeiten(faction, role);
+    assert.equal(list.length, 6, faction + " " + role);
+    same(list.map((f) => f.stufe), [1, 3, 6, 10, 15, 20]);
+    // Kronreich und Freie Häfen bezahlen alles mit Ausdauer.
+    if (!K.fraktionen[faction].magie) assert.ok(list.every((f) => f.zahlung === "A"), faction);
+    for (const f of list) {
+      count++;
+      assert.ok(f.name && f.wirkung, faction + " " + role + " " + f.stufe);
+      // Jede Fähigkeit hat mindestens eine Regelwirkung.
+      const r = f.regel;
+      assert.ok(r.schaden !== undefined || r.heilung || r.hot || r.schild || r.dot || r.diener || r.staerkung || r.naechster ||
+        r.unsichtbar || r.furcht || r.betaeuben || r.verlangsamen || r.verspotten || r.schwaechen || r.verwundbar ||
+        r.zielAngriff || r.todesschutz, faction + " " + role + " " + f.name + ": " + f.wirkung);
+      if (f.stufe === 1) assert.ok([4, 6].includes(r.schaden), f.name);
+    }
+  }
+}
+assert.equal(count, 540);
+for (const volk of Object.keys(K.voelker)) assert.equal(F.meister[volk].length, 2, volk);
+
+// Stichproben aus dem Kampfdokument.
+const ability = (faction, role, stufe) => kampf.klassenFaehigkeiten(faction, role).find((f) => f.stufe === stufe);
+same(ability("faeulnisbrut", "magier", 3).regel.diener, { anzahl: 1, lp: 8, schaden: 3, runden: 2, name: "Gebundener", koeder: false });
+assert.equal(ability("kronreich", "krieger", 10).regel.ziele, 3);
+assert.equal(ability("orden", "magier", 20).regel.ziele, "alle");
+assert.equal(ability("haefen", "schurke", 10).regel.dot.wert, 7);
+assert.equal(ability("hof", "krieger", 20).regel.todesschutz.lp, 12);
+assert.equal(ability("kronreich", "schurke", 10).regel.sonst, 12);
+assert.equal(ability("dornenklingen", "krieger", 3).regel.treffer, 2);
+assert.equal(ability("aschenclan", "magier", 3).regel.staerkung.wert, 2);
+
+// ---- Machtbudget ----
+same([1, 3, 6, 10, 15, 20].map((stufe) => kampf.budget[stufe].punkte), [6, 10, 14, 18, 24, 36]);
+same([1, 3, 6, 10, 15, 20].map((stufe) => kampf.budget[stufe].kosten), [0, 3, 4, 5, 6, 8]);
+same([3, 6, 10, 15].map((stufe) => kampf.budget[stufe].abklingzeit), [1, 2, 3, 4]);
+assert.equal(kampf.budget[20].ressource, 3);
+
+// ---- Erfahrungsstufen: 100 × n EP von Stufe n auf n+1, bis Stufe 20 zusammen 19.000 ----
+assert.equal(kampf.epFuer(20), 19000);
+assert.equal(kampf.epFuer(3), 300);
+assert.equal(kampf.stufeAus(0), 1);
+assert.equal(kampf.stufeAus(299), 2);
+assert.equal(kampf.stufeAus(300), 3);
+assert.equal(kampf.stufeAus(1000000), 20);
+
+// ---- Lebenspunkte je Rolle ----
+const lp = (profil, stufe) => kampf.lebenspunkte(profil, stufe);
+same([lp("waechter", 1), lp("waechter", 20)], [40, 97]);
+same([lp("krieger", 1), lp("krieger", 20)], [34, 91]);
+same([lp("schurke", 1), lp("schurke", 20)], [28, 66]);
+same([lp("spaeher", 1), lp("spaeher", 20)], [26, 64]);
+same([lp("feldscher", 1), lp("heiler", 20)], [26, 64]);
+same([lp("skalde", 1), lp("magier", 20)], [22, 60]);
+const huskarl = rules.create("Tala", "kronreich", "frau", 1, "krieger");
+assert.equal(rules.healthLimit(huskarl), 34);
+assert.equal(rules.healthLimit({ ...huskarl, xp: 19000 }), 91);
+assert.equal(rules.healthLimit(rules.create("Tala", "kronreich", "frau", 1, "magier")), 22);
+
+// ---- Ausdauer und Mana ----
+same(rules.kraft(huskarl), { ausdauer: 10, mana: 0 });
+same(rules.kraft({ ...huskarl, xp: 19000 }), { ausdauer: 19, mana: 0 });
+const priest = rules.create("Tala", "orden", "frau", 1, "magier");
+assert.equal(rules.kraft(priest).mana, 2 * priest.build.fertigkeiten.magie);
+assert.equal(rules.resourceName(priest), "Glaube");
+assert.equal(priest.ressource, 3);
+
+// ---- Gegnerwerte ----
+const foe = (rang, stufe, helden) => ({ ...kampf.gegnerWerte(rang, stufe, helden) });
+same(foe("mitlaeufer", 5), { rang: "mitlaeufer", stufe: 5, lp: 21, schaden: 5, aktionen: 1 });
+same(foe("elite", 5), { rang: "elite", stufe: 5, lp: 50, schaden: 6, aktionen: 1 });
+same(foe("elite", 8), { rang: "elite", stufe: 8, lp: 80, schaden: 8, aktionen: 1 });
+same(foe("anfuehrer", 12), { rang: "anfuehrer", stufe: 12, lp: 360, schaden: 16, aktionen: 2 });
+same(foe("endgegner", 20), { rang: "endgegner", stufe: 20, lp: 900, schaden: 24, aktionen: 2 });
+assert.equal(foe("anfuehrer", 12, 5).lp, 450);
+assert.equal(foe("anfuehrer", 12, 3).lp, 270);
+assert.equal(kampf.morbius.phasen.reduce((sum, phase) => sum + phase.lp, 0), kampf.morbius.lp);
+
+// ---- Kampf ----
+const fightAs = (character) =>
+  rules.choose(rules.choose(rules.choose(rules.choose(character, "lantern"), "move"), "go", highRoll), "fight");
+// Alle Kampftests laufen an der Kornwik-Begegnung, unabhängig vom Startpunkt der Fraktion.
+const hero = (faction, role, xp = 0) => ({ ...rules.create("Tala", faction, "frau", 1, role), scene: "start", xp });
+const full = (state) => ({ ...state, health: rules.healthLimit(state) });
+const keilerFight = (faction, role, xp = 0) => {
+  const state = fightAs(full(hero(faction, role, xp)));
+  return { ...state, health: rules.healthLimit(state) };
+};
+
+// Der Keiler ist eine Elite der Stufe 2: 20 LP, 5 Schaden.
+const start = keilerFight("kronreich", "krieger");
+assert.equal(start.combat.feinde[0].max, 20);
+assert.equal(start.combat.feinde[0].schaden, 5);
+assert.equal(start.combat.held.ausdauer, 10);
+same(rules.abilities(start).filter((f) => f.frei).map((f) => f.id), ["f1"]);
+
+// Grundangriff: 6 + Nahkampf + Bonus aus Stärke + Waffe (Axt 6: +1).
+const values = rules.heroAttributes(start);
+const expected = 6 + start.build.fertigkeiten.nahkampf + rules.modifier(values.strength) + 1;
+const basic = rules.strike(start, "spear", highRoll);
+assert.equal(basic.combat.feinde[0].lp, 20 - expected);
+assert.equal(rules.strike(start, "f1", highRoll).combat.feinde[0].lp, 20 - expected);
+// Nicht freigeschaltete Fähigkeiten gehen nicht.
+assert.equal(rules.strike(start, "f3"), start);
+
+// Stufe 3: Schildstoß kostet 3 Ausdauer und hat 1 Runde Abklingzeit, Ausdauer füllt sich um 2.
+const level3 = keilerFight("kronreich", "krieger", 300);
+assert.equal(rules.progression(level3).level, 3);
+const shove = rules.strike(level3, "f3", highRoll);
+assert.equal(rules.kraft(level3).ausdauer, 11); // +1 je zwei Erfahrungsstufen
+assert.equal(shove.combat.held.ausdauer, 11 - 3 + 2);
+assert.equal(rules.abilityState(shove, "f3"), "Abklingzeit 1");
+assert.equal(rules.strike(shove, "f3"), shove);
+const afterCooldown = rules.strike(shove, "guard");
+assert.equal(rules.abilityState(afterCooldown, "f3"), null);
+// Schildstoß stößt zurück: Ziel 1 Runde verlangsamt (−1 Schaden).
+assert.ok(shove.journal.some((entry) => /Schildstoß: \d+ Schaden, verlangsamt/.test(entry)));
+
+// Verstärken mit Fraktionsressource: +25 % Wirkung für 1 Korn.
+const boosted = rules.strike(level3, "f3+", highRoll);
+assert.equal(boosted.ressource, level3.ressource - 1);
+assert.ok(boosted.combat.feinde[0].lp < shove.combat.feinde[0].lp);
+const poor = { ...level3, ressource: 0 };
+assert.equal(rules.strike(poor, "f3+"), poor);
+assert.equal(rules.strike(level3, "f1+"), level3);
+
+// Stufe 20: einmal pro Schlacht, 8 Ausdauer und 3 Fraktionsressource.
+const legend = keilerFight("kronreich", "krieger", 19000);
+const legendStart = { ...legend, combat: { ...legend.combat, feinde: [{ ...legend.combat.feinde[0], lp: 500, max: 500 }] } };
+const storm = rules.strike(legendStart, "f20", highRoll);
+assert.equal(storm.ressource, legendStart.ressource - 3);
+assert.equal(rules.abilityState(storm, "f20"), "schon genutzt");
+assert.equal(rules.abilityState({ ...legendStart, ressource: 2 }, "f20"), "zu wenig Korn");
+// Grundangriff steigt auf den Stufen 4, 8, 12, 16 und 20 um je +1.
+assert.equal(rules.kampfwerte(legend).grundangriff, 5);
+
+// Intelligenz-Bonus senkt die Kosten, mindestens 1.
+const clever = keilerFight("runenschmiede", "magier", 300);
+assert.ok(rules.modifier(rules.heroAttributes(clever).mind) >= 1);
+assert.ok(rules.abilities(clever).find((f) => f.id === "f3").kostenWert < 3);
+
+// Spezialisierung A verstärkt die Stufe-6-Fähigkeit um 50 %.
+const lasso = keilerFight("kronreich", "spaeher", 1500);
+const lassoSpez = { ...lasso, build: { ...lasso.build, spez: { variante: "a", grundwert: "agility" } } };
+assert.ok(rules.abilities(lassoSpez).find((f) => f.id === "f6").spezialisiert);
+assert.ok(!rules.abilities(lassoSpez).find((f) => f.id === "f10").spezialisiert);
+// Kontrollwirkung: 1 Runde kürzere Abklingzeit.
+assert.equal(rules.abilities(lassoSpez).find((f) => f.id === "f6").abklingzeitWert, 1);
+
+// Betäuben: der Keiler greift nicht an, danach ist er eine Runde immun.
+const tough = { ...lasso, combat: { ...lasso.combat, feinde: [{ ...lasso.combat.feinde[0], lp: 500, max: 500 }] } };
+const stunned = rules.strike(tough, "f6", highRoll);
+assert.equal(stunned.health, tough.health);
+const recovered = rules.strike(stunned, "guard");
+assert.equal(recovered.combat.feinde[0].status.immunBis, recovered.combat.round);
+
+// Unsichtbarkeit schützt vor Angriffen und endet beim ersten Angriff.
+const thief = keilerFight("kronreich", "schurke", 300);
+const hidden = rules.strike(thief, "f3", highRoll);
+assert.equal(hidden.health, thief.health);
+assert.ok(hidden.combat.held.unsichtbar > 0);
+const ambush = rules.strike(hidden, "f1", highRoll);
+assert.equal(ambush.combat?.held.unsichtbar ?? 0, 0);
+
+// Beschworene Wesen: höchstens drei gleichzeitig.
+const necro = keilerFight("faeulnisbrut", "magier", 300);
+const necroLong = { ...necro, combat: { ...necro.combat, feinde: [{ ...necro.combat.feinde[0], lp: 500, max: 500 }],
+  held: { ...necro.combat.held, mana: 30 } } };
+let raised = rules.strike(necroLong, "f3", highRoll);
+assert.equal(raised.combat.diener.length, 1);
+assert.equal(raised.combat.diener[0].name, "Gebundener");
+raised = rules.strike(rules.strike(raised, "guard"), "guard");
+assert.ok(raised.combat.diener.length <= kampf.maxDiener);
+
+// Heilung hebt nie über die höchsten LP.
+const healer = keilerFight("orden", "heiler", 300);
+assert.equal(rules.strike(healer, "f3", highRoll).health <= rules.healthLimit(healer), true);
+const hurt = { ...healer, health: 5 };
+assert.ok(rules.strike(hurt, "f3", highRoll).health > 5);
+
+// Schild fängt Schaden ab und verfällt nach 3 Runden.
+const warden = keilerFight("kronreich", "waechter", 1500);
+const walled = rules.strike(warden, "f6", highRoll);
+assert.equal(walled.health, warden.health);
+assert.ok(walled.combat.held.schild > 0);
+
+// Initiative: wer das höhere Geschick hat, handelt zuerst. Der Eisenborstenkeiler (Geschick 12) ist schneller als ein Huskarl.
+assert.ok(start.combat.gegnerZuerst);
+assert.ok(start.journal.some((entry) => /greift zuerst an/.test(entry)));
+
+// Jede Klasse kann im Kampf jede ihrer Fähigkeiten einsetzen, der Spielstand bleibt gültig.
+for (const faction of Object.keys(K.fraktionen)) {
+  for (const role of K.klassenFolge) {
+    let state = keilerFight(faction, role, 19000);
+    state = { ...state, ressource: 20, combat: { ...state.combat, feinde: [{ ...state.combat.feinde[0], lp: 2000, max: 2000 }] } };
+    for (const id of ["f20", "f15", "f10", "f6", "f3", "f1"]) {
+      state = { ...state, health: rules.healthLimit(state), combat: { ...state.combat, held: { ...state.combat.held, abklingen: {},
+        ausdauer: rules.kraft(state).ausdauer, mana: rules.kraft(state).mana } } };
+      const next = rules.strike(state, id, highRoll);
+      assert.notEqual(next, state, faction + " " + role + " " + id + " " + rules.abilityState(state, id));
+      assert.equal(reload(next).combat.id, "keiler", faction + " " + role + " " + id);
+      state = next;
+    }
+  }
+}
+
+// Meisterfähigkeiten: Meister I sofort, Meister II ab Stufe 20.
+const master = { ...keilerFight("hueter", "spaeher", 1500) };
+master.build = { ...master.build, spez: { variante: "a", grundwert: "agility" }, meister: { grundwerte: { mind: 2 } } };
+same(rules.abilities(master).filter((f) => f.meister).map((f) => [f.id, f.frei]), [["m1", true], ["m2", false]]);
+assert.equal(rules.abilities(master).find((f) => f.id === "m1").name, "Dorn, Nebel und Wurzel");
+
+// Sieg: 50 EP für die Schlacht und 10 EP je Gegnerstufe, dazu 1 Fraktionsressource.
+let won = keilerFight("kronreich", "krieger");
+const xpBefore = won.xp;
+for (let turn = 0; turn < 20 && won.combat; turn++) won = rules.strike(won, "spear", highRoll);
+assert.equal(won.scene, "ford");
+assert.equal(won.xp - xpBefore, 50 + 10 * 2);
+assert.equal(won.ressource, 4);
+
+// Alte Spielstände (Version 2): EP bleiben, Stufe ergibt sich neu, offene Grundwertpunkte bleiben erhalten.
+const old = { ...rules.create("Tala", "kronreich", "frau", 1, "waechter"), version: 2, xp: 410, training: { strength: 1 }, health: 20 };
+delete old.stufenpunkte;
+delete old.ressource;
+const upgraded = reload(old);
+assert.equal(upgraded.version, 3);
+assert.equal(rules.progression(upgraded).level, 3);
+assert.equal(upgraded.stufenpunkte, 3);
+assert.equal(upgraded.ressource, 3);
+assert.ok(upgraded.health > 0 && upgraded.health <= rules.healthLimit(upgraded));
+const trained = rules.train(upgraded, "will");
+assert.equal(trained.stufenpunkte, 2);
+assert.equal(reload(trained).training.will, 1);
+
+
+// EP-Schnittstelle für Prologe und Questakte: einmal je Kennung, Stufenaufstieg mit neuen Fähigkeiten.
+{
+  const start = full(hero("kronreich", "krieger"));
+  const once = rules.awardXp(start, "prolog-test");
+  assert.equal(once.xp, 300);
+  assert.equal(rules.level(once), 3);
+  assert.equal(rules.awardXp(once, "prolog-test").xp, 300);
+  assert.equal(rules.awardXp(once, "prolog-test-2", 50).xp, 350);
+  assert.equal(start.xp, 0);
+  assert.ok(reload(once));
+}
+console.log("Kampftests bestanden: " + count + " Fähigkeiten geprüft.");

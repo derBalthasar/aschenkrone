@@ -738,24 +738,30 @@ const world = (() => {
       text: "Du gehst zu Boden. Dein Auftrag bleibt unerledigt.",
     },
   };
+  // Gegnerwerte nach dem Kampfdokument (17. 11. 2026): Rang und Stufe bestimmen LP und Schaden (spiel/kampf.js).
+  // Namen und Bilder bleiben, die alten Bestiariumswerte gelten im Kampf nicht mehr. Prolog: Gegnerstufe 1 bis 2, Akt 1: 3 bis 5.
   const fights = {
     keiler: {
+      gegner: { rang: "elite", stufe: 2 },
       to: "ford", victory: "keiler-erlegt", escape: "keiler-umgangen", loot: ["keilerhauer", "borstenfell"],
       spearPierce: 2, special: { name: "Rammstoß", warning: "Der Keiler scharrt mit den Vorderhufen.",
         damage: 2, stuns: true },
     },
     galgenkraehe: {
+      gegner: { rang: "mitlaeufer", stufe: 1, anzahl: 3 },
       to: "arrival", victory: "kraehen-besiegt", escape: "kraehen-umgangen", loot: ["kraehenfedern"],
       emberBonus: 4, special: { name: "Schnabelhiebe", warning: "Die Krähen sammeln sich zum Sturzflug.",
         damage: 1, bleeds: true },
     },
     grauwolf: {
+      gegner: { rang: "mitlaeufer", stufe: 2, anzahl: 3, tags: ["spaeher"] },
       name: "Leitwolf der Grauwölfe", to: "ford", victory: "woelfe-besiegt", escape: "woelfe-umgangen",
       loot: ["wolfspelz", "wolfszahn"], emberBonus: 3,
       special: { name: "Reißbiss", warning: "Der Leitwolf setzt zum Sprung an.", damage: 1, bleeds: true },
       victoryText: "Der Leitwolf fällt. Das Rudel zieht sich zwischen die Eichen zurück.",
     },
     irrglut: {
+      gegner: { rang: "elite", stufe: 2 },
       to: "moor-report", victory: "irrglut-besiegt", escape: "irrglut-entkommen",
       loot: ["glutfunke"],
       special: { name: "Glutwurf", warning: "Das Licht zieht sich zu einem glühenden Kern zusammen.",
@@ -763,25 +769,30 @@ const world = (() => {
       victoryText: "Das Licht erlischt. Zwischen den Bohlen bleibt ein Glutfunke zurück.",
     },
     glutkaefer: {
+      gegner: { rang: "mitlaeufer", stufe: 2, anzahl: 3 },
       to: "mine-cleared", retreatTo: "watch-yard", victory: "kaefer-besiegt", unlock: "pass-mine",
       loot: ["glutpanzer"], deathBurst: 3,
       special: { name: "Glutwolke", warning: "Unter den Panzern leuchtet es orange.", damage: 2 },
     },
     felsgreif: {
+      gegner: { rang: "elite", stufe: 3 },
       to: "ridge-cleared", retreatTo: "watch-yard", victory: "greif-besiegt", unlock: "pass-ridge",
       loot: ["greifenfeder", "greifenklaue"], preparation: "greifnetz",
       special: { name: "Sturzflug", warning: "Der Greif legt die Flügel an.", damage: 3, stuns: true },
     },
     schlundtroll: {
+      gegner: { rang: "elite", stufe: 4 },
       to: "ravine-cleared", retreatTo: "watch-yard", victory: "troll-besiegt", unlock: "pass-ravine",
       loot: ["trollblut"], regeneration: 4, emberBonus: 5,
       special: { name: "Keulenschlag", warning: "Der Troll holt mit seiner Keule aus.", damage: 4, stuns: true },
     },
     deserteure: {
+      gegner: { rang: "mitlaeufer", stufe: 3, anzahl: 3, tags: ["schurke"] },
       to: "toll-resolved", retreatTo: "watch-yard", victory: "zoll-befreit", loot: ["rostklaue"],
       special: { name: "Flankenangriff", warning: "Der zweite Deserteur versucht, hinter dich zu kommen.", damage: 2 },
     },
     frostbaer: {
+      gegner: { rang: "elite", stufe: 4 },
       to: "skarn-cliffs-open", retreatTo: "skarn-gate", victory: "frostbaer-besiegt",
       loot: ["frostfell", "baerenklaue"], emberBonus: 4,
       special: { name: "Prankenhieb", warning: "Der Frostbär richtet sich auf.", damage: 3, stuns: true },
@@ -796,6 +807,7 @@ const world = (() => {
     glutkaefer: { leader: "Glutkäfer", ally: "Weiterer Glutkäfer", health: 6, attack: 2 },
     deserteure: { leader: "Wortführer", ally: "Deserteur", health: 12, attack: 3 },
   };
+  // Silber für gewonnene Kämpfe. Die EP ergeben sich aus dem Kampfdokument (50 je Schlacht, 10 je Gegnerstufe).
   const battleRewards = {
     keiler: [30, 0], galgenkraehe: [22, 0], grauwolf: [32, 0], irrglut: [36, 0],
     glutkaefer: [30, 0], felsgreif: [55, 0], schlundtroll: [85, 0], deserteure: [50, 14], frostbaer: [75, 0],
@@ -972,6 +984,15 @@ const world = (() => {
     "pass-mine": { warrior: 25, mage: 15 }, "frostbaer-besiegt": { ranger: -25, druid: -25 },
     "klippen-beruhigt": { ranger: 15, druid: 15 },
   };
+  // Prologe der Nacht des Erwachens je Fraktion (spiel/startpunkte.js) und ihre Zentrallager.
+  Object.assign(scenes, startpunkte.scenes);
+  Object.assign(storageSites, startpunkte.storageSites);
+  // Gegner, Belohnungen und Beute der Prologe in der Nacht des Erwachens.
+  Object.assign(creatures, startpunkte.creatures);
+  Object.assign(fights, startpunkte.fights);
+  Object.assign(battleRewards, startpunkte.battleRewards);
+  Object.assign(milestones, startpunkte.milestones);
+  Object.assign(lootTables, startpunkte.lootTables);
   for (const scene of Object.values(scenes)) {
     if (scene.map) continue;
     const region = scene.place.split(" · ")[0];

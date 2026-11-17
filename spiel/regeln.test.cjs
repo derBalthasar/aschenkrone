@@ -8,7 +8,7 @@ const vm = require("node:vm");
 const root = path.join(__dirname, "..");
 const context = vm.createContext({ structuredClone });
 
-for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/welt.js", "spiel/regeln.js"]) {
+for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/faehigkeiten.js", "spiel/kampf.js", "spiel/startpunkte.js", "spiel/welt.js", "spiel/regeln.js"]) {
   vm.runInContext(fs.readFileSync(path.join(root, file), "utf8"), context, { filename: file });
 }
 
@@ -17,11 +17,20 @@ const world = vm.runInContext("world", context);
 const plain = (value) => JSON.parse(JSON.stringify(value));
 const highRoll = () => 0.99;
 const lowRoll = () => 0;
+// Lebenspunkte eines Gegners und ein Kampf bis zum Ende (höchstens 40 Runden).
+const foeHp = (state, index = 0) => state.combat.feinde[index].lp;
+const fightOut = (state, action = "spear") => {
+  for (let turn = 0; turn < 40 && state.combat; turn++) state = rules.strike(state, action, highRoll);
+  return state;
+};
 // Burgvögtin des Kronreichs mit festen Werten, damit die Kampf- und Probenwerte nachvollziehbar bleiben.
 const heroBuild = { frei: { strength: 2, presence: 2, will: 1 }, wahl: "presence", spez: null, meister: null,
   fertigkeiten: { nahkampf: 3, fernkampf: 2, magie: 0, verteidigung: 4, list: 2, fuehrung: 4, mut: 3 } };
-const hero = () => rules.create("Tala", "kronreich", "frau", 2, "waechter", heroBuild);
-assert.equal(hero().scene, "wake");
+// Neue Helden des Kronreichs beginnen im Prolog in Westvik. Diese Tests laufen ab dem Erwachen bei Kornwik,
+// das für bestehende Spielstände erhalten bleibt.
+assert.equal(rules.create("Tala", "kronreich", "frau", 2, "waechter", heroBuild).scene, "heim-kronreich");
+const hero = () => ({ ...rules.create("Tala", "kronreich", "frau", 2, "waechter", heroBuild), scene: "wake" });
+assert.equal(rules.read(JSON.stringify(hero())).scene, "wake");
 const start = () => rules.choose(rules.choose(hero(), "lantern"), "move");
 assert.equal(start().scene, "start");
 assert.equal(rules.read(JSON.stringify(start())).scene, "start");
@@ -106,7 +115,7 @@ assert.equal(retreated.scene, "moor-report");
 assert.deepEqual(ids(retreated), ["close"]);
 
 let light = rules.choose(rested, "fight");
-light = rules.strike(rules.strike(light, "spear", highRoll), "spear", highRoll);
+light = fightOut(light);
 assert.equal(light.scene, "moor-report");
 assert.ok(light.inventory.includes("glutfunke"));
 assert.deepEqual(ids(light), ["hand-over", "keep", "close"]);
@@ -130,8 +139,9 @@ const ancestry = [
   ["aschenclan", "wake-cart", "fuhrleute-vertrauen"],
   ["erinnernde", "wake-shade", "faehrwort"],
 ];
+// Ältere Spielstände stehen noch im Erwachen bei Kornwik. Die Wege je Herkunft bleiben für sie erhalten.
 for (const [faction, scene, mark] of ancestry) {
-  const character = rules.create("Tala", faction, "frau", 2, "heiler");
+  const character = reload({ ...rules.create("Tala", faction, "frau", 2, "heiler"), scene: "wake" });
   const opening = rules.choose(character, "lantern");
   assert.equal(opening.scene, scene);
   assert.deepEqual(ids(character), ["lantern"]);
@@ -139,12 +149,91 @@ for (const [faction, scene, mark] of ancestry) {
   assert.ok(!rules.choose(opening, "move").marks.includes(mark));
 }
 
+// Nacht des Erwachens: 15 Prologe mit drei Kapiteln, Angriff und Morgengrauen im eigenen Gebiet.
+const startMarks = { valmarcher: "ditch", waldelf: "waldspur", bergzwerg: "steinrhythmus", gruenhaut: "fuhrleute-vertrauen", vampir: "faehrwort" };
+const nacht = vm.runInContext("startpunkte", context);
+const factionIds = Object.keys(vm.runInContext("klassen", context).fraktionen);
+assert.equal(factionIds.length, 15);
+assert.deepEqual(Object.keys(nacht.prologe).sort(), [...factionIds].sort());
+const winFight = (state) => {
+  let current = state;
+  for (let round = 0; current.combat && round < 40; round++) {
+    current = rules.strike(current, current.ember >= 1 && current.balance < 2 ? "ember" : "spear", highRoll);
+  }
+  assert.equal(current.combat, null, "Der Prologkampf muss zu gewinnen sein");
+  return current;
+};
+const longJournal = [];
+for (const faction of factionIds) {
+  const character = rules.create("Tala", faction, "frau", 1, "krieger");
+  const home = world.scenes[character.scene];
+  assert.equal(character.scene, "heim-" + faction);
+  if (faction !== "kronreich") assert.ok(!home.place.startsWith("Kornwik"), faction + " darf nicht in Kornwik beginnen");
+  assert.equal(home.map, undefined);
+  assert.match(home.objective, /Kapitel 1/);
+  assert.ok(rules.storageOpen(character), faction + " braucht ein Zentrallager am Startort");
+  assert.equal(rules.read(JSON.stringify(character)).scene, character.scene);
+  assert.equal(rules.route(character, "weidenkamm"), null);
+  const slides = nacht.prologe[faction];
+  assert.equal(slides.length, 3);
+  assert.equal(slides[0].location, "Odris · Herbst 612 n. E.");
+  assert.ok(slides[2].showPortrait && slides[2].text.includes("%NAME%"));
+  for (const slide of slides) assert.ok(fs.existsSync(path.join(root, "spiel/prolog", slide.image)), slide.image);
+  // Kapitel 1: Heimat und Bewegung, jede Erkundung nur einmal.
+  assert.deepEqual(ids(character), ["erkunden-1", "erkunden-2", "weiter"]);
+  let state = rules.choose(rules.choose(character, "erkunden-1"), "erkunden-2");
+  assert.deepEqual(ids(state), ["weiter"]);
+  assert.equal(state.marks.length, 2);
+  // Kapitel 2: Kampf.
+  state = rules.choose(state, "weiter");
+  assert.equal(state.scene, "kampf-" + faction);
+  assert.match(world.scenes[state.scene].objective, /Kapitel 2/);
+  state = rules.choose(state, "kampf");
+  assert.equal(state.combat.id, "nacht-" + faction);
+  assert.equal(reload(state).combat.id, "nacht-" + faction);
+  state = winFight(state);
+  assert.equal(state.scene, "wahl-" + faction);
+  assert.ok(state.marks.includes("nacht-" + faction + "-sieg"));
+  // Kapitel 3: Entscheidung mit gespeicherter Marke.
+  const full = { ...state, ember: rules.emberLimit(state) };
+  assert.deepEqual(ids(full), ["wahl-a", "wahl-b"]);
+  const [markA, markB] = nacht.marken[faction];
+  const chosenA = rules.choose(full, "wahl-a");
+  const chosenB = rules.choose(full, "wahl-b");
+  assert.ok(chosenA.marks.includes(markA) && !chosenA.marks.includes(markB));
+  assert.ok(chosenB.marks.includes(markB) && !chosenB.marks.includes(markA));
+  assert.equal(chosenA.scene, "angriff-" + faction);
+  const cost = world.scenes["wahl-" + faction].choices[0].emberCost;
+  if (cost) assert.equal(chosenA.ember, full.ember - cost);
+  // Angriff, der den Helden vertreibt, dann Morgengrauen an der Zuflucht.
+  let fled = rules.choose(reload(chosenB), "flucht");
+  if (fled.combat) fled = winFight(fled);
+  assert.equal(fled.scene, "morgen-" + faction);
+  assert.ok(fled.rewards.includes("prolog-" + faction));
+  // Kampfdokument: Prolog (300 EP) plus Kampf-EP führen auf Erfahrungsstufe 3.
+  assert.equal(rules.level(fled), 3, faction + ": Stufe nach dem Prolog");
+  assert.ok(rules.storageOpen(fled), faction + " braucht ein Zentrallager an der Zuflucht");
+  for (const entry of fled.journal) if (entry.length > 300) longJournal.push(faction + ": " + entry);
+  const sent = rules.choose(fled, "reise");
+  assert.equal(sent.scene, "ankunft");
+  assert.equal(rules.storageSite(sent), "Zentrallager · Kornwik");
+  assert.deepEqual(ids(reload(sent)), ["prepare", "move"]);
+  const prepared = rules.choose(sent, "prepare");
+  assert.equal(prepared.scene, "start");
+  if (startMarks[character.origin]) assert.ok(prepared.marks.includes(startMarks[character.origin]));
+  else assert.ok(prepared.inventory.includes("galgenwurz"));
+  assert.equal(rules.choose(sent, "move").scene, "start");
+}
+assert.deepEqual(longJournal, []);
+// Einsteige aus der Vorschau (PR #5) mit der Marke „heimvorrat“ laden weiterhin.
+assert.equal(reload({ ...rules.create("Tala", "hof", "frau", 1, "krieger"), marks: ["heimvorrat"] }).scene, "heim-hof");
+
 // Spielstand aus Version 1: noch ohne Klasse, Gleichgewicht und Attributpunkte.
 const oldCharacter = { version: 1, name: "Tala", origin: "valmarcher", appearance: "frau", variant: 2, scene: "start",
   allocation: null, health: 28, ember: 4, inventory: [], equipment: { weapon: null, armor: null }, xp: 0, silver: 5,
   training: {}, rewards: [], party: [], relationships: {}, factionRuf: {}, marks: [], journal: [], combat: null };
 const migrated = reload(oldCharacter);
-assert.equal(migrated.version, 2);
+assert.equal(migrated.version, 3);
 assert.equal(migrated.role, "waechter");
 assert.equal(migrated.faction, "kronreich");
 assert.equal(migrated.balance, 0);
@@ -169,13 +258,14 @@ assert.equal(migratedRanger.faction, "hueter");
 assert.equal(migratedRanger.role, "spaeher");
 assert.deepEqual(plain(migratedRanger.build.frei), { agility: 3, will: 2 });
 assert.equal(migratedRanger.training.agility, 1);
-assert.equal(migratedRanger.combat.health, 20);
+// Ein laufender Kampf beginnt nach der Umstellung auf das Kampfdokument neu (Keiler: Elite, Stufe 2, 20 LP).
+assert.equal(foeHp(migratedRanger), 25); // 20 LP, +25 % für Iven in der Gruppe
 assert.deepEqual(Array.from(migratedRanger.party), ["knight"]);
 assert.equal(rules.weapon(migratedRanger), "bogen");
 assert.ok(migratedRanger.health > 0 && migratedRanger.health < rules.healthLimit(migratedRanger));
 assert.ok(migratedRanger.ember <= rules.emberLimit(migratedRanger));
-assert.equal(rules.strike(migratedRanger, "guard").combat.round, 2);
-assert.equal(reload(migratedRanger).version, 2);
+assert.equal(rules.strike(migratedRanger, "guard").combat.round, 1);
+assert.equal(reload(migratedRanger).version, 3);
 
 const seeded = rules.choose(start(), "soil");
 const savedSoil = rules.choose(seeded, "balance");
@@ -194,19 +284,21 @@ assert.ok(ids(getToArrival(scorched)).includes("rest"));
 assert.ok(rules.choose(getToArrival(savedSoil), "seed").inventory.includes("galgenwurz"));
 assert.equal(rules.choose(getToArrival(scorched), "rest").balance, 0);
 
+// Kronreich erwacht in Kornwik, alle anderen Fraktionen reisen von ihrem Startort an.
+const begin = (character) => character.scene === "wake" ? rules.choose(character, "lantern") : { ...character, scene: "ankunft" };
 const fightAs = (character) =>
-  rules.choose(rules.choose(rules.choose(rules.choose(character, "lantern"), "move"), "go", highRoll), "fight");
+  rules.choose(rules.choose(rules.choose(begin(character), "move"), "go", highRoll), "fight");
 const mageCombat = fightAs(rules.create("Tala", "orden", "frau", 2, "magier"));
 const firstFlame = rules.strike(mageCombat, "ember");
 assert.equal(firstFlame.balance, 2);
 // Flammenstoß: 11 + Magie (Intelligenz verändert den Schaden nicht).
-assert.equal(firstFlame.combat.health, mageCombat.combat.health - 11 - mageCombat.build.fertigkeiten.magie);
+assert.equal(foeHp(firstFlame), foeHp(mageCombat) - 11 - mageCombat.build.fertigkeiten.magie);
 const backlash = rules.strike(firstFlame, "ember");
 assert.equal(backlash.balance, 3);
-assert.equal(backlash.combat.health, firstFlame.combat.health);
+assert.equal(foeHp(backlash), foeHp(firstFlame));
 const roots = rules.strike(firstFlame, "restore");
 assert.equal(roots.balance, 0);
-assert.equal(roots.combat.health, firstFlame.combat.health - 4);
+assert.equal(foeHp(roots), foeHp(firstFlame) - 4);
 const settled = rules.strike(firstFlame, "guard");
 assert.equal(settled.balance, 1);
 const ward = rules.strike(inCombat, "restore");
@@ -221,11 +313,11 @@ assert.match(tooMuchHealing.journal.at(-2), /außer Kontrolle/);
 assert.equal(reload(tooMuchHealing).role, "heiler");
 
 const elf = rules.create("Tala", "dornenklingen", "frau", 2, "spaeher");
-const elfStart = rules.choose(rules.choose(elf, "lantern"), "prepare");
+const elfStart = rules.choose(begin(elf), "prepare");
 const elfDetour = rules.choose(rules.choose(elfStart, "go"), "detour");
 assert.equal(rules.choose(elfDetour, "trace", () => .2).scene, "ford");
 const vampire = rules.create("Tala", "erinnernde", "frau", 2, "schurke");
-const vampireStart = rules.choose(rules.choose(vampire, "lantern"), "prepare");
+const vampireStart = rules.choose(begin(vampire), "prepare");
 const vampireFord = rules.choose(rules.choose(vampireStart, "go"), "fire", highRoll);
 assert.ok(ids(vampireFord).includes("password"));
 assert.equal(rules.ending(rules.choose(vampireFord, "password")).delivery, true);
@@ -257,9 +349,11 @@ assert.deepEqual(ids(bugs), []);
 assert.equal(reload(bugs).combat.id, "glutkaefer");
 assert.equal(rules.strike(bugs, "flee", highRoll).scene, "watch-yard");
 assert.ok(!rules.strike(bugs, "flee", highRoll).marks.includes("pass-mine"));
-const cleared = rules.strike(bugs, "ember");
+// Drei Glutkäfer (Mitläufer, Stufe 2). Beim Sieg bersten sie.
+assert.equal(rules.targets(bugs).length, 3);
+const cleared = fightOut(bugs);
 assert.equal(cleared.scene, "mine-cleared");
-assert.equal(cleared.health, bugs.health - 3);
+assert.ok(cleared.journal.some(entry => /Glutwolke kostet 3 LP/.test(entry)));
 assert.ok(cleared.inventory.includes("glutpanzer"));
 assert.ok(cleared.marks.includes("pass-mine"));
 const revisited = rules.choose(rules.choose(cleared, "mine-back"), "mine-revisit");
@@ -289,10 +383,10 @@ assert.equal(rules.strike(greif, "ember").health, greif.health);
 assert.equal(rules.choose(ridge, "ridge-climb", lowRoll).combat.id, "felsgreif");
 assert.equal(rules.choose(ridge, "ridge-climb", highRoll).scene, "ridge-cleared");
 const troll = rules.choose(rules.choose(restedYard, "ravine"), "ravine-fight");
-assert.equal(reload(troll).combat.health, 70);
-// Speer 5 + Nahkampf 3 + Wurf 3 − Trollhaut: 4 Schaden. Fackel 6 + Nahkampf 3.
-assert.equal(rules.strike(troll, "spear", highRoll).combat.health, 66);
-assert.equal(rules.strike(troll, "torch").combat.health, 61);
+// Schlundtroll: Elite der Stufe 4 (40 LP). Grundangriff 6 + Nahkampf 3, danach Regeneration 4. Fackel 6 + Nahkampf 3 stoppt sie.
+assert.equal(foeHp(reload(troll)), 40);
+assert.equal(foeHp(rules.strike(troll, "spear", highRoll)), 35);
+assert.equal(foeHp(rules.strike(troll, "torch")), 31);
 
 const planning = rules.choose(rules.choose(restedYard, "sister"), "warden");
 const clue = rules.choose(rules.choose(planning, "mine"), "inspect-mine");
@@ -397,11 +491,11 @@ const steadyGuard = rules.strike(steady, "guard");
 assert.equal(rules.strike(steadyGuard, "flee", lowRoll).ember, steadyGuard.ember);
 // Orks: Nach einem Sieg trägt der Kampfrausch den ersten Angriff der nächsten Schlacht.
 const orc = fightAs(rules.create("Tala", "aschenclan", "frau", 2, "krieger"));
-const orcWin = rules.strike({ ...orc, combat: { ...orc.combat, health: 1 } }, "spear", lowRoll);
+const orcWin = rules.strike({ ...orc, combat: { ...orc.combat, feinde: [{ ...orc.combat.feinde[0], lp: 1 }] } }, "spear", lowRoll);
 assert.equal(orcWin.rausch, true);
 assert.equal(reload(orcWin).rausch, true);
 const raging = rules.strike({ ...orc, rausch: true }, "spear", lowRoll);
-assert.equal(raging.combat.health, rules.strike(orc, "spear", lowRoll).combat.health - 2);
+assert.equal(foeHp(raging), foeHp(rules.strike(orc, "spear", lowRoll)) - 2);
 assert.equal(raging.rausch, false);
 assert.equal(rules.strike({ ...orcWin, rausch: false }, "guard").rausch ?? false, false);
 
@@ -433,8 +527,7 @@ assert.throws(() => reload({ ...armored, equipment: { weapon: "schwert", armor: 
 const trial = state => rules.choose(rules.choose(state, "ridge-trail"), "ridge-fight");
 const bowFight = trial(updated);
 const fistFight = trial(unarmed);
-assert.ok(rules.strike(bowFight, "spear", highRoll).combat.health <
-  rules.strike(fistFight, "spear", highRoll).combat.health);
+assert.ok(foeHp(rules.strike(bowFight, "spear", highRoll)) < foeHp(rules.strike(fistFight, "spear", highRoll)));
 assert.ok(rules.strike(trial(armored), "spear", highRoll).health > rules.strike(bowFight, "spear", highRoll).health);
 const route = rules.route(yard, "weidenkamm");
 assert.deepEqual(Array.from(route.stops), ["hochwacht", "kraehenfurt", "weidenkamm"]);
@@ -451,8 +544,8 @@ assert.equal(bargained.combat, null);
 assert.equal(rules.choose(toll, "toll-help", highRoll).xp, toll.xp + 20);
 let deserters = rules.choose(toll, "toll-talk", lowRoll);
 assert.equal(deserters.combat.id, "deserteure");
-deserters = rules.strike(rules.strike(rules.strike(deserters, "ember"), "guard"), "ember");
-deserters = rules.strike(deserters, "spear", highRoll);
+// Drei Deserteure (Mitläufer, Stufe 3) gegen eine ausgeruhte Burgvögtin der Stufe 2.
+deserters = fightOut({ ...deserters, health: rules.healthLimit(deserters) });
 assert.equal(deserters.scene, "toll-resolved");
 assert.ok(deserters.inventory.includes("rostklaue"));
 assert.equal(deserters.silver, toll.silver + 14);
@@ -471,14 +564,17 @@ assert.ok(rules.choose(signal, "search-chest", highRoll).inventory.includes("asc
 const rewarded = rules.choose(sealed, "reward-sword");
 assert.ok(rewarded.inventory.includes("wachschwert"));
 assert.equal(rules.choose(rewarded, "reward-cloak"), rewarded);
-const apprentice = { ...yard, xp: 75, training: {} };
+// Erfahrungsstufe 2 ab 100 EP. Grundwertpunkte stammen nur noch aus alten Spielständen (stufenpunkte).
+const apprentice = { ...yard, xp: 100, training: {}, stufenpunkte: 1 };
 assert.equal(rules.progression(apprentice).level, 2);
+assert.equal(rules.progression({ ...apprentice, xp: 99 }).level, 1);
 assert.equal(rules.progression(apprentice).points, 1);
 const trained = rules.train(apprentice, "strength");
 assert.equal(reload(trained).training.strength, 1);
-assert.equal(rules.healthLimit(trained), rules.healthLimit(apprentice) + 1);
+// LP hängen jetzt an Rolle und Erfahrungsstufe, nicht mehr an Stärke.
+assert.equal(rules.healthLimit(trained), rules.healthLimit(apprentice));
 assert.equal(rules.heroAttributes(trained).strength, rules.heroAttributes(apprentice).strength + 1);
-const strongest = { ...apprentice, training: { strength: 1 }, xp: 410, build: { ...heroBuild, frei: { strength: 5 } } };
+const strongest = { ...apprentice, training: { strength: 1 }, xp: 410, stufenpunkte: 3, build: { ...heroBuild, frei: { strength: 5 } } };
 assert.equal(rules.heroAttributes(strongest).strength, 18);
 const peak = rules.train(rules.train(strongest, "strength"), "strength");
 assert.equal(rules.heroAttributes(peak).strength, 20);
@@ -544,12 +640,12 @@ assert.equal(rules.recruit(knightContract, "paladin").party.length, 3);
 const withAllies = trial(atYard);
 assert.equal(rules.recruit(withAllies, "knight"), withAllies);
 assert.equal(rules.strike(withAllies, "support:knight"), withAllies);
-assert.ok(withAllies.combat.health > trial(yard).combat.health);
+assert.ok(foeHp(withAllies) > foeHp(trial(yard)));
 const round = [];
 const shot = rules.strike(withAllies, "guard", highRoll, undefined, 0, round);
 assert.deepEqual(round.filter(event => event.kind === "hit").map(event => event.actor), Array.from(atYard.party));
 assert.equal(round.find(event => event.actor === "ranger").value, 14);
-assert.ok(shot.combat.health < withAllies.combat.health);
+assert.ok(foeHp(shot) < foeHp(withAllies));
 assert.equal(shot.ember, withAllies.ember);
 for (const event of round.filter(event => event.kind === "hit" && event.actor !== "hero")) {
   const target = rules.targets(withAllies).find(enemy => enemy.id === event.target);
@@ -569,15 +665,16 @@ assert.equal(healedByAlly.combat.bleeding, 0);
 assert.ok(healedByAlly.health > 10);
 
 const patrol = rules.choose(rules.choose(atYard, "toll"), "toll-fight");
-assert.equal(rules.targets(patrol).length, 3);
-assert.deepEqual(Array.from(rules.targets(reload(patrol)), target => target.id), [0, 1, 2]);
+// Drei Deserteure allein, je Gefährte einer mehr, höchstens sechs.
+assert.equal(rules.targets(patrol).length, 6);
+assert.deepEqual(Array.from(rules.targets(reload(patrol)), target => target.id), [0, 1, 2, 3, 4, 5]);
 const aimed = [];
 rules.strike(patrol, "spear", highRoll, undefined, 2, aimed);
 assert.equal(aimed[0].target, 2);
 assert.ok(aimed.some(event => event.kind === "hit" && event.target !== 2));
 assert.equal(rules.strike(patrol, "spear", highRoll, undefined, 999), patrol);
 const soloGroup = rules.choose(rules.choose(yard, "toll"), "toll-fight");
-assert.equal(rules.targets(soloGroup).length, 1);
+assert.equal(rules.targets(soloGroup).length, 3);
 
 const northRoad = rules.choose(posted, "skarn-briefing");
 assert.equal(northRoad.scene, "skarn-briefing");
@@ -885,13 +982,17 @@ assert.equal(rules.assigned(migratedFive, 'runenbeil'), 0);
 assert.equal(reload(migratedFive).party.length, 3);
 const migratedFight = reload(trial(legacyFive));
 assert.equal(migratedFight.party.length, 3);
-assert.equal(reload(migratedFight).combat.max, migratedFight.combat.max);
+assert.equal(JSON.stringify(reload(migratedFight).combat.feinde), JSON.stringify(migratedFight.combat.feinde));
+// Einzelgegner: +25 % LP je Begleiter, nach dem Kürzen auf drei Begleiter also +75 %.
+{
+  const fiveFight = trial({ ...legacyFive, party: ['druid', 'ranger', 'mage'] });
+  assert.equal(migratedFight.combat.feinde[0].max, fiveFight.combat.feinde[0].max);
+}
 assert.throws(() => reload({ ...questStart, companionQuests: { mage: { status: 'done', debt: 15 } } }));
 console.log('Dreierlimit, Aufnahmequests, Herstellung, Sold, Herkunftsvorbehalte und Altspeicher geprüft.');
 
 const oldGroupBattle = rules.choose(rules.choose(legacyFive, "toll"), "toll-fight");
-oldGroupBattle.combat.health = 0;
-oldGroupBattle.combat.extras = [0, 0, 1];
+oldGroupBattle.combat.feinde.forEach((foe, index) => { foe.lp = index === oldGroupBattle.combat.feinde.length - 1 ? 1 : 0; });
 oldGroupBattle.combat.supportUsed = ["warrior"];
 const resizedBattle = reload(oldGroupBattle);
 assert.ok(rules.targets(resizedBattle).some(enemy => enemy.health > 0));
@@ -961,3 +1062,36 @@ const groupStored = rules.store(protectedMember, 'runenbeil');
 assert.equal(rules.memberEquipment(groupStored, 'ranger').weapon, null);
 assert.equal(reload(groupStored).storage.includes('runenbeil'), true);
 console.log('Questlog, Fristen, letzte Abgabe, Scheitern, Soldverzug und Spielzugmigration geprüft.');
+
+// Charakterfenster: wirkende Effekte werden nur gelesen, der Spielstand bleibt unverändert.
+{
+  const effectIds = (state) => rules.effects(state).map(effect => effect.id);
+  const fresh = hero();
+  const before = JSON.stringify(fresh);
+  assert.ok(Array.isArray(rules.effects(fresh)));
+  assert.equal(JSON.stringify(fresh), before);
+  assert.ok(!effectIds(fresh).includes("benommen"));
+  assert.ok(!effectIds(fresh).includes("blutung"));
+  const hurt = { ...fresh, combat: { id: "keiler", round: 2, stunned: true, bleeding: 2, feinde: [], diener: [], held: { schild: 0 } }, rausch: true, balance: 3, ember: 0 };
+  const listed = rules.effects(hurt);
+  assert.deepEqual(["benommen", "blutung", "kampfrausch", "glut-unruhig", "glut-erschoepft"].filter(id => !listed.some(e => e.id === id)), []);
+  assert.equal(listed.find(e => e.id === "blutung").dauer, "Noch 2 Runden");
+  assert.equal(listed.find(e => e.id === "kampfrausch").art, "gut");
+  assert.equal(listed.find(e => e.id === "benommen").art, "schlecht");
+  assert.ok(listed.every(e => ["gut", "schlecht", "hinweis"].includes(e.art) && e.name && e.text && e.dauer));
+  assert.ok(!effectIds({ ...fresh, balance: 1 }).includes("glut-unruhig"));
+  assert.ok(effectIds({ ...fresh, balance: -2 }).includes("glut-unruhig"));
+  assert.ok(effectIds({ ...fresh, marks: ["steinrhythmus"] }).includes("steinrhythmus"));
+  assert.ok(effectIds({ ...fresh, health: 0 }).includes("gefallen"));
+  assert.ok(effectIds({ ...fresh, stufenpunkte: 1 }).includes("stufenpunkte"));
+  assert.ok(effectIds({ ...fresh, umschulung: true }).includes("umschulung"));
+  // Alte Spielstände (Version 1) laden weiter und liefern Effekte.
+  const legacy = rules.read(JSON.stringify({ version: 1, name: "Alt", origin: "bergzwerg", appearance: "mann", variant: 0, scene: "start",
+    role: "knight", allocation: { strength: 2, agility: 1, mind: 1, presence: 1, will: 1 }, health: 20, ember: 1, xp: 90, silver: 3,
+    inventory: [], equipment: { weapon: null, armor: null }, marks: ["steinrhythmus"], journal: [], combat: null }));
+  assert.ok(effectIds(legacy).includes("umschulung"));
+  assert.ok(effectIds(legacy).includes("steinrhythmus"));
+  assert.equal(rules.levelThresholds.length, 20);
+  assert.equal(rules.levelThresholds[19], 19000);
+}
+console.log("Charakterfenster: Effekte (Benommen, Blutung, Kampfrausch, Glut, Stufenpunkte, Umschulung) und alte Spielstände geprüft.");
