@@ -159,7 +159,7 @@ const rules = (() => {
       equipment: { ...emptyEquipment(), weapon, armor: "lederwams" },
       storage: [],
       xp: 0, silver: 5, training: {}, stufenpunkte: 0, ressource: 3, rewards: [],
-      party: [], companionEquipment: {},
+      party: [], companionEquipment: {}, partyVitals: {}, heroStatus: {},
       relationships: {}, factionRuf: {}, companionQuests: {}, crafted: [], questClock: 0, questLog: {},
       marks: [], journal: [], combat: null,
     };
@@ -279,6 +279,8 @@ const rules = (() => {
     state.rewards ??= [];
     state.party ??= [];
     state.companionEquipment ??= {};
+    state.partyVitals ??= {};
+    state.heroStatus ??= {};
     state.relationships ??= {};
     state.factionRuf ??= {};
     // Bestehende Mitglieder behalten ihre bereits erworbene Aufnahmeberechtigung.
@@ -335,6 +337,10 @@ const rules = (() => {
           return id === null || (own(world.gear, id) && world.gear[id].slot === slotKinds[slot] &&
             wornCount(state, id) <= state.inventory.filter(entry => entry === id).length);
         }) ||
+        !validRecord(state.heroStatus, world.ailments, turns => intBetween(turns, 1, 3)) ||
+        !validRecord(state.partyVitals, world.companions, vitals => vitals &&
+          intBetween(vitals.health, 0, 100) && validRecord(vitals.status, world.ailments, turns => intBetween(turns, 1, 3))) ||
+        !Object.entries(state.partyVitals).every(([id, vitals]) => vitals.health <= memberHealthLimit(id)) ||
         !validRecord(state.companionEquipment, world.companions, equipment => equipment &&
           ["weapon", "armor"].every(slot => equipment[slot] === null ||
             (own(world.gear, equipment[slot]) && world.gear[equipment[slot]].slot === slot))) ||
@@ -361,6 +367,7 @@ const rules = (() => {
       note(state, "Maximal drei Begleiter: " + waiting.map(id => world.companions[id].name).join(", ") +
         " warten am Wachhof. Ihre Ausrüstung liegt im Gruppenvorrat.");
     }
+    ensureVitals(state);
     syncQuests(state);
     return state;
   }
@@ -533,6 +540,7 @@ const rules = (() => {
         recruitment(previous, id) !== "ready") return previous;
     const state = structuredClone(previous);
     state.party.push(id);
+    ensureVitals(state);
     note(state, world.companions[id].name + " schließt sich deiner Gruppe an.");
     return state;
   }
@@ -927,25 +935,67 @@ const rules = (() => {
     return state;
   }
 
-  function canUse(state, id) {
-    const supply = world.supplies[id];
-    return Boolean(supply && state.health > 0 && state.inventory.includes(id) &&
-      ((supply.heal && state.health < healthLimit(state)) || (supply.ember && state.ember < emberLimit(state))));
+  const memberHealth = { knight: 32, mage: 24, priest: 26, ranger: 28, thief: 26, necromancer: 24, paladin: 34, druid: 28, warrior: 36 };
+  const memberHealthLimit = id => memberHealth[id];
+  function memberVitals(state, id) {
+    return state.partyVitals?.[id] ?? { health: memberHealthLimit(id), status: {} };
   }
-
-  function consume(state, id) {
+  function ensureVitals(state) {
+    state.partyVitals ??= {};
+    state.heroStatus ??= {};
+    for (const id of state.party) state.partyVitals[id] ??= { health: memberHealthLimit(id), status: {} };
+  }
+  function allies(state) {
+    return [{ id: "hero", name: state.name, health: state.health, max: healthLimit(state), status: state.heroStatus ?? {} },
+      ...state.party.map(id => ({ id, name: world.companions[id].name, health: memberVitals(state, id).health,
+        max: memberHealthLimit(id), status: memberVitals(state, id).status }))];
+  }
+  function changeHealth(state, id, value) {
+    ensureVitals(state);
+    if (id === "hero") state.health = Math.max(0, Math.min(healthLimit(state), value));
+    else {
+      state.partyVitals[id].health = Math.max(0, Math.min(memberHealthLimit(id), value));
+      if (!state.partyVitals[id].health) state.partyVitals[id].status = {};
+    }
+  }
+  function healAlly(state, id, amount, actor, events) {
+    const target = allies(state).find(ally => ally.id === id);
+    if (!target?.health) return 0;
+    const healing = Math.min(amount, target.max - target.health);
+    changeHealth(state, id, target.health + healing);
+    if (healing) events.push({ kind: "heal", actor, ally: id, value: healing });
+    return healing;
+  }
+  function canUse(state, id, targetId = "hero") {
     const supply = world.supplies[id];
+    const target = allies(state).find(ally => ally.id === targetId);
+    return Boolean(supply && target && state.health > 0 && state.inventory.includes(id) &&
+      (supply.revive ? targetId !== "hero" && target.health === 0 : target.health > 0 &&
+      ((supply.heal && target.health < target.max) || (supply.ember && targetId === "hero" && state.ember < emberLimit(state)) ||
+        (supply.cure && target.status[supply.cure]))));
+  }
+  function consume(state, id, targetId = "hero", events = []) {
+    ensureVitals(state);
+    const supply = world.supplies[id];
+    const target = allies(state).find(ally => ally.id === targetId);
     state.inventory.splice(state.inventory.indexOf(id), 1);
-    if (supply.heal) state.health = Math.min(healthLimit(state), state.health + supply.heal);
+    if (supply.revive) {
+      const restored = Math.max(1, Math.ceil(target.max * supply.revive / 100));
+      changeHealth(state, targetId, restored);
+      events.push({ kind: "revive", actor: "hero", ally: targetId, value: restored });
+    } else if (supply.heal) healAlly(state, targetId, supply.heal, "hero", events);
     if (supply.ember) state.ember = Math.min(emberLimit(state), state.ember + supply.ember);
-    note(state, world.items[id] + " verwendet.");
+    if (supply.cure) {
+      delete (targetId === "hero" ? state.heroStatus : state.partyVitals[targetId].status)[supply.cure];
+      events.push({ kind: "cleanse", actor: "hero", ally: targetId });
+    }
+    note(state, world.items[id] + " für " + target.name + " verwendet.");
   }
-
-  function use(previous, id) {
-    if (!canUse(previous, id)) return previous;
-    if (previous.combat) return strike(previous, "herb", Math.random, id);
+  function use(previous, id, targetId = "hero") {
+    if (!canUse(previous, id, targetId)) return previous;
+    if (previous.combat) return strike(previous, "herb", Math.random, id, undefined, [], targetId);
     const state = structuredClone(previous);
-    consume(state, id);
+    consume(state, id, targetId);
     return state;
   }
 
@@ -1047,7 +1097,13 @@ const rules = (() => {
       if (choice.spend) state.ember -= choice.emberCost;
       if (choice.item) receive(state, [choice.item]);
       if (choice.consume) state.inventory.splice(state.inventory.indexOf(choice.consume), 1);
-      if (choice.recover) state.health = Math.min(healthLimit(state), state.health + choice.recover);
+      if (choice.recover) {
+        state.health = Math.min(healthLimit(state), state.health + choice.recover);
+        ensureVitals(state);
+        for (const id of state.party) if (memberVitals(state, id).health > 0) {
+          changeHealth(state, id, memberVitals(state, id).health + choice.recover);
+        }
+      }
       if (choice.replenish) state.ember = Math.min(emberLimit(state), state.ember + choice.replenish);
       if (choice.center || (choice.id === "rest" && state.scene === "arrival")) state.balance = 0;
       if (choice.soil) affectSoil(state, choice.soil);
@@ -1237,7 +1293,7 @@ const rules = (() => {
   const actionIds = ["spear", "ember", "restore", "guard", "herb", "flee", "torch"];
   // Aktion: Grundangriff (spear oder f1), eine Fähigkeit (f3 … f20, m1, m2, mit + für Verstärkung durch Ressource),
   // Glutgabe (ember, restore), Deckung, Verbrauchsgut, Flucht oder Fackel.
-  function strikeStep(previous, action, dice = Math.random, supply = "galgenwurz", targetId, events = []) {
+  function strikeStep(previous, action, dice = Math.random, supply = "galgenwurz", targetId, events = [], allyId = "hero") {
     const fight = previous.combat;
     if (!fight || typeof action !== "string") return previous;
     const boosted = action.endsWith("+");
@@ -1256,21 +1312,31 @@ const rules = (() => {
     const available = targets(previous).filter(enemy => enemy.health > 0);
     const selected = targetId === undefined ? available[0] : available.find(enemy => enemy.id === targetId);
     if (!selected) return previous;
+    const chosenAlly = allies(previous).find(ally => ally.id === allyId);
+    if (!chosenAlly || (action === "herb" && !canUse(previous, supply, allyId)) ||
+        ((action === "restore" && kit(previous).restore.heal || ability?.regel.heilung || ability?.regel.hot) && chosenAlly.health === 0)) return previous;
     const state = structuredClone(previous);
+    ensureVitals(state);
+    const confused = Boolean(state.heroStatus.confused);
+    const revived = action === "herb" && world.supplies[supply]?.revive ? allyId : null;
+    const previousStatuses = Object.fromEntries(allies(state).map(ally => [ally.id, { ...ally.status }]));
     const result = world.fights[fight.id];
     const turn = state.combat;
     const held = turn.held;
-    const round = { usedFire: false, ward: 0, guarding: false, events, fire: false };
+    const round = { usedFire: false, ward: 0, guarding: false, events, fire: false, revived, allyId, previousStatuses };
     // Orks: Nach einer gewonnenen Schlacht trägt sie der Kampfrausch durch den ersten Angriff der nächsten.
     let rage = 0;
-    if (state.rausch && (isAbility || ["ember", "torch"].includes(action))) {
+    if (!confused && state.rausch && (isAbility || ["ember", "torch"].includes(action))) {
       rage = 2;
       state.rausch = false;
       note(state, "Kampfrausch: +2 Schaden.");
     }
     turn.round++;
     let stabilized = false;
-    if (action === "flee") {
+    if (confused && (isAbility || ["ember", "restore", "torch"].includes(action))) {
+      note(state, state.name + " ist verwirrt und setzt die Aktion aus.");
+      events.push({ kind: "skip", actor: "hero" });
+    } else if (action === "flee") {
       const roll = 1 + Math.floor(dice() * 20);
       const target = 8 + Math.floor((world.creatures[fight.id].stats[3] ?? 5) / 2);
       if (roll + skillValue(state, "list") >= target) {
@@ -1281,10 +1347,7 @@ const rules = (() => {
       }
       note(state, "Der Fluchtversuch scheitert.");
     } else if (action === "herb") {
-      if (!canUse(state, supply)) return previous;
-      const before = state.health;
-      consume(state, supply);
-      if (state.health > before) events.push({ kind: "heal", actor: "hero", value: state.health - before });
+      consume(state, supply, allyId, events);
     } else if (action === "ember" && cast(state, 2)) {
       round.usedFire = true;
       const role = kit(state);
@@ -1295,8 +1358,10 @@ const rules = (() => {
       const role = kit(state);
       round.ward = role.restore.guard ?? 0;
       if (role.restore.heal) {
-        const healing = healHero(state, role.restore.heal, events);
-        note(state, role.restore.name + " stellt " + healing + " LP wieder her.");
+        const before = allies(state).find(ally => ally.id === allyId).health;
+        healAlly(state, allyId, role.restore.heal, "hero", events);
+        note(state, role.restore.name + " stellt für " + chosenAlly.name + " " +
+          (allies(state).find(ally => ally.id === allyId).health - before) + " LP wieder her.");
       } else {
         dealDamage(state, selected.id, role.restore.hinder ?? 0, { round });
         note(state, role.restore.name + " schwächt den Gegenangriff.");
@@ -1322,6 +1387,8 @@ const rules = (() => {
     if (!events.some(event => event.actor === "hero")) events.push({ kind: "cover", actor: "hero" });
     companionsAct(state, selected.id, round);
     summonsAct(state, selected.id, round);
+    tickAllyStatus(state, previousStatuses, revived, events);
+    if (!state.health) { arrive(state, "defeat"); return state; }
     if (finishIfWon(state, result)) return state;
     if (result.regeneration && !round.usedFire && turn.feinde[0].lp > 0) {
       const recovered = Math.min(result.regeneration, turn.feinde[0].max - turn.feinde[0].lp);
@@ -1510,16 +1577,20 @@ const rules = (() => {
     if (r.aufdecken) affect("aufdecken", (status) => { status.enttarnt = true; });
     if (/Mine/.test(ability.wirkung) && !r.mineBedingung) held.mine = true;
 
-    // Heilung, Schild und Stärkung treffen den Helden (Gefährten haben keine eigenen LP).
+    // Direkte Heilung trifft das gewählte Gruppenziel; persönliche Schild- und Stärkungseffekte bleiben beim Helden.
     if (r.heilung) {
       const amount = scaled(r.heilung, factor) + Math.max(0, skillValue(state, healSkill(state)));
-      parts.push(healHero(state, amount, events) + " LP geheilt");
+      parts.push(healAlly(state, round.allyId ?? "hero", amount, "hero", events) + " LP geheilt");
     }
     if (r.hot) {
-      held.hot = { wert: scaled(r.hot.wert, factor), runden: r.hot.runden };
+      held.hot = { wert: scaled(r.hot.wert, factor), runden: r.hot.runden, ally: round.allyId ?? "hero" };
       parts.push("heilt " + r.hot.runden + " Runden je " + held.hot.wert);
     }
-    if (r.reinigen) turn.bleeding = 0;
+    if (r.reinigen) {
+      const target = round.allyId ?? "hero";
+      if (target === "hero") { turn.bleeding = 0; state.heroStatus = {}; }
+      else state.partyVitals[target].status = {};
+    }
     if (r.selbstBenommen) turn.selbstBenommen = true;
     if (r.schild) {
       held.schild += scaled(r.schild, factor);
@@ -1579,17 +1650,24 @@ const rules = (() => {
     const extra = turn.held.staerkung?.wert ?? 0;
     for (const id of state.party) {
       if (!living().length) break;
+      if (!memberVitals(state, id).health || id === round.revived) continue;
+      if (memberVitals(state, id).status.confused) {
+        round.events.push({ kind: "skip", actor: id });
+        continue;
+      }
       const member = world.companions[id];
       const equipment = memberEquipment(state, id);
       const weaponGear = world.gear[equipment.weapon];
       const ready = !(turn.supportUsed ?? []).includes(id);
-      const wounded = state.health <= healthLimit(state) - (member.heal ?? 0) || (member.cleanse && turn.bleeding > 0);
+      const patient = allies(state).filter(ally => ally.health > 0)
+        .sort((a, b) => a.health / a.max - b.health / b.max)[0];
+      const wounded = patient.health <= patient.max - (member.heal ?? 0) || (member.cleanse && turn.bleeding > 0);
       const special = ready && (member.heal ? wounded : member.guard ? turn.round % 2 === 0 : true);
       if (special) {
         turn.supportUsed.push(id);
         round.ward = Math.max(round.ward, member.guard ?? 0);
         if (member.fire) round.usedFire = true;
-        const healing = healHero(state, member.heal ?? 0, round.events, id);
+        const healing = healAlly(state, patient.id, member.heal ?? 0, id, round.events);
         if (member.cleanse) turn.bleeding = 0;
         const damage = (member.damage ? member.damage + (weaponGear?.power ?? 0) + (weaponGear?.magic ?? 0) : 0) +
           (turn.id === "felsgreif" ? (member.airborne ?? 0) : 0);
@@ -1602,6 +1680,24 @@ const rules = (() => {
       }
     }
     if (assisted.length) note(state, "Unterstützung: " + assisted.join(", ") + ".");
+  }
+
+  function tickAllyStatus(state, previousStatuses, revived, events) {
+    for (const ally of allies(state)) {
+      if (!ally.health || ally.id === revived) continue;
+      for (const effect of Object.keys(previousStatuses[ally.id] ?? {})) {
+        const status = ally.id === "hero" ? state.heroStatus : state.partyVitals[ally.id].status;
+        if (!status[effect]) continue;
+        const current = allies(state).find(entry => entry.id === ally.id);
+        const loss = Math.min(current.health, world.ailments[effect].damage);
+        if (loss) {
+          changeHealth(state, ally.id, current.health - loss);
+          events.push({ kind: "status", actor: ally.id, ally: ally.id, value: loss });
+          note(state, ally.name + " · " + world.ailments[effect].name + " kostet " + loss + " LP.");
+        }
+        if (--status[effect] <= 0) delete status[effect];
+      }
+    }
   }
 
   // Beschworene Wesen greifen an und verschwinden nach ihren Runden.
@@ -1645,15 +1741,14 @@ const rules = (() => {
 
   // Die Gegner handeln. Rüstung und Schutz senken jeden Treffer um die Hälfte ihres Werts, Schild fängt zuerst ab.
   function enemyPhase(state, round, stabilized = false) {
+    ensureVitals(state);
     const turn = state.combat;
     const held = turn.held;
     const result = world.fights[turn.id];
     const events = round.events;
-    // Auch die Rüstungen der Begleiter schützen die Gruppe.
-    const groupArmor = state.party.reduce((total, id) => total + (world.gear[memberEquipment(state, id).armor]?.armor ?? 0), 0);
-    const reduction = Math.floor((protection(state) + gearBonus(state, "armor") + groupArmor) / 2);
-    const defense = round.guarding ? Math.max(6, round.ward) : round.ward;
-    const guarding = round.guarding || round.ward > 0;
+    let heroHit = false;
+    let heroGuarded = false;
+    let victimCursor = Math.max(0, turn.round - 1);
     const leader = turn.feinde[0];
     const special = leader.lp > 0 && turn.round > 0 && turn.round % 2 === 0 && !leader.status.schweigen && !leader.status.betaeubt &&
       !leader.status.furcht ? result.special : null;
@@ -1701,16 +1796,36 @@ const rules = (() => {
             summon.lp = Math.max(0, summon.lp - damage);
             continue;
           }
-          if (held.unsichtbar > 0) {
-            sparedByStealth = true;
-            continue;
-          }
+          const active = allies(state).filter(ally => ally.health > 0 && (ally.id !== "hero" || held.unsichtbar <= 0));
+          if (!active.length) { sparedByStealth = true; continue; }
+          const victim = active[victimCursor++ % active.length];
+          const heroTarget = victim.id === "hero";
+          const armor = heroTarget ? gearBonus(state, "armor") : world.gear[memberEquipment(state, victim.id).armor]?.armor ?? 0;
+          const reduction = Math.floor(((heroTarget ? protection(state) : 2) + armor) / 2);
+          const defense = heroTarget && round.guarding ? Math.max(6, round.ward) : round.ward;
+          const guarding = defense > 0;
           let hit = Math.max(guarding ? 0 : 1, damage - reduction - defense);
-          const absorbed = Math.min(held.schild, hit);
-          held.schild -= absorbed;
-          hit -= absorbed;
-          lost += hit;
-          events.push({ kind: "retaliate", actor: index, value: hit });
+          if (heroTarget) {
+            if (index === 0 && action === 0) { heroHit = true; heroGuarded = guarding; }
+            const absorbed = Math.min(held.schild, hit);
+            held.schild -= absorbed; hit -= absorbed;
+            if (hit >= state.health && held.todesschutz) {
+              hit = Math.max(0, state.health - Math.max(1, held.todesschutz.lp));
+              held.todesschutz = null;
+              note(state, "Todesschutz bewahrt dich vor dem tödlichen Treffer.");
+            }
+          }
+          const loss = Math.min(victim.health, hit);
+          changeHealth(state, victim.id, victim.health - loss);
+          lost += loss;
+          events.push({ kind: "retaliate", actor: index, ally: victim.id, value: loss });
+          const ailment = world.enemyAilments[turn.id];
+          if (ailment && !round.previousStatuses?.[victim.id]?.[ailment] && index === 0 && action === 0 && turn.round > 0 && turn.round % 2 === 0 && !guarding && victim.health - loss > 0) {
+            const effects = heroTarget ? state.heroStatus : state.partyVitals[victim.id].status;
+            effects[ailment] = ailment === "confused" ? 2 : 3;
+            events.push({ kind: "afflict", actor: index, ally: victim.id, effect: ailment });
+          }
+          if (!state.health) break;
         }
       }
       if (status.langsam && !--status.langsam) delete status.langsam;
@@ -1719,7 +1834,8 @@ const rules = (() => {
       if (status.verwundbar && !--status.verwundbar.runden) delete status.verwundbar;
     }
     turn.diener = turn.diener.filter((summon) => summon.lp > 0);
-    const applied = special && !held.unsichtbar;
+    const guarding = heroGuarded;
+    const applied = special && heroHit;
     const stuns = Boolean(applied && special.stuns && !guarding);
     turn.stunned = stuns || Boolean(turn.selbstBenommen);
     delete turn.selbstBenommen;
@@ -1729,14 +1845,10 @@ const rules = (() => {
     const resisted = Boolean(applied && special.drainsEmber && !guarding && modifier(heroAttributes(state).will) > 0);
     const stolenEmber = Boolean(applied && special.drainsEmber && !guarding && !resisted && state.ember > 0);
     if (stolenEmber) state.ember--;
-    let loss = Math.min(state.health, lost + bleedingNow);
-    if (loss >= state.health && held.todesschutz) {
-      loss = Math.max(0, state.health - held.todesschutz.lp);
-      if (state.health - loss <= 0) loss = state.health - 1;
-      note(state, "Ein tödlicher Treffer – du bleibst mit " + (state.health - loss) + " LP stehen.");
-      held.todesschutz = null;
-    }
-    state.health -= loss;
+    const bleedingLoss = Math.min(state.health, bleedingNow);
+    state.health -= bleedingLoss;
+    if (bleedingLoss) events.push({ kind: "status", actor: "hero", ally: "hero", value: bleedingLoss });
+    const loss = lost + bleedingLoss;
     note(state, (special?.name ?? "Gegenangriff") + " · " + loss + " LP verloren." +
       (sparedByStealth ? " Unsichtbar entgehst du den Angriffen." : "") +
       (stuns ? " Du bist benommen. Dein nächster Angriff ist schwächer." : "") +
@@ -1759,7 +1871,7 @@ const rules = (() => {
       if (--held.abklingen[id] <= 0) delete held.abklingen[id];
     }
     if (held.hot) {
-      healHero(state, held.hot.wert, []);
+      healAlly(state, held.hot.ally ?? "hero", held.hot.wert, "hero", []);
       if (!--held.hot.runden) held.hot = null;
     }
     if (held.schildRunden && !--held.schildRunden) held.schild = 0;
@@ -1865,6 +1977,12 @@ const rules = (() => {
     const list = [];
     const add = (id, name, art, text, dauer) => list.push({ id, name, art, text, dauer });
     const fight = state.combat;
+    for (const [id, turns] of Object.entries(state.heroStatus ?? {})) {
+      const effect = world.ailments[id];
+      add(id, effect.name, "schlecht", effect.damage ? effect.damage + " LP Schaden je Kampfrunde." :
+        "Angriffs- und Zauberaktionen setzen aus. Klartrank entfernt den Effekt.",
+        "Noch " + turns + (turns === 1 ? " Runde" : " Runden"));
+    }
     if (!state.health) add("gefallen", "Gefallen", "schlecht", "Deine Lebenspunkte sind aufgebraucht.", "Bis zum Neubeginn");
     if (fight?.stunned) add("benommen", "Benommen", "schlecht", "Dein nächster Waffenangriff verursacht 2 Schaden weniger.", "Nächster Zug");
     if (fight?.bleeding > 0) {
@@ -1916,7 +2034,7 @@ const rules = (() => {
     store, retrieve, isQuestItem: id => questItems.has(id), choose, route, retrain, specialize, ascend, weapon, equip, use, canUse, strike,
     attributes, baseAttributes, defaultBuild, suggestSkills, buildProblem, skillLimits, skillPoints, cap, modifier, originOf, profile,
     className, title, gearSkill, heroSkills, heroLimits, modifiers, skillValue, protection,
-    memberEquipment, assigned, progression, train, trade, candidates, recruit, dismiss, targets,
+    memberHealthLimit, memberVitals, allies, memberEquipment, assigned, progression, train, trade, candidates, recruit, dismiss, targets,
     questEntries, questPlans, partyLimit, attitude, questReady, completeQuest, paySalary, craft, relationship, reputation, recruitment, promise, bondActions, bondWith,
     healthLimit, emberLimit, heroAttributes, ending, moorConsequences, effects,
     levelThresholds: Array.from({ length: kampf.maxStufe }, (_, index) => kampf.epFuer(index + 1)) };

@@ -272,3 +272,23 @@ assert.equal(reload(trained).training.will, 1);
   assert.ok(reload(once));
 }
 console.log("Kampftests bestanden: " + count + " Fähigkeiten geprüft.");
+
+// Integration: neue Klassenfähigkeiten heilen das ausgewählte Gruppenmitglied.
+{
+  let healer = full(hero("hueter", "heiler", 1000));
+  healer.party = ["ranger"];
+  healer.partyVitals = { ranger: { health: 3, status: {} } };
+  healer = fightAs(healer);
+  healer.health = rules.healthLimit(healer);
+  const spell = rules.abilities(healer).find(entry => entry.frei && entry.regel.heilung && !rules.abilityState(healer, entry.id));
+  assert.ok(spell, "Verfügbare direkte Heilfähigkeit");
+  const events = [];
+  const healed = rules.strike(healer, spell.id, highRoll, undefined, undefined, events, "ranger");
+  assert.ok(events.some(event => event.kind === "heal" && event.ally === "ranger"));
+  assert.ok(reload(healed));
+  const fallen = { ...healer, partyVitals: { ranger: { health: 0, status: {} } } };
+  assert.equal(rules.strike(fallen, spell.id, highRoll, undefined, undefined, [], "ranger"), fallen);
+}
+
+assert.ok(rules.effects({ ...hero("orden", "waechter"), heroStatus: { burn: 2 } })
+  .some(effect => effect.id === "burn" && effect.name === "Brand" && effect.dauer === "Noch 2 Runden"));

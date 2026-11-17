@@ -20,6 +20,7 @@
   let skills = {};
   let target = null;
   let enemyTarget = null;
+  let allyTarget = "hero";
   let boostAbility = false;
   let animating = false;
   let lastBattleMessages = [];
@@ -376,6 +377,8 @@
     if (gear?.magic) details.push("+" + gear.magic + " Glutschaden");
     if (gear?.airborne) details.push("+" + gear.airborne + " gegen Flieger");
     if (supply?.heal) details.push("+" + supply.heal + " LP");
+    if (supply?.revive) details.push("Belebt einen Begleiter mit " + supply.revive + " % LP wieder");
+    if (supply?.cure) details.push("Entfernt " + world.ailments[supply.cure].name);
     if (supply?.ember) details.push("+" + supply.ember + " Glut");
     if (world.salePrices[id]) details.push("Wert " + world.salePrices[id] + " Silber");
     if (rules.isQuestItem(id)) details.push("Für eine Aufgabe");
@@ -386,6 +389,43 @@
     const counts = new Map();
     for (const id of ids) counts.set(id, (counts.get(id) ?? 0) + 1);
     return counts;
+  }
+
+  function selectedAlly() {
+    if (!rules.allies(state).some(ally => ally.id === allyTarget)) allyTarget = "hero";
+    return allyTarget;
+  }
+  function allyPicker(context) {
+    const label = element("label", "Ziel für Heilung und Items");
+    label.className = "ally-picker";
+    const select = element("select");
+    select.setAttribute("aria-label", "Heilziel · " + context);
+    for (const ally of rules.allies(state)) select.append(new Option(ally.name + " · " + ally.health + "/" + ally.max + " LP" +
+      (!ally.health ? " · Kampfunfähig" : ""), ally.id));
+    select.value = selectedAlly();
+    select.addEventListener("change", () => {
+      allyTarget = select.value;
+      render();
+      document.querySelector('select[aria-label="Heilziel · ' + context + '"]')?.focus();
+    });
+    label.append(select);
+    return label;
+  }
+  function allyCondition(parent, id) {
+    const ally = rules.allies(state).find(ally => ally.id === id);
+    if (id !== "hero") {
+      const health = element("div");
+      health.className = "fighter-vitals";
+      const meter = element("progress"); meter.max = ally.max; meter.value = ally.health;
+      meter.setAttribute("aria-label", ally.name + " · Lebenspunkte");
+      health.append(element("small", ally.health + " / " + ally.max + " LP"), meter);
+      parent.append(health);
+    }
+    const status = element("p", !ally.health ? "Kampfunfähig · Lebensfunke benötigt" : Object.entries(ally.status)
+      .map(([key, turns]) => world.ailments[key].name + " · " + turns + " Rd.").join(" · "));
+    status.className = "ally-status";
+    parent.classList.toggle("is-fallen", !ally.health);
+    if (status.textContent) parent.append(status);
   }
 
   function renderInventory() {
@@ -399,6 +439,7 @@
       state.storage.length + " Gegenstände" + (site && !state.combat ? " · hier erreichbar." : "");
     const inventory = el("inventory");
     inventory.replaceChildren();
+    const picker = element("li"); picker.append(allyPicker("Vorrat")); inventory.append(picker);
     const counts = counted(state.inventory);
     for (const [id, count] of counts) {
       const item = element("li");
@@ -422,8 +463,8 @@
         const slot = rules.equipmentSlots.find(entry => equipment[entry] === id);
         update(rules.equip(state, id, slot ?? null));
       }, { disabled: Boolean(state.combat) || !state.health || (!equipped && rules.assigned(state, id) >= count) });
-      if (supply) button(item, "Verwenden", () => state.combat ? battleAction("herb", id) : update(rules.use(state, id)),
-        { disabled: !rules.canUse(state, id) });
+      if (supply) button(item, "Verwenden", () => state.combat ? battleAction("herb", id) : update(rules.use(state, id, selectedAlly())),
+        { disabled: !rules.canUse(state, id, selectedAlly()) });
       inventory.append(item);
     }
     if (!counts.size) inventory.append(element("li", "Leer"));
@@ -620,12 +661,12 @@
       if (!wornHere) main.append(...deltaChips(rules.equipPreview(state, id, slot)));
     } else if (supply) {
       label = "Verwenden";
-      disabled = !rules.canUse(state, id);
+      disabled = !rules.canUse(state, id, selectedAlly());
       action = () => {
         if (state.combat) {
           el("inventory-hub").close();
           battleAction("herb", id);
-        } else hubAction(rules.use(state, id));
+        } else hubAction(rules.use(state, id, selectedAlly()));
       };
     }
     if (wornIn.length && !storageTab) {
@@ -673,6 +714,9 @@
   }
 
   function renderHub() {
+    el("hub-ally-picker")?.remove();
+    const picker = allyPicker("Inventar"); picker.id = "hub-ally-picker";
+    el("inventory-hub").querySelector(".hub-tabs").before(picker);
     const site = rules.storageSite(state);
     const open = rules.storageOpen(state);
     el("hub-place").textContent = open ? site : state.combat ? "Im Kampf" : world.scenes[state.scene].place ?? "";
@@ -986,7 +1030,7 @@
     return "Waffe: " + (world.items[kit.weapon] ?? "Eigener Kampfstil") +
       " · Rüstung: " + (world.items[kit.armor] ?? "Keine") +
       " · Angriff +" + (world.gear[kit.weapon]?.power ?? 0) +
-      " · Gruppenschutz +" + (world.gear[kit.armor]?.armor ?? 0);
+      " · Eigener Schutz +" + (world.gear[kit.armor]?.armor ?? 0);
   }
 
   const openEquipment = new Set();
@@ -1088,6 +1132,7 @@
       const row = element("li");
       row.append(element("strong", companion.name + " · " + klassen.grundklassen[companion.klasse].name));
       row.append(element("div", companion.ability + " · " + companionEffect(companion) + " · Einmal pro Kampf"));
+      allyCondition(row, id);
       renderMemberEquipment(row, id);
       const debt = state.companionQuests?.[id]?.debt ?? 0;
       if (debt) button(row, "Offenen Sold bezahlen · " + debt + " Silber", () => update(rules.paySalary(state, id)),
@@ -1160,8 +1205,14 @@
 
   function battleMessage(event, previous) {
     const name = actorName(event.actor, previous);
-    if (event.kind === "retaliate") return "Gegenangriff · " + (event.value ? "−" + event.value + " LP" : "Abgewehrt");
-    if (event.kind === "heal") return name + " heilt " + previous.name + ": +" + event.value + " LP";
+    const ally = event.ally === "hero" || !event.ally ? previous.name : world.companions[event.ally].name;
+    if (event.kind === "retaliate") return "Gegenangriff auf " + ally + " · " + (event.value ? "−" + event.value + " LP" : "Abgewehrt");
+    if (event.kind === "heal") return name + " heilt " + ally + ": +" + event.value + " LP";
+    if (event.kind === "revive") return ally + " wird wiederbelebt: +" + event.value + " LP";
+    if (event.kind === "cleanse") return ally + " wird von einem Statuseffekt befreit.";
+    if (event.kind === "afflict") return ally + " leidet unter " + world.ailments[event.effect].name + ".";
+    if (event.kind === "status") return ally + " · Statusschaden: −" + event.value + " LP";
+    if (event.kind === "skip") return name + " ist verwirrt und setzt aus.";
     if (event.kind === "cover") return name + " sichert die Gruppe.";
     const target = rules.targets(previous).find(enemy => enemy.id === event.target)?.name ?? "Gegner";
     return name + " trifft " + target + ": −" + event.value + " LP";
@@ -1178,7 +1229,7 @@
     const sequence = element("ol");
     sequence.className = "battle-sequence";
     sequence.setAttribute("aria-label", "Aktionsfolge einer Runde");
-    for (const [id, name] of [["hero", state.name], ...state.party.map(id => [id, world.companions[id].name]), ["enemies", "Gegner"]]) {
+    for (const [id, name] of [["hero", state.name], ...state.party.filter(id => rules.memberVitals(state, id).health > 0).map(id => [id, world.companions[id].name]), ["enemies", "Gegner"]]) {
       const chip = element("li", name);
       chip.dataset.turnActor = id;
       if (id === "hero") { chip.className = "is-current"; chip.setAttribute("aria-current", "step"); }
@@ -1199,16 +1250,18 @@
     health.className = "fighter-vitals";
     health.append(element("small", state.health + " / " + rules.healthLimit(state) + " LP"), heroMeter);
     hero.append(health);
+    allyCondition(hero, "hero");
     formation.append(hero);
     for (const id of state.party) {
       const companion = world.companions[id];
       const card = fighterCard(companion.name, klassen.grundklassen[companion.klasse].name, id);
       card.dataset.actor = id;
+      allyCondition(card, id);
       const used = (state.combat.supportUsed ?? []).includes(id);
-      const badge = element("span", used ? "✓ Verbraucht" : "✦ Bereit");
+      const badge = element("span", !rules.memberVitals(state, id).health ? "Kampfunfähig" : used ? "✓ Verbraucht" : "✦ Bereit");
       badge.className = "ability-badge" + (used ? " is-used" : "");
       badge.title = companion.ability;
-      badge.setAttribute("aria-label", companion.ability + (used ? " · Verbraucht" : " · Bereit"));
+      badge.setAttribute("aria-label", companion.ability + (!rules.memberVitals(state, id).health ? " · Kampfunfähig" : used ? " · Verbraucht" : " · Bereit"));
       card.append(badge);
       const gear = rules.memberEquipment(state, id);
       const held = world.gear[gear.weapon];
@@ -1283,7 +1336,7 @@
     for (const message of lastBattleMessages) messages.append(element("li", message));
     log.append(messages);
     log.hidden = !lastBattleMessages.length;
-    battlefield.append(header, sequence, group, opponents, summary, announcement, log);
+    battlefield.append(header, sequence, allyPicker("Kampf"), group, opponents, summary, announcement, log);
     content.append(battlefield);
   }
 
@@ -1291,7 +1344,7 @@
     if (animating || !state.combat) return;
     const previous = state;
     const events = [];
-    const next = rules.strike(previous, action, Math.random, item, enemyTarget, events);
+    const next = rules.strike(previous, action, Math.random, item, enemyTarget, events, selectedAlly());
     if (next === previous) return;
     lastBattleMessages = events.map(event => battleMessage(event, previous));
     if (!events.length || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -1307,9 +1360,9 @@
     panel.setAttribute("aria-busy", "true");
     try {
       for (const event of events) {
-        const retaliates = event.kind === "retaliate";
+        const retaliates = ["retaliate", "afflict"].includes(event.kind);
         const actor = panel.querySelector(retaliates ? '[data-enemy="' + event.actor + '"]' : '[data-actor="' + event.actor + '"]');
-        const target = retaliates || event.kind === "heal" ? panel.querySelector('[data-actor="hero"]') :
+        const target = event.ally ? panel.querySelector('[data-actor="' + event.ally + '"]') : event.kind === "heal" ? panel.querySelector('[data-actor="hero"]') :
           panel.querySelector('[data-enemy="' + event.target + '"]');
         for (const chip of panel.querySelectorAll("[data-turn-actor]")) {
           const current = chip.dataset.turnActor === (retaliates ? "enemies" : event.actor);
@@ -1323,7 +1376,7 @@
         actor?.classList.add(retaliates ? "enemy-lunge" : event.kind === "cover" ? "fighter-cover" : "fighter-lunge");
         let marker;
         if (target && event.value > 0) {
-          const healing = event.kind === "heal";
+          const healing = ["heal", "revive"].includes(event.kind);
           if (!healing) target.classList.add("fighter-hit");
           marker = element("span", (healing ? "+" : "−") + event.value);
           marker.className = "hit-value";
@@ -1401,7 +1454,7 @@
           f.kostenWert + " " + (f.zahlung === "M" ? "Mana" : "Ausdauer") + (f.ressource ? " + " + f.ressource + " " + values.ressourceName : "") +
           (boostable ? " + 1 " + values.ressourceName : "");
         const label = f.name + " · " + cost + (reason ? " · " + reason : "");
-        const node = button(actions, label, () => battleAction(f.id + (boostable ? "+" : "")), { disabled: Boolean(reason) });
+        const node = button(actions, label, () => battleAction(f.id + (boostable ? "+" : "")), { disabled: Boolean(reason) || Boolean((f.regel.heilung || f.regel.hot) && !rules.allies(state).find(ally => ally.id === selectedAlly()).health) });
         if (node) node.title = f.wirkung;
         if (node && f.id === "f1") node.dataset.battleAction = "spear";
       }
@@ -1414,7 +1467,7 @@
         const risk = shift && Math.abs(state.balance + shift) >= 4;
         const cost = shift ? " · 1 Glut" : "";
         const control = button(actions, label + cost + (risk ? " · Rückschlag" : ""),
-          () => battleAction(id), { disabled: Boolean(shift && !state.ember) });
+          () => battleAction(id), { disabled: Boolean(shift && !state.ember) || (id === "restore" && abilities.restore.heal && !rules.allies(state).find(ally => ally.id === selectedAlly()).health) });
         control.dataset.battleAction = id;
       }
       button(actions, "Gegenstand", () => openHub());
