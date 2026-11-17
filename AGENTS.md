@@ -24,4 +24,4 @@ Diese Datei ist die zentrale Arbeitsanweisung für alle Mitwirkenden und KI-Assi
 
 Öffne die [aktuelle index.html](index.html) im Browser. Die ältere Upload-Kopie und das Vorschau-ZIP sind lokale Exporte. Die [technische Übergabe](CLAUDE-UEBERGABE.md) beschreibt den Aufbau. Der [Quellenabgleich zur Lore](lore/KANON.md) hält die Entscheidungen zu Spielwelt und Prolog fest.
 
-Für Bestiarium-Modelle gilt die [Arbeitsanweisung für Modelle](quellen/arbeitsanweisung-modelle.pdf). Bei Änderungen am Spiel führe `node --test spiel/regeln.test.cjs` und passende JavaScript-Syntaxprüfungen aus. Prüfe geänderte Oberflächenabläufe zusätzlich im Browser, bei Layoutänderungen auch auf Handybreite.
+Für Bestiarium-Modelle gilt die [Arbeitsanweisung für Modelle](quellen/arbeitsanweisung-modelle.pdf). Bei Änderungen am Spiel führe `node --test spiel/regeln.test.cjs`, `node --test spiel/kampf.test.cjs` und passende JavaScript-Syntaxprüfungen aus. Prüfe geänderte Oberflächenabläufe zusätzlich im Browser, bei Layoutänderungen auch auf Handybreite.

@@ -38,6 +38,30 @@ Das Weltbuch führt fünf Startwerte für eine künftige Kampagne um 612 n. E. a
 | `legion` | Knochenlegion | Hof der Bleichen Krone | bisher ohne Rufereignis |
 | `league` | Splitterliga | Freie Häfen | bisher ohne Rufereignis |
 
+## Startpunkte der Fraktionen
+
+Seit dem 17. 11. 2026 beginnt jede spielbare Fraktion in ihrem eigenen Gebiet (Vorgabe von Henry). Alle 15 Prologe spielen in der Nacht des Erwachens im Herbst 612 n. E., wie in [Die Nacht des Erwachens](NACHT-DES-ERWACHENS.md) festgelegt. Die Orte stehen auf der verbindlichen Karte. Daten und Texte liegen in `spiel/startpunkte.js`, die Prologbilder sind Kartenausschnitte unter `spiel/prolog/start/`.
+
+| Volk | Fraktion | Startort | Zuflucht im Morgengrauen |
+| --- | --- | --- | --- |
+| Menschen | Kronreich | Westvik | Kronhall |
+| Menschen | Freie Häfen | Perlvik | Zollholm |
+| Menschen | Orden der Flamme | Aschenkloster | Glutberg |
+| Elfen | Dornenklingen | Hochdorn | Hochdorn |
+| Elfen | Schattenblüte | Velasyr | Velasyr |
+| Elfen | Hüter des Weltenbaums | Ylvenor | Waldrand |
+| Zwerge | Tiefes Königreich | Ambossheim | Ambossheim |
+| Zwerge | Tiefgräber | Kluftheim | Stollenmund |
+| Zwerge | Runenschmiede | Essenfels | Essenfels |
+| Orks | Grüne Banner | Kragmar | Kragmar |
+| Orks | Staubreiter | Ur-Taal | Zhar-Kesh |
+| Orks | Aschenclan | Aschenthron | Kraterpfad am Ghor-Mahr |
+| Untote | Fäulnisbrut | Tal von Nachtquell | Madenmoor |
+| Untote | Hof der Bleichen Krone | Palast der Tausend Stimmen | Seelenhafen |
+| Untote | Die Erinnernden | Eryndor | Eryndor |
+
+Jeder Prolog hat drei Bilder und drei spielbare Kapitel: Heimat mit zwei Erkundungen, ein Kampf gegen einen Prologgegner, dann die Entscheidung (Marken `nacht-…`) und der Angriff, der den Helden in die Zuflucht treibt. Startort und Zuflucht haben ein Zentrallager. Bis die Fraktionsreihen spielbar sind, führt die Reise danach zur Szene „Ankunft im Kronreich“ bei Kornwik mit den Startvorteilen je Herkunft und weiter in den bestehenden Abschnitt. Spielstände im Erwachen bei Kornwik bleiben gültig.
+
 ## Bestiarium und Völker
 
 Die Gebiete im Bestiarium folgen seit dem 17. 11. 2026 den Kontinenten der verbindlichen Karte. Namen und Spielwerte der Kreaturen sind unverändert.

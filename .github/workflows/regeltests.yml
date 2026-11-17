@@ -20,8 +20,12 @@ jobs:
       - name: JavaScript-Syntax prüfen
         run: |
           node --check spiel/klassen.js
+          node --check spiel/faehigkeiten.js
+          node --check spiel/kampf.js
           node --check spiel/welt.js
           node --check spiel/regeln.js
           node --check spiel/spiel.js
       - name: Spielregeln testen
-        run: node --test spiel/regeln.test.cjs
+        run: |
+          node --test spiel/regeln.test.cjs
+          node --test spiel/kampf.test.cjs

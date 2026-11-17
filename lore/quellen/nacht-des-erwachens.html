@@ -1,0 +1,1165 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nacht des Erwachens · Quellen · Aschenkrone</title>
+  <link rel="stylesheet" href="../../bestiarium/stil.css">
+  <link rel="stylesheet" href="../stil.css">
+</head>
+<body>
+  <header class="masthead">
+    <div class="wrap">
+      <p class="wordmark">Aschenkrone · Weltbuch</p>
+      <h1>Die Nacht des Erwachens</h1>
+      <nav class="lore-nav" aria-label="Quelltexte">
+        <a href="../index.html">Zum Weltbuch</a><a href="weltbuch.html">Weltbuch 2.0</a><a href="menschen.html">Menschen</a><a href="untote.html">Untote</a><a href="elfen.html">Elfen</a><a href="orks.html">Orks</a><a href="zwerge.html">Zwerge</a><a href="nacht-des-erwachens.html">Nacht des Erwachens</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap lore quelltext">
+<nav class="inhalt" aria-label="Inhalt">
+<h2>Inhalt</h2>
+<ul>
+<li><a href="#prologe-und-questreihen--die-nacht-des-erwachens"
+id="toc-prologe-und-questreihen--die-nacht-des-erwachens">Prologe und
+Questreihen – Die Nacht des Erwachens</a>
+<ul>
+<li><a href="#überblick" id="toc-überblick">Überblick</a></li>
+<li><a href="#gemeinsame-zeitlinie"
+id="toc-gemeinsame-zeitlinie">Gemeinsame Zeitlinie</a></li>
+<li><a href="#menschen" id="toc-menschen">Menschen</a></li>
+<li><a href="#elfen" id="toc-elfen">Elfen</a></li>
+<li><a href="#zwerge" id="toc-zwerge">Zwerge</a></li>
+<li><a href="#orks" id="toc-orks">Orks</a></li>
+<li><a href="#untote" id="toc-untote">Untote</a></li>
+<li><a href="#weltquest-das-ende-der-nacht"
+id="toc-weltquest-das-ende-der-nacht">Weltquest: „Das Ende der
+Nacht“</a></li>
+<li><a href="#kreuzungen-zwischen-den-reihen"
+id="toc-kreuzungen-zwischen-den-reihen">Kreuzungen zwischen den
+Reihen</a></li>
+<li><a href="#umsetzung-im-spiel" id="toc-umsetzung-im-spiel">Umsetzung
+im Spiel</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="prologe-und-questreihen--die-nacht-des-erwachens">Prologe und
+Questreihen – Die Nacht des Erwachens</h1>
+<ol start="17" type="1">
+<li>Nov. 2026 · Henry. Von Henry am 17. 11. 2026 bestätigt,
+einschließlich der Punkte, die zur Bestätigung offen waren.</li>
+</ol>
+<p>Alle 15 Prologe spielen in derselben Nacht im Herbst 612 n. E., der
+Nacht des Erwachens, und jede Fraktionsreihe folgt danach Stufe für
+Stufe der bestehenden Hauptquest ihrer Fraktion. So erzählt der Spieler
+die Hauptquest als Geschichte seines eigenen Helden, und wer später ein
+anderes Volk spielt, erkennt dieselbe Nacht von der anderen Seite
+wieder.</p>
+<p><strong>Stand im Spiel:</strong> Die 15 Prologe sind spielbar
+(<code>spiel/startpunkte.js</code>). Die Entscheidungen der Prologe
+werden als Marken <code>nacht-…</code> gespeichert. Fraktionsreihen,
+Volksquests und Weltquest sind hier festgehalten und noch nicht
+spielbar. Bis dahin führt der Weg nach jedem Prolog in den bestehenden
+Abschnitt bei Kornwik.</p>
+<h2 id="überblick">Überblick</h2>
+<p>Was in der Nacht des Erwachens geschieht: Obersteigerin Kuni
+Lampenlicht bricht im Tiefen Stollen in die Halle aus glühendem Erz
+durch, das Herz des Berges. Im selben Augenblick bebt der Mutterberg so
+stark wie seit dem Aschenwinter nicht, und neue Glutspalten öffnen sich.
+Weit im Norden spürt Morthan Vel die freigesetzte Glut wie ein Meer aus
+Lebenskraft und vollzieht noch in derselben Nacht ein großes Ritual an
+den Fleischaltären. Die Fäulnis springt: Schiffe, die schon auf See
+sind, landen, Sporen treiben weiter, Täler der Blutholden kippen. Der
+Kult nutzt die Unruhe und schlägt in der Nacht gegen die Ewige Flamme
+zu.</p>
+<p>Aufbau je Fraktion:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Teil</th>
+<th>Umfang</th>
+<th>Inhalt</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Prolog (Tutorial)</td>
+<td>3 Kapitel</td>
+<td>1. Heimat und Bewegung, 2. Kampf und Klassenfähigkeit, 3. Ressource
+und erste Entscheidung. Endet mit einem Angriff, der den Helden aus
+seiner Heimat treibt</td>
+</tr>
+<tr class="even">
+<td>Fraktionsreihe</td>
+<td>5 Akte</td>
+<td>Akt 1 bis 5 entsprechen den Stufen 1 bis 5 der Hauptquest der
+Fraktion. Akt 3 bringt die Spezialisierung (Quest-Stufe 3, Variante A
+oder B). Akt 5 führt zum Treffen mit den beiden anderen Fraktionen des
+Volks</td>
+</tr>
+<tr class="odd">
+<td>Volksquest</td>
+<td>je Volk 1</td>
+<td>Vereinigung (Eroberung oder Diplomatie) und das große Ritual des
+Volks. Danach wird die Meisterklasse frei (max. 3 Meisterhelden je
+Volk)</td>
+</tr>
+<tr class="even">
+<td>Weltquest</td>
+<td>1, zweiseitig</td>
+<td>Die Lebenden gegen Fäulnis und Mutterberg; die Untoten spielen
+dieselbe Weltquest als Gegenseite</td>
+</tr>
+</tbody>
+</table>
+<p>Wo der Kanon den ersten Vorschlag korrigiert:</p>
+<ul>
+<li><strong>Orden der Flamme:</strong> Seit dem Krieg der Drei (410 n.
+E.) gab es keinen großen Angriff aus dem Norden. Statt eines
+Untotenangriffs übers Meer kommt der Schlag von innen: Kultisten löschen
+Wachfeuer, ein Draugr erhebt sich im Aschenkloster, vor der Nordwacht
+liegt nur ein einzelnes Geisterschiff.</li>
+<li><strong>Hüter des Weltenbaums:</strong> Der Aschenast ist schon seit
+dem Aschenwinter tot. In der Nacht stirbt kein neuer Ast, sondern der
+Aschenast glüht zum ersten Mal wie offenes Feuer, und die Welke
+steigt.</li>
+<li><strong>Weltquest:</strong> Die Untoten verhandeln mit niemandem,
+und die Orks schließen keine Bündnisse. „Alle Völker gemeinsam“ geht
+deshalb nicht. Menschen, Elfen und Zwerge können sich verbünden, die
+Orks kämpfen über Verträge und gemeinsame Schlachten mit, Zwerge und
+Orks nur nebeneinander, nie miteinander. Die Untoten sind die
+Gegenseite.</li>
+</ul>
+<p>Von Henry bestätigt (17. 11. 2026): Der Name „Nacht des Erwachens“
+und ihr Datum (Herbst 612 n. E.); Morthan spürt die Glut als Lebenskraft
+und löst damit den Sprung der Fäulnis aus; ein verschollener Trupp der
+Tiefgräber taucht am Mutterberg auf; die Figuren, die nur in den
+Prologen vorkommen.</p>
+<h2 id="gemeinsame-zeitlinie">Gemeinsame Zeitlinie</h2>
+<p>Die Nacht dauert von der Abenddämmerung bis zum Morgengrauen, und
+alle 15 Prologe enden mit ihr. Die Stunden sind Ortszeit des Erzählers
+und dienen nur der Reihenfolge.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Stunde</th>
+<th>Ort</th>
+<th>Ereignis</th>
+<th>Erlebt im Prolog</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Abend</td>
+<td>Glutberg, Nordwacht</td>
+<td>Die Ewige Flamme wird schwächer, Kultisten löschen die ersten
+Wachfeuer</td>
+<td>Orden der Flamme</td>
+</tr>
+<tr class="even">
+<td>Abend</td>
+<td>Perlvik</td>
+<td>Ein Schmugglerschiff aus dem Norden läuft ein, mit Aethari-Schriften
+und gefangenen Elfenhändlern</td>
+<td>Freie Häfen</td>
+</tr>
+<tr class="odd">
+<td>Abend</td>
+<td>Palast der Tausend Stimmen</td>
+<td>Die Geisteradligen flüstern von einem Aufstand, Aldric schweigt</td>
+<td>Hof der Bleichen Krone</td>
+</tr>
+<tr class="even">
+<td>Mitternacht</td>
+<td>Tiefer Stollen</td>
+<td>Kuni Lampenlicht bricht in die Halle der Tiefenglut durch</td>
+<td>Tiefgräber</td>
+</tr>
+<tr class="odd">
+<td>Mitternacht</td>
+<td>Mutterberg</td>
+<td>Das stärkste Beben seit dem Aschenwinter, neue Glutspalten öffnen
+sich unter den Dörfern</td>
+<td>Aschenclan, Grüne Banner (Beben), Staubreiter (Brunnen sinkt)</td>
+</tr>
+<tr class="even">
+<td>Mitternacht</td>
+<td>Zollpass, Essenfels</td>
+<td>Das Beben ist bis über die Meerenge zu spüren, Ortwins Rune aus
+Tiefenglut schreit in Ghrash</td>
+<td>Tiefes Königreich, Runenschmiede</td>
+</tr>
+<tr class="odd">
+<td>Mitternacht</td>
+<td>Weltenbaum</td>
+<td>Der Aschenast glüht wie offenes Feuer, die Welke steigt</td>
+<td>Hüter des Weltenbaums, Schattenblüte (alle Blüten öffnen sich)</td>
+</tr>
+<tr class="even">
+<td>Nach Mitternacht</td>
+<td>Tempel der Fleischaltäre</td>
+<td>Morthan spürt die Glut und vollzieht das große Altarritual, die
+Fäulnis springt</td>
+<td>Fäulnisbrut</td>
+</tr>
+<tr class="odd">
+<td>Zweite Hälfte der Nacht</td>
+<td>Nordkap, Täler der Blutholden, Knocheninseln</td>
+<td>Faulende Schiffe landen am Nordkap, ein Tal der Blutholden kippt in
+die Fäulnis, ein Wrack treibt an die Knocheninseln</td>
+<td>Dornenklingen, Die Erinnernden, Fäulnisbrut</td>
+</tr>
+<tr class="even">
+<td>Zweite Hälfte der Nacht</td>
+<td>Westmark</td>
+<td>Die Vorhut der Rostsegel landet bei Westvik</td>
+<td>Kronreich</td>
+</tr>
+<tr class="odd">
+<td>Morgengrauen</td>
+<td>Kronhall</td>
+<td>König Harald IV. bricht zusammen, der Kult flüstert ihm vom ewigen
+Leben</td>
+<td>Kronreich (Nachricht am Ende des Prologs)</td>
+</tr>
+</tbody>
+</table>
+<p>Danach: Die Fraktionsreihen laufen ab Herbst 612 n. E. parallel. Akt
+1 und 2 spielen im ersten Jahr nach der Nacht, Akt 3 bis 5 in den beiden
+Jahren darauf. Volksquests und Weltquest folgen ohne festes Datum, weil
+sie vom Spielverlauf abhängen.</p>
+<h2 id="menschen">Menschen</h2>
+<p>Die Menschen erleben die Nacht als Verrat von innen und Feuer von
+außen: Der Kult schlägt am Glutberg und in Perlvik zu, die Rostsegel
+landen an der Westmark, und am Morgen bricht der König zusammen.</p>
+<h3 id="kronreich-leicht-eine-krone-ein-volk">Kronreich (leicht): „Eine
+Krone, ein Volk“</h3>
+<p>Der Held stammt aus Westvik, einem Hafendorf der Westmark, und dient
+in der Landwehr des Jarls.</p>
+<p><strong>Prolog „Feuer über Westvik“</strong></p>
+<ol type="1">
+<li>Heimat: Erntefest in der Methalle, Wege zwischen Hof, Hafen und
+Kornspeicher, ein Gespräch mit dem Skalden über den Roten Sommer
+588.</li>
+<li>Kampf: Mitten in der Nacht landet die Vorhut der Rostsegel. Der Held
+verteidigt den Kornspeicher und lernt die erste Fähigkeit seiner
+Klasse.</li>
+<li>Korn und Entscheidung: Der Dorfvorsteher will den Orks heimlich Korn
+als Tribut geben, wie es andere Jarle der Westmark tun. Der Held stimmt
+zu (weniger Tote, aber Verrat am König) oder verweigert. Angriff: Die
+Rostsegel brennen den Hafen nieder. Der Held flieht mit den Überlebenden
+nach Kronhall und erfährt dort, dass Harald IV. im Morgengrauen
+zusammengebrochen ist.</li>
+</ol>
+<p><strong>Fraktionsreihe</strong></p>
+<ol type="1">
+<li>Akt 1, Der Thron wankt: Der Held wird Bote zwischen Prinzessin
+Astrid und Jarl Ragnvald. Ein Kultist am Krankenbett des Königs wird
+entlarvt oder entkommt.</li>
+<li>Akt 2, Feuer an der Westmark: Rückkehr nach Westvik. Die Rostsegel
+vertreiben oder mit Kapitän Urgash einen Frieden aushandeln. Der Tribut
+aus dem Prolog wird hier aufgedeckt oder bleibt geheim.</li>
+<li>Akt 3, Die abtrünnigen Häfen: Auf dem Reichsthing oder vor Perlvik
+die Häfen zurückgewinnen. Spezialisierung wählen.</li>
+<li>Akt 4, Der Schwur am Glutberg: Mit Korn über den Eispass zum Orden.
+Der Held erlebt, wie schwach die Ewige Flamme seit der Nacht
+brennt.</li>
+<li>Akt 5, Das Alte Reich ersteht neu: Treffen der drei Fraktionen auf
+dem großen Thing in Kronhall. Leitet die Volksquest ein.</li>
+</ol>
+<h3 id="freie-häfen-mittel-jedes-meer-ist-ein-weg">Freie Häfen (mittel):
+„Jedes Meer ist ein Weg“</h3>
+<p>Der Held ist Seesoldat oder Agent der Stillen Feder in Perlvik.</p>
+<p><strong>Prolog „Fracht aus dem Norden“</strong></p>
+<ol type="1">
+<li>Heimat: Perlvik bei Nacht, Leuchtturm, Börse und Hafenviertel mit
+Zwergen und Elfen. Erster Auftrag für die Gilde.</li>
+<li>Kampf: Ein Schmugglerschiff aus dem Norden wird durchsucht. Die
+Besatzung wehrt sich. Im Laderaum liegen Aethari-Schriften und
+gefesselte Elfenhändler.</li>
+<li>Gold und Entscheidung: Der Reeder bietet Bestechungsgold. Der Held
+nimmt es (Gold, aber die Spur verliert sich) oder meldet alles der
+Stillen Feder. Angriff: Eine Kultzelle setzt das Gildenhaus mit der
+Fracht in Brand. Ein Kultist stirbt in den Flammen, die Schriften
+verschwinden. Der Held flieht mit den befreiten Elfen auf die
+Zollinseln.</li>
+</ol>
+<p><strong>Fraktionsreihe</strong></p>
+<ol type="1">
+<li>Akt 1, Die Zollinseln: Handelsrouten sichern, Piraten vertreiben.
+Die Leiche des Kultisten aus dem Brand ist nicht mehr auffindbar, und
+die Gilde sucht einen Seesoldaten der Bundesflotte, der seit Wochen
+vermisst wird.</li>
+<li>Akt 2, Gold und Eisen: Verhandlungen mit Meister Orrin Kupferbart
+und der Königsbank, Schwarzpulver aus Essenfels.</li>
+<li>Akt 3, Der Handel mit den Grünen Bannern: Fahrt zum Grünmarkt,
+erster Frieden mit einem Ork-Clan. Spezialisierung wählen.</li>
+<li>Akt 4, Die Kronschuld: Das Kronreich durch Kredite an den
+Verhandlungstisch zwingen oder Kronhall fallen lassen.</li>
+<li>Akt 5, Die Flotte gen Norden: Die Flotte liegt vor dem Glutberg.
+Treffen der drei Fraktionen. Leitet die Volksquest ein.</li>
+</ol>
+<h3 id="orden-der-flamme-schwer-solange-die-flamme-brennt">Orden der
+Flamme (schwer): „Solange die Flamme brennt“</h3>
+<p>Der Held ist Novize im Aschenkloster und hat gerade seine Gelübde
+abgelegt.</p>
+<p><strong>Prolog „Die Nacht der kalten Feuer“</strong></p>
+<ol type="1">
+<li>Heimat: Aschenkloster und Runensteine am Glutberg, Gebet vor der
+Ewigen Flamme. Die Seherin Freydis sieht im Feuer ein schwarzes
+Herz.</li>
+<li>Kampf: Ein gefallener Ordensbruder steht im Kloster als Draugr auf.
+Der Held verbrennt ihn mit seiner ersten Klassenfähigkeit.</li>
+<li>Glaube und Entscheidung: Die Wachfeuer der Nordwacht erlöschen eins
+nach dem anderen, vor der Küste liegt ein einzelnes Geisterschiff im
+Nebel. Der Held entzündet ein Wachfeuer mit eigenem Glauben (kostet
+Glaube) oder jagt die Kultisten, die es gelöscht haben. Angriff: Die
+Kultisten stürmen den Wachturm. Der Held rettet sich zum Glutberg und
+sieht, dass die Ewige Flamme fast erloschen ist.</li>
+</ol>
+<p><strong>Fraktionsreihe</strong></p>
+<ol type="1">
+<li>Akt 1, Die flackernde Flamme: Herausfinden, warum die Flamme
+schwindet, und sie neu entfachen.</li>
+<li>Akt 2, Verräter im Feuer: Mit Freydis den Kult im Orden aufspüren.
+Die Spur führt zum Bleichen Skalden.</li>
+<li>Akt 3, Der Kreuzzug ruft: Kronreich und Häfen um Korn und Schiffe
+bitten oder sie zwingen. Spezialisierung wählen.</li>
+<li>Akt 4, Die Elfen am Weltenbaum: Gesandtschaft zur Wurzelhalle.
+Kaelith Eisdorn und die Dornenklingen empfangen den Helden als
+Waffenbruder.</li>
+<li>Akt 5, Über das Nordmeer: Der Kreuzzug sammelt sich am Glutberg.
+Treffen der drei Fraktionen. Leitet die Volksquest ein.</li>
+</ol>
+<h3 id="volksquest-menschen-das-alte-reich">Volksquest Menschen: „Das
+Alte Reich“</h3>
+<p>Die Fraktionen treffen sich auf dem großen Thing in Kronhall.
+Vereinigung durch Eroberung (Kronhall, Perlvik oder Glutberg) oder durch
+Diplomatie (Handelsvertrag, Bündnis, Treueschwur). Danach verlangt die
+Quest, beide Bedrohungsleisten zu senken, und der Held steigt zum
+Bannerjarl auf. Als letzte Prüfung entlarvt das vereinte Reich den
+Bleichen Skalden; je nach Weg fällt er im Kronreich, in Perlvik oder am
+Glutberg.</p>
+<h2 id="elfen">Elfen</h2>
+<p>Die Elfen erleben die Nacht am Weltenbaum: Der Aschenast glüht wie
+Feuer, die Welke steigt, alle schwarzen Blüten öffnen sich zugleich, und
+am Nordkap landen faulende Schiffe.</p>
+<h3 id="dornenklingen-leicht-der-dorn-schützt-die-blüte">Dornenklingen
+(leicht): „Der Dorn schützt die Blüte“</h3>
+<p>Der Held ist ein junger Krieger der Dornenwacht in Hochdorn und
+reitet unter Sylmar Windläufer.</p>
+<p><strong>Prolog „Segel im Nordmeer“</strong></p>
+<ol type="1">
+<li>Heimat: Hochdorn, die Dornhaine und ein Ritt auf dem Sturmhirsch an
+die verbrannte Küste des Nordkaps.</li>
+<li>Kampf: Drei faulende Schiffe landen. Der Held kämpft gegen
+verwesende Kultisten und lernt die erste Klassenfähigkeit. Im Laderaum
+findet er einen gefangenen Seemann aus Perlvik.</li>
+<li>Dornholz und Entscheidung: Orwen der Jüngere will die Küste sofort
+niederbrennen, auch mit Elfen und dem Gefangenen darin. Der Held brennt
+(Fäulnis gestoppt, Verluste) oder rettet erst die Lebenden (mehr
+Fäulnis, ein Zeuge). Angriff: Gefallene Dornenklingen erheben sich im
+verseuchten Land als Gebundene. Der Held zieht sich nach Hochdorn
+zurück.</li>
+</ol>
+<p><strong>Fraktionsreihe</strong></p>
+<ol type="1">
+<li>Akt 1, Das Nordkap: Die Schiffe zurückschlagen und die Fäulnis von
+der Küste brennen.</li>
+<li>Akt 2, Der Dornwall: Den lebenden Wall durch die Hirschsteppe
+vollenden. Der gerettete Seemann erzählt von Schmugglern, die für die
+Erinnernden Elfen kaufen.</li>
+<li>Akt 3, Klinge und Flamme: Gesandte des Ordens der Flamme begleiten
+und das Bündnis schließen. Spezialisierung wählen.</li>
+<li>Akt 4, Orwens Fahrt: Orwen rüstet heimlich drei Wachtschiffe. Der
+Held hält ihn auf oder folgt ihm. Danach Verhandlungen mit Wurzelrat und
+Schattenblüte (Stufe 4 der Hauptquest: Der Riss heilt).</li>
+<li>Akt 5, Am Weltenbaum: Treffen der drei Fraktionen vor der
+Wurzelhalle. Leitet die Volksquest ein.</li>
+</ol>
+<h3 id="schattenblüte-mittel-im-schatten-blüht">Schattenblüte (mittel):
+„Im Schatten blüht“</h3>
+<p>Der Held ist ein junger Gartenwächter im Schwarzen Garten und ein
+Freund von Iselde.</p>
+<p><strong>Prolog „Die Nacht der offenen Kelche“</strong></p>
+<ol type="1">
+<li>Heimat: Velasyr auf Stelzen, Kanäle und Laternen, Wege durch die
+Nebelmarschen.</li>
+<li>Kampf: Um Mitternacht öffnen sich alle schwarzen Blüten zugleich.
+Späher der Hüter schleichen in den Garten. Der Held stellt sie mit
+seiner ersten Klassenfähigkeit.</li>
+<li>Nektar und Entscheidung: Die Kelche geben in einer Nacht so viel
+Nektar wie sonst in einem Jahr. Iselde zeigt dem Helden eine Wurzel, die
+nach Norden führt. Der Held erntet alles (viel Nektar, Welke steigt)
+oder lässt die Hälfte stehen und schweigt über die Wurzel. Angriff:
+Hainwächter, die Waldhauptmann Varyn in die Marschen geschickt hat,
+überschreiten ihre Befehle und zünden einen Teil des Gartens an. Der
+Held flieht mit Iselde nach Velasyr.</li>
+</ol>
+<p><strong>Fraktionsreihe</strong></p>
+<ol type="1">
+<li>Akt 1, Der Schwarze Garten: Die Ernte sichern und die Nebelmarschen
+gegen die Hüter schließen.</li>
+<li>Akt 2, Schleier über Perlvik: Mit Saelith der Stimme ein
+Spionagenetz in Perlvik knüpfen und ihre Schuld bei der Stillen Feder
+begleichen. Dabei geraten die Elfenhändler aus dem Prolog der Freien
+Häfen ins Blickfeld.</li>
+<li>Akt 3, Die bittere Wahrheit: Mit Iselde beweisen, dass der Nektar
+Saft des Weltenbaums ist, und wählen: weiter ernten oder den Garten
+verbrennen. Spezialisierung wählen.</li>
+<li>Akt 4, Die Rückkehr der Verbannten: Hüter und Dornenklingen
+gewinnen, durch Gift im Wurzelrat oder durch den Verzicht auf den
+Garten.</li>
+<li>Akt 5, Am Weltenbaum: Treffen der drei Fraktionen vor der
+Wurzelhalle. Leitet die Volksquest ein.</li>
+</ol>
+<h3 id="hüter-des-weltenbaums-schwer-die-wurzel-vergisst-nicht">Hüter
+des Weltenbaums (schwer): „Die Wurzel vergisst nicht“</h3>
+<p>Der Held ist Schüler der Baumsängerin Ilvara Aschenblatt in
+Ylvenor.</p>
+<p><strong>Prolog „Der brennende Ast“</strong></p>
+<ol type="1">
+<li>Heimat: Ylvenor im Geäst, Hängebrücken, Wurzelhalle und der
+Laubmarkt.</li>
+<li>Kampf: Um Mitternacht glüht der Aschenast wie offenes Feuer. Glut
+tropft auf den Waldboden, und in der Unruhe schleichen Späher der
+Schattenblüte durch den Wald. Der Held stellt sie mit Waldhauptmann
+Varyn.</li>
+<li>Weltensaft und Entscheidung: Die Welke steigt, und der Baum verliert
+Saft. Der Held löscht die Glut mit Weltensaft (kostet Saft) oder lässt
+sie brennen und folgt Ilvara. Ilvara will dem Rat endlich vom Aschenpakt
+erzählen, Wurzelsprecher Caelorin verbietet es. Angriff: Ein Waldbrand
+unter dem Aschenast zwingt Ylvenor zur Flucht in die Wurzelhalle. Ilvara
+verlässt mit dem Helden heimlich den Wald.</li>
+</ol>
+<p><strong>Fraktionsreihe</strong></p>
+<ol type="1">
+<li>Akt 1, Der glühende Ast: Mit Ilvara herausfinden, warum der Ast
+glüht, und den Aschenpakt wiederentdecken.</li>
+<li>Akt 2, Die Aschenschuld: Mit dem Aschenclan das Aschenlied singen.
+Spiegelt Akt 2 des Aschenclans.</li>
+<li>Akt 3, Die alte Kränkung: Die verweigerte Hilfe der Langen Nacht
+wiedergutmachen, Bündnis mit Kronreich oder Orden. Spezialisierung
+wählen.</li>
+<li>Akt 4, Die verlorenen Zweige: Dornenklingen und Schattenblüte zurück
+in den Wurzelrat holen.</li>
+<li>Akt 5, Am Weltenbaum: Treffen der drei Fraktionen vor der
+Wurzelhalle. Leitet die Volksquest ein.</li>
+</ol>
+<h3 id="volksquest-elfen-das-immergrüne-reich">Volksquest Elfen: „Das
+Immergrüne Reich“</h3>
+<p>Vereinigung durch Eroberung (Hochdorn, Ylvenor oder Velasyr) oder
+durch den Wurzelschwur. Jede Fraktion stellt ihre Bedingung: Garten
+aufgeben, Krieg gegen die Fäulnis mittragen, Verbannung aufheben. Danach
+singen Baumsänger, Dornweber und Nebelweber den Grünen Gesang, und der
+Held steigt zum Immergrünen Sänger auf. Die Welke sinkt erst dauerhaft,
+wenn der Tempel der Fleischaltäre fällt; das führt in die Weltquest.</p>
+<h2 id="zwerge">Zwerge</h2>
+<p>Die Zwerge lösen die Nacht aus. Die Tiefgräber erleben den Durchbruch
+selbst, das Königreich und die Runenschmiede spüren nur das Beben und
+hören, was die Tiefenglut zu sagen hat.</p>
+<h3 id="tiefes-königreich-leicht-was-der-stein-hält">Tiefes Königreich
+(leicht): „Was der Stein hält“</h3>
+<p>Der Held dient in der Eisenwacht am Zollpass unter Schildherr Hagen
+Felswall.</p>
+<p><strong>Prolog „Zoll in der Bebennacht“</strong></p>
+<ol type="1">
+<li>Heimat: Ambossheim, die Halle der Steinahnen und der Weg über die
+Pass-Straße zur Festung am Zollpass.</li>
+<li>Kampf: Ein Erzzug der Tiefgräber will den Zoll umgehen. Der Held
+stellt die Schmuggler mit seiner ersten Klassenfähigkeit. Um Mitternacht
+bebt der Pass.</li>
+<li>Hort und Entscheidung: Auf den Karren liegt Tiefenglut. Ein Bote von
+Schatzmeister Dankwart Goldzunge will sie heimlich kaufen. Der Held
+beschlagnahmt sie für die Krone (Hort, Erzfieber +) oder lässt den
+Handel zu und merkt sich den Namen. Angriff: Das Beben reißt eine Mauer
+der Zollfestung ein, die Tiefgräber stürmen durch die Lücke. Der Held
+bringt die Nachricht nach Ambossheim.</li>
+</ol>
+<p><strong>Fraktionsreihe</strong></p>
+<ol type="1">
+<li>Akt 1, Der Zollpass: Den Pass zurückgewinnen und den Erzhandel über
+die Königsbank lenken.</li>
+<li>Akt 2, Gold für die Häfen: Den Kredit an die Freien Häfen in ein
+Bündnis verwandeln. Spiegelt Akt 2 der Freien Häfen.</li>
+<li>Akt 3, Der Runenstreit: Die Runenschmiede zurückgewinnen, durch
+Anerkennung ihrer Freiheit oder durch die Belagerung von Essenfels.
+Spezialisierung wählen.</li>
+<li>Akt 4, Die Eidbrecher: Mit Thronerbin Hadwig Eisenhand die
+Tiefgräber zum Schwur zwingen und entscheiden: Stollen versiegeln oder
+unter der Krone weitergraben.</li>
+<li>Akt 5, Der Schwur am Amboss: Treffen der drei Fraktionen im Hohen
+Amboss. Leitet die Volksquest ein.</li>
+</ol>
+<h3 id="tiefgräber-mittel-tiefer-immer-tiefer">Tiefgräber (mittel):
+„Tiefer, immer tiefer“</h3>
+<p>Der Held arbeitet im Trupp von Obersteigerin Kuni Lampenlicht am
+vordersten Ort des Tiefen Stollens.</p>
+<p><strong>Prolog „Das Herz bricht auf“</strong></p>
+<ol type="1">
+<li>Heimat: Kluftheim mit Aufzügen und Schmelzhütten, dann die lange
+Fahrt durch den Stollenmund unter die Meerenge.</li>
+<li>Kampf: Kuni bricht in eine Halle aus glühendem Erz durch, größer als
+Ambossheim. Aus der Glut lösen sich Schatten mit Hauern und Narben. Der
+Held wehrt sie mit seiner ersten Klassenfähigkeit ab. Erzspürer Alberich
+hört sie in einer fremden Sprache rufen.</li>
+<li>Erz und Entscheidung: Der Berg bebt, ein Seitenstollen stürzt ein
+und schneidet einen zweiten Trupp ab. Der Held trägt Tiefenglut hinaus
+(viel Erz, Glut +) oder gräbt nach dem abgeschnittenen Trupp (kein Erz,
+aber Gefährten). Angriff: Glühendes Gestein flutet den vorderen Stollen.
+Der Held flieht zum Stollenmund. Der abgeschnittene Trupp bleibt
+verschollen.</li>
+</ol>
+<p><strong>Fraktionsreihe</strong></p>
+<ol type="1">
+<li>Akt 1, Erzhafen halten: Die Rostsegel von der Westküste und den
+Erzschiffen vertreiben.</li>
+<li>Akt 2, Das Klopfen im Fels: Mit Alberich die Stimmen ergründen und
+entdecken, dass die Tiefenglut die erstarrte Glut der Ork-Ahnen ist.
+Spuren führen zum verschollenen Trupp am Mutterberg.</li>
+<li>Akt 3, Das Grabrecht: Den Strafzug von Thronerbin Hadwig abwehren
+oder der Krone einen Erzvertrag abhandeln. Spezialisierung wählen.</li>
+<li>Akt 4, Das Herz des Berges: Den Stollen bis ins Herz treiben oder
+ihn selbst versiegeln, bevor der Berg ausbricht.</li>
+<li>Akt 5, Der Schwur am Amboss: Treffen der drei Fraktionen im Hohen
+Amboss, als Herren des Erzes oder als die, die den Stollen geschlossen
+haben. Leitet die Volksquest ein.</li>
+</ol>
+<h3 id="runenschmiede-schwer-die-rune-vergisst-nicht">Runenschmiede
+(schwer): „Die Rune vergisst nicht“</h3>
+<p>Der Held ist Geselle in Essenfels und arbeitet mit Gesellin Gunda für
+Runenmeister Ortwin Siebenhammer.</p>
+<p><strong>Prolog „Die schreiende Rune“</strong></p>
+<ol type="1">
+<li>Heimat: Essenfels mit seinen hundert Essen, der Vorhof der
+Runenhalle und das Nordtor, wo Waffen nach Norden gehen.</li>
+<li>Kampf: Am Nordtor wird ein Schmugglerboot aus Velasyr gestellt,
+Nektar unter Pulverfässern. Der Held kämpft gegen die Schmuggler und
+lernt seine erste Klassenfähigkeit.</li>
+<li>Runen und Entscheidung: Um Mitternacht schreit Ortwins Rune aus
+Tiefenglut in Ghrash, und alle Runen in der Werkstatt glühen auf. Der
+Held gibt Ortwin seine Runen, um die Werkstatt zu bannen (kostet Runen),
+oder er schreibt die Namen auf, die die Rune ruft. Angriff: Auf der
+Funkeninsel zünden die glühenden Runen das Pulverlager. Der Held rettet
+Wolfram den Pulvermacher aus den Trümmern und kehrt nach Essenfels
+zurück.</li>
+</ol>
+<p><strong>Fraktionsreihe</strong></p>
+<ol type="1">
+<li>Akt 1, Die Funkeninsel: Mit Wolfram die erste Runenkanone bauen und
+die Insel neu aufbauen.</li>
+<li>Akt 2, Klingen für die Flamme: Bündnis mit dem Orden der Flamme. Die
+Runenmeister des Ordens zeigen, dass ihre Flammenrunen seit der Nacht
+schwächer glühen.</li>
+<li>Akt 3, Ortwins Flüstern: Die Namen aus dem Prolog deuten und wählen:
+weiter mit Tiefenglut schmieden oder verzichten. Spezialisierung
+wählen.</li>
+<li>Akt 4, Die freie Gilde: Die Krone zur Anerkennung der Gilde bringen
+oder Ambossheim bezwingen, dann die Tiefgräber gewinnen.</li>
+<li>Akt 5, Der Schwur am Amboss: Treffen der drei Fraktionen im Hohen
+Amboss. Leitet die Volksquest ein.</li>
+</ol>
+<h3 id="volksquest-zwerge-das-reich-unter-dem-stein">Volksquest Zwerge:
+„Das Reich unter dem Stein“</h3>
+<p>Vereinigung durch Eroberung (Ambossheim, Essenfels oder Kluftheim)
+oder durch den Schwur am Amboss. Bedingungen: Aschengesetz anerkennen,
+Freiheit der Gilde wahren, Grabrecht oder Entschädigung für die
+Tiefgräber. Danach schneiden Steinsprecher, Runenmeister und Erzspürer
+die Siegelrune am Stollenmund, und der Held steigt zum Siegelmeister
+auf. Am Ende steht die Wahl zwischen Weg des Steins und Weg des Erzes;
+sie bestimmt die Rolle der Zwerge in der Weltquest.</p>
+<h2 id="orks">Orks</h2>
+<p>Die Orks erleben die Nacht als Zorn der Mutter: Der Berg bebt,
+Glutspalten öffnen sich, der Brunnen von Ur-Taal sinkt, und die Ahnen
+schreien in der Glut.</p>
+<h3 id="grüne-banner-leicht-wo-gras-wächst">Grüne Banner (leicht): „Wo
+Gras wächst“</h3>
+<p>Der Held ist Büffelhirte einer Sippe in den Weiten und Lehrling von
+Oghul dem Alten.</p>
+<p><strong>Prolog „Die Erde brüllt“</strong></p>
+<ol type="1">
+<li>Heimat: Kragmar und der Bannerhügel, ein Ritt mit der Herde über die
+Weiten bis an die Grenzwälle.</li>
+<li>Kampf: Um Mitternacht bebt die Erde bis in den Süden, die Herde
+gerät in Panik. Staubreiter nutzen das Chaos für einen Überfall. Der
+Held lernt seine erste Klassenfähigkeit.</li>
+<li>Herden und Entscheidung: Ein verdursteter Staubreiter-Trupp bittet
+um Wasser, weil ihr Brunnen seit Monaten sinkt. Der Held tauscht Wasser
+gegen Vieh, wie es die Clans in Dürrejahren heimlich tun, oder jagt sie
+fort. Oghul legt das Ohr auf den Boden und sagt: Der Berg wurde geweckt.
+Angriff: Ein großer Staubreiter-Haufen bricht durch die Lücke im
+Grenzwall. Der Held rettet, was von der Herde übrig ist, nach
+Kragmar.</li>
+</ol>
+<p><strong>Fraktionsreihe</strong></p>
+<ol type="1">
+<li>Akt 1, Die Weiten schützen: Die Herden sichern und die Grenzwälle
+vollenden.</li>
+<li>Akt 2, Der Grünmarkt: Mit Zesh Silberzahn und Bannerherrin Ulma den
+Handelsvertrag mit den Freien Häfen zum Frieden ausbauen. Spiegelt Akt 3
+der Freien Häfen.</li>
+<li>Akt 3, Der Graue Pass: Den Aschenclan in offener Schlacht schlagen,
+damit er zuhört. Oghul trifft nachts Ahnenmutter Morga. Spezialisierung
+wählen.</li>
+<li>Akt 4, Wasser gegen Vieh: Die Staubreiter mit Herden und Weiderecht
+gewinnen oder Zhar-Kesh einnehmen.</li>
+<li>Akt 5, Der Bannerschwur: Treffen der drei Clans am Mutterberg.
+Leitet die Volksquest ein.</li>
+</ol>
+<h3 id="staubreiter-mittel-was-der-wind-bringt">Staubreiter (mittel):
+„Was der Wind bringt“</h3>
+<p>Der Held ist Dornechsenreiter in der Sippe der Staubkhanin Vashka
+Dornzahn.</p>
+<p><strong>Prolog „Der sinkende Brunnen“</strong></p>
+<ol type="1">
+<li>Heimat: Das Sommerlager am Brunnen von Ur-Taal, ein Ritt über die
+Glasebene, Windseherin Ashka liest im Sand.</li>
+<li>Kampf: Um Mitternacht bebt die Erde, und der Brunnen sinkt um
+Manneshöhe. Am Wasser bricht Streit zwischen den Sippen aus. Der Held
+setzt sich mit seiner ersten Klassenfähigkeit durch.</li>
+<li>Beute und Entscheidung: Vashka lässt die letzte Beute verteilen. Der
+Held gibt seinen Anteil an durstige Sippen (Ansehen) oder behält ihn
+(Beute). Brakk der Hungrige sagt laut, Vashka habe den Brunnen verloren.
+Angriff: Brakks Krieger überfallen in der Nacht Vashkas Zelte. Der Held
+flieht mit Vashka nach Zhar-Kesh.</li>
+</ol>
+<p><strong>Fraktionsreihe</strong></p>
+<ol type="1">
+<li>Akt 1, Der leere Brunnen: Herausfinden, warum der Brunnen sinkt, und
+neues Wasser finden. Die Spur führt zu den Beben unter dem Berg.</li>
+<li>Akt 2, Brakks Aufstand: Brakk niederwerfen oder ihm den großen
+Raubzug geben. Ein Wrack an den Knocheninseln voller zusammengenähter
+Leichen zeigt: Die Fäulnisbrut hat die Orks entdeckt.</li>
+<li>Akt 3, Feuer an der Westmark: Die Westmark plündern oder dem
+Kronreich einen Korntribut abpressen. Spiegelt Akt 2 des Kronreichs.
+Spezialisierung wählen.</li>
+<li>Akt 4, Das grüne Land: Grüne Banner unterwerfen oder Weiderecht
+erhandeln, dann den Aschenclan im Feld oder im Zweikampf bezwingen.</li>
+<li>Akt 5, Der Bannerschwur: Treffen der drei Clans am Mutterberg.
+Leitet die Volksquest ein.</li>
+</ol>
+<h3 id="aschenclan-schwer-nur-die-asche-bleibt">Aschenclan (schwer):
+„Nur die Asche bleibt“</h3>
+<p>Der Held ist junger Narbenträger am Aschenthron und kämpft im Gefolge
+von Durza der Narbigen.</p>
+<p><strong>Prolog „Die Mutter erwacht“</strong></p>
+<ol type="1">
+<li>Heimat: Der Aschenthron am Kraterrand, die Schlackenschmieden von
+Thrak Obsidianhand und der Kreis der Asche.</li>
+<li>Kampf: Ein Übungskampf im Kreis der Asche lehrt die erste
+Klassenfähigkeit. Um Mitternacht reißt das Beben eine Glutspalte unter
+dem Schmiededorf auf.</li>
+<li>Ruhm und Entscheidung: Die Lava bedroht zugleich die Ahnenstätte und
+die Schmieden. Der Held rettet die Ahnenstätte (Ahnen geehrt, Glut sinkt
+leicht) oder die Schmieden (Glutstahl, Ruhm). Ahnenmutter Morga hört im
+Berg ein Klopfen, das nicht von den Ahnen kommt. Angriff: Aus einem
+frischen Felsspalt an der Bergflanke klettern Zwerge mit Grubenlampen
+und Spitzhacken. Der Held kämpft gegen sie, dann stürzt der Spalt ein.
+Kragh Schlackenherz glaubt ihm nicht und schickt ihn mit Morga in den
+Krater.</li>
+</ol>
+<p><strong>Fraktionsreihe</strong></p>
+<ol type="1">
+<li>Akt 1, Der Kreis der Asche: Durzas Herausforderung an Kragh: an
+ihrer Seite kämpfen oder sie aufhalten.</li>
+<li>Akt 2, Der grollende Berg: Mit Morga in den Krater steigen und
+beweisen, dass der Tiefe Stollen den Berg weckt. Morga erinnert sich an
+den Aschenpakt und ruft die Elfen. Spiegelt Akt 2 der Hüter.</li>
+<li>Akt 3, Glutstahl und Eisen: Erz sichern, durch den Zweiten Erzkrieg
+oder durch Handel mit den Menschen nach einer gewonnenen Schlacht.
+Spezialisierung wählen.</li>
+<li>Akt 4, Die Clans beugen: Grüne Banner und Staubreiter im Feld
+schlagen.</li>
+<li>Akt 5, Der Bannerschwur: Treffen der drei Clans am Mutterberg.
+Leitet die Volksquest ein.</li>
+</ol>
+<h3 id="volksquest-orks-das-großbanner">Volksquest Orks: „Das
+Großbanner“</h3>
+<p>Vereinigung durch Eroberung (Kragmar, Zhar-Kesh oder Aschenthron)
+oder durch Handel, Blutbund und Bannerschwur am Mutterberg; der
+Aschenclan schwört nur nach verlorener Schlacht oder Zweikampf. Danach
+entzünden Erdsänger, Windseher und Aschenrufer das Ahnenfeuer, und der
+Held steigt zum Glutkönig auf. Am Ende steht die Wahl zwischen Weg der
+Asche und Weg des Sturms; nur der Weg der Asche führt in die Weltquest
+auf Seiten der Lebenden.</p>
+<h2 id="untote">Untote</h2>
+<p>Die Untoten erleben die Nacht als Hunger: Morthans Ritual lässt die
+Fäulnis springen, ein Tal der Blutholden kippt, und im Palast der
+Tausend Stimmen wollen die Geister endlich sterben. Wie bei den anderen
+Völkern endet jeder Prolog mit einem Angriff, der den Helden
+vertreibt.</p>
+<h3 id="fäulnisbrut-leicht-was-einmal-lebte">Fäulnisbrut (leicht): „Was
+einmal lebte“</h3>
+<p>Der Held war ein Blutholde aus dem Tal von Nachtquell. In der Nacht
+stirbt er im verseuchten Land und erhebt sich als Gebundener.</p>
+<p><strong>Prolog „Das zweite Erwachen“</strong></p>
+<ol type="1">
+<li>Heimat: Der Held erwacht am verfaulten Rand des Tals von Nachtquell,
+wo er gestorben ist, spürt Hunger statt Herzschlag und lernt die
+Bewegung im verseuchten Land, wo Gebundene schneller sind.</li>
+<li>Kampf: Er folgt dem Ruf zu einem Fleischaltar am Talrand, an dem
+Kultisten Morthans großes Ritual aus der Ferne mittragen. Auf dem Weg
+kämpft er gegen Blutholde, die vor der Fäulnis fliehen, und lernt seine
+erste Klassenfähigkeit.</li>
+<li>Fleisch und Entscheidung: Sein neues Fleisch beginnt sofort zu
+faulen. Der Held nimmt einem gefangenen Blutholden das Fleisch (heilt,
+Fleischvorrat) oder lässt ihn laufen; ein Mitglied der Stillen
+beobachtet ihn dabei. Angriff: Blutritter der Erinnernden stürmen das
+Ritualfeld bei Nachtquell und brennen den Altar nieder. Der Held flieht
+nach Osten in die Marschen von Madenmoor.</li>
+</ol>
+<p><strong>Fraktionsreihe</strong></p>
+<ol type="1">
+<li>Akt 1, Der Hunger der Altäre: Die Täler der Blutholden überfallen.
+Das erste Tal ist das eigene Heimattal des Helden.</li>
+<li>Akt 2, Die faulenden Schiffe: Die Fäulnis über das Meer tragen, ans
+Nordkap der Elfen oder an die Knocheninseln der Orks.</li>
+<li>Akt 3, Die Stillen: Die Stillen vernichten oder ihnen insgeheim
+folgen. Spezialisierung wählen.</li>
+<li>Akt 4, Die Grenze fällt: Die Fäulnis bis an Eryndor und den Palast
+der Tausend Stimmen tragen.</li>
+<li>Akt 5, Vor den Toren: Treffen mit den beiden anderen Fraktionen, als
+Eroberer oder als Unterworfener. Leitet die Volksquest ein.</li>
+</ol>
+<h3 id="hof-der-bleichen-krone-mittel-der-könig-ohne-morgen">Hof der
+Bleichen Krone (mittel): „Der König ohne Morgen“</h3>
+<p>Der Held ist ein Geist aus Vaelthar, ein ehemaliger Ritter der
+Hofwache, der seit dreitausend Jahren denselben Gang bewacht.</p>
+<p><strong>Prolog „Die Stimmen werden laut“</strong></p>
+<ol type="1">
+<li>Heimat: Der Palast der Tausend Stimmen, Feste in verlassenen Sälen,
+Bewegung durch Wände. Aldric hört jedes Wort.</li>
+<li>Kampf: Eine Gruppe Geisteradliger will die Krone stehlen, damit alle
+endlich sterben können. Der Held stellt sie mit seiner ersten
+Klassenfähigkeit.</li>
+<li>Seelen und Entscheidung: Ein gefangener Adliger bittet um Gnade. Der
+Held liefert ihn Aldric aus (Seelen) oder lässt ihn entkommen. Aldric
+spricht zum ersten Mal zu ihm: Er brauche bald Körper für sein Volk.
+Angriff: Der Aufstand bricht offen aus, die Säle füllen sich mit
+kämpfenden Geistern. Der Held flieht nach Seelenhafen.</li>
+</ol>
+<p><strong>Fraktionsreihe</strong></p>
+<ol type="1">
+<li>Akt 1, Die Stimmen im Palast: Den Aufstand der Geisteradligen
+niederschlagen.</li>
+<li>Akt 2, Der erste Draugr: Die Kultzelle hat die Leiche des Kultisten
+aus dem Gildenhaus von Perlvik geborgen und mit Totenmagie kalt
+gehalten, denn er hatte der Krone sein Leben geschworen. Der Held fährt
+in diesen Körper und treibt den Kultwert einer Provinz auf das
+Maximum.</li>
+<li>Akt 3, Ein Körper für den König: Am Krankenbett von Harald IV. das
+ewige Leben anbieten und Kronhall ohne Schlacht fallen lassen.
+Spezialisierung wählen.</li>
+<li>Akt 4, Die zweite Lange Nacht: Mit der Geisterflotte die Nordwacht
+überrennen und die Ewige Flamme löschen.</li>
+<li>Akt 5, Vor den Toren: Treffen mit den beiden anderen Fraktionen.
+Leitet die Volksquest ein.</li>
+</ol>
+<h3 id="die-erinnernden-schwer-was-das-blut-erinnert">Die Erinnernden
+(schwer): „Was das Blut erinnert“</h3>
+<p>Der Held ist ein junger Vampir eines alten Hauses und Vogt über das
+Tal von Nachtquell.</p>
+<p><strong>Prolog „Der verweigerte Zehnt“</strong></p>
+<ol type="1">
+<li>Heimat: Eryndor mit seinen Bibliotheken, dann die Reise ins Tal von
+Nachtquell zum Blutzehnt.</li>
+<li>Kampf: In der Nacht kippt der Rand des Tals in die Fäulnis.
+Gebundene greifen die Dörfer an. Der Held kämpft für die Blutholden und
+lernt seine erste Klassenfähigkeit.</li>
+<li>Blut und Entscheidung: Am Morgen verweigert das Dorf den Zehnt, weil
+der versprochene Schutz versagt hat. Der Held nimmt das Blut mit Gewalt
+(Blut, aber das Tal fällt ab) oder verzichtet (Raserei droht, das Tal
+bleibt treu). Beim Trinken sieht er die Erinnerung eines Toten, der als
+Gebundener wieder aufstand. Angriff: Ein Heer der Fäulnisbrut überrennt
+das Tal. Der Held führt die Überlebenden nach Eryndor.</li>
+</ol>
+<p><strong>Fraktionsreihe</strong></p>
+<ol type="1">
+<li>Akt 1, Der Blutzehnt: Die Täler der Blutholden gegen die Fäulnis
+sichern.</li>
+<li>Akt 2, Die Bibliothek der Toten: Die Aethari-Schriften zurückholen,
+die in der Nacht in Perlvik verschwunden sind.</li>
+<li>Akt 3, Das Herz von Eryndor: Den Blutbrunnen wiederherstellen.
+Spezialisierung wählen.</li>
+<li>Akt 4, Die Schlafende: Serathia wecken und die Wahrheit über das
+veränderte Ritual erfahren.</li>
+<li>Akt 5, Vor den Toren: Treffen mit den beiden anderen Fraktionen.
+Leitet die Volksquest ein.</li>
+</ol>
+<h3 id="volksquest-untote-die-vollendeten">Volksquest Untote: „Die
+Vollendeten“</h3>
+<p>Die Vereinigung gelingt nur unter den schweren Bedingungen des
+Kanons: alle drei Hauptfestungen in einer Hand, Aldrics Krone
+unversehrt, Serathia geweckt, die Fäulnis eingebändigt, und das Ritual
+der Vollendung mit der Lebenskraft eines eroberten Reichs. Während des
+Rituals greift der Diener des ersten Toten ein. Gelingt es, steigt der
+Held zum Vollendeten auf.</p>
+<h2 id="weltquest-das-ende-der-nacht">Weltquest: „Das Ende der
+Nacht“</h2>
+<p>Die Weltquest beendet, was in der Nacht des Erwachens begann: Die
+Lebenden müssen den Mutterberg bändigen und die Quelle der Fäulnis
+zerstören, die Untoten spielen dieselbe Quest als Gegenseite. Sie öffnet
+sich für ein Volk, sobald es seine Volksquest abgeschlossen hat, und
+läuft dann neben dem Spiel weiter. Siegbedingungen der Völker bleiben
+unverändert; die Weltquest ist der Weg dorthin, kein neues Ziel.</p>
+<h3 id="seite-der-lebenden">Seite der Lebenden</h3>
+<ol type="1">
+<li>Die Wahrheit unter dem Berg: Die Spuren aus den Reihen
+zusammenführen: Tiefenglut ist die Glut der Ork-Ahnen (Tiefgräber Akt
+2), die Rune spricht ihre Namen (Runenschmiede Akt 3), der Stollen weckt
+den Berg (Aschenclan Akt 2), und Morthan hat in der Nacht die Glut als
+Lebenskraft gespürt.</li>
+<li>Der Rat der Lebenden: Menschen, Elfen und Zwerge schließen ein
+Bündnis. Die Orks können nicht beitreten, aber Verträge schließen und an
+gemeinsamen Schlachten teilnehmen. Zwerge und Orks sitzen nie am selben
+Tisch; Menschen und Elfen vermitteln zwischen ihnen.</li>
+<li>Der Berg schläft: Die Glutleiste auf null senken. Auf null kommt sie
+nur auf zwei Wegen: durch das Ahnenfeuer der vereinten Orks (Weg der
+Asche) oder durch das Herz des Berges, das den Berg löscht und die Ahnen
+für immer nimmt (Weg des Erzes). Aschenlied (−15), versiegelter Stollen
+(−10) und Siegelrune (−20, danach halb so schnell) kaufen Zeit bis
+dahin.</li>
+<li>Über das Nordmeer: Die Flotte der Freien Häfen bringt die Heere nach
+Norden. Der Tempel der Fleischaltäre fällt, danach Eryndor und der
+Palast der Tausend Stimmen. Die Bleiche Krone fällt erst, wenn Aldrics
+Krone zerbricht. Mit dem Tempel sinkt die Welke dauerhaft; die
+Untoten-Bedrohung sinkt erst auf null, wenn auch der Kult ausgelöscht
+ist.</li>
+<li>Der Name im Dunkeln: Unter dem nördlichen Kontinent erwacht der
+Diener des ersten Toten. Solange niemand seinen Namen kennt, ist er
+unbesiegbar: Jeder Schlag geht durch ihn hindurch, und fällt er, steht
+er in der nächsten Runde wieder auf. Die Helden müssen drei Bruchstücke
+seines Namens finden (siehe unten). Wird der Name Morbius am Blutbrunnen
+von Eryndor ausgesprochen, dem Ort des ersten Rituals, bekommt er eine
+Gestalt und kann sterben.</li>
+<li>Morbius: Die letzte Schlacht gegen Morbius. Die Helden erfahren,
+dass alle drei Flüche Teil eines einzigen Plans sind: eine Welt, in der
+nichts mehr lebt. Sein Fall ist der Abschluss der Weltquest.</li>
+</ol>
+<p>Die drei Bruchstücke des Namens. Jedes Bruchstück ist eine
+Nebenquest, die ein Volk der Lebenden erfüllen kann. Es reichen alle
+drei, egal welcher Spieler sie findet.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Bruchstück</th>
+<th>Wo es liegt</th>
+<th>Wer es am leichtesten findet</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Die Schrift</td>
+<td>In den Aethari-Schriften, die in der Nacht des Erwachens aus Perlvik
+verschwanden: eine Liste der Blutmagier des ersten Rituals, ein Name ist
+ausgekratzt</td>
+<td>Freie Häfen (Spionage), Schattenblüte (Saelith); haben die
+Erinnernden die Schriften zurückgeholt, liegen sie nach dem Fall von
+Eryndor in dessen Bibliothek</td>
+</tr>
+<tr class="even">
+<td>Das Laub</td>
+<td>Der Weltenbaum warf in der Nacht des Ersten Blutes sein Laub ab, als
+die Elfen das Ritual der Aethari sahen. Der Grüne Gesang lässt diese
+Erinnerung hören</td>
+<td>Elfen nach der Volksquest</td>
+</tr>
+<tr class="odd">
+<td>Das Feuer</td>
+<td>Die Seherinnen des Ordens sehen im Feuer, wer die Untoten lenkt. Nur
+in der wieder entfachten Ewigen Flamme wird der Name lesbar</td>
+<td>Orden der Flamme; ist die Flamme gelöscht (Krone Akt 4), muss sie
+erst neu entfacht werden, nach der Vereinigung kann das jede
+Menschenfraktion</td>
+</tr>
+</tbody>
+</table>
+<p>Zwerge und Orks können kein eigenes Bruchstück finden, aber sie
+schützen den Weg dorthin: Die Siegelrune oder das Ahnenfeuer hält den
+Berg ruhig, solange die anderen suchen. Fehlt ein Bruchstück, weil ein
+Volk vernichtet ist, gibt es einen Notweg: In der Gruft unter Eryndor
+liegt Serathia im Blutschlaf. Wer sie nach dem Fall der Stadt erschlägt,
+hört ihr letztes Wort, und das ist das fehlende Bruchstück. So bleibt
+Morbius für die Lebenden immer besiegbar, aber ohne Serathia ist die
+Vereinigung der Untoten für immer unmöglich.</p>
+<h3 id="seite-der-untoten-die-nacht-ohne-morgen">Seite der Untoten: „Die
+Nacht ohne Morgen“</h3>
+<ol type="1">
+<li>Der Durst der Welt: Die Nacht des Erwachens nutzen: Ascheregen und
+Hunger schwächen alle Lebenden, Glut, Welke und Erzfieber sind
+Verbündete, die man nicht senken muss.</li>
+<li>Den Rat zerschlagen: Das Bündnis der Lebenden durch Kult, Draugr und
+Schmuggler spalten, bevor es Schiffe nach Norden schickt.</li>
+<li>Die Lebenskraft ernten: Das eigene Siegziel vorantreiben: Morthans
+großes Ritual (Fäulnisbrut), Draugr in allen Reichen (Krone) oder den
+Blutbrunnen (Erinnernde). Die Untoten können keine Leiste der Lebenden
+senken und wollen es auch nicht.</li>
+<li>Die letzte Festung: Den Feldzug der Lebenden über das Nordmeer
+abwehren.</li>
+<li>Der erste Tote: Sieg für die Untoten erfüllt den Willen des ersten
+Toten, ohne dass ein Herrscher es weiß. Serathia kennt den Namen des
+Dieners (Erinnernde Akt 4). Wer ihn erfährt, kann sich beim Ritual der
+Vollendung gegen Morbius wehren, der sonst unbesiegbar eingreift. Er
+greift ein, weil die Vollendeten kein fremdes Leben mehr bräuchten und
+damit nicht mehr seine Werkzeuge wären. Wer als Vollendeter spielt,
+sieht in der letzten Szene, wem er gedient hat.</li>
+</ol>
+<p>Die Untoten gewinnen weiterhin allein, und Orks gewinnen ebenfalls
+allein, auch wenn sie auf der Seite der Lebenden kämpfen.</p>
+<h2 id="kreuzungen-zwischen-den-reihen">Kreuzungen zwischen den
+Reihen</h2>
+<p>Jede Kreuzung ist ein Ereignis, das zwei Reihen von zwei Seiten
+zeigen. Die Entscheidung des einen Spielers kann im Spiel des anderen
+sichtbar werden, wenn beide in derselben Partie sind.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Ereignis</th>
+<th>Seite A</th>
+<th>Seite B</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Der Brand im Gildenhaus von Perlvik</td>
+<td>Freie Häfen, Prolog Kap. 3 und Akt 1 (Leiche verschwunden)</td>
+<td>Bleiche Krone, Akt 2 (der Held fährt in diesen Körper)</td>
+</tr>
+<tr class="even">
+<td>Die gestohlenen Aethari-Schriften</td>
+<td>Freie Häfen, Prolog Kap. 2</td>
+<td>Erinnernde, Akt 2 (Bibliothek der Toten)</td>
+</tr>
+<tr class="odd">
+<td>Gefangene Elfenhändler</td>
+<td>Freie Häfen, Prolog Kap. 2</td>
+<td>Schattenblüte, Akt 2 (Schleier über Perlvik)</td>
+</tr>
+<tr class="even">
+<td>Der Seemann aus Perlvik am Nordkap</td>
+<td>Dornenklingen, Prolog Kap. 2 und 3</td>
+<td>Freie Häfen (vermisster Seesoldat, Akt 1)</td>
+</tr>
+<tr class="odd">
+<td>Das Tal von Nachtquell</td>
+<td>Erinnernde, Prolog (verteidigt das Tal)</td>
+<td>Fäulnisbrut, Prolog und Akt 1 (der Held stammt von dort und
+überfällt es)</td>
+</tr>
+<tr class="even">
+<td>Der zerstörte Altar bei Nachtquell</td>
+<td>Fäulnisbrut, Prolog Kap. 3</td>
+<td>Erinnernde, Prolog (Blutritter im Hintergrund)</td>
+</tr>
+<tr class="odd">
+<td>Die Späher im Wald und im Garten</td>
+<td>Hüter, Prolog Kap. 2</td>
+<td>Schattenblüte, Prolog Kap. 2 und Angriff (Varyns Feuer)</td>
+</tr>
+<tr class="even">
+<td>Der verschollene Trupp im Stollen</td>
+<td>Tiefgräber, Prolog Kap. 3 und Akt 2</td>
+<td>Aschenclan, Prolog Angriff (Zwerge an der Bergflanke)</td>
+</tr>
+<tr class="odd">
+<td>Die Schatten in der Tiefenglut</td>
+<td>Tiefgräber, Prolog Kap. 2</td>
+<td>Runenschmiede, Prolog Kap. 3 (die Rune ruft Namen in Ghrash)</td>
+</tr>
+<tr class="even">
+<td>Die Tiefenglut am Zollpass</td>
+<td>Tiefes Königreich, Prolog Kap. 3</td>
+<td>Tiefgräber (geschmuggeltes Erz), Runenschmiede (Käufer)</td>
+</tr>
+<tr class="odd">
+<td>Nektar am Nordtor</td>
+<td>Runenschmiede, Prolog Kap. 2</td>
+<td>Schattenblüte, Prolog Kap. 3 (Rekordernte)</td>
+</tr>
+<tr class="even">
+<td>Der sinkende Brunnen</td>
+<td>Staubreiter, Prolog Kap. 2</td>
+<td>Grüne Banner, Prolog Kap. 3 (Wasser gegen Vieh)</td>
+</tr>
+<tr class="odd">
+<td>Die Rostsegel vor Westvik</td>
+<td>Kronreich, Prolog</td>
+<td>Staubreiter, Akt 3 (Feuer an der Westmark)</td>
+</tr>
+<tr class="even">
+<td>Der Kult am Krankenbett</td>
+<td>Kronreich, Akt 1</td>
+<td>Bleiche Krone, Akt 3 (Ein Körper für den König)</td>
+</tr>
+<tr class="odd">
+<td>Die Ewige Flamme</td>
+<td>Orden, Prolog und Akt 1</td>
+<td>Bleiche Krone, Akt 4; Kronreich, Akt 4</td>
+</tr>
+<tr class="even">
+<td>Das Aschenlied</td>
+<td>Hüter, Akt 2</td>
+<td>Aschenclan, Akt 2</td>
+</tr>
+<tr class="odd">
+<td>Klinge und Flamme</td>
+<td>Dornenklingen, Akt 3</td>
+<td>Orden, Akt 4</td>
+</tr>
+<tr class="even">
+<td>Gold und Eisen</td>
+<td>Tiefes Königreich, Akt 2</td>
+<td>Freie Häfen, Akt 2</td>
+</tr>
+<tr class="odd">
+<td>Der Grünmarkt</td>
+<td>Grüne Banner, Akt 2</td>
+<td>Freie Häfen, Akt 3</td>
+</tr>
+<tr class="even">
+<td>Das Wrack an den Knocheninseln</td>
+<td>Staubreiter, Akt 2</td>
+<td>Fäulnisbrut, Akt 2</td>
+</tr>
+</tbody>
+</table>
+<p>Von Henry festgelegt (17.11.2026): Der Diener des ersten Toten heißt
+Morbius. Sein Name wird erst über eine Quest entdeckt, und erst wenn man
+ihn kennt, wird er besiegbar.</p>
+<h2 id="umsetzung-im-spiel">Umsetzung im Spiel</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Fraktion</th>
+<th>Startort (Kapitel 1)</th>
+<th>Zuflucht im Morgengrauen</th>
+<th>Marken der Entscheidung in Kapitel 3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Kronreich</td>
+<td>Westvik</td>
+<td>Kronhall</td>
+<td><code>nacht-kronreich-tribut</code>,
+<code>nacht-kronreich-verweigert</code></td>
+</tr>
+<tr class="even">
+<td>Freie Häfen</td>
+<td>Perlvik</td>
+<td>Zollholm</td>
+<td><code>nacht-haefen-gold</code>,
+<code>nacht-haefen-gemeldet</code></td>
+</tr>
+<tr class="odd">
+<td>Orden der Flamme</td>
+<td>Aschenkloster</td>
+<td>Glutberg</td>
+<td><code>nacht-orden-feuer</code>, <code>nacht-orden-jagd</code></td>
+</tr>
+<tr class="even">
+<td>Dornenklingen</td>
+<td>Hochdorn</td>
+<td>Hochdorn</td>
+<td><code>nacht-dorn-brand</code>, <code>nacht-dorn-gerettet</code></td>
+</tr>
+<tr class="odd">
+<td>Schattenblüte</td>
+<td>Velasyr</td>
+<td>Velasyr</td>
+<td><code>nacht-schatten-ernte</code>,
+<code>nacht-schatten-schweigen</code></td>
+</tr>
+<tr class="even">
+<td>Hüter des Weltenbaums</td>
+<td>Ylvenor</td>
+<td>Waldrand</td>
+<td><code>nacht-hueter-geloescht</code>,
+<code>nacht-hueter-ilvara</code></td>
+</tr>
+<tr class="odd">
+<td>Tiefes Königreich</td>
+<td>Ambossheim</td>
+<td>Ambossheim</td>
+<td><code>nacht-reich-beschlagnahmt</code>,
+<code>nacht-reich-dankwart</code></td>
+</tr>
+<tr class="even">
+<td>Tiefgräber</td>
+<td>Kluftheim</td>
+<td>Stollenmund</td>
+<td><code>nacht-graeber-erz</code>,
+<code>nacht-graeber-gegraben</code></td>
+</tr>
+<tr class="odd">
+<td>Runenschmiede</td>
+<td>Essenfels</td>
+<td>Essenfels</td>
+<td><code>nacht-rune-gebannt</code>, <code>nacht-rune-namen</code></td>
+</tr>
+<tr class="even">
+<td>Grüne Banner</td>
+<td>Kragmar</td>
+<td>Kragmar</td>
+<td><code>nacht-banner-tausch</code>,
+<code>nacht-banner-fortgejagt</code></td>
+</tr>
+<tr class="odd">
+<td>Staubreiter</td>
+<td>Ur-Taal</td>
+<td>Zhar-Kesh</td>
+<td><code>nacht-staub-geteilt</code>,
+<code>nacht-staub-behalten</code></td>
+</tr>
+<tr class="even">
+<td>Aschenclan</td>
+<td>Aschenthron</td>
+<td>Kraterpfad am Ghor-Mahr</td>
+<td><code>nacht-asche-ahnen-gerettet</code>,
+<code>nacht-asche-schmieden</code></td>
+</tr>
+<tr class="odd">
+<td>Fäulnisbrut</td>
+<td>Tal von Nachtquell</td>
+<td>Madenmoor</td>
+<td><code>nacht-brut-fleisch</code>,
+<code>nacht-brut-verschont</code></td>
+</tr>
+<tr class="even">
+<td>Hof der Bleichen Krone</td>
+<td>Palast der Tausend Stimmen</td>
+<td>Seelenhafen</td>
+<td><code>nacht-hof-ausgeliefert</code>,
+<code>nacht-hof-verschont</code></td>
+</tr>
+<tr class="odd">
+<td>Die Erinnernden</td>
+<td>Eryndor</td>
+<td>Eryndor</td>
+<td><code>nacht-blut-gewalt</code>,
+<code>nacht-blut-verzicht</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Kapitel 1 hat zwei Erkundungen mit eigener Marke, Kapitel 2 einen
+Kampf gegen einen Prologgegner (<code>nacht-&lt;fraktion&gt;</code>,
+nicht im Bestiarium), Kapitel 3 die Entscheidung und den Angriff. Beim
+Aschenclan ist der Angriff ein zweiter Kampf gegen die Zwerge aus dem
+Felsspalt.</li>
+<li>Startort und Zuflucht haben ein Zentrallager. Die Ressourcen der
+Fraktionen sind noch nicht spielwirksam. „Kostet Glaube“, „kostet Saft“
+und „kostet Runen“ kosten im Prolog 1 Glut. Gold und Beute geben Silber,
+Tiefenglut gibt Glutampullen, Glutstahl einen Minenspeer, Fleisch und
+Blut heilen.</li>
+<li>Spielstände im Erwachen bei Kornwik (vor der Nacht des Erwachens)
+bleiben gültig und spielen dort weiter.</li>
+<li>Die Klassenfähigkeit aus Kapitel 2 und die EP-Verteilung stimmt das
+Kampfsystem ab. Bis dahin nutzt der Prologkampf den bestehenden
+Glutangriff der Klasse.</li>
+</ul>
+    <footer><a href="../index.html">Zum Weltbuch</a><a href="../../index.html">Zum Spiel</a></footer>
+  </main>
+</body>
+</html>
