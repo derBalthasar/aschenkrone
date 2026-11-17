@@ -1,5 +1,17 @@
 # Arbeitsanweisung für Aschenkrone
 
+## Verbindlicher gemeinsamer Ablauf
+
+Diese Datei ist die zentrale Arbeitsanweisung für alle Mitwirkenden und KI-Assistenten, einschließlich Codex, Claude und weiterer Werkzeuge. Lies sie zu Beginn jeder Aufgabe. Der vollständige Ablauf und die Einrichtung des GitHub-Branchschutzes stehen in [CONTRIBUTING.md](CONTRIBUTING.md). Halte diese gemeinsame Referenz aktuell; ändere sie über einen Pull Request.
+
+- Arbeite auf einem eigenen Feature-Branch. Im regulären Ablauf gehen alle Änderungen über einen Pull Request gegen `main`; kein direkter Push auf `main` und kein Force-Push.
+- Sichere vorhandene Arbeit, bevor du fremde Änderungen integrierst. Überschreibe keine Änderungen anderer blind.
+- Gleiche vor Änderungen, vor jedem Push und unmittelbar vor dem Merge mit GitHub ab. Integriere neue Änderungen und wiederhole betroffene Prüfungen.
+- Beschreibe im Pull Request das Problem, das resultierende Verhalten und tatsächlich ausgeführte Prüfungen.
+- Merge nur mit ausdrücklichem Auftrag des Projektverantwortlichen und bestandenen erforderlichen Prüfungen. Bereits erteilte Aufträge gelten für die beauftragte Änderung weiter; frage dieselbe Zustimmung nicht erneut ab.
+- Berichte zu Beginn Branch, lokale Änderungen und Abgleichstatus. Berichte zum Abschluss Ergebnis, Prüfungen, Commit-ID, PR-Link und Merge-Status. Kennzeichne Blocker und nicht ausgeführte Prüfungen klar.
+- Melde „hochgeladen“, „gemergt“ oder „synchron“ erst nach erfolgreicher Prüfung des jeweiligen Zustands.
+
 ## Mit GitHub abgleichen
 
 1. Prüfe vor jeder Änderung mit `git status --short --branch` den aktuellen Branch und vorhandene lokale Änderungen. Rufe anschließend mit `git fetch origin` den aktuellen Stand von GitHub ab.
@@ -12,4 +24,4 @@
 
 Öffne die [aktuelle index.html](index.html) im Browser. Die ältere Upload-Kopie und das Vorschau-ZIP sind lokale Exporte. Die [technische Übergabe](CLAUDE-UEBERGABE.md) beschreibt den Aufbau. Der [Quellenabgleich zur Lore](lore/KANON.md) hält die Entscheidungen zu Spielwelt und Prolog fest.
 
-Für Bestiarium-Modelle gilt die [Arbeitsanweisung für Modelle](quellen/arbeitsanweisung-modelle.pdf). Bei Änderungen am Spiel führe `node --test spiel/regeln.test.cjs` aus.
+Für Bestiarium-Modelle gilt die [Arbeitsanweisung für Modelle](quellen/arbeitsanweisung-modelle.pdf). Bei Änderungen am Spiel führe `node --test spiel/regeln.test.cjs` und passende JavaScript-Syntaxprüfungen aus. Prüfe geänderte Oberflächenabläufe zusätzlich im Browser, bei Layoutänderungen auch auf Handybreite.

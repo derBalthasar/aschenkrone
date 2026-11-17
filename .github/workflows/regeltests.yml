@@ -1,0 +1,27 @@
+name: Projektprüfung
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  regeltests:
+    name: Regeltests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: JavaScript-Syntax prüfen
+        run: |
+          node --check spiel/klassen.js
+          node --check spiel/welt.js
+          node --check spiel/regeln.js
+          node --check spiel/spiel.js
+      - name: Spielregeln testen
+        run: node --test spiel/regeln.test.cjs
