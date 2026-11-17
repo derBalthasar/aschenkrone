@@ -120,7 +120,12 @@ const world = (() => {
     lederbeinlinge: { slot: "legs", armor: 1 },
     kettenbeinlinge: { slot: "legs", armor: 2 },
   };
-  const supplies = { galgenwurz: { heal: 10 }, glutfunke: { ember: 2 }, harzverband: { heal: 16 }, glutampulle: { ember: 3 } };
+  Object.assign(items, { lebensfunke: "Lebensfunke", brandbalsam: "Brandbalsam", gegengift: "Gegengift", klartrank: "Klartrank" });
+  const ailments = {
+    burn: { name: "Brand", damage: 2 }, poison: { name: "Gift", damage: 3 }, confused: { name: "Verwirrt", damage: 0 },
+  };
+  const enemyAilments = { glutkaefer: "burn", netzweberin: "poison", schlundtroll: "poison", irrglut: "confused" };
+  const supplies = { lebensfunke: { revive: 35 }, brandbalsam: { cure: "burn" }, gegengift: { cure: "poison" }, klartrank: { cure: "confused" }, galgenwurz: { heal: 10 }, glutfunke: { ember: 2 }, harzverband: { heal: 16 }, glutampulle: { ember: 3 } };
   const rarity = {
     eisenkeil: "Ungewöhnlich", rostklaue: "Ungewöhnlich", glutpanzer: "Ungewöhnlich",
     grenzmantel: "Selten", grauflussbogen: "Selten", wachschwert: "Selten", runenstab: "Selten",
@@ -149,7 +154,7 @@ const world = (() => {
   // Zentrallager: ein gemeinsames Lager, erreichbar aus jeder Stadt.
   const storageSites = { weidenkamm: "Zentrallager · Kornwik", kraehenfurt: "Zentrallager · Heidvang",
     hochwacht: "Zentrallager · Eiswacht", "skarn-gate": "Zentrallager · Glutberg" };
-  const shop = { harzverband: 8, glutampulle: 12, eisenkeil: 22, rostklaue: 24, grenzmantel: 40,
+  const shop = { lebensfunke: 20, brandbalsam: 6, gegengift: 6, klartrank: 8, harzverband: 8, glutampulle: 12, eisenkeil: 22, rostklaue: 24, grenzmantel: 40,
     holzschild: 14, wachschild: 34, glutamulett: 26, spurenring: 24, eisenring: 24,
     lederhaube: 10, eisenhelm: 28, lederbeinlinge: 10, kettenbeinlinge: 28 };
   const salePrices = { keilerhauer: 5, wolfszahn: 4, kraehenfedern: 2, greifenfeder: 10, greifenklaue: 14, trollblut: 18 };
@@ -1001,7 +1006,7 @@ const world = (() => {
       "Moor bei Eiswacht": "schwarzmoor", Eiswacht: "hochwacht",
     })[region];
   }
-  return { attributes, skills, origins, classes, items, gear, supplies, rarity, lootTables, milestones, deeds, shop, salePrices, storageSites,
+  return { ailments, enemyAilments, attributes, skills, origins, classes, items, gear, supplies, rarity, lootTables, milestones, deeds, shop, salePrices, storageSites,
     storyQuests, recruitmentQuests, companionAttitudes, recipes, battleRewards, enemyGroups, companions, loyalties, factions, factionEffects, relationshipEffects,
     scenes, creatures, fights, destinations, routes, travelScenes };
 })();

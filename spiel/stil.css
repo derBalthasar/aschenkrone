@@ -442,6 +442,12 @@ button.map-marker[aria-pressed="true"] { background: #694623; }
   .ally-card .ability-badge, .ally-card .fighter-stats, .ally-card .fighter-details, .ally-card .fighter-vitals { grid-column: 1 / -1; }
 }
 
+.ally-picker { display: grid; gap: .3rem; font-size: .85rem; }
+.ally-picker select { width: 100%; min-width: 0; }
+#hub-ally-picker { margin: .8rem; color: #eddbb9; }
+.ally-status { margin: .2rem 0; color: #eeb098; font-size: .78rem; grid-column: 1 / -1; }
+.ally-card.is-fallen { border-color: #9b655b; }
+.ally-card.is-fallen .battle-portrait { filter: grayscale(1); opacity: .6; }
 /* Kampfdokument (17. 11. 2026): Verstärkung und Fähigkeitenliste. */
 .boost-toggle { display: inline-flex; align-items: center; gap: 0.4rem; flex-basis: 100%; grid-column: 1 / -1; font-size: 0.95rem; }
 .ability-list { padding-left: 1.1rem; display: grid; gap: 0.45rem; }

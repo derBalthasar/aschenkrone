@@ -524,7 +524,8 @@ assert.equal(rules.use(woundedNew, "glutfunke").ember, 2);
 assert.equal(rules.use(woundedNew, "glutfunke").inventory.filter(id => id === "glutfunke").length,
   woundedNew.inventory.filter(id => id === "glutfunke").length - 1);
 assert.throws(() => reload({ ...armored, equipment: { weapon: "schwert", armor: "glutpanzer" } }));
-const trial = state => rules.choose(rules.choose(state, "ridge-trail"), "ridge-fight");
+// Ausrüstungstests starten mit vollen Helden-LP, unabhängig von Verletzungen früherer Questkämpfe.
+const trial = state => rules.choose(rules.choose({ ...state, health: rules.healthLimit(state) }, "ridge-trail"), "ridge-fight");
 const bowFight = trial(updated);
 const fistFight = trial(unarmed);
 assert.ok(foeHp(rules.strike(bowFight, "spear", highRoll)) < foeHp(rules.strike(fistFight, "spear", highRoll)));
@@ -911,7 +912,7 @@ const plainRound = rules.strike(trial(gearGroup), 'guard', highRoll, undefined, 
 const gearRound = rules.strike(gearFight, 'guard', highRoll, undefined, 0, gearEvents);
 assert.ok(gearEvents.find(e => e.actor === 'ranger' && e.kind === 'hit').value >
   plainEvents.find(e => e.actor === 'ranger' && e.kind === 'hit').value);
-assert.ok(gearRound.health > plainRound.health);
+assert.equal(gearRound.health, plainRound.health, "Begleiterrüstung schützt nicht länger die Spielfigur");
 const legacyGroup = JSON.parse(JSON.stringify(atYard));
 delete legacyGroup.companionEquipment;
 assert.equal(Object.keys(reload(legacyGroup).companionEquipment).length, 0);
@@ -1063,6 +1064,85 @@ assert.equal(rules.memberEquipment(groupStored, 'ranger').weapon, null);
 assert.equal(reload(groupStored).storage.includes('runenbeil'), true);
 console.log('Questlog, Fristen, letzte Abgabe, Scheitern, Soldverzug und Spielzugmigration geprüft.');
 
+// Individuelle Begleiter-LP, gezielte Gegenstände, Ausfall und Zustände.
+const medicalBase = { ...rules.create('Heiltest', 'orden', 'frau', 1, 'waechter'), scene: 'watch-yard', party: ['ranger', 'mage'],
+  partyVitals: { ranger: { health: 12, status: { burn: 2, poison: 3, confused: 2 } }, mage: { health: 0, status: {} } },
+  inventory: ['speer', 'lederwams', 'galgenwurz', 'lebensfunke', 'brandbalsam', 'gegengift', 'klartrank'] };
+// Die Startausrüstung hängt von der gewählten Klasse ab: vollständiges gültiges Inventar verwenden.
+medicalBase.inventory = [...new Set([...medicalBase.inventory, ...Object.values(medicalBase.equipment).filter(Boolean)])];
+assert.equal(rules.canUse(medicalBase, 'galgenwurz', 'mage'), false);
+assert.equal(rules.canUse(medicalBase, 'lebensfunke', 'ranger'), false);
+assert.equal(rules.canUse(medicalBase, 'lebensfunke', 'hero'), false);
+assert.equal(rules.canUse(medicalBase, 'glutfunke', 'ranger'), false);
+const revivedMage = rules.use(medicalBase, 'lebensfunke', 'mage');
+assert.equal(revivedMage.partyVitals.mage.health, Math.ceil(rules.memberHealthLimit('mage') * .35));
+assert.ok(!revivedMage.inventory.includes('lebensfunke'));
+assert.equal(rules.use(revivedMage, 'lebensfunke', 'mage'), revivedMage);
+assert.equal(rules.use(medicalBase, 'galgenwurz', 'unknown'), medicalBase);
+const healedNeri = rules.use(medicalBase, 'galgenwurz', 'ranger');
+assert.equal(healedNeri.partyVitals.ranger.health, 22);
+assert.equal(healedNeri.health, medicalBase.health);
+assert.equal(medicalBase.partyVitals.ranger.health, 12, 'Vorherigen Zustand nicht mutieren');
+let cleansed = medicalBase;
+for (const [item, effect] of [['brandbalsam','burn'], ['gegengift','poison'], ['klartrank','confused']]) {
+  cleansed = rules.use(cleansed, item, 'ranger');
+  assert.equal(cleansed.partyVitals.ranger.status[effect], undefined);
+  assert.equal(rules.canUse(cleansed, item, 'ranger'), false);
+}
+assert.equal(reload(revivedMage).partyVitals.mage.health, revivedMage.partyVitals.mage.health);
+const oldVitals = JSON.parse(JSON.stringify(atYard));
+delete oldVitals.partyVitals; delete oldVitals.heroStatus;
+assert.equal(reload(oldVitals).partyVitals.ranger.health, rules.memberHealthLimit('ranger'));
+assert.throws(() => reload({ ...medicalBase, partyVitals: { mage: { health: 10000, status: {} } } }));
+assert.throws(() => reload({ ...medicalBase, heroStatus: { poison: 4 } }));
+assert.throws(() => reload({ ...medicalBase, partyVitals: { mage: { health: 10, status: { unknown: 2 } } } }));
+const medicalFight = rules.choose(rules.choose(medicalBase, 'ravine'), 'ravine-fight');
+const revivalEvents = [];
+const revivedInCombat = rules.strike(medicalFight, 'herb', lowRoll, 'lebensfunke', undefined, revivalEvents, 'mage');
+assert.ok(revivalEvents.some(e => e.kind === 'revive' && e.ally === 'mage'));
+assert.ok(!revivalEvents.some(e => e.kind === 'hit' && e.actor === 'mage'), 'Wiederbelebte handeln ab nächster Runde');
+const fallenEvents = [];
+rules.strike(medicalFight, 'guard', lowRoll, undefined, undefined, fallenEvents);
+assert.ok(!fallenEvents.some(e => e.kind === 'hit' && e.actor === 'mage'));
+assert.ok(fallenEvents.some(e => e.kind === 'skip' && e.actor === 'ranger'));
+const poisonedNeri = rules.strike(medicalFight, 'guard', lowRoll);
+assert.equal(poisonedNeri.partyVitals.ranger.health, 7, 'Brand und Gift verursachen 2+3 LP');
+assert.equal(poisonedNeri.partyVitals.ranger.status.poison, 2);
+const confusedHero = { ...medicalFight, heroStatus: { confused: 2 } };
+const confusionEvents = [];
+const confusedRound = rules.strike(confusedHero, 'ember', lowRoll, undefined, undefined, confusionEvents);
+assert.ok(!confusionEvents.some(e => e.kind === 'hit' && e.actor === 'hero'));
+assert.equal(confusedRound.ember, confusedHero.ember, 'Ausgesetzte Magie kostet keine Glut');
+const clearHead = rules.strike({ ...confusedHero, inventory: [...confusedHero.inventory, 'klartrank'] }, 'herb', lowRoll, 'klartrank');
+assert.equal(clearHead.heroStatus.confused, undefined);
+const armorBase = { ...medicalBase, party: ['ranger'], inventory: [...medicalBase.inventory, 'aschenwaechter'],
+  partyVitals: { ranger: { health: 28, status: {} } }, companionEquipment: {}, combat: null };
+const armorFight = rules.choose(rules.choose(armorBase, 'ravine'), 'ravine-fight');
+armorFight.combat.round = 1; armorFight.combat.supportUsed = ['ranger'];
+const armoredFight = structuredClone(armorFight);
+armoredFight.companionEquipment = { ranger: { weapon: null, armor: 'aschenwaechter' } };
+const plainDamage = [], armorDamage = [];
+const plainTarget = rules.strike(armorFight, 'guard', lowRoll, undefined, undefined, plainDamage);
+const protectedTarget = rules.strike(armoredFight, 'guard', lowRoll, undefined, undefined, armorDamage);
+assert.equal(plainDamage.find(e => e.kind === 'retaliate').ally, 'ranger');
+assert.ok(protectedTarget.partyVitals.ranger.health > plainTarget.partyVitals.ranger.health);
+assert.equal(protectedTarget.health, plainTarget.health, 'Rüstung wirkt nur am Träger');
+const woundedPriest = { ...medicalFight, faction: 'hueter', origin: 'waldelf', role: 'heiler',
+  build: rules.defaultBuild('hueter', 'heiler') };
+woundedPriest.health = Math.min(woundedPriest.health, rules.healthLimit(woundedPriest));
+woundedPriest.ember = Math.min(woundedPriest.ember, rules.emberLimit(woundedPriest));
+const targetedHealEvents = [];
+rules.strike(woundedPriest, 'restore', lowRoll, undefined, undefined, targetedHealEvents, 'ranger');
+assert.ok(targetedHealEvents.some(e => e.kind === 'heal' && e.ally === 'ranger' && e.actor === 'hero'));
+const koAfterCounter = rules.strike({ ...armorFight, partyVitals: { ranger: { health: 1, status: {} } } }, 'guard', lowRoll);
+assert.equal(koAfterCounter.partyVitals.ranger.health, 0);
+assert.equal(reload(koAfterCounter).partyVitals.ranger.health, 0);
+const restKO = rules.choose({ ...koAfterCounter, combat: null, scene: 'watch-yard' }, 'rest');
+assert.equal(restKO.partyVitals.ranger.health, 0, 'Rast belebt nicht wieder');
+console.log('Individuelle LP, gezielte Heilung, Wiederbelebung, Zustände und persönlicher Rüstungsschutz geprüft.');
+assert.ok(plainDamage.some(e => e.kind === 'afflict' && e.effect === 'poison' && e.ally === 'ranger'));
+assert.equal(plainTarget.partyVitals.ranger.status.poison, 3, 'Neu verursachtes Gift tickt erst ab Folgerunde');
+assert.ok(world.shop.lebensfunke > 0 && world.shop.brandbalsam > 0 && world.shop.gegengift > 0 && world.shop.klartrank > 0);
 // Charakterfenster: wirkende Effekte werden nur gelesen, der Spielstand bleibt unverändert.
 {
   const effectIds = (state) => rules.effects(state).map(effect => effect.id);
