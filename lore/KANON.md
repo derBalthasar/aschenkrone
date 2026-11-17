@@ -2,6 +2,8 @@
 
 ## Quellenstand
 
+Die Welt heißt **Odris** (Festlegung von Henry, 17. 11. 2026). Das Bestiarium heißt deshalb „Bestiarium von Odris“.
+
 Das Weltbuch im Spiel verarbeitet das Weltbuch 2.0, die fünf Völkerdokumente und die sechs Karten und Bildtafeln vom Desktop. Die Fraktionsbeschreibungen und Stadtverzeichnisse stehen in `voelker.js`. Sie folgen den Völkerdokumenten. Die Karte `weltkarte-verbindlich-mit-orten.png` liefert die räumliche Übersicht. Ihr sichtbarer Titel „Entwurf 3“ stammt aus der Vorlage mit eingezeichneten Orten. Die frühere Gebietsübersicht ohne Städtebeschriftung liegt unter den Bildtafeln.
 
 - Die Untoten-Tafeln datieren die Nacht des Ersten Blutes unter anderem auf 500, 1800 oder etwa 2000 v. E. Die Völkertexte führen sie um 4400 v. E., Aldrics Ritual um 2500 v. E. und das erste Fleischritual um 900 v. E. Diese Daten gelten für die Spielchronik.
