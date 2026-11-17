@@ -16,7 +16,7 @@ Jeder Held hat zwei Ebenen von Werten: fünf Grundwerte (Talent, bei der Charakt
 6. **Magie nur, wo es sie gibt.** Hat eine Fraktion Magie 0, haben auch ihre Helden Magie 0. Das betrifft Kronreich und Freie Häfen.
 7. **Ressource.** Jede Klasse verbraucht oder erzeugt die Ressource ihrer Fraktion auf eigene Weise.
 8. **Spezialisierung ab Quest-Stufe 3.** Hat die eigene Fraktion Stufe 3 ihrer Hauptquest erreicht, wählt jeder Held eine von zwei Spezialisierungen seiner Klasse: Titel, neue Fähigkeit, +1 Fertigkeitspunkt (19) und +1 Grundwert. Die Wahl gilt für immer.
-9. **Meisterklasse nach der Vereinigung.** Ein spezialisierter Held kann zur Meisterklasse seines Volkes aufsteigen: +1 Fertigkeitspunkt (20), +2 Grundwerte, alle drei Ressourcen aus dem gemeinsamen Vorrat. Höchstens ein Meisterheld pro ehemaliger Fraktion.
+9. **Meisterklasse nach der Vereinigung.** Ein spezialisierter Held kann zur Meisterklasse seines Volkes aufsteigen: +1 Fertigkeitspunkt (20), +2 Grundwerte, alle drei Ressourcen aus dem gemeinsamen Vorrat. Höchstens ein Meisterheld pro ehemaliger Fraktion gilt nur im Strategiemodus; im Einzelspieler-Rollenspiel darf der Hauptheld nach der Vereinigung immer aufsteigen (Errata 7).
 10. **Der Kult ist keine Klasse.** Der Kult der Bleichen Ewigkeit bleibt nicht spielbar. Ein Held kann ihm aber durch Ereignisse verfallen. Ein Held behält seine Klasse sein Leben lang, auch nach der Vereinigung.
 
 ## Welche Fertigkeit an welchem Grundwert hängt

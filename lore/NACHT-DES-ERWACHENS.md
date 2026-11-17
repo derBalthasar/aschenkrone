@@ -16,7 +16,7 @@ Aufbau je Fraktion:
 | --- | --- | --- |
 | Prolog (Tutorial) | 3 Kapitel | 1. Heimat und Bewegung, 2. Kampf und Klassenfähigkeit, 3. Ressource und erste Entscheidung. Endet mit einem Angriff, der den Helden aus seiner Heimat treibt |
 | Fraktionsreihe | 5 Akte | Akt 1 bis 5 entsprechen den Stufen 1 bis 5 der Hauptquest der Fraktion. Akt 3 bringt die Spezialisierung (Quest-Stufe 3, Variante A oder B). Akt 5 führt zum Treffen mit den beiden anderen Fraktionen des Volks |
-| Volksquest | je Volk 1 | Vereinigung (Eroberung oder Diplomatie) und das große Ritual des Volks. Danach wird die Meisterklasse frei (max. 3 Meisterhelden je Volk) |
+| Volksquest | je Volk 1 | Vereinigung (Eroberung oder Diplomatie) und das große Ritual des Volks. Danach wird die Meisterklasse frei (im Strategiemodus max. 3 Meisterhelden je Volk, der Hauptheld darf immer aufsteigen, siehe ERRATA.md). Der Sieg des Volks schaltet die Weltquest „Das Ende der Nacht“ frei |
 | Weltquest | 1, zweiseitig | Die Lebenden gegen Fäulnis und Mutterberg; die Untoten spielen dieselbe Weltquest als Gegenseite |
 
 Wo der Kanon den ersten Vorschlag korrigiert:

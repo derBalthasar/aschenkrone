@@ -316,6 +316,11 @@ const kampf = (() => {
     const faktor = r.skaliert ? Math.max(0.25, 1 + 0.25 * (helden - 4)) : 1;
     return { rang, stufe, lp: Math.max(1, Math.round(r.lp(stufe) * faktor)), schaden: r.schaden(stufe), aktionen: r.aktionen };
   }
+  // Errata 4: Alphatiere ohne eigene Werte kämpfen als Anführer auf der Stufe ihres Gebiets.
+  const alphaWerte = (gebietsstufe, helden = 4) => gegnerWerte("anfuehrer", gebietsstufe, helden);
+  // Errata 1: Odris kennt Tag und Nacht. Vampire der Erinnernden kämpfen tagsüber 25 % schwächer.
+  const tagschwaeche = 0.25;
+  const tagesWert = (wert, vampir, tag) => vampir && tag ? Math.max(1, Math.round(wert * (1 - tagschwaeche))) : wert;
   const faireKaempfe = "Ein fairer Kampf für eine Gruppe von 4 Helden der Stufe n: 6 Mitläufer, oder 2 Elite und 2 Mitläufer, oder 1 Anführer und 2 Mitläufer, alle auf Stufe n. Ein einzelner Held (Prolog) schafft 3 Mitläufer oder 1 Elite. Jede Gegnerstufe über der Gruppe macht den Kampf etwa 25 % schwerer.";
   const questStufen = [
     ["Prolog", "1–3", "1–2"], ["Akt 1", "3–5", "3–5"], ["Akt 2", "5–8", "5–8"], ["Akt 3 (Spezialisierung)", "8–11", "8–11"],
@@ -355,6 +360,7 @@ const kampf = (() => {
   };
 
   return { maxStufe, epFuer, stufeAus, ep, lpTabelle, lebenspunkte, budget, meisterBudget, machtpunkte, gegenUebermacht,
+    alphaWerte, tagschwaeche, tagesWert,
     ressourceVerstaerkung, spezVerstaerkung, maxDiener, schildDauer, lies, klassenFaehigkeiten, meisterFaehigkeiten,
     raenge, gegnerWerte, faireKaempfe, questStufen, gegner, gebundenRegel, kultText, morbius };
 })();

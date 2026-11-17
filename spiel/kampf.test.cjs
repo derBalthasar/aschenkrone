@@ -292,3 +292,11 @@ console.log("Kampftests bestanden: " + count + " Fähigkeiten geprüft.");
 
 assert.ok(rules.effects({ ...hero("orden", "waechter"), heroStatus: { burn: 2 } })
   .some(effect => effect.id === "burn" && effect.name === "Brand" && effect.dauer === "Noch 2 Runden"));
+
+// ---- Errata 17. 11. 2026: Alphatiere ohne Werte und Tagschwäche der Vampire ----
+same(kampf.alphaWerte(12), { rang: "anfuehrer", stufe: 12, lp: 360, schaden: 16, aktionen: 2 });
+assert.equal(kampf.alphaWerte(12, 1).lp, 90, "Alphatier gegen einen Helden: 25 % der LP");
+assert.equal(kampf.tagesWert(20, true, true), 15);
+assert.equal(kampf.tagesWert(20, true, false), 20);
+assert.equal(kampf.tagesWert(20, false, true), 20);
+assert.match(JSON.stringify(K), /Meisterheld pro ehemaliger Fraktion gilt nur im Strategiemodus/, "Errata 7: Meisterklasse im Einzelspiel");

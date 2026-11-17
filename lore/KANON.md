@@ -2,6 +2,8 @@
 
 ## Quellenstand
 
+Die [Errata und verbindliche Regel-Checkliste](ERRATA.md) (Henry, 17. 11. 2026) geht älteren Tabellen und Entwurfsnotizen des Weltbuchs vor.
+
 Die Welt heißt **Odris** (Festlegung von Henry, 17. 11. 2026). Das Bestiarium heißt deshalb „Bestiarium von Odris“.
 
 Das Weltbuch im Spiel verarbeitet das Weltbuch 2.0, die fünf Völkerdokumente und die sechs Karten und Bildtafeln vom Desktop. Die Fraktionsbeschreibungen und Stadtverzeichnisse stehen in `voelker.js`. Sie folgen den Völkerdokumenten. Die Karte `weltkarte-verbindlich-mit-orten.png` liefert die räumliche Übersicht. Ihr sichtbarer Titel „Entwurf 3“ stammt aus der Vorlage mit eingezeichneten Orten. Die frühere Gebietsübersicht ohne Städtebeschriftung liegt unter den Bildtafeln.
@@ -9,7 +11,7 @@ Das Weltbuch im Spiel verarbeitet das Weltbuch 2.0, die fünf Völkerdokumente u
 - Die Untoten-Tafeln datieren die Nacht des Ersten Blutes unter anderem auf 500, 1800 oder etwa 2000 v. E. Die Völkertexte führen sie um 4400 v. E., Aldrics Ritual um 2500 v. E. und das erste Fleischritual um 900 v. E. Diese Daten gelten für die Spielchronik.
 - Eryndor und der Blutbrunnen gehören den Erinnernden. Der Hof der Bleichen Krone herrscht vom Palast der Tausend Stimmen. Eine Zeile in der Gleichgewichtstabelle des Weltbuchs verortet den Hof in Eryndor. Die Ortslisten und das Untoten-Dokument ordnen beide Sitze eindeutig zu.
 - Das Elfen-Dokument beschreibt den Wald der Hüter bis zur Ostküste. Auf der Karte reicht dort die Schattenblüte weiter nach Norden. Städte stehen bei ihren Fraktionen gemäß Völkerdokument. Eine verbindliche Grenzlinie für die Küste bleibt offen.
-- Die drei Weltursprünge im Weltbuch (erlöschende Sonne, toter Gott, steigende Nebelflut) stehen dort als Entwürfe. Die Legende vom Ersten Toten gehört zur Untoten-Lore und bleibt eine Legende innerhalb der Welt.
+- Die drei Weltursprünge im Weltbuch (erlöschende Sonne, toter Gott, steigende Nebelflut) sind laut [Errata](ERRATA.md) verworfen. Odris hat einen normalen Tag-Nacht-Wechsel, die Götterknochen der Orks sind ein Mythos. Die Legende vom Ersten Toten gehört zur Untoten-Lore und bleibt eine Legende innerhalb der Welt.
 
 ## Konflikte für spätere Quests
 
