@@ -100,6 +100,7 @@
         <a href="#scene-title">Szene</a>
         <a href="#travel-map">Reisekarte</a>
         <a href="#character-panel">Charakter</a>
+        <button type="button" class="hub-open" data-hub-open>Inventar</button>
       </nav>
       <section class="paper encounter">
         <p class="overline" id="location"></p>
@@ -143,7 +144,9 @@
             <ul id="quest-clues" hidden></ul>
           </section>
           <details><summary>Eigenschaften</summary><dl id="attributes" class="stat-line"></dl></details>
-          <details open><summary>Inventar und Ausrüstung</summary><p id="equipment"></p><ul id="inventory" class="inventory-list"></ul></details>
+          <details open><summary>Inventar und Ausrüstung</summary><p id="equipment"></p>
+            <p id="bag-summary" class="bag-summary"></p>
+            <button type="button" class="action primary hub-launch" data-hub-open>Inventar öffnen</button><ul id="inventory" class="inventory-list"></ul></details>
           <details open><summary id="party-count">Gefährten</summary><ul id="party-members" class="inventory-list"></ul>
             <details><summary>Mögliche Treffpunkte</summary><ul id="party-leads"></ul></details>
           </details>
@@ -159,5 +162,26 @@
       </div>
     </div>
   </main>
+  <dialog id="inventory-hub" class="inventory-hub" aria-labelledby="hub-title">
+    <div class="hub-head">
+      <div><p class="overline" id="hub-place"></p><h2 id="hub-title">Inventar</h2></div>
+      <button type="button" id="hub-close" class="action">Schließen</button>
+    </div>
+    <section class="hub-equipment" aria-label="Ausrüstung">
+      <div id="hub-slots" class="hub-slots"></div>
+      <p id="hub-silver" class="hub-silver"></p>
+    </section>
+    <div class="hub-tabs" role="tablist" aria-label="Aufbewahrung">
+      <button type="button" role="tab" id="hub-tab-bag" aria-controls="hub-items" data-tab="bag"></button>
+      <button type="button" role="tab" id="hub-tab-storage" aria-controls="hub-items" data-tab="storage"></button>
+    </div>
+    <p id="hub-hint" class="hub-hint"></p>
+    <div id="hub-filters" class="hub-filters" role="group" aria-label="Nach Art filtern"></div>
+    <div class="hub-body">
+      <ul id="hub-items" class="hub-grid" role="tabpanel" aria-label="Gegenstände"></ul>
+      <section id="hub-detail" class="hub-detail" aria-live="polite"></section>
+    </div>
+    <p id="hub-status" class="hub-status" role="status"></p>
+  </dialog>
 </body>
 </html>

@@ -175,6 +175,7 @@
   }
 
   function showHome(message = "") {
+    if (el("inventory-hub").open) el("inventory-hub").close();
     show("home");
     el("continue").hidden = state === null;
     el("home-status").textContent = message;
@@ -282,14 +283,47 @@
       "Deine Reise ist beendet.";
   }
 
+  const slotLabels = { weapon: "Waffe", armor: "Rüstung", offhand: "Nebenhand", trinket: "Schmuck" };
+  const categoryLabels = { weapon: "Waffe", armor: "Rüstung", offhand: "Nebenhand", trinket: "Schmuck",
+    supply: "Verbrauchsgut", trophy: "Trophäe und Fund", quest: "Questgegenstand" };
+  const hubFilters = [["all", "Alle"], ["weapon", "Waffen"], ["defense", "Rüstung und Schild"], ["trinket", "Schmuck"],
+    ["supply", "Verbrauch"], ["trophy", "Trophäen"], ["quest", "Quest"]];
+  const filterMatch = { all: () => true, defense: category => category === "armor" || category === "offhand" };
+  const hub = { tab: "bag", filter: "all", selected: null };
+
+  function itemDetails(id) {
+    const gear = world.gear[id];
+    const supply = world.supplies[id];
+    const details = [];
+    if (gear?.power) details.push(gear.power + " Grundschaden + " + world.attributes[gear.stat]);
+    if (gear?.pierce) details.push(gear.pierce + " Durchschlag");
+    if (gear?.armor) details.push(gear.armor + " Rüstung");
+    if (gear?.travel) details.push("+" + gear.travel + " auf Geschickproben unterwegs");
+    if (gear?.magic) details.push("+" + gear.magic + " Glutschaden");
+    if (gear?.airborne) details.push("+" + gear.airborne + " gegen fliegende Gegner");
+    if (supply?.heal) details.push("Stellt bis zu " + supply.heal + " LP wieder her");
+    if (supply?.ember) details.push("Stellt bis zu " + supply.ember + " Glut wieder her");
+    if (world.salePrices[id]) details.push("Verkaufswert " + world.salePrices[id] + " Silber in der Zeugkammer");
+    if (rules.isQuestItem(id)) details.push("Wird für eine Aufgabe gebraucht und bleibt immer im Rucksack");
+    return details;
+  }
+
+  function counted(ids) {
+    const counts = new Map();
+    for (const id of ids) counts.set(id, (counts.get(id) ?? 0) + 1);
+    return counts;
+  }
+
   function renderInventory() {
     const equipment = state.equipment;
-    el("equipment").textContent = state.silver + " Silber · Waffe: " + world.items[rules.weapon(state)] +
-      " · Rüstung: " + (world.items[equipment.armor] ?? "Keine");
+    el("equipment").textContent = state.silver + " Silber · " + rules.equipmentSlots.map(slot =>
+      slotLabels[slot] + ": " + (slot === "weapon" ? world.items[rules.weapon(state)] : world.items[equipment[slot]] ?? "Keine")).join(" · ");
+    const site = rules.storageSite(state);
+    el("bag-summary").textContent = "Rucksack " + rules.slotsUsed(state) + " / " + rules.bagSlots + " Plätze · Lager " +
+      state.storage.length + " Gegenstände" + (site && !state.combat ? " · " + site + " ist hier." : "");
     const inventory = el("inventory");
     inventory.replaceChildren();
-    const counts = new Map();
-    for (const id of state.inventory) counts.set(id, (counts.get(id) ?? 0) + 1);
+    const counts = counted(state.inventory);
     for (const [id, count] of counts) {
       const item = element("li");
       const gear = world.gear[id];
@@ -303,13 +337,7 @@
         item.append(quality);
       }
       if (equipped) item.append(element("small", " Ausgerüstet"));
-      const details = [];
-      if (gear?.power) details.push(gear.power + " Grundschaden + " + world.attributes[gear.stat]);
-      if (gear?.armor) details.push(gear.armor + " Rüstung");
-      if (gear?.travel) details.push("+" + gear.travel + " auf Geschickproben unterwegs");
-      if (gear?.magic) details.push("+" + gear.magic + " Glutschaden");
-      if (supply?.heal) details.push("Stellt bis zu " + supply.heal + " LP wieder her");
-      if (supply?.ember) details.push("Stellt bis zu " + supply.ember + " Glut wieder her");
+      const details = itemDetails(id).filter(text => !text.startsWith("Verkaufswert") && !text.startsWith("Wird für"));
       if (details.length) item.append(element("div", details.join(" · ")));
       if (gear?.slot) button(item, equipped ? "Ablegen" : "Ausrüsten",
         () => update(rules.equip(state, id)), { disabled: Boolean(state.combat) || !state.health });
@@ -318,6 +346,228 @@
       inventory.append(item);
     }
     if (!counts.size) inventory.append(element("li", "Leer"));
+    if (el("inventory-hub").open) renderHub();
+  }
+
+  function openHub() {
+    if (!state) return;
+    const site = rules.storageSite(state);
+    hub.tab = site && !state.combat && state.storage.length && !state.inventory.length ? "storage" : "bag";
+    hub.selected = null;
+    el("hub-status").textContent = "";
+    renderHub();
+    el("inventory-hub").showModal();
+    el("hub-tab-" + hub.tab).focus();
+  }
+
+  function hubAction(next, message) {
+    if (next === state) return;
+    update(next);
+    el("hub-status").textContent = message ?? state.journal.at(-1) ?? "";
+  }
+
+  function compareText(id) {
+    const gear = world.gear[id];
+    const current = gear?.slot && state.equipment[gear.slot];
+    if (!gear?.slot || current === id) return "";
+    const base = world.gear[current] ?? (gear.slot === "weapon" ? world.gear[rules.weapon(state)] : {});
+    const parts = [["power", "Grundschaden"], ["pierce", "Durchschlag"], ["armor", "Rüstung"], ["magic", "Glutschaden"],
+      ["travel", "Geschick unterwegs"], ["airborne", "gegen Flieger"]]
+      .map(([key, label]) => [(gear[key] ?? 0) - (base[key] ?? 0), label])
+      .filter(([delta]) => delta)
+      .map(([delta, label]) => (delta > 0 ? "+" : "−") + Math.abs(delta) + " " + label);
+    const against = current ? world.items[current] : gear.slot === "weapon" ? world.items[rules.weapon(state)] : "leerem Platz";
+    return "Im Vergleich zu " + against + ": " + (parts.length ? parts.join(", ") : "gleichwertig") + ".";
+  }
+
+  function renderHub() {
+    const site = rules.storageSite(state);
+    const open = rules.storageOpen(state);
+    el("hub-place").textContent = open ? site : state.combat ? "Im Kampf" : world.scenes[state.scene].place ?? "";
+    el("hub-silver").textContent = state.silver + " Silber";
+    const slots = el("hub-slots");
+    slots.replaceChildren();
+    for (const slot of rules.equipmentSlots) {
+      const id = slot === "weapon" ? rules.weapon(state) : state.equipment[slot];
+      const card = element("button");
+      card.type = "button";
+      card.className = "hub-slot" + (state.equipment[slot] ? "" : " hub-slot-empty");
+      card.append(element("small", slotLabels[slot]), element("strong", id ? world.items[id] : "Leer"));
+      const summary = id ? itemDetails(id).slice(0, 2).join(" · ") : "Kein Gegenstand angelegt";
+      card.append(element("span", summary));
+      card.disabled = !state.equipment[slot];
+      card.setAttribute("aria-label", slotLabels[slot] + ": " + (id ? world.items[id] : "leer"));
+      card.addEventListener("click", () => {
+        hub.tab = "bag";
+        hub.selected = state.equipment[slot];
+        renderHub();
+        el("hub-detail").querySelector("button:not(:disabled)")?.focus();
+      });
+      slots.append(card);
+    }
+    const tabs = { bag: "Rucksack · " + rules.slotsUsed(state) + " / " + rules.bagSlots,
+      storage: "Lager · " + state.storage.length };
+    for (const [tab, label] of Object.entries(tabs)) {
+      const control = el("hub-tab-" + tab);
+      control.textContent = label;
+      control.setAttribute("aria-selected", String(hub.tab === tab));
+      control.tabIndex = hub.tab === tab ? 0 : -1;
+    }
+    el("hub-hint").textContent = hub.tab === "storage"
+      ? (open ? "Du bist an deinem Lager. Wähle einen Gegenstand, um ihn herauszunehmen."
+        : "Das Lager kannst du hier nur ansehen. Einlagern und Herausnehmen geht in Eiswacht und Glutberg.")
+      : state.combat ? "Im Kampf kannst du nur Verbrauchsgüter verwenden."
+        : open ? "Du bist an deinem Lager. Gegenstände lassen sich hier einlagern."
+          : "Gleiche Gegenstände stapeln sich auf einem Platz. Questgegenstände belegen keinen Platz.";
+    const source = hub.tab === "bag" ? state.inventory : state.storage;
+    const counts = counted(source);
+    const present = new Set([...counts.keys()].map(id => rules.category(id)));
+    const filters = el("hub-filters");
+    filters.replaceChildren();
+    for (const [filter, label] of hubFilters) {
+      const matches = filterMatch[filter] ?? (category => category === filter);
+      if (filter !== "all" && ![...present].some(matches)) continue;
+      const chip = element("button", label);
+      chip.type = "button";
+      chip.className = "hub-chip";
+      chip.setAttribute("aria-pressed", String(hub.filter === filter));
+      chip.addEventListener("click", () => {
+        hub.filter = filter;
+        renderHub();
+        filters.querySelector('[aria-pressed="true"]')?.focus();
+      });
+      filters.append(chip);
+    }
+    if (!filters.querySelector('[aria-pressed="true"]')) hub.filter = "all";
+    filters.querySelector("button")?.setAttribute("aria-pressed", String(hub.filter === "all"));
+    const matches = filterMatch[hub.filter] ?? (category => category === hub.filter);
+    const order = ["quest", "weapon", "armor", "offhand", "trinket", "supply", "trophy"];
+    const entries = [...counts].filter(([id]) => matches(rules.category(id)))
+      .sort(([a], [b]) => order.indexOf(rules.category(a)) - order.indexOf(rules.category(b)) || world.items[a].localeCompare(world.items[b], "de"));
+    if (!counts.has(hub.selected)) hub.selected = null;
+    const grid = el("hub-items");
+    grid.replaceChildren();
+    for (const [id, count] of entries) {
+      const tile = element("button");
+      tile.type = "button";
+      tile.className = "hub-item";
+      tile.dataset.category = rules.category(id);
+      if (world.rarity[id]) tile.dataset.quality = world.rarity[id];
+      tile.setAttribute("aria-pressed", String(hub.selected === id));
+      const gear = world.gear[id];
+      const equipped = hub.tab === "bag" && gear?.slot && state.equipment[gear.slot] === id;
+      tile.append(element("strong", world.items[id]));
+      tile.append(element("small", categoryLabels[rules.category(id)] + (world.rarity[id] ? " · " + world.rarity[id] : "")));
+      if (count > 1) {
+        const badge = element("span", "×" + count);
+        badge.className = "hub-count";
+        tile.append(badge);
+      }
+      if (equipped) {
+        const mark = element("span", "Angelegt");
+        mark.className = "hub-equipped";
+        tile.append(mark);
+      }
+      tile.addEventListener("click", () => {
+        hub.selected = hub.selected === id ? null : id;
+        renderHub();
+        el("hub-items").querySelector('[aria-pressed="true"]')?.focus();
+      });
+      const item = element("li");
+      item.append(tile);
+      grid.append(item);
+    }
+    if (!entries.length) grid.append(element("li", hub.tab === "bag" ? "Dein Rucksack ist leer." : "Im Lager liegt nichts."));
+    renderHubDetail(counts);
+  }
+
+  function renderHubDetail(counts) {
+    const detail = el("hub-detail");
+    detail.replaceChildren();
+    const id = hub.selected;
+    if (!id) {
+      detail.append(element("p", "Wähle einen Gegenstand, um Werte und Möglichkeiten zu sehen."));
+      return;
+    }
+    const gear = world.gear[id];
+    const count = counts.get(id);
+    detail.append(element("h3", world.items[id] + (count > 1 ? " ×" + count : "")));
+    const meta = element("p", categoryLabels[rules.category(id)] + (world.rarity[id] ? " · " + world.rarity[id] : ""));
+    meta.className = "hub-meta";
+    if (world.rarity[id]) meta.dataset.quality = world.rarity[id];
+    detail.append(meta);
+    const details = itemDetails(id);
+    if (details.length) {
+      const lines = element("ul");
+      for (const text of details) lines.append(element("li", text));
+      detail.append(lines);
+    }
+    const comparison = compareText(id);
+    if (comparison) detail.append(element("p", comparison));
+    const actions = element("div");
+    actions.className = "actions hub-actions";
+    const hints = [];
+    if (hub.tab === "bag") {
+      const equipped = gear?.slot && state.equipment[gear.slot] === id;
+      if (gear?.slot) button(actions, equipped ? "Ablegen" : "Ausrüsten",
+        () => hubAction(rules.equip(state, id)), { disabled: Boolean(state.combat) || !state.health });
+      if (world.supplies[id]) button(actions, "Verwenden", () => {
+        if (state.combat) {
+          el("inventory-hub").close();
+          battleAction("herb", id);
+        } else hubAction(rules.use(state, id));
+      }, { disabled: !rules.canUse(state, id) });
+      if (world.supplies[id] && !rules.canUse(state, id)) hints.push("Verwenden geht erst, wenn dir Lebenspunkte oder Glut fehlen.");
+      if (!rules.isQuestItem(id)) {
+        button(actions, "Einlagern", () => hubAction(rules.store(state, id, 1)), { disabled: !rules.canStore(state, id) });
+        if (count > 1) button(actions, "Alle einlagern", () => hubAction(rules.store(state, id, count)),
+          { disabled: !rules.canStore(state, id) });
+        if (!rules.storageOpen(state)) hints.push("Einlagern kannst du in Eiswacht und Glutberg.");
+        else if (equipped && count === 1) hints.push("Beim Einlagern wird der Gegenstand abgelegt.");
+      }
+    } else {
+      button(actions, "Herausnehmen", () => hubAction(rules.retrieve(state, id, 1)), { disabled: !rules.canRetrieve(state, id) });
+      if (count > 1) button(actions, "Alle herausnehmen", () => hubAction(rules.retrieve(state, id, count)),
+        { disabled: !rules.canRetrieve(state, id) });
+      if (gear?.slot) button(actions, "Herausnehmen und ausrüsten", () => {
+        const taken = rules.retrieve(state, id, 1);
+        if (taken === state) return;
+        const worn = rules.equip(taken, id);
+        hubAction(worn, world.items[id] + " aus dem Lager genommen und ausgerüstet.");
+        hub.tab = "bag";
+        hub.selected = id;
+        renderHub();
+      }, { disabled: !rules.canRetrieve(state, id) || (state.equipment[gear.slot] === id) });
+      if (!rules.storageOpen(state)) hints.push("Herausnehmen kannst du in Eiswacht und Glutberg.");
+      else if (!rules.fits(state, id)) hints.push("Dein Rucksack ist voll. Lagere zuerst etwas ein.");
+    }
+    if (actions.children.length) detail.append(actions);
+    for (const text of hints) {
+      const hint = element("p", text);
+      hint.className = "hub-hint";
+      detail.append(hint);
+    }
+  }
+
+  for (const opener of document.querySelectorAll("[data-hub-open]")) opener.addEventListener("click", openHub);
+  el("hub-close").addEventListener("click", () => el("inventory-hub").close());
+  el("inventory-hub").addEventListener("click", event => {
+    if (event.target === event.currentTarget) event.currentTarget.close();
+  });
+  for (const tab of ["bag", "storage"]) {
+    const control = el("hub-tab-" + tab);
+    control.addEventListener("click", () => {
+      hub.tab = tab;
+      hub.selected = null;
+      hub.filter = "all";
+      renderHub();
+      control.focus();
+    });
+    control.addEventListener("keydown", event => {
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+      event.preventDefault();
+      el("hub-tab-" + (tab === "bag" ? "storage" : "bag")).click();
+    });
   }
 
   function companionEffect(companion) {
@@ -559,6 +809,7 @@
           const gear = world.gear[id];
           const supply = world.supplies[id];
           const effect = gear?.power ? gear.power + " Grundschaden" : gear?.armor ? gear.armor + " Rüstung" :
+            gear?.magic ? "+" + gear.magic + " Glutschaden" : gear?.travel ? "+" + gear.travel + " Geschick unterwegs" :
             supply?.heal ? "+" + supply.heal + " LP" : "+" + supply.ember + " Glut";
           button(stock, world.items[id] + " · " + effect + " · " + price + " Silber", () => update(rules.trade(state, id, true)),
             { disabled: price > state.silver || state.inventory.length >= 180 });

@@ -2,6 +2,7 @@
 
 const rules = (() => {
   const version = 1;
+  const equipmentSlots = ["weapon", "armor", "offhand", "trinket"];
   const own = (obj, key) => typeof key === "string" && Object.hasOwn(obj, key);
   const intBetween = (value, low, high) => Number.isInteger(value) && value >= low && value <= high;
 
@@ -37,7 +38,8 @@ const rules = (() => {
       version, name: cleanName, origin, appearance, variant, role, scene: "wake",
       allocation, health: maxHealth(origin, allocation ?? undefined), ember: maxEmber(origin, allocation ?? undefined),
       balance: 0, inventory: allocation ? [weapon, "lederwams", "galgenwurz"] : [],
-      equipment: allocation ? { weapon, armor: "lederwams" } : { weapon: null, armor: null },
+      equipment: { weapon: allocation ? weapon : null, armor: allocation ? "lederwams" : null, offhand: null, trinket: null },
+      storage: [],
       xp: 0, silver: 5, training: {}, rewards: [],
       party: [],
       relationships: {}, factionRuf: {},
@@ -54,6 +56,10 @@ const rules = (() => {
     if (!Object.hasOwn(state, "balance")) state.balance = 0;
     if (!Object.hasOwn(state, "allocation")) state.allocation = null;
     if (!Object.hasOwn(state, "equipment")) state.equipment = { weapon: null, armor: null };
+    if (state.equipment && typeof state.equipment === "object") {
+      state.equipment.offhand ??= null;
+      state.equipment.trinket ??= null;
+    }
     state.xp ??= 0;
     state.silver ??= 5;
     state.training ??= {};
@@ -61,6 +67,7 @@ const rules = (() => {
     state.party ??= [];
     state.relationships ??= {};
     state.factionRuf ??= {};
+    state.storage ??= [];
     create(state.name, state.origin, state.appearance, state.variant, state.role, state.allocation);
     const combat = state.combat;
     const validList = (value, check, limit) => Array.isArray(value) && value.length <= limit && value.every(check);
@@ -81,7 +88,8 @@ const rules = (() => {
           typeof bond.gift === "boolean" && typeof bond.left === "boolean" &&
           ["none", "romance", "friendship"].includes(bond.bond)) ||
         !validList(state.inventory, (id) => own(world.items, id) && id !== "faeuste", 200) ||
-        !state.equipment || !["weapon", "armor"].every((slot) => {
+        !validList(state.storage, (id) => own(world.items, id) && id !== "faeuste", storageLimit) ||
+        !state.equipment || !equipmentSlots.every((slot) => {
           const id = state.equipment[slot];
           return id === null || (own(world.gear, id) && state.inventory.includes(id) && world.gear[id].slot === slot);
         }) ||
@@ -174,8 +182,8 @@ const rules = (() => {
     } else if (action === "gift") {
       bond.gift = true;
       const item = world.loyalties[id].gift;
-      state.inventory.push(item);
       note(state, name + " schenkt dir " + world.items[item] + ".");
+      receive(state, [item]);
     } else {
       bond.bond = action;
       note(state, action === "romance"
@@ -223,7 +231,7 @@ const rules = (() => {
     state.rewards.push(id);
     state.xp += xp;
     state.silver += silver;
-    state.inventory.push(...items);
+    const overflow = receive(state, items, false);
     const parts = [];
     if (xp) parts.push(xp + " EP");
     if (silver) parts.push(silver + " Silber");
@@ -231,6 +239,7 @@ const rules = (() => {
     const level = progression(state).level;
     if (parts.length) note(state, parts.join(" · ") +
       (level > previousLevel ? ". Stufe " + level + " erreicht. Du hast neue Attributpunkte." : "."));
+    noteOverflow(state, overflow);
   }
 
   function loot(state, id, dice) {
@@ -253,10 +262,10 @@ const rules = (() => {
     const index = previous.inventory.indexOf(id);
     if (buying ? previous.silver < price || previous.inventory.length >= 180 : index === -1) return previous;
     const state = structuredClone(previous);
-    if (buying) state.inventory.push(id);
-    else state.inventory.splice(index, 1);
+    if (!buying) state.inventory.splice(index, 1);
     state.silver += buying ? -price : price;
     note(state, world.items[id] + (buying ? " gekauft" : " verkauft") + " · " + price + " Silber.");
+    if (buying) receive(state, [id]);
     return state;
   }
 
@@ -266,6 +275,96 @@ const rules = (() => {
     const state = structuredClone(previous);
     state.equipment[gear.slot] = state.equipment[gear.slot] === id ? null : id;
     note(state, world.items[id] + (state.equipment[gear.slot] ? " ausgerüstet." : " abgelegt."));
+    return state;
+  }
+
+  // Rucksack und Lager. Gleiche Gegenstände stapeln sich auf einem Platz, Questgegenstände belegen keinen.
+  const bagSlots = 20;
+  const storageLimit = 400;
+  const questItems = new Set(Object.values(world.scenes).flatMap(scene => (scene.choices ?? []).map(choice => choice.requiresItem))
+    .filter(id => id && !own(world.supplies, id) && !own(world.gear, id)));
+
+  function category(id) {
+    const slot = world.gear[id]?.slot;
+    if (slot) return slot;
+    if (own(world.supplies, id)) return "supply";
+    if (questItems.has(id)) return "quest";
+    return "trophy";
+  }
+
+  function slotsUsed(state) {
+    return new Set(state.inventory.filter(id => !questItems.has(id))).size;
+  }
+
+  function fits(state, id) {
+    return questItems.has(id) || state.inventory.includes(id) || slotsUsed(state) < bagSlots;
+  }
+
+  // Legt neue Gegenstände in den Rucksack. Ist er voll, bringt ein Bote sie ins Lager. Nichts geht verloren.
+  function receive(state, items, announce = true) {
+    const overflow = [];
+    for (const id of items) {
+      if (fits(state, id) && state.inventory.length < 200) state.inventory.push(id);
+      else if (state.storage.length < storageLimit) {
+        state.storage.push(id);
+        overflow.push(id);
+      }
+    }
+    if (announce) noteOverflow(state, overflow);
+    return overflow;
+  }
+
+  function noteOverflow(state, overflow) {
+    if (!overflow.length) return;
+    note(state, "Dein Rucksack ist voll. " + [...new Set(overflow)].map(id => world.items[id]).join(", ") +
+      (overflow.length > 1 ? " werden" : " wird") + " ins Lager gebracht.");
+  }
+
+  function storageSite(state) {
+    return world.storageSites[world.scenes[state.scene]?.map] ?? null;
+  }
+
+  function storageOpen(state) {
+    return Boolean(!state.combat && state.health > 0 && storageSite(state));
+  }
+
+  function canStore(state, id) {
+    return storageOpen(state) && state.inventory.includes(id) && !questItems.has(id) && state.storage.length < storageLimit;
+  }
+
+  function canRetrieve(state, id) {
+    return storageOpen(state) && state.storage.includes(id) && fits(state, id) && state.inventory.length < 200;
+  }
+
+  function moveCount(from, id, count) {
+    const have = from.filter(entry => entry === id).length;
+    return Math.max(1, Math.min(have, Number.isInteger(count) ? count : 1));
+  }
+
+  function store(previous, id, count = 1) {
+    if (!canStore(previous, id)) return previous;
+    const state = structuredClone(previous);
+    const amount = Math.min(moveCount(state.inventory, id, count), storageLimit - state.storage.length);
+    for (let index = 0; index < amount; index++) {
+      state.inventory.splice(state.inventory.indexOf(id), 1);
+      state.storage.push(id);
+    }
+    const slot = world.gear[id]?.slot;
+    const unequipped = slot && state.equipment[slot] === id && !state.inventory.includes(id);
+    if (unequipped) state.equipment[slot] = null;
+    note(state, world.items[id] + (amount > 1 ? " ×" + amount : "") + " eingelagert" + (unequipped ? " und abgelegt." : "."));
+    return state;
+  }
+
+  function retrieve(previous, id, count = 1) {
+    if (!canRetrieve(previous, id)) return previous;
+    const state = structuredClone(previous);
+    const amount = Math.min(moveCount(state.storage, id, count), 200 - state.inventory.length);
+    for (let index = 0; index < amount; index++) {
+      state.storage.splice(state.storage.indexOf(id), 1);
+      state.inventory.push(id);
+    }
+    note(state, world.items[id] + (amount > 1 ? " ×" + amount : "") + " aus dem Lager genommen.");
     return state;
   }
 
@@ -373,12 +472,12 @@ const rules = (() => {
     if (choice.check) {
       const [key, target] = choice.check;
       const bonus = stats[key] + (state.marks.includes(choice.advantage) ? 2 : 0) +
-        (key === "agility" ? (world.gear[state.equipment?.armor]?.travel ?? 0) : 0);
+        (key === "agility" ? gearBonus(state, "travel") : 0);
       const roll = 1 + Math.floor(dice() * 20);
       const passed = roll + bonus >= target;
       note(state, world.attributes[key] + " " + roll + " + " + bonus + " gegen " + target + ". " +
         (passed ? choice.pass : choice.fail));
-      if (passed && choice.item) state.inventory.push(choice.item);
+      if (passed && choice.item) receive(state, [choice.item]);
       if (passed && choice.mark) markDeed(state, choice.mark);
       if (passed || !choice.fight) {
         arrive(state, choice.to);
@@ -386,7 +485,7 @@ const rules = (() => {
       }
     } else {
       if (choice.mark) markDeed(state, choice.mark);
-      if (choice.item) state.inventory.push(choice.item);
+      if (choice.item) receive(state, [choice.item]);
       if (choice.consume) state.inventory.splice(state.inventory.indexOf(choice.consume), 1);
       if (choice.recover) state.health = Math.min(healthLimit(state), state.health + choice.recover);
       if (choice.replenish) state.ember = Math.min(emberLimit(state), state.ember + choice.replenish);
@@ -529,7 +628,7 @@ const rules = (() => {
     } else if (action === "ember" && cast(state, 2)) {
       usedFire = true;
       const damage = role.attack.power + stats[role.attack.stat] + (result.emberBonus ?? 0) +
-        (world.gear[state.equipment?.weapon]?.magic ?? 0);
+        gearBonus(state, "magic");
       hit(damage);
       note(state, role.attack.name + " verursacht " + damage + " Schaden.");
     } else if (action === "restore" && cast(state, -2)) {
@@ -629,7 +728,7 @@ const rules = (() => {
     const leaderAttack = current.health > 0 ? attack + (current.max ? Math.floor(state.party.length / 2) : 0) : 0;
     const defense = action === "guard" ? Math.max(6, ward) : ward;
     const damage = Math.max(guarding ? 0 : 1, leaderAttack + extraAttack + (special?.damage ?? 0) -
-      Math.floor(stats.will / 2) - (world.gear[state.equipment?.armor]?.armor ?? 0) - defense);
+      Math.floor(stats.will / 2) - gearBonus(state, "armor") - defense);
     current.stunned = Boolean(special?.stuns && !guarding);
     const startsBleeding = special?.bleeds && !guarding;
     if (startsBleeding) current.bleeding = 2;
@@ -646,6 +745,11 @@ const rules = (() => {
       (bleedingDamage ? " Die Blutung kostet 1 LP." : ""));
     if (!state.health) arrive(state, "defeat");
     return state;
+  }
+
+  // Summiert einen Ausrüstungswert über alle belegten Plätze (Waffe, Rüstung, Nebenhand, Schmuck).
+  function gearBonus(state, key) {
+    return equipmentSlots.reduce((total, slot) => total + (world.gear[state.equipment?.[slot]]?.[key] ?? 0), 0);
   }
 
   function weapon(state) {
@@ -679,12 +783,13 @@ const rules = (() => {
     state.role = role;
     state.party = state.party.filter(id => id !== role);
     state.allocation = allocation;
-    state.inventory.push(...setup.inventory.filter(id => !state.inventory.includes(id)));
+    const overflow = receive(state, setup.inventory.filter(id => !state.inventory.includes(id)), false);
     state.equipment.weapon ??= setup.equipment.weapon;
     state.equipment.armor ??= setup.equipment.armor;
     state.health += healthLimit(state) - healthLimit(previous);
     state.ember += emberLimit(state) - emberLimit(previous);
     note(state, "Klasse und Attributpunkte festgelegt. Deine bisherige Reise und Beute bleiben erhalten.");
+    noteOverflow(state, overflow);
     return state;
   }
 
@@ -719,7 +824,8 @@ const rules = (() => {
     return { bridge, news, messengers: marks.includes("boten-unterwegs") };
   }
 
-  return { create, read, choices, choose, route, buildLegacy, weapon, equip, use, canUse, strike, attributes, maxHealth, maxEmber,
+  return { create, read, choices, equipmentSlots, gearBonus, bagSlots, category, slotsUsed, fits, storageSite, storageOpen, canStore, canRetrieve,
+    store, retrieve, isQuestItem: id => questItems.has(id), choose, route, buildLegacy, weapon, equip, use, canUse, strike, attributes, maxHealth, maxEmber,
     progression, train, trade, candidates, recruit, dismiss, targets,
     relationship, reputation, recruitment, promise, bondActions, bondWith,
     healthLimit, emberLimit, heroAttributes, ending, moorConsequences };

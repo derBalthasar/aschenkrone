@@ -86,6 +86,8 @@ const world = (() => {
     rostklaue: "Rostklaue", harzverband: "Harzverband", glutampulle: "Glutampulle",
     forstbuch: "Heidvanger Forstbuch", frostfell: "Frostklippenmantel", runenbeil: "Runenbeil",
     baerenklaue: "Bärenklaue", runensplitter: "Runensplitter",
+    holzschild: "Eichenrundschild", wachschild: "Schild der Grenzwache",
+    glutamulett: "Glutamulett", spurenring: "Ring des Spurenlesers",
   };
   const gear = {
     speer: { slot: "weapon", stat: "strength", power: 5, pierce: 2 },
@@ -108,12 +110,18 @@ const world = (() => {
     rostklaue: { slot: "weapon", stat: "agility", power: 7, pierce: 2 },
     frostfell: { slot: "armor", armor: 4, travel: 1 },
     runenbeil: { slot: "weapon", stat: "strength", power: 9, pierce: 2, magic: 1 },
+    // Nebenhand und Schmuck (17.11.2026, Vorschlagswerte)
+    holzschild: { slot: "offhand", armor: 1 },
+    wachschild: { slot: "offhand", armor: 2 },
+    glutamulett: { slot: "trinket", magic: 1 },
+    spurenring: { slot: "trinket", travel: 1 },
   };
   const supplies = { galgenwurz: { heal: 10 }, glutfunke: { ember: 2 }, harzverband: { heal: 16 }, glutampulle: { ember: 3 } };
   const rarity = {
     eisenkeil: "Ungewöhnlich", rostklaue: "Ungewöhnlich", glutpanzer: "Ungewöhnlich",
     grenzmantel: "Selten", grauflussbogen: "Selten", wachschwert: "Selten", runenstab: "Selten",
     aschenwaechter: "Episch", frostfell: "Selten", runenbeil: "Selten",
+    wachschild: "Ungewöhnlich", glutamulett: "Ungewöhnlich", spurenring: "Ungewöhnlich",
   };
   const lootTables = {
     "minenfach": [[50, ["harzverband"], 8], [32, ["eisenkeil"], 5], [18, ["runenstab"], 0]],
@@ -133,7 +141,10 @@ const world = (() => {
     "forstbuch-geborgen": 20, "forstbuch-zurueckgegeben": 25,
     "klippen-umgangen": 35, "klippen-beruhigt": 40, "runen-geschuetzt": 65, "runen-verbrannt": 45,
   };
-  const shop = { harzverband: 8, glutampulle: 12, eisenkeil: 22, rostklaue: 24, grenzmantel: 40 };
+  // Lagerorte nach Kartenpunkt: Rastorte, an denen Rucksack und Lager getauscht werden können.
+  const storageSites = { hochwacht: "Lagerkammer am Wachhof von Eiswacht", "skarn-gate": "Naldas Lagerzelt in Glutberg" };
+  const shop = { harzverband: 8, glutampulle: 12, eisenkeil: 22, rostklaue: 24, grenzmantel: 40,
+    holzschild: 14, wachschild: 34, glutamulett: 26, spurenring: 24 };
   const salePrices = { keilerhauer: 5, wolfszahn: 4, kraehenfedern: 2, greifenfeder: 10, greifenklaue: 14, trollblut: 18 };
 
   const scenes = {
@@ -918,7 +929,7 @@ const world = (() => {
       "Moor bei Eiswacht": "schwarzmoor", Eiswacht: "hochwacht",
     })[region];
   }
-  return { attributes, origins, classes, items, gear, supplies, rarity, lootTables, milestones, deeds, shop, salePrices,
+  return { attributes, origins, classes, items, gear, supplies, rarity, lootTables, milestones, deeds, shop, salePrices, storageSites,
     battleRewards, enemyGroups, companions, loyalties, factions, factionEffects, relationshipEffects,
     scenes, creatures, fights, destinations, routes, travelScenes };
 })();
