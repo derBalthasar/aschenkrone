@@ -40,27 +40,27 @@ Das Weltbuch führt fünf Startwerte für eine künftige Kampagne um 612 n. E. a
 
 ## Startpunkte der Fraktionen
 
-Seit dem 17. 11. 2026 beginnt jede spielbare Fraktion in ihrem eigenen Gebiet (Vorgabe von Henry). Die Orte stehen auf der verbindlichen Karte. Daten und Texte liegen in `spiel/startpunkte.js`, die Prologbilder sind Kartenausschnitte unter `spiel/prolog/start/`.
+Seit dem 17. 11. 2026 beginnt jede spielbare Fraktion in ihrem eigenen Gebiet (Vorgabe von Henry). Alle 15 Prologe spielen in der Nacht des Erwachens im Herbst 612 n. E., wie in [Die Nacht des Erwachens](NACHT-DES-ERWACHENS.md) festgelegt. Die Orte stehen auf der verbindlichen Karte. Daten und Texte liegen in `spiel/startpunkte.js`, die Prologbilder sind Kartenausschnitte unter `spiel/prolog/start/`.
 
-| Volk | Fraktion | Startort | Begründung |
+| Volk | Fraktion | Startort | Zuflucht im Morgengrauen |
 | --- | --- | --- | --- |
-| Menschen | Kronreich | Kornwik | bisheriger Prolog, unverändert |
-| Menschen | Orden der Flamme | Aschenkloster | Ausbildungsstätte der Paladine und Runenmeister unter Glutberg |
-| Menschen | Freie Häfen | Perlvik | Hauptstadt und Sitz des Hafenthings |
-| Untote | Hof der Bleichen Krone | Draugrsund | Hafen des Hofs gegenüber dem Land der Menschen |
-| Untote | Die Erinnernden | Eryndor | Blutbrunnen und Bibliotheken der Häuser |
-| Untote | Fäulnisbrut | Sporenwald | verseuchtes Land nahe dem Tempel der Fleischaltäre |
-| Elfen | Dornenklingen | Dornwacht | Wache am Dornwall |
-| Elfen | Hüter des Weltenbaums | Ylvenor | Stadt im Weltenbaum, Aschenast |
-| Elfen | Schattenblüte | Schwarzgarten | Ernte der schwarzen Blüten |
-| Orks | Staubreiter | Ur-Taal | Brunnen von Ur-Taal |
-| Orks | Aschenclan | Aschenthron | Ahnenfeuer am Ghor-Mahr |
-| Orks | Grüne Banner | Weitenlager | Herdenlager in den Weiten |
-| Zwerge | Tiefes Königreich | Zollburg | Erzkontrolle am Zollpass |
-| Zwerge | Runenschmiede | Essenfels | Gildensitz, alte Runen in Grenzsteinen bei Kornwik |
-| Zwerge | Tiefgräber | Stollenmund | Festung am Tiefen Stollen |
+| Menschen | Kronreich | Westvik | Kronhall |
+| Menschen | Freie Häfen | Perlvik | Zollholm |
+| Menschen | Orden der Flamme | Aschenkloster | Glutberg |
+| Elfen | Dornenklingen | Hochdorn | Hochdorn |
+| Elfen | Schattenblüte | Velasyr | Velasyr |
+| Elfen | Hüter des Weltenbaums | Ylvenor | Waldrand |
+| Zwerge | Tiefes Königreich | Ambossheim | Ambossheim |
+| Zwerge | Tiefgräber | Kluftheim | Stollenmund |
+| Zwerge | Runenschmiede | Essenfels | Essenfels |
+| Orks | Grüne Banner | Kragmar | Kragmar |
+| Orks | Staubreiter | Ur-Taal | Zhar-Kesh |
+| Orks | Aschenclan | Aschenthron | Kraterpfad am Ghor-Mahr |
+| Untote | Fäulnisbrut | Tal von Nachtquell | Madenmoor |
+| Untote | Hof der Bleichen Krone | Palast der Tausend Stimmen | Seelenhafen |
+| Untote | Die Erinnernden | Eryndor | Eryndor |
 
-Außer dem Kronreich hat jede Fraktion einen kurzen Prolog mit drei Bildern und eine Startszene mit Zentrallager. Dort holt man einmal Galgenwurz und bricht dann im Auftrag der Fraktion (`auftrag-<fraktion>`) oder auf eigene Faust (`eigener-weg`) auf. Die Reise endet in der Szene „Ankunft im Kronreich“ bei Kornwik. Dort gibt es dieselben Startvorteile je Herkunft wie beim Erwachen in Kornwik. Danach geht es mit dem bestehenden Abschnitt weiter. Die Auftragsmarken sind für spätere Fraktionsquests gedacht. Spielstände im Erwachen bei Kornwik bleiben gültig.
+Jeder Prolog hat drei Bilder und drei spielbare Kapitel: Heimat mit zwei Erkundungen, ein Kampf gegen einen Prologgegner, dann die Entscheidung (Marken `nacht-…`) und der Angriff, der den Helden in die Zuflucht treibt. Startort und Zuflucht haben ein Zentrallager. Bis die Fraktionsreihen spielbar sind, führt die Reise danach zur Szene „Ankunft im Kronreich“ bei Kornwik mit den Startvorteilen je Herkunft und weiter in den bestehenden Abschnitt. Spielstände im Erwachen bei Kornwik bleiben gültig.
 
 ## Bestiarium und Völker
 

@@ -1006,6 +1006,8 @@ const rules = (() => {
       }
     } else {
       if (choice.mark) markDeed(state, choice.mark);
+      // Glutkosten ohne eigene Glutwirkung (Prologe, spend): die Glut wird einfach verbraucht.
+      if (choice.spend) state.ember -= choice.emberCost;
       if (choice.item) receive(state, [choice.item]);
       if (choice.consume) state.inventory.splice(state.inventory.indexOf(choice.consume), 1);
       if (choice.recover) state.health = Math.min(healthLimit(state), state.health + choice.recover);

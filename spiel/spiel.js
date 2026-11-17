@@ -346,7 +346,7 @@
     const far = world.scenes[state.scene].fern;
     el("map-status").textContent = state.combat ? "Im Kampf kannst du die Karte ansehen. Reiseoptionen öffnen sich nach der Begegnung." :
       location ? "Standort: " + location + (travels.size ? " · Wähle ein Reiseziel, um die Route zu sehen." : " · Folge den Optionen in der Szene.") :
-      far ? "Standort: " + far + " · außerhalb dieser Reisekarte. Folge den Optionen in der Szene, um ins Kronreich zu reisen." :
+      far ? "Standort: " + far + " · außerhalb dieser Reisekarte. Folge den Optionen in der Szene." :
       "Deine Reise ist beendet.";
   }
 
@@ -1453,7 +1453,7 @@
     const faction = klassen.fraktionen[origin.value];
     el("faction-description").textContent = "Ressource " + faction.ressource + " · Schwierigkeit " + faction.schwierigkeit +
       " · Grundwerte " + bonusText(faction.bonus) + (faction.magie ? "" : " · keine Magie") + " · Startort " +
-      startpunkte.ort(origin.value) + (faction.hinweis ? ". " + faction.hinweis : "");
+      startpunkte.ort(origin.value) + " · Prolog „" + startpunkte.fraktionen[origin.value].prolog + "“" + (faction.hinweis ? ". " + faction.hinweis : "");
     if (!editingLegacy || portraitNeedsReset) portraitPreview(true);
     updateClassDescription();
   }

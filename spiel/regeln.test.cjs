@@ -20,8 +20,11 @@ const lowRoll = () => 0;
 // Burgvögtin des Kronreichs mit festen Werten, damit die Kampf- und Probenwerte nachvollziehbar bleiben.
 const heroBuild = { frei: { strength: 2, presence: 2, will: 1 }, wahl: "presence", spez: null, meister: null,
   fertigkeiten: { nahkampf: 3, fernkampf: 2, magie: 0, verteidigung: 4, list: 2, fuehrung: 4, mut: 3 } };
-const hero = () => rules.create("Tala", "kronreich", "frau", 2, "waechter", heroBuild);
-assert.equal(hero().scene, "wake");
+// Neue Helden des Kronreichs beginnen im Prolog in Westvik. Diese Tests laufen ab dem Erwachen bei Kornwik,
+// das für bestehende Spielstände erhalten bleibt.
+assert.equal(rules.create("Tala", "kronreich", "frau", 2, "waechter", heroBuild).scene, "heim-kronreich");
+const hero = () => ({ ...rules.create("Tala", "kronreich", "frau", 2, "waechter", heroBuild), scene: "wake" });
+assert.equal(rules.read(JSON.stringify(hero())).scene, "wake");
 const start = () => rules.choose(rules.choose(hero(), "lantern"), "move");
 assert.equal(start().scene, "start");
 assert.equal(rules.read(JSON.stringify(start())).scene, "start");
@@ -140,50 +143,82 @@ for (const [faction, scene, mark] of ancestry) {
   assert.ok(!rules.choose(opening, "move").marks.includes(mark));
 }
 
-// Startpunkte: jede Fraktion beginnt in ihrem eigenen Gebiet, das Kronreich weiter in Kornwik.
+// Nacht des Erwachens: 15 Prologe mit drei Kapiteln, Angriff und Morgengrauen im eigenen Gebiet.
 const startMarks = { valmarcher: "ditch", waldelf: "waldspur", bergzwerg: "steinrhythmus", gruenhaut: "fuhrleute-vertrauen", vampir: "faehrwort" };
-const startVolk = { menschen: "Land der Menschen", untote: "Land der Untoten", elfen: "Land der Elfen", orks: "Land der Orks", zwerge: "Land der Zwerge" };
+const nacht = vm.runInContext("startpunkte", context);
 const factionIds = Object.keys(vm.runInContext("klassen", context).fraktionen);
 assert.equal(factionIds.length, 15);
+assert.deepEqual(Object.keys(nacht.prologe).sort(), [...factionIds].sort());
+const winFight = (state) => {
+  let current = state;
+  for (let round = 0; current.combat && round < 40; round++) {
+    current = rules.strike(current, current.ember >= 1 && current.balance < 2 ? "ember" : "spear", highRoll);
+  }
+  assert.equal(current.combat, null, "Der Prologkampf muss zu gewinnen sein");
+  return current;
+};
+const longJournal = [];
 for (const faction of factionIds) {
   const character = rules.create("Tala", faction, "frau", 1, "krieger");
-  const volk = vm.runInContext("klassen", context).fraktionen[faction].volk;
-  if (faction === "kronreich") {
-    assert.equal(character.scene, "wake");
-    assert.equal(vm.runInContext("startpunkte", context).prologe[faction], undefined);
-    continue;
-  }
   const home = world.scenes[character.scene];
   assert.equal(character.scene, "heim-" + faction);
-  assert.ok(!home.place.startsWith("Kornwik"), faction + " darf nicht in Kornwik erwachen");
+  if (faction !== "kronreich") assert.ok(!home.place.startsWith("Kornwik"), faction + " darf nicht in Kornwik beginnen");
   assert.equal(home.map, undefined);
+  assert.match(home.objective, /Kapitel 1/);
   assert.ok(rules.storageOpen(character), faction + " braucht ein Zentrallager am Startort");
-  assert.equal(rules.storageSite(character), "Zentrallager · " + home.place.split(" · ")[0]);
   assert.equal(rules.read(JSON.stringify(character)).scene, character.scene);
   assert.equal(rules.route(character, "weidenkamm"), null);
-  const slides = vm.runInContext("startpunkte", context).prologe[faction];
+  const slides = nacht.prologe[faction];
   assert.equal(slides.length, 3);
-  assert.equal(slides[0].location, "Odris · " + startVolk[volk]);
+  assert.equal(slides[0].location, "Odris · Herbst 612 n. E.");
   assert.ok(slides[2].showPortrait && slides[2].text.includes("%NAME%"));
   for (const slide of slides) assert.ok(fs.existsSync(path.join(root, "spiel/prolog", slide.image)), slide.image);
-  assert.deepEqual(ids(character), ["vorrat", "auftrag", "eigen"]);
-  const stocked = rules.choose(character, "vorrat");
-  assert.equal(stocked.scene, character.scene);
-  assert.equal(stocked.inventory.filter((id) => id === "galgenwurz").length, 2);
-  assert.deepEqual(ids(stocked), ["auftrag", "eigen"]);
-  const sent = rules.choose(stocked, "auftrag");
+  // Kapitel 1: Heimat und Bewegung, jede Erkundung nur einmal.
+  assert.deepEqual(ids(character), ["erkunden-1", "erkunden-2", "weiter"]);
+  let state = rules.choose(rules.choose(character, "erkunden-1"), "erkunden-2");
+  assert.deepEqual(ids(state), ["weiter"]);
+  assert.equal(state.marks.length, 2);
+  // Kapitel 2: Kampf.
+  state = rules.choose(state, "weiter");
+  assert.equal(state.scene, "kampf-" + faction);
+  assert.match(world.scenes[state.scene].objective, /Kapitel 2/);
+  state = rules.choose(state, "kampf");
+  assert.equal(state.combat.id, "nacht-" + faction);
+  assert.equal(reload(state).combat.id, "nacht-" + faction);
+  state = winFight(state);
+  assert.equal(state.scene, "wahl-" + faction);
+  assert.ok(state.marks.includes("nacht-" + faction + "-sieg"));
+  // Kapitel 3: Entscheidung mit gespeicherter Marke.
+  const full = { ...state, ember: rules.emberLimit(state) };
+  assert.deepEqual(ids(full), ["wahl-a", "wahl-b"]);
+  const [markA, markB] = nacht.marken[faction];
+  const chosenA = rules.choose(full, "wahl-a");
+  const chosenB = rules.choose(full, "wahl-b");
+  assert.ok(chosenA.marks.includes(markA) && !chosenA.marks.includes(markB));
+  assert.ok(chosenB.marks.includes(markB) && !chosenB.marks.includes(markA));
+  assert.equal(chosenA.scene, "angriff-" + faction);
+  const cost = world.scenes["wahl-" + faction].choices[0].emberCost;
+  if (cost) assert.equal(chosenA.ember, full.ember - cost);
+  // Angriff, der den Helden vertreibt, dann Morgengrauen an der Zuflucht.
+  let fled = rules.choose(reload(chosenB), "flucht");
+  if (fled.combat) fled = winFight(fled);
+  assert.equal(fled.scene, "morgen-" + faction);
+  assert.ok(fled.rewards.includes("prolog-" + faction));
+  assert.ok(rules.storageOpen(fled), faction + " braucht ein Zentrallager an der Zuflucht");
+  for (const entry of fled.journal) if (entry.length > 300) longJournal.push(faction + ": " + entry);
+  const sent = rules.choose(fled, "reise");
   assert.equal(sent.scene, "ankunft");
-  assert.ok(sent.marks.includes("auftrag-" + faction));
-  assert.ok(rules.choose(character, "eigen").marks.includes("eigener-weg"));
   assert.equal(rules.storageSite(sent), "Zentrallager · Kornwik");
-  const arrival = ids(reload(sent));
-  assert.deepEqual(arrival, ["prepare", "move"]);
+  assert.deepEqual(ids(reload(sent)), ["prepare", "move"]);
   const prepared = rules.choose(sent, "prepare");
   assert.equal(prepared.scene, "start");
   if (startMarks[character.origin]) assert.ok(prepared.marks.includes(startMarks[character.origin]));
-  else assert.equal(prepared.inventory.filter((id) => id === "galgenwurz").length, 3);
+  else assert.ok(prepared.inventory.includes("galgenwurz"));
   assert.equal(rules.choose(sent, "move").scene, "start");
 }
+assert.deepEqual(longJournal, []);
+// Einsteige aus der Vorschau (PR #5) mit der Marke „heimvorrat“ laden weiterhin.
+assert.equal(reload({ ...rules.create("Tala", "hof", "frau", 1, "krieger"), marks: ["heimvorrat"] }).scene, "heim-hof");
 
 // Spielstand aus Version 1: noch ohne Klasse, Gleichgewicht und Attributpunkte.
 const oldCharacter = { version: 1, name: "Tala", origin: "valmarcher", appearance: "frau", variant: 2, scene: "start",
@@ -241,7 +276,7 @@ assert.ok(rules.choose(getToArrival(savedSoil), "seed").inventory.includes("galg
 assert.equal(rules.choose(getToArrival(scorched), "rest").balance, 0);
 
 // Kronreich erwacht in Kornwik, alle anderen Fraktionen reisen von ihrem Startort an.
-const begin = (character) => rules.choose(character, character.scene === "wake" ? "lantern" : "auftrag");
+const begin = (character) => character.scene === "wake" ? rules.choose(character, "lantern") : { ...character, scene: "ankunft" };
 const fightAs = (character) =>
   rules.choose(rules.choose(rules.choose(begin(character), "move"), "go", highRoll), "fight");
 const mageCombat = fightAs(rules.create("Tala", "orden", "frau", 2, "magier"));
