@@ -239,6 +239,7 @@
 
   function showHome(message = "") {
     if (el("inventory-hub").open) el("inventory-hub").close();
+    if (el("character-sheet").open) el("character-sheet").close();
     show("home");
     el("continue").hidden = state === null;
     el("home-status").textContent = message;
@@ -423,6 +424,7 @@
 
   function openHub() {
     if (!state) return;
+    if (el("character-sheet").open) el("character-sheet").close();
     hub.tab = "bag";
     hub.slot = null;
     el("hub-status").textContent = "";
@@ -740,6 +742,212 @@
       el("hub-tab-" + (tab === "bag" ? "storage" : "bag")).click();
     });
   }
+
+  // Charakterfenster: Stand (Erfahrung, Lebenspunkte, Glut), Werte und wirkende Effekte als Reiter in einem Pop-up.
+  const sheet = { tab: "stand" };
+  const sheetTabs = ["stand", "werte", "effekte"];
+
+  function sheetMeter(id, value, max) {
+    const meter = el("sheet-" + id);
+    meter.max = Math.max(1, max);
+    meter.value = Math.max(0, Math.min(value, max));
+  }
+
+  function sheetSection(title, ...children) {
+    const section = element("section");
+    section.className = "sheet-section";
+    section.append(element("h3", title), ...children);
+    return section;
+  }
+
+  function sheetStats(values) {
+    const dl = element("dl");
+    dl.className = "hub-stats sheet-stats";
+    stats(dl, values);
+    return dl;
+  }
+
+  function sheetBalance() {
+    const scale = element("div");
+    scale.className = "sheet-balance";
+    scale.setAttribute("role", "img");
+    scale.setAttribute("aria-label", "Glutgleichgewicht " + signed(state.balance) + " · Rückstoß ab ±4");
+    for (let step = -3; step <= 3; step++) {
+      const cell = element("span", step === 0 ? "0" : signed(step));
+      cell.className = "sheet-balance-step" + (step === state.balance ? " sheet-balance-now" : "") +
+        (Math.abs(step) >= 2 ? " sheet-balance-edge" : "");
+      scale.append(cell);
+    }
+    const legend = element("p");
+    legend.className = "sheet-note";
+    legend.textContent = "← Erneuerung · Zerstörung → · Bei ±4 schlägt die Glut zurück.";
+    return [scale, legend];
+  }
+
+  function renderSheetStand(panel) {
+    const progress = rules.progression(state);
+    const xp = element("p");
+    xp.className = "sheet-big";
+    xp.textContent = progress.next === null ? progress.xp + " EP · Höchststufe dieses Abschnitts"
+      : progress.xp + " / " + progress.next + " EP · noch " + (progress.next - progress.xp) + " bis Stufe " + (progress.level + 1);
+    const ladder = element("ol");
+    ladder.className = "sheet-ladder";
+    rules.levelThresholds.forEach((value, index) => {
+      const step = element("li", "Stufe " + (index + 1) + " · " + value + " EP");
+      if (index + 1 < progress.level) step.className = "sheet-done";
+      if (index + 1 === progress.level) { step.className = "sheet-now"; step.setAttribute("aria-current", "step"); }
+      ladder.append(step);
+    });
+    const training = element("div");
+    training.className = "actions sheet-training";
+    if (progress.points) {
+      training.append(element("p", progress.points + (progress.points === 1 ? " Grundwertpunkt" : " Grundwertpunkte") + " aus Stufenaufstiegen zu verteilen:"));
+      const values = rules.heroAttributes(state);
+      for (const [id, label] of Object.entries(world.attributes)) {
+        button(training, "+1 " + label, () => update(rules.train(state, id)),
+          { disabled: Boolean(state.combat) || !state.health || values[id] >= klassen.regeln.grundwertMax });
+      }
+    }
+    const fight = state.combat ? rules.targets(state).filter(enemy => enemy.health > 0) : [];
+    panel.append(
+      sheetSection("Erfahrung · Stufe " + progress.level, xp, ladder, training),
+      sheetSection("Lebenspunkte und Glut", sheetStats([
+        ["Lebenspunkte", state.health + " / " + rules.healthLimit(state)],
+        ["Glut", state.ember + " / " + rules.emberLimit(state)],
+        ["Schutz im Kampf", String(rules.protection(state) + rules.gearBonus(state, "armor"))],
+        ["Silber", String(state.silver)],
+      ])),
+      sheetSection("Glutgleichgewicht", ...sheetBalance()),
+      sheetSection("Lage", sheetStats([
+        ["Ort", world.scenes[state.scene].place ?? "Unterwegs"],
+        ["Kampf", fight.length ? "Gegen " + fight.map(enemy => enemy.name + " (" + enemy.health + " LP)").join(", ") : "Kein Kampf"],
+        ["Gefährten", state.party.length + " / 5"],
+        ["Quest-Stufe", String(state.questStufe)],
+      ])),
+    );
+  }
+
+  function renderSheetWerte(panel) {
+    const faction = klassen.fraktionen[state.faction];
+    const klasse = faction.klassen[state.role];
+    const limits = rules.heroLimits(state);
+    const gear = rules.gearStats(state);
+    const intro = element("p", klasse.spielweise + ".");
+    intro.className = "sheet-note";
+    panel.append(
+      sheetSection("Klasse · " + rules.title(state), sheetStats([
+        ["Volk", klassen.voelker[faction.volk].name],
+        ["Fraktion", faction.name],
+        ["Grundklasse", klassen.grundklassen[rules.profile(state.faction, state.role)].name],
+        ["Spezialisierung", state.build.spez ? klasse[state.build.spez.variante][0] : "ab Quest-Stufe " + klassen.regeln.spezialisierungStufe],
+        ["Magie", faction.magie ? "Ja" : "Keine Magie"],
+      ]), intro),
+      sheetSection("Grundwerte", sheetStats(attributeValues(rules.heroAttributes(state)))),
+      sheetSection("Fertigkeiten", sheetStats(Object.entries(rules.heroSkills(state)).map(([id, value]) =>
+        [klassen.fertigkeiten[id].name, value + " / " + limits[id]]))),
+      sheetSection("Kampfwerte mit Ausrüstung", sheetStats([
+        ["Waffe", world.items[rules.weapon(state)] ?? "—"],
+        ...statLabels.map(([key, label]) => [label, String(gear[key])]),
+        ["Abwehr", String(rules.protection(state))],
+      ])),
+    );
+  }
+
+  function renderSheetEffekte(panel) {
+    const all = rules.effects(state);
+    const groupsOf = [["gut", "Vorteile"], ["schlecht", "Nachteile und Zustände"], ["hinweis", "Hinweise"]];
+    for (const [art, title] of groupsOf) {
+      const entries = all.filter(effect => effect.art === art);
+      if (!entries.length) continue;
+      const listing = element("ul");
+      listing.className = "sheet-effects";
+      for (const effect of entries) {
+        const item = element("li");
+        item.className = "sheet-effect sheet-effect-" + art;
+        item.dataset.effect = effect.id;
+        const head = element("div");
+        head.className = "sheet-effect-head";
+        head.append(element("strong", effect.name), element("span", effect.dauer));
+        item.append(head, element("p", effect.text));
+        listing.append(item);
+      }
+      panel.append(sheetSection(title, listing));
+    }
+    if (state.party.length) {
+      const listing = element("ul");
+      listing.className = "sheet-effects";
+      for (const id of state.party) {
+        const companion = world.companions[id];
+        const item = element("li");
+        item.className = "sheet-effect sheet-effect-gut";
+        const head = element("div");
+        head.className = "sheet-effect-head";
+        head.append(element("strong", companion.name), element("span", "In der Gruppe"));
+        item.append(head, element("p", companionEffect(companion) || "Kämpft an deiner Seite."));
+        listing.append(item);
+      }
+      panel.append(sheetSection("Unterstützung durch Gefährten", listing));
+    }
+    if (!panel.children.length) {
+      const empty = element("p", "Zurzeit wirkt kein besonderer Effekt auf dich.");
+      empty.className = "sheet-note";
+      panel.append(empty);
+    }
+  }
+
+  function renderSheet() {
+    setPortrait(el("sheet-avatar"), state);
+    el("sheet-title").textContent = state.name;
+    el("sheet-origin").textContent = klassen.fraktionen[state.faction].name + " · " + rules.title(state);
+    const progress = rules.progression(state);
+    el("sheet-level").textContent = "Stufe " + progress.level;
+    el("sheet-xp-text").textContent = progress.next === null ? progress.xp + " EP" : (progress.xp - progress.floor) + " / " + (progress.next - progress.floor) + " EP";
+    sheetMeter("xp", progress.next === null ? 1 : progress.xp - progress.floor, progress.next === null ? 1 : progress.next - progress.floor);
+    el("sheet-hp-text").textContent = state.health + " / " + rules.healthLimit(state);
+    sheetMeter("hp", state.health, rules.healthLimit(state));
+    el("sheet-hp").classList.toggle("sheet-low", state.health <= rules.healthLimit(state) / 4);
+    el("sheet-ember-text").textContent = state.ember + " / " + rules.emberLimit(state);
+    sheetMeter("ember", state.ember, rules.emberLimit(state));
+    const count = rules.effects(state).filter(effect => effect.art !== "hinweis").length + state.party.length;
+    for (const tab of sheetTabs) {
+      const control = el("sheet-tab-" + tab);
+      control.setAttribute("aria-selected", String(sheet.tab === tab));
+      control.tabIndex = sheet.tab === tab ? 0 : -1;
+    }
+    el("sheet-tab-effekte").textContent = "Effekte" + (count ? " (" + count + ")" : "");
+    const panel = el("sheet-panel");
+    panel.setAttribute("aria-labelledby", "sheet-tab-" + sheet.tab);
+    panel.replaceChildren();
+    ({ stand: renderSheetStand, werte: renderSheetWerte, effekte: renderSheetEffekte })[sheet.tab](panel);
+  }
+
+  function openSheet(tab = "stand") {
+    if (!state) return;
+    if (el("inventory-hub").open) el("inventory-hub").close();
+    sheet.tab = tab;
+    renderSheet();
+    el("character-sheet").showModal();
+    el("sheet-close").focus();
+  }
+
+  for (const opener of document.querySelectorAll("[data-sheet-open]")) opener.addEventListener("click", () => openSheet());
+  el("sheet-close").addEventListener("click", () => el("character-sheet").close());
+  el("character-sheet").addEventListener("click", event => {
+    if (event.target === event.currentTarget) event.currentTarget.close();
+  });
+  sheetTabs.forEach((tab, index) => {
+    const control = el("sheet-tab-" + tab);
+    control.addEventListener("click", () => {
+      sheet.tab = tab;
+      renderSheet();
+      control.focus();
+    });
+    control.addEventListener("keydown", event => {
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+      event.preventDefault();
+      el("sheet-tab-" + sheetTabs[(index + (event.key === "ArrowRight" ? 1 : sheetTabs.length - 1)) % sheetTabs.length]).click();
+    });
+  });
 
   function companionEffect(companion) {
     const effects = [];
@@ -1200,6 +1408,7 @@
     list(el("journal"), [...state.journal].reverse(), "Deine Reise beginnt.");
     renderScene();
     renderMap();
+    if (el("character-sheet").open) renderSheet();
   }
 
   for (const [id, data] of Object.entries(klassen.voelker)) volk.add(new Option(data.name, id));
