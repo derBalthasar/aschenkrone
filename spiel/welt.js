@@ -928,6 +928,9 @@ const world = (() => {
     "pass-mine": { warrior: 25, mage: 15 }, "frostbaer-besiegt": { ranger: -25, druid: -25 },
     "klippen-beruhigt": { ranger: 15, druid: 15 },
   };
+  // Startorte der Fraktionen außerhalb des Kronreichs (spiel/startpunkte.js) und ihre Zentrallager.
+  Object.assign(scenes, startpunkte.scenes);
+  Object.assign(storageSites, startpunkte.storageSites);
   for (const scene of Object.values(scenes)) {
     if (scene.map) continue;
     const region = scene.place.split(" · ")[0];

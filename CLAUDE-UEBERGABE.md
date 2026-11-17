@@ -15,6 +15,7 @@ Arbeite im Ordner `C:\Users\afisc\Documents\ChatGPT\Pen and Paper - Aschenkrone`
 | `spiel/welt.js` | Szenen und Entscheidungen, Kampfwerte der Klassen, Herkünfte, Reiseziele und Routen, Kämpfe, Gegenstände, Loot-Tabellen, Gefährten und Fraktionen |
 | `spiel/regeln.js` | Zustandswechsel, Regeln für Proben, Reisen und Kampf, Inventar, EP und Stufen, Beziehungen, Fraktionsruf und Spielstandvalidierung |
 | `spiel/spiel.js` | DOM und Ereignisse, Kampfanzeige und Animationen, Routenplanung, lokale Speicherung und JSON-Spielstandimport/-export |
+| `spiel/startpunkte.js`, `spiel/prolog/start/` | Startort, Prolog und Startszene je Fraktion (Kronreich weiter in Kornwik), Ankunftsszene bei Kornwik |
 | `spiel/prolog.js`, `spiel/prolog/` | Illustrierter Prolog mit drei Bildern beziehungsweise Einstellungen sowie weiteren Szenenbildern |
 | `bestiarium/daten.js`, `bestiarium/bilder/` | Bestehendes Bestiarium und Kreaturenbilder. Für einen spielbaren Gegner zusätzlich Kampfregeln, Loot und Szenenanbindung in `spiel/welt.js` ergänzen. |
 | `profilbilder/portraets.js`, `profilbilder/bilder/` | Porträts und Varianten. Fünf Grundfiguren pro Geschlecht sowie ein eigenes Untotenmotiv. |

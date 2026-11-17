@@ -8,7 +8,7 @@ const vm = require("node:vm");
 const root = path.join(__dirname, "..");
 const context = vm.createContext({ structuredClone });
 
-for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/welt.js", "spiel/regeln.js"]) {
+for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/startpunkte.js", "spiel/welt.js", "spiel/regeln.js"]) {
   vm.runInContext(fs.readFileSync(path.join(root, file), "utf8"), context, { filename: file });
 }
 
@@ -130,13 +130,59 @@ const ancestry = [
   ["aschenclan", "wake-cart", "fuhrleute-vertrauen"],
   ["erinnernde", "wake-shade", "faehrwort"],
 ];
+// Ältere Spielstände stehen noch im Erwachen bei Kornwik. Die Wege je Herkunft bleiben für sie erhalten.
 for (const [faction, scene, mark] of ancestry) {
-  const character = rules.create("Tala", faction, "frau", 2, "heiler");
+  const character = reload({ ...rules.create("Tala", faction, "frau", 2, "heiler"), scene: "wake" });
   const opening = rules.choose(character, "lantern");
   assert.equal(opening.scene, scene);
   assert.deepEqual(ids(character), ["lantern"]);
   assert.ok(rules.choose(reload(opening), "prepare").marks.includes(mark));
   assert.ok(!rules.choose(opening, "move").marks.includes(mark));
+}
+
+// Startpunkte: jede Fraktion beginnt in ihrem eigenen Gebiet, das Kronreich weiter in Kornwik.
+const startMarks = { valmarcher: "ditch", waldelf: "waldspur", bergzwerg: "steinrhythmus", gruenhaut: "fuhrleute-vertrauen", vampir: "faehrwort" };
+const startVolk = { menschen: "Land der Menschen", untote: "Land der Untoten", elfen: "Land der Elfen", orks: "Land der Orks", zwerge: "Land der Zwerge" };
+const factionIds = Object.keys(vm.runInContext("klassen", context).fraktionen);
+assert.equal(factionIds.length, 15);
+for (const faction of factionIds) {
+  const character = rules.create("Tala", faction, "frau", 1, "krieger");
+  const volk = vm.runInContext("klassen", context).fraktionen[faction].volk;
+  if (faction === "kronreich") {
+    assert.equal(character.scene, "wake");
+    assert.equal(vm.runInContext("startpunkte", context).prologe[faction], undefined);
+    continue;
+  }
+  const home = world.scenes[character.scene];
+  assert.equal(character.scene, "heim-" + faction);
+  assert.ok(!home.place.startsWith("Kornwik"), faction + " darf nicht in Kornwik erwachen");
+  assert.equal(home.map, undefined);
+  assert.ok(rules.storageOpen(character), faction + " braucht ein Zentrallager am Startort");
+  assert.equal(rules.storageSite(character), "Zentrallager · " + home.place.split(" · ")[0]);
+  assert.equal(rules.read(JSON.stringify(character)).scene, character.scene);
+  assert.equal(rules.route(character, "weidenkamm"), null);
+  const slides = vm.runInContext("startpunkte", context).prologe[faction];
+  assert.equal(slides.length, 3);
+  assert.equal(slides[0].location, "Odris · " + startVolk[volk]);
+  assert.ok(slides[2].showPortrait && slides[2].text.includes("%NAME%"));
+  for (const slide of slides) assert.ok(fs.existsSync(path.join(root, "spiel/prolog", slide.image)), slide.image);
+  assert.deepEqual(ids(character), ["vorrat", "auftrag", "eigen"]);
+  const stocked = rules.choose(character, "vorrat");
+  assert.equal(stocked.scene, character.scene);
+  assert.equal(stocked.inventory.filter((id) => id === "galgenwurz").length, 2);
+  assert.deepEqual(ids(stocked), ["auftrag", "eigen"]);
+  const sent = rules.choose(stocked, "auftrag");
+  assert.equal(sent.scene, "ankunft");
+  assert.ok(sent.marks.includes("auftrag-" + faction));
+  assert.ok(rules.choose(character, "eigen").marks.includes("eigener-weg"));
+  assert.equal(rules.storageSite(sent), "Zentrallager · Kornwik");
+  const arrival = ids(reload(sent));
+  assert.deepEqual(arrival, ["prepare", "move"]);
+  const prepared = rules.choose(sent, "prepare");
+  assert.equal(prepared.scene, "start");
+  if (startMarks[character.origin]) assert.ok(prepared.marks.includes(startMarks[character.origin]));
+  else assert.equal(prepared.inventory.filter((id) => id === "galgenwurz").length, 3);
+  assert.equal(rules.choose(sent, "move").scene, "start");
 }
 
 // Spielstand aus Version 1: noch ohne Klasse, Gleichgewicht und Attributpunkte.
@@ -194,8 +240,10 @@ assert.ok(ids(getToArrival(scorched)).includes("rest"));
 assert.ok(rules.choose(getToArrival(savedSoil), "seed").inventory.includes("galgenwurz"));
 assert.equal(rules.choose(getToArrival(scorched), "rest").balance, 0);
 
+// Kronreich erwacht in Kornwik, alle anderen Fraktionen reisen von ihrem Startort an.
+const begin = (character) => rules.choose(character, character.scene === "wake" ? "lantern" : "auftrag");
 const fightAs = (character) =>
-  rules.choose(rules.choose(rules.choose(rules.choose(character, "lantern"), "move"), "go", highRoll), "fight");
+  rules.choose(rules.choose(rules.choose(begin(character), "move"), "go", highRoll), "fight");
 const mageCombat = fightAs(rules.create("Tala", "orden", "frau", 2, "magier"));
 const firstFlame = rules.strike(mageCombat, "ember");
 assert.equal(firstFlame.balance, 2);
@@ -221,11 +269,11 @@ assert.match(tooMuchHealing.journal.at(-2), /außer Kontrolle/);
 assert.equal(reload(tooMuchHealing).role, "heiler");
 
 const elf = rules.create("Tala", "dornenklingen", "frau", 2, "spaeher");
-const elfStart = rules.choose(rules.choose(elf, "lantern"), "prepare");
+const elfStart = rules.choose(begin(elf), "prepare");
 const elfDetour = rules.choose(rules.choose(elfStart, "go"), "detour");
 assert.equal(rules.choose(elfDetour, "trace", () => .2).scene, "ford");
 const vampire = rules.create("Tala", "erinnernde", "frau", 2, "schurke");
-const vampireStart = rules.choose(rules.choose(vampire, "lantern"), "prepare");
+const vampireStart = rules.choose(begin(vampire), "prepare");
 const vampireFord = rules.choose(rules.choose(vampireStart, "go"), "fire", highRoll);
 assert.ok(ids(vampireFord).includes("password"));
 assert.equal(rules.ending(rules.choose(vampireFord, "password")).delivery, true);

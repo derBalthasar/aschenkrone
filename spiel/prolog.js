@@ -10,7 +10,7 @@ const prologue = (() => {
   const next = el("intro-next");
   const skip = el("intro-skip");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const slides = [
+  const kornwik = [
     {
       image: "nordpass.png", location: "Eispass · In der Nacht", title: "Asche auf dem Pass",
       text: "Noch vor Tagesanbruch trägt der Wind graue Asche vom Eispass über die Felder des Kronreichs.",
@@ -27,6 +27,8 @@ const prologue = (() => {
       duration: 7300, showPortrait: true,
     },
   ];
+  // Das Kronreich erwacht in Kornwik. Die anderen Fraktionen haben eigene Bilder aus spiel/startpunkte.js.
+  let slides = kornwik;
   let playback = null;
 
   function clearTimer() {
@@ -101,8 +103,9 @@ const prologue = (() => {
     schedule();
   });
 
-  function play(name, done) {
+  function play(name, faction, done) {
     if (playback) clearTimer();
+    slides = startpunkte.prologe[faction] ?? kornwik;
     playback = {
       index: 0, name, done, paused: reducedMotion.matches, timer: null,
       remaining: slides[0].duration, deadline: 0,

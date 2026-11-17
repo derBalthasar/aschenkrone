@@ -151,7 +151,7 @@ const rules = (() => {
     if (problem) throw new Error(problem);
     const weapon = kit({ faction, role }).weapon;
     const state = {
-      version, name: cleanName, faction, origin, appearance, variant, role, scene: "wake",
+      version, name: cleanName, faction, origin, appearance, variant, role, scene: startpunkte.szene(faction),
       build: structuredClone({ ...setup, spez: setup.spez ?? null, meister: setup.meister ?? null }),
       questStufe: 0, vereinigt: false, umschulung: false, rausch: false,
       health: 0, ember: 0, balance: 0, inventory: [weapon, "lederwams", "galgenwurz"],
@@ -632,7 +632,8 @@ const rules = (() => {
   }
 
   function storageSite(state) {
-    return world.storageSites[world.scenes[state.scene]?.map] ?? null;
+    const scene = world.scenes[state.scene];
+    return world.storageSites[scene?.map] ?? world.storageSites[scene?.lager] ?? null;
   }
 
   function storageOpen(state) {

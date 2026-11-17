@@ -38,6 +38,30 @@ Das Weltbuch führt fünf Startwerte für eine künftige Kampagne um 612 n. E. a
 | `legion` | Knochenlegion | Hof der Bleichen Krone | bisher ohne Rufereignis |
 | `league` | Splitterliga | Freie Häfen | bisher ohne Rufereignis |
 
+## Startpunkte der Fraktionen
+
+Seit dem 17. 11. 2026 beginnt jede spielbare Fraktion in ihrem eigenen Gebiet (Vorgabe von Henry). Die Orte stehen auf der verbindlichen Karte. Daten und Texte liegen in `spiel/startpunkte.js`, die Prologbilder sind Kartenausschnitte unter `spiel/prolog/start/`.
+
+| Volk | Fraktion | Startort | Begründung |
+| --- | --- | --- | --- |
+| Menschen | Kronreich | Kornwik | bisheriger Prolog, unverändert |
+| Menschen | Orden der Flamme | Aschenkloster | Ausbildungsstätte der Paladine und Runenmeister unter Glutberg |
+| Menschen | Freie Häfen | Perlvik | Hauptstadt und Sitz des Hafenthings |
+| Untote | Hof der Bleichen Krone | Draugrsund | Hafen des Hofs gegenüber dem Land der Menschen |
+| Untote | Die Erinnernden | Eryndor | Blutbrunnen und Bibliotheken der Häuser |
+| Untote | Fäulnisbrut | Sporenwald | verseuchtes Land nahe dem Tempel der Fleischaltäre |
+| Elfen | Dornenklingen | Dornwacht | Wache am Dornwall |
+| Elfen | Hüter des Weltenbaums | Ylvenor | Stadt im Weltenbaum, Aschenast |
+| Elfen | Schattenblüte | Schwarzgarten | Ernte der schwarzen Blüten |
+| Orks | Staubreiter | Ur-Taal | Brunnen von Ur-Taal |
+| Orks | Aschenclan | Aschenthron | Ahnenfeuer am Ghor-Mahr |
+| Orks | Grüne Banner | Weitenlager | Herdenlager in den Weiten |
+| Zwerge | Tiefes Königreich | Zollburg | Erzkontrolle am Zollpass |
+| Zwerge | Runenschmiede | Essenfels | Gildensitz, alte Runen in Grenzsteinen bei Kornwik |
+| Zwerge | Tiefgräber | Stollenmund | Festung am Tiefen Stollen |
+
+Außer dem Kronreich hat jede Fraktion einen kurzen Prolog mit drei Bildern und eine Startszene mit Zentrallager. Dort holt man einmal Galgenwurz und bricht dann im Auftrag der Fraktion (`auftrag-<fraktion>`) oder auf eigene Faust (`eigener-weg`) auf. Die Reise endet in der Szene „Ankunft im Kronreich“ bei Kornwik. Dort gibt es dieselben Startvorteile je Herkunft wie beim Erwachen in Kornwik. Danach geht es mit dem bestehenden Abschnitt weiter. Die Auftragsmarken sind für spätere Fraktionsquests gedacht. Spielstände im Erwachen bei Kornwik bleiben gültig.
+
 ## Bestiarium und Völker
 
 Die Gebiete im Bestiarium folgen seit dem 17. 11. 2026 den Kontinenten der verbindlichen Karte. Namen und Spielwerte der Kreaturen sind unverändert.
