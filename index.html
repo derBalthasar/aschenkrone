@@ -114,6 +114,7 @@
         <a href="#scene-title">Szene</a>
         <a href="#travel-map">Reisekarte</a>
         <a href="#character-panel">Charakter</a>
+        <button type="button" class="hub-open" data-hub-open>Inventar</button>
       </nav>
       <section class="paper encounter">
         <p class="overline" id="location"></p>
@@ -161,7 +162,9 @@
             <h4 class="sheet-heading">Fertigkeiten</h4><dl id="skills" class="stat-line"></dl>
             <div id="class-sheet"></div>
           </details>
-          <details open><summary>Inventar und Ausrüstung</summary><p id="equipment"></p><ul id="inventory" class="inventory-list"></ul></details>
+          <details open><summary>Inventar und Ausrüstung</summary><p id="equipment"></p>
+            <p id="bag-summary" class="bag-summary"></p>
+            <button type="button" class="action primary hub-launch" data-hub-open>Inventar öffnen</button><ul id="inventory" class="inventory-list"></ul></details>
           <details open><summary id="party-count">Gefährten</summary><ul id="party-members" class="inventory-list"></ul>
             <details><summary>Mögliche Treffpunkte</summary><ul id="party-leads"></ul></details>
           </details>
@@ -177,5 +180,31 @@
       </div>
     </div>
   </main>
+  <dialog id="inventory-hub" class="inventory-hub" aria-labelledby="hub-title">
+    <div class="hub-head">
+      <div><p class="overline" id="hub-place"></p><h2 id="hub-title">Inventar</h2></div>
+      <button type="button" id="hub-close" class="action">Schließen</button>
+    </div>
+    <section class="hub-gear" aria-labelledby="hub-gear-title">
+      <h3 id="hub-gear-title" class="hub-section-title">Ausrüstung</h3>
+      <div class="hub-gear-body">
+        <div id="hub-doll" class="hub-doll"></div>
+        <div class="hub-stats-box">
+          <dl id="hub-stats" class="hub-stats"></dl>
+          <p id="hub-compare" class="hub-compare" aria-live="polite"></p>
+          <button type="button" id="hub-unequip-all" class="action hub-unequip-all">Alles ablegen</button>
+          <p id="hub-silver" class="hub-silver"></p>
+        </div>
+      </div>
+    </section>
+    <div class="hub-tabs" role="tablist" aria-label="Aufbewahrung">
+      <button type="button" role="tab" id="hub-tab-bag" aria-controls="hub-items" data-tab="bag"></button>
+      <button type="button" role="tab" id="hub-tab-storage" aria-controls="hub-items" data-tab="storage"></button>
+    </div>
+    <div class="hub-bar"><progress id="hub-capacity" max="20" value="0" aria-label="Belegte Rucksackplätze"></progress><p id="hub-hint" class="hub-hint"></p></div>
+    <div id="hub-slot-filter" class="hub-slot-filter" hidden></div>
+    <div id="hub-items" class="hub-items" role="tabpanel" aria-label="Gegenstände"></div>
+    <p id="hub-status" class="hub-status" role="status"></p>
+  </dialog>
 </body>
 </html>

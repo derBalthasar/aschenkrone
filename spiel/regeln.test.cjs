@@ -151,6 +151,8 @@ assert.equal(migrated.balance, 0);
 assert.equal(migrated.scene, "start");
 assert.equal(migrated.umschulung, true);
 assert.equal(migrated.allocation, undefined);
+assert.deepEqual(Object.keys(migrated.equipment).sort(), ["armor", "head", "legs", "neck", "offhand", "ring1", "ring2", "weapon"]);
+assert.deepEqual(Array.from(migrated.storage), []);
 assert.equal(rules.weapon(migrated), "speer");
 assert.equal(migrated.health, rules.healthLimit(migrated));
 assert.equal(rules.buildProblem(migrated.faction, migrated.role, migrated.build), null);
@@ -641,3 +643,140 @@ assert.equal(rules.recruitment({ ...failingRescue, scene: "watch-yard" }, "knigh
 assert.equal(rules.reputation(scorchedRunes, "skarn"), rules.reputation(torben, "skarn") - 35);
 
 console.log("Gefährtenaufträge, Beziehungsfolgen, Geschenke, Romanze, Fraktionsruf und Glutberg geprüft.");
+
+// Inventar-Hub: Rucksack, Lager, Nebenhand und Schmuck
+{
+  const legacy = JSON.parse(JSON.stringify(armored));
+  delete legacy.storage;
+  legacy.equipment = { weapon: legacy.equipment.weapon, armor: legacy.equipment.armor };
+  const loaded = reload(legacy);
+  assert.equal(loaded.storage.length, 0);
+  assert.equal(loaded.equipment.offhand, null);
+  assert.equal(loaded.equipment.ring2, null);
+  assert.equal(loaded.equipment.armor, "glutpanzer");
+  assert.equal(hero().storage.length, 0);
+  assert.equal(Object.keys(hero().equipment).join(), "weapon,offhand,head,neck,armor,legs,ring1,ring2");
+
+  // Zentrallager nur in Städten und nicht im Kampf
+  assert.equal(world.scenes[armored.scene].map, "hochwacht");
+  assert.ok(rules.storageOpen(armored));
+  assert.ok(rules.storageOpen(start()));
+  const outside = { ...armored, scene: "moor", inventory: ["galgenwurz"] };
+  assert.equal(rules.store(outside, "galgenwurz"), outside);
+  assert.equal(rules.storageOpen(trial(armored)), false);
+  assert.equal(world.storageSites[world.scenes["skarn-gate"].map], "Zentrallager · Glutberg");
+  for (const city of ["weidenkamm", "kraehenfurt", "hochwacht", "skarn-gate"]) assert.ok(world.storageSites[city]);
+  assert.ok(rules.storageOpen({ ...armored, scene: "arrival" }));
+  assert.equal(rules.storageOpen({ ...armored, scene: "moor" }), false);
+
+  // Einlagern legt Ausgerüstetes ab, Herausnehmen holt es zurück
+  const stored = rules.store(armored, "glutpanzer");
+  assert.ok(stored.storage.includes("glutpanzer"));
+  assert.ok(!stored.inventory.includes("glutpanzer"));
+  assert.equal(stored.equipment.armor, null);
+  assert.equal(reload(stored).storage.length, 1);
+  const back = rules.retrieve(stored, "glutpanzer");
+  assert.ok(back.inventory.includes("glutpanzer"));
+  assert.equal(back.storage.length, 0);
+  assert.equal(rules.retrieve(back, "glutpanzer"), back);
+
+  // Stapel: einzeln oder alle
+  const stack = { ...armored, inventory: [...armored.inventory, "harzverband", "harzverband", "harzverband"] };
+  assert.equal(rules.store(stack, "harzverband").storage.length, 1);
+  const allStored = rules.store(stack, "harzverband", 3);
+  assert.equal(allStored.storage.length, 3);
+  assert.ok(!allStored.inventory.includes("harzverband"));
+  assert.equal(rules.retrieve(allStored, "harzverband", 3).inventory.filter(id => id === "harzverband").length, 3);
+
+  // Questgegenstände bleiben im Rucksack und belegen keinen Platz
+  assert.ok(rules.isQuestItem("flusssiegel"));
+  assert.ok(rules.isQuestItem("forstbuch"));
+  assert.ok(!rules.isQuestItem("glutfunke"));
+  const quest = { ...armored, inventory: [...armored.inventory, "flusssiegel"] };
+  assert.equal(rules.store(quest, "flusssiegel"), quest);
+  assert.equal(rules.slotsUsed(quest), rules.slotsUsed(armored));
+
+  // 20 Plätze: volle Rucksäcke nehmen keine neue Art auf, Beute wandert ins Lager
+  const types = Object.keys(world.items).filter(id => id !== "faeuste" && !rules.isQuestItem(id) && id !== "trollblut");
+  const full = { ...armored, inventory: types.slice(0, rules.bagSlots), equipment: Object.fromEntries(rules.equipmentSlots.map(slot => [slot, null])) };
+  assert.equal(rules.slotsUsed(full), 20);
+  assert.equal(rules.fits(full, "trollblut"), false);
+  assert.equal(rules.fits(full, types[0]), true);
+  const pending = { ...full, storage: ["trollblut"] };
+  assert.equal(rules.retrieve(pending, "trollblut"), pending);
+  const vendorFull = rules.choose({ ...full, scene: "watch-yard", silver: 50 }, "supply-post");
+  assert.equal(vendorFull.scene, "supply-post");
+  const missing = Object.keys(world.shop).find(id => !vendorFull.inventory.includes(id));
+  const bought = rules.trade(vendorFull, missing, true);
+  assert.ok(bought.storage.includes(missing));
+  assert.ok(!bought.inventory.includes(missing));
+  assert.match(bought.journal.at(-1), /ins Lager gebracht/);
+  assert.equal(reload(bought).storage.at(-1), missing);
+
+  // Acht Plätze: Hände, Kopf, Hals, Körper, Beine, zwei Ringe
+  assert.equal(world.gear.holzschild.slot, "offhand");
+  assert.equal(world.gear.glutamulett.slot, "neck");
+  assert.equal(world.gear.spurenring.slot, "ring");
+  const bag = ["wachschild", "glutamulett", "spurenring", "eisenring", "eisenhelm", "kettenbeinlinge"];
+  const kitted = bag.reduce((state, id) => rules.equip(state, id), { ...armored, inventory: [...armored.inventory, ...bag] });
+  assert.equal(kitted.equipment.offhand, "wachschild");
+  assert.equal(kitted.equipment.neck, "glutamulett");
+  assert.equal(kitted.equipment.ring1, "spurenring");
+  assert.equal(kitted.equipment.ring2, "eisenring");
+  assert.equal(kitted.equipment.head, "eisenhelm");
+  assert.equal(kitted.equipment.legs, "kettenbeinlinge");
+  assert.equal(rules.gearBonus(kitted, "armor"), 3 + 2 + 1 + 2 + 2);
+  assert.equal(rules.gearBonus(kitted, "magic"), 1);
+  assert.equal(rules.gearBonus(kitted, "travel"), 1);
+  assert.equal(rules.gearBonus(armored, "armor"), 3);
+  assert.equal(reload(kitted).equipment.ring2, "eisenring");
+  assert.ok(rules.strike(trial(kitted), "spear", highRoll).health >= rules.strike(trial(armored), "spear", highRoll).health);
+  assert.throws(() => reload({ ...kitted, equipment: { ...kitted.equipment, offhand: "glutamulett" } }));
+  assert.throws(() => reload({ ...kitted, equipment: { ...kitted.equipment, ring1: "eisenring" } }));
+  // Zwei gleiche Ringe nur mit zwei Exemplaren
+  const twoRings = { ...armored, inventory: [...armored.inventory, "eisenring", "eisenring"] };
+  const both = rules.equip(rules.equip(twoRings, "eisenring", "ring1"), "eisenring", "ring2");
+  assert.equal(both.equipment.ring1, "eisenring");
+  assert.equal(both.equipment.ring2, "eisenring");
+  assert.equal(reload(both).equipment.ring2, "eisenring");
+  const oneRing = rules.store(both, "eisenring");
+  assert.equal([oneRing.equipment.ring1, oneRing.equipment.ring2].filter(Boolean).length, 1);
+  // Ring tauschen: ein Klick auf einen anderen Ring ersetzt den gewählten Platz
+  const swapped = rules.equip(kitted, "eisenring", "ring1");
+  assert.equal(swapped.equipment.ring1, "eisenring");
+  assert.equal(swapped.equipment.ring2, null);
+  // Zweihandwaffen räumen die linke Hand und umgekehrt
+  assert.ok(world.gear.bogen.twoHanded && world.gear.runenstab.twoHanded && !world.gear.schwert.twoHanded);
+  const archer = rules.equip(kitted, "bogen");
+  assert.equal(archer.equipment.weapon, "bogen");
+  assert.equal(archer.equipment.offhand, null);
+  assert.match(archer.journal.at(-1), /beide Hände/);
+  const shielded = rules.equip(archer, "wachschild");
+  assert.equal(shielded.equipment.offhand, "wachschild");
+  assert.equal(shielded.equipment.weapon, null);
+  // Vergleich: Verbesserung positiv, Verschlechterung negativ
+  assert.equal(rules.equipPreview(armored, "eisenhelm").armor, 2);
+  assert.equal(rules.equipPreview(armored, "lederwams").armor, -2);
+  assert.ok(rules.equipPreview(shielded, "bogen").armor < 0);
+  // Ablegen: einzelner Platz oder alles, Gegenstände bleiben im Rucksack
+  const bare = rules.unequip(kitted, "head");
+  assert.equal(bare.equipment.head, null);
+  assert.ok(bare.inventory.includes("eisenhelm"));
+  assert.equal(rules.unequip(bare, "head"), bare);
+  const naked = rules.unequip(kitted);
+  assert.ok(rules.equipmentSlots.every(slot => naked.equipment[slot] === null));
+  assert.equal(naked.inventory.length, kitted.inventory.length);
+  assert.equal(rules.weapon(naked), "faeuste");
+  assert.equal(rules.unequip(naked), naked);
+  assert.equal(rules.unequip(kitted, "trinket"), kitted);
+  assert.equal(rules.unequip(trial(kitted)).equipment.head, "eisenhelm");
+  assert.equal(reload(naked).equipment.armor, null);
+  // Frühere Vorschaustände mit "trinket" werden übernommen
+  const oldPreview = JSON.parse(JSON.stringify(kitted));
+  oldPreview.equipment = { weapon: kitted.equipment.weapon, armor: "glutpanzer", offhand: null, trinket: "spurenring" };
+  const migrated = reload(oldPreview);
+  assert.equal(migrated.equipment.ring1, "spurenring");
+  assert.equal(Object.hasOwn(migrated.equipment, "trinket"), false);
+  assert.throws(() => reload({ ...armored, storage: ["unbekannt"] }));
+}
+console.log("Inventar-Hub: Zentrallager, Stapel, Platzgrenze, Questgegenstände, acht Ausrüstungsplätze und Vergleich geprüft.");

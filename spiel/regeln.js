@@ -3,6 +3,12 @@
 const rules = (() => {
   const version = 2;
   const K = klassen;
+  // Ausrüstungsplätze: rechte Hand (weapon), linke Hand (offhand), Kopf, Hals, Körper (armor), Beine, zwei Ringe.
+  // Die Schlüssel weapon und armor bleiben wegen bestehender Spielstände erhalten.
+  const equipmentSlots = ["weapon", "offhand", "head", "neck", "armor", "legs", "ring1", "ring2"];
+  const slotKinds = { weapon: "weapon", offhand: "offhand", head: "head", neck: "neck", armor: "armor", legs: "legs",
+    ring1: "ring", ring2: "ring" };
+  const emptyEquipment = () => Object.fromEntries(equipmentSlots.map(slot => [slot, null]));
   const own = (obj, key) => typeof key === "string" && Object.hasOwn(obj, key);
   const intBetween = (value, low, high) => Number.isInteger(value) && value >= low && value <= high;
   const total = (record) => Object.values(record ?? {}).reduce((sum, value) => sum + value, 0);
@@ -149,7 +155,8 @@ const rules = (() => {
       build: structuredClone({ ...setup, spez: setup.spez ?? null, meister: setup.meister ?? null }),
       questStufe: 0, vereinigt: false, umschulung: false, rausch: false,
       health: 0, ember: 0, balance: 0, inventory: [weapon, "lederwams", "galgenwurz"],
-      equipment: { weapon, armor: "lederwams" },
+      equipment: { ...emptyEquipment(), weapon, armor: "lederwams" },
+      storage: [],
       xp: 0, silver: 5, training: {}, rewards: [],
       party: [],
       relationships: {}, factionRuf: {},
@@ -223,6 +230,16 @@ const rules = (() => {
     }
     if (state.version !== version) throw new Error("Unbekanntes Spielstandformat.");
     if (!Object.hasOwn(state, "equipment")) state.equipment = { weapon: null, armor: null };
+    if (state.equipment && typeof state.equipment === "object" && !Array.isArray(state.equipment)) {
+      // Vorschaustände mit dem früheren Platz "trinket" übernehmen.
+      const trinket = state.equipment.trinket;
+      delete state.equipment.trinket;
+      for (const slot of equipmentSlots) state.equipment[slot] ??= null;
+      if (trinket) {
+        const target = world.gear[trinket]?.slot === "ring" ? "ring1" : "neck";
+        state.equipment[target] ??= trinket;
+      }
+    }
     state.xp ??= 0;
     state.silver ??= 5;
     state.training ??= {};
@@ -234,6 +251,7 @@ const rules = (() => {
     state.vereinigt ??= false;
     state.umschulung ??= false;
     state.rausch ??= false;
+    state.storage ??= [];
     create(state.name, state.faction, state.appearance, state.variant, state.role, state.build);
     const combat = state.combat;
     const validList = (value, check, limit) => Array.isArray(value) && value.length <= limit && value.every(check);
@@ -258,9 +276,11 @@ const rules = (() => {
           typeof bond.gift === "boolean" && typeof bond.left === "boolean" &&
           ["none", "romance", "friendship"].includes(bond.bond)) ||
         !validList(state.inventory, (id) => own(world.items, id) && id !== "faeuste", 200) ||
-        !state.equipment || !["weapon", "armor"].every((slot) => {
+        !validList(state.storage, (id) => own(world.items, id) && id !== "faeuste", storageLimit) ||
+        !state.equipment || !equipmentSlots.every((slot) => {
           const id = state.equipment[slot];
-          return id === null || (own(world.gear, id) && state.inventory.includes(id) && world.gear[id].slot === slot);
+          return id === null || (own(world.gear, id) && world.gear[id].slot === slotKinds[slot] &&
+            wornCount(state, id) <= state.inventory.filter(entry => entry === id).length);
         }) ||
         !validList(state.marks, (id) => typeof id === "string" && id.length <= 40, 100) ||
         !validList(state.journal, (entry) => typeof entry === "string" && entry.length <= 300, 16) ||
@@ -351,8 +371,8 @@ const rules = (() => {
     } else if (action === "gift") {
       bond.gift = true;
       const item = world.loyalties[id].gift;
-      state.inventory.push(item);
       note(state, name + " schenkt dir " + world.items[item] + ".");
+      receive(state, [item]);
     } else {
       bond.bond = action;
       note(state, action === "romance"
@@ -454,7 +474,7 @@ const rules = (() => {
     state.rewards.push(id);
     state.xp += xp;
     state.silver += silver;
-    state.inventory.push(...items);
+    const overflow = receive(state, items, false);
     const parts = [];
     if (xp) parts.push(xp + " EP");
     if (silver) parts.push(silver + " Silber");
@@ -462,6 +482,7 @@ const rules = (() => {
     const level = progression(state).level;
     if (parts.length) note(state, parts.join(" · ") +
       (level > previousLevel ? ". Stufe " + level + " erreicht. Du kannst einen Grundwert steigern." : "."));
+    noteOverflow(state, overflow);
   }
 
   function loot(state, id, dice) {
@@ -484,19 +505,184 @@ const rules = (() => {
     const index = previous.inventory.indexOf(id);
     if (buying ? previous.silver < price || previous.inventory.length >= 180 : index === -1) return previous;
     const state = structuredClone(previous);
-    if (buying) state.inventory.push(id);
-    else state.inventory.splice(index, 1);
+    if (!buying) state.inventory.splice(index, 1);
     state.silver += buying ? -price : price;
     note(state, world.items[id] + (buying ? " gekauft" : " verkauft") + " · " + price + " Silber.");
+    if (buying) receive(state, [id]);
     return state;
   }
 
-  function equip(previous, id) {
+  const wornCount = (state, id) => equipmentSlots.filter(slot => state.equipment?.[slot] === id).length;
+  const twoHanded = (id) => Boolean(world.gear[id]?.twoHanded);
+
+  // Welcher Platz würde beim Anlegen belegt? Ringe nehmen den ersten freien Ringplatz, sonst den ersten.
+  function targetSlot(state, id, wanted) {
+    const kind = world.gear[id]?.slot;
+    if (!kind) return null;
+    if (wanted) return slotKinds[wanted] === kind ? wanted : null;
+    const slots = equipmentSlots.filter(slot => slotKinds[slot] === kind);
+    return slots.find(slot => state.equipment[slot] === id) ?? slots.find(slot => !state.equipment[slot]) ?? slots[0];
+  }
+
+  // Legt einen Gegenstand an oder, wenn er auf dem Platz liegt, ab. Zweihandwaffen räumen die linke Hand.
+  function equip(previous, id, wanted = null) {
     const gear = world.gear[id];
-    if (!gear?.slot || previous.combat || !previous.health || !previous.inventory.includes(id)) return previous;
+    const slot = targetSlot(previous, id, wanted);
+    if (!slot || previous.combat || !previous.health || !previous.inventory.includes(id)) return previous;
     const state = structuredClone(previous);
-    state.equipment[gear.slot] = state.equipment[gear.slot] === id ? null : id;
-    note(state, world.items[id] + (state.equipment[gear.slot] ? " ausgerüstet." : " abgelegt."));
+    if (state.equipment[slot] === id) {
+      state.equipment[slot] = null;
+      note(state, world.items[id] + " abgelegt.");
+      return state;
+    }
+    if (wornCount(state, id) >= state.inventory.filter(entry => entry === id).length) {
+      const other = equipmentSlots.find(entry => entry !== slot && state.equipment[entry] === id);
+      if (!other) return previous;
+      state.equipment[other] = null;
+    }
+    const replaced = state.equipment[slot];
+    state.equipment[slot] = id;
+    const removed = [];
+    if (slot === "weapon" && gear.twoHanded && state.equipment.offhand) {
+      removed.push(state.equipment.offhand);
+      state.equipment.offhand = null;
+    }
+    if (slot === "offhand" && twoHanded(state.equipment.weapon)) {
+      removed.push(state.equipment.weapon);
+      state.equipment.weapon = null;
+    }
+    note(state, world.items[id] + " ausgerüstet" + (replaced ? " statt " + world.items[replaced] : "") +
+      (removed.length ? ". " + removed.map(entry => world.items[entry]).join(", ") + " abgelegt, beide Hände werden gebraucht." : "."));
+    return state;
+  }
+
+  // Legt den Gegenstand eines Platzes ab oder, ohne Angabe, die gesamte Ausrüstung. Er bleibt im Rucksack.
+  function unequip(previous, slot = null) {
+    const slots = slot ? [slot] : equipmentSlots;
+    if (previous.combat || !previous.health || !slots.every(entry => equipmentSlots.includes(entry)) ||
+        !slots.some(entry => previous.equipment[entry])) return previous;
+    const state = structuredClone(previous);
+    const removed = slots.filter(entry => state.equipment[entry]).map(entry => state.equipment[entry]);
+    for (const entry of slots) state.equipment[entry] = null;
+    note(state, slot ? world.items[removed[0]] + " abgelegt." : "Gesamte Ausrüstung abgelegt: " + removed.map(id => world.items[id]).join(", ") + ".");
+    return state;
+  }
+
+  // Werte des Helden mit der aktuellen oder einer probeweise geänderten Ausrüstung.
+  function gearStats(state, equipment = state.equipment) {
+    const preview = { ...state, equipment };
+    const weaponId = weapon(preview);
+    const held = world.gear[weaponId];
+    return {
+      damage: held.power + damageValue(state, gearSkill(held)), pierce: held.pierce ?? 0, armor: gearBonus(preview, "armor"),
+      magic: gearBonus(preview, "magic"), travel: gearBonus(preview, "travel"), airborne: held.airborne ?? 0,
+    };
+  }
+
+  // Vergleich: Wie ändern sich die Werte, wenn dieser Gegenstand angelegt würde?
+  function equipPreview(state, id, wanted = null) {
+    const inventory = state.inventory.includes(id) ? state.inventory : [...state.inventory, id];
+    const next = equip({ ...state, inventory, combat: null, health: Math.max(1, state.health) }, id, wanted);
+    if (next.equipment === state.equipment) return null;
+    const before = gearStats(state);
+    const after = gearStats(state, next.equipment);
+    return Object.fromEntries(Object.keys(before).map(key => [key, after[key] - before[key]]));
+  }
+
+  // Rucksack und Lager. Gleiche Gegenstände stapeln sich auf einem Platz, Questgegenstände belegen keinen.
+  const bagSlots = 20;
+  const storageLimit = 400;
+  const questItems = new Set(Object.values(world.scenes).flatMap(scene => (scene.choices ?? []).map(choice => choice.requiresItem))
+    .filter(id => id && !own(world.supplies, id) && !own(world.gear, id)));
+
+  function category(id) {
+    const slot = world.gear[id]?.slot;
+    if (slot) return slot;
+    if (own(world.supplies, id)) return "supply";
+    if (questItems.has(id)) return "quest";
+    return "trophy";
+  }
+
+  function slotsUsed(state) {
+    return new Set(state.inventory.filter(id => !questItems.has(id))).size;
+  }
+
+  function fits(state, id) {
+    return questItems.has(id) || state.inventory.includes(id) || slotsUsed(state) < bagSlots;
+  }
+
+  // Legt neue Gegenstände in den Rucksack. Ist er voll, bringt ein Bote sie ins Lager. Nichts geht verloren.
+  function receive(state, items, announce = true) {
+    const overflow = [];
+    for (const id of items) {
+      if (fits(state, id) && state.inventory.length < 200) state.inventory.push(id);
+      else if (state.storage.length < storageLimit) {
+        state.storage.push(id);
+        overflow.push(id);
+      }
+    }
+    if (announce) noteOverflow(state, overflow);
+    return overflow;
+  }
+
+  function noteOverflow(state, overflow) {
+    if (!overflow.length) return;
+    note(state, "Dein Rucksack ist voll. " + [...new Set(overflow)].map(id => world.items[id]).join(", ") +
+      (overflow.length > 1 ? " werden" : " wird") + " ins Lager gebracht.");
+  }
+
+  function storageSite(state) {
+    return world.storageSites[world.scenes[state.scene]?.map] ?? null;
+  }
+
+  function storageOpen(state) {
+    return Boolean(!state.combat && state.health > 0 && storageSite(state));
+  }
+
+  function canStore(state, id) {
+    return storageOpen(state) && state.inventory.includes(id) && !questItems.has(id) && state.storage.length < storageLimit;
+  }
+
+  function canRetrieve(state, id) {
+    return storageOpen(state) && state.storage.includes(id) && fits(state, id) && state.inventory.length < 200;
+  }
+
+  function moveCount(from, id, count) {
+    const have = from.filter(entry => entry === id).length;
+    return Math.max(1, Math.min(have, Number.isInteger(count) ? count : 1));
+  }
+
+  function store(previous, id, count = 1) {
+    if (!canStore(previous, id)) return previous;
+    const state = structuredClone(previous);
+    const amount = Math.min(moveCount(state.inventory, id, count), storageLimit - state.storage.length);
+    for (let index = 0; index < amount; index++) {
+      state.inventory.splice(state.inventory.indexOf(id), 1);
+      state.storage.push(id);
+    }
+    let remaining = state.inventory.filter(entry => entry === id).length;
+    let unequipped = false;
+    for (const slot of equipmentSlots) {
+      if (state.equipment[slot] !== id) continue;
+      if (remaining > 0) remaining--;
+      else {
+        state.equipment[slot] = null;
+        unequipped = true;
+      }
+    }
+    note(state, world.items[id] + (amount > 1 ? " ×" + amount : "") + " eingelagert" + (unequipped ? " und abgelegt." : "."));
+    return state;
+  }
+
+  function retrieve(previous, id, count = 1) {
+    if (!canRetrieve(previous, id)) return previous;
+    const state = structuredClone(previous);
+    const amount = Math.min(moveCount(state.storage, id, count), 200 - state.inventory.length);
+    for (let index = 0; index < amount; index++) {
+      state.storage.splice(state.storage.indexOf(id), 1);
+      state.inventory.push(id);
+    }
+    note(state, world.items[id] + (amount > 1 ? " ×" + amount : "") + " aus dem Lager genommen.");
     return state;
   }
 
@@ -603,12 +789,12 @@ const rules = (() => {
     if (choice.check) {
       const [key, target] = choice.check;
       const bonus = skillValue(state, key) + (state.marks.includes(choice.advantage) ? 2 : 0) +
-        (key === "list" ? (world.gear[state.equipment?.armor]?.travel ?? 0) : 0);
+        (key === "list" ? gearBonus(state, "travel") : 0);
       const roll = 1 + Math.floor(dice() * 20);
       const passed = roll + bonus >= target;
       note(state, K.fertigkeiten[key].name + " " + roll + " + " + bonus + " gegen " + target + ". " +
         (passed ? choice.pass : choice.fail));
-      if (passed && choice.item) state.inventory.push(choice.item);
+      if (passed && choice.item) receive(state, [choice.item]);
       if (passed && choice.mark) markDeed(state, choice.mark);
       if (passed || !choice.fight) {
         arrive(state, choice.to);
@@ -616,7 +802,7 @@ const rules = (() => {
       }
     } else {
       if (choice.mark) markDeed(state, choice.mark);
-      if (choice.item) state.inventory.push(choice.item);
+      if (choice.item) receive(state, [choice.item]);
       if (choice.consume) state.inventory.splice(state.inventory.indexOf(choice.consume), 1);
       if (choice.recover) state.health = Math.min(healthLimit(state), state.health + choice.recover);
       if (choice.replenish) state.ember = Math.min(emberLimit(state), state.ember + choice.replenish);
@@ -764,7 +950,7 @@ const rules = (() => {
     } else if (action === "ember" && cast(state, 2)) {
       usedFire = true;
       const damage = role.attack.power + damageValue(state, role.attack.skill) + (result.emberBonus ?? 0) +
-        (world.gear[state.equipment?.weapon]?.magic ?? 0) + rage;
+        gearBonus(state, "magic") + rage;
       hit(damage);
       note(state, role.attack.name + " verursacht " + damage + " Schaden.");
     } else if (action === "restore" && cast(state, -2)) {
@@ -866,7 +1052,7 @@ const rules = (() => {
     const leaderAttack = current.health > 0 ? attack + (current.max ? Math.floor(state.party.length / 2) : 0) : 0;
     const defense = action === "guard" ? Math.max(6, ward) : ward;
     const damage = Math.max(guarding ? 0 : 1, leaderAttack + extraAttack + (special?.damage ?? 0) -
-      protection(state) - (world.gear[state.equipment?.armor]?.armor ?? 0) - defense);
+      protection(state) - gearBonus(state, "armor") - defense);
     current.stunned = Boolean(special?.stuns && !guarding);
     const startsBleeding = special?.bleeds && !guarding;
     if (startsBleeding) current.bleeding = 2;
@@ -886,6 +1072,11 @@ const rules = (() => {
       (bleedingDamage ? " Die Blutung kostet 1 LP." : ""));
     if (!state.health) arrive(state, "defeat");
     return state;
+  }
+
+  // Summiert einen Ausrüstungswert über alle belegten Plätze (Waffe, Rüstung, Nebenhand, Schmuck).
+  function gearBonus(state, key) {
+    return equipmentSlots.reduce((total, slot) => total + (world.gear[state.equipment?.[slot]]?.[key] ?? 0), 0);
   }
 
   function weapon(state) {
@@ -922,12 +1113,14 @@ const rules = (() => {
     const state = structuredClone(previous);
     Object.assign(state, { faction, role, build: setup, umschulung: false });
     const weapon = kit(state).weapon;
-    if (!state.inventory.includes(weapon)) state.inventory.push(weapon);
+    const overflow = state.inventory.includes(weapon) ? [] : receive(state, [weapon], false);
     // Die Startwaffe der alten Klasse weicht der Startwaffe der neuen. Gefundene Waffen bleiben angelegt.
-    if (!state.equipment.weapon || state.equipment.weapon === kit(previous).weapon) state.equipment.weapon = weapon;
+    if (state.inventory.includes(weapon) &&
+        (!state.equipment.weapon || state.equipment.weapon === kit(previous).weapon)) state.equipment.weapon = weapon;
     state.health = Math.max(1, Math.min(healthLimit(state), state.health + healthLimit(state) - healthLimit(previous)));
     state.ember = Math.min(emberLimit(state), Math.max(0, state.ember + emberLimit(state) - emberLimit(previous)));
     note(state, "Du bist nun " + title(state) + " (" + K.fraktionen[faction].name + "). Deine bisherige Reise und Beute bleiben erhalten.");
+    noteOverflow(state, overflow);
     return state;
   }
 
@@ -962,9 +1155,10 @@ const rules = (() => {
     return { bridge, news, messengers: marks.includes("boten-unterwegs") };
   }
 
-  return { create, read, choices, choose, route, retrain, specialize, ascend, weapon, equip, use, canUse, strike,
+  return { create, read, choices, unequip, equipmentSlots, slotKinds, targetSlot, gearStats, equipPreview, gearBonus, bagSlots, category, slotsUsed, fits, storageSite, storageOpen, canStore, canRetrieve,
+    store, retrieve, isQuestItem: id => questItems.has(id), choose, route, retrain, specialize, ascend, weapon, equip, use, canUse, strike,
     attributes, baseAttributes, defaultBuild, suggestSkills, buildProblem, skillLimits, skillPoints, cap, modifier, originOf, profile,
-    className, title, heroSkills, heroLimits, modifiers, skillValue, protection,
+    className, title, gearSkill, heroSkills, heroLimits, modifiers, skillValue, protection,
     progression, train, trade, candidates, recruit, dismiss, targets,
     relationship, reputation, recruitment, promise, bondActions, bondWith,
     healthLimit, emberLimit, heroAttributes, ending, moorConsequences };
