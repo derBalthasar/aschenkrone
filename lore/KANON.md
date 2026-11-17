@@ -53,3 +53,19 @@ Die Gebiete im Bestiarium folgen seit dem 17. 11. 2026 den Kontinenten der verbi
 ## Quelltexte im Weltbuch
 
 Seit dem 17. November 2026 stehen das Weltbuch 2.0 und die fünf Völkerdokumente vollständig unter `lore/quellen/`. Die Seiten sind aus den Word-Dateien erzeugt und enthalten die Detailkarten, das Gleichgewicht der Welt, Spielwerte, Städte, Dörfer, Hauptquests und die Bildtafeln der Dokumente. Bilder, die schon unter `lore/` liegen, werden wiederverwendet. Neue Bilder liegen unter `lore/quellen/bilder/`. Die Spielregeln und Spielstände sind davon nicht betroffen.
+
+## Begleiter und Aufnahmeaufträge
+
+Die Gruppe führt höchstens drei Begleiter. Alle neun Figuren können am Wachhof von Eiswacht angesprochen werden, damit Reisen für persönliche Aufnahmeaufträge keine Abgabe verhindern. Bereits absolvierte Taten zählen nach Annahme des Auftrags. Aufnahme und erneute Aufnahme erfordern einen abgeschlossenen persönlichen Auftrag; ein Versprechen allein genügt nicht. Kelda akzeptiert alternativ einen Vertrag über 15 Silber mit späterer Zahlung. Der Betrag bleibt als Schuld gespeichert.
+
+Die Herkunftsvorbehalte sind neue persönliche Charakterentscheidungen für das Spiel, keine aus den Quellen abgeleitete allgemeine Feindschaft zwischen Völkern: Iven verlangt von Vampiren und Erwachten 25 Ruf bei der Grenzwache. Mira reist nicht mit Erwachten und verlangt von Vampiren 15 Ruf beim Orden der Flamme. Neri verlangt von Orks nach einem persönlichen Grenzkonflikt 15 Ruf beim Kronreich. Grundlage der Fraktionsnamen und Hintergründe sind `voelker.js`, die Ordenssuche nach dem Kult der Bleichen Ewigkeit und die Unterscheidung von Bleicher Krone und Erinnernden. Misstrauen beginnt bei −10 Sympathie und kann durch den genannten Ruf überwunden werden; Miras persönliche Ablehnung bleibt bestehen.
+
+Aufträge sind in `world.recruitmentQuests` hinterlegt. Hedas Rezept verarbeitet zwei Galgenwurz zu einem Harzverband. Sela erhält einen Glutfunken; Iven, Neri, Tovin, Oren und Bryn verlangen bestehende Rettungs-, Kampf- oder Weltentscheidungen. Mira verlangt Grenzwachenruf. Sympathieänderungen durch bekannte Entscheidungen erscheinen im Journal. Bei alten Spielständen bleiben Aufnahmeberechtigungen vorhandener Mitglieder erhalten. Überzählige Mitglieder warten am Wachhof, ihre Gegenstände bleiben im Vorrat.
+
+## Questlog und Spielzugfristen
+
+Das gemeinsame Questlog führt persönliche Aufnahmeaufträge, Weltaufträge von Runa, Ada, Enna und Torben sowie Keldas offene Soldzahlung. Es trennt offene, erfüllte und gescheiterte Aufträge und speichert Auftraggeber, Beginn und Frist. Fristen sind Spielzüge, keine reale Wartezeit. Gültige Entscheidungen einschließlich Reisen, Kampfrunden, Herstellung sowie Annahme, Abgabe und Soldzahlung verbrauchen je einen Zug. Lesen, Ausrüsten, Handel, Gruppenverwaltung, reine Gespräche und Browserpausen verbrauchen keinen Zug. Ein neu angenommener Auftrag erhält seine volle Frist nach der Annahme. Eine erfolgreiche Abgabe im letzten verbleibenden Zug zählt noch.
+
+Begleiteraufträge laufen nach 25–100 Zügen aus; die jeweilige Frist steht vor der Annahme. Nach Fristablauf sind sie gescheitert, kosten 15 Sympathie und sperren die Aufnahme. Bereits erfüllte Aufnahmeaufträge verfallen nicht. Keldas aufgeschobener Sold wird nach 30 Zügen überfällig und kostet einmalig 20 Sympathie; die Schuld bleibt bezahlbar. Eine späte Zahlung löscht den gescheiterten Friststatus nicht. Weltaufträge bleiben nach Fristablauf als gescheitert im Log, unabhängig davon, ob die Handlung später noch eine Rettung erlaubt. Bestehende Szenen, Entscheidungen und Beute werden dadurch nicht entfernt.
+
+Alte Spielstände ohne Zeitdaten starten bei Spielzug 0; bestehende offene Aufträge erhalten eine volle Frist. Laden, Filtern und erneutes Öffnen setzen gespeicherte Fristen nicht zurück. Das System ist mit dem Inventar-Hub und dem Klassensystem aus `main` (Stand `e8054e3`) zusammengeführt.
