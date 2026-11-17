@@ -152,7 +152,7 @@ const rules = (() => {
     if (problem) throw new Error(problem);
     const weapon = kit({ faction, role }).weapon;
     const state = {
-      version, name: cleanName, faction, origin, appearance, variant, role, scene: "wake",
+      version, name: cleanName, faction, origin, appearance, variant, role, scene: startpunkte.szene(faction),
       build: structuredClone({ ...setup, spez: setup.spez ?? null, meister: setup.meister ?? null }),
       questStufe: 0, vereinigt: false, umschulung: false, rausch: false,
       health: 0, ember: 0, balance: 0, inventory: [weapon, "lederwams", "galgenwurz"],
@@ -865,7 +865,8 @@ const rules = (() => {
   }
 
   function storageSite(state) {
-    return world.storageSites[world.scenes[state.scene]?.map] ?? null;
+    const scene = world.scenes[state.scene];
+    return world.storageSites[scene?.map] ?? world.storageSites[scene?.lager] ?? null;
   }
 
   function storageOpen(state) {
@@ -1042,6 +1043,8 @@ const rules = (() => {
       }
     } else {
       if (choice.mark) markDeed(state, choice.mark);
+      // Glutkosten ohne eigene Glutwirkung (Prologe, spend): die Glut wird einfach verbraucht.
+      if (choice.spend) state.ember -= choice.emberCost;
       if (choice.item) receive(state, [choice.item]);
       if (choice.consume) state.inventory.splice(state.inventory.indexOf(choice.consume), 1);
       if (choice.recover) state.health = Math.min(healthLimit(state), state.health + choice.recover);

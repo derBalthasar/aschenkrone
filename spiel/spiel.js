@@ -344,8 +344,10 @@
       mapPlaces.append(marker);
     }
     const location = world.destinations[current]?.name;
+    const far = world.scenes[state.scene].fern;
     el("map-status").textContent = state.combat ? "Im Kampf kannst du die Karte ansehen. Reiseoptionen öffnen sich nach der Begegnung." :
       location ? "Standort: " + location + (travels.size ? " · Wähle ein Reiseziel, um die Route zu sehen." : " · Folge den Optionen in der Szene.") :
+      far ? "Standort: " + far + " · außerhalb dieser Reisekarte. Folge den Optionen in der Szene." :
       "Deine Reise ist beendet.";
   }
 
@@ -1515,7 +1517,8 @@
     if (previous) role.value = previous;
     const faction = klassen.fraktionen[origin.value];
     el("faction-description").textContent = "Ressource " + faction.ressource + " · Schwierigkeit " + faction.schwierigkeit +
-      " · Grundwerte " + bonusText(faction.bonus) + (faction.magie ? "" : " · keine Magie") + (faction.hinweis ? ". " + faction.hinweis : "");
+      " · Grundwerte " + bonusText(faction.bonus) + (faction.magie ? "" : " · keine Magie") + " · Startort " +
+      startpunkte.ort(origin.value) + " · Prolog „" + startpunkte.fraktionen[origin.value].prolog + "“" + (faction.hinweis ? ". " + faction.hinweis : "");
     if (!editingLegacy || portraitNeedsReset) portraitPreview(true);
     updateClassDescription();
   }
@@ -1602,7 +1605,7 @@
       save();
       setPortrait(el("intro-portrait"), next);
       show("prologue");
-      prologue.play(next.name, () => showPlay(next));
+      prologue.play(next.name, next.faction, () => showPlay(next));
     } catch (error) {
       el("creation-status").textContent = error.message;
     }

@@ -984,6 +984,15 @@ const world = (() => {
     "pass-mine": { warrior: 25, mage: 15 }, "frostbaer-besiegt": { ranger: -25, druid: -25 },
     "klippen-beruhigt": { ranger: 15, druid: 15 },
   };
+  // Prologe der Nacht des Erwachens je Fraktion (spiel/startpunkte.js) und ihre Zentrallager.
+  Object.assign(scenes, startpunkte.scenes);
+  Object.assign(storageSites, startpunkte.storageSites);
+  // Gegner, Belohnungen und Beute der Prologe in der Nacht des Erwachens.
+  Object.assign(creatures, startpunkte.creatures);
+  Object.assign(fights, startpunkte.fights);
+  Object.assign(battleRewards, startpunkte.battleRewards);
+  Object.assign(milestones, startpunkte.milestones);
+  Object.assign(lootTables, startpunkte.lootTables);
   for (const scene of Object.values(scenes)) {
     if (scene.map) continue;
     const region = scene.place.split(" · ")[0];
