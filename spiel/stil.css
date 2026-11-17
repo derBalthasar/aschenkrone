@@ -286,6 +286,19 @@ button.map-marker { min-height: 2rem; color: #fff0d6; border-color: #e1b677; }
 .hub-stat-worse { background: #f3c9c0; }
 .hub-compare { min-height: 1.3em; margin: .4rem 0 0; font-size: .85rem; color: #69492d; }
 .hub-silver { margin: .2rem 0 0; color: #69492d; text-align: right; }
+/* Gürtel mit zwei Ladungen und Rucksack-Ausbau (Errata 10) */
+.hub-belt { display: grid; gap: .3rem; margin-top: .55rem; padding-top: .45rem; border-top: 1px solid #ad906655; }
+.hub-belt h4 { margin: 0; font-size: .9rem; color: #69492d; }
+.hub-belt-slots { display: grid; grid-template-columns: 1fr 1fr; gap: .35rem; }
+.hub-belt-slot { display: grid; gap: .2rem; padding: .3rem .4rem; background: #f4e8d0; border: 1px dashed #96734c; border-radius: 3px; min-width: 0; }
+.hub-belt-slot strong { overflow-wrap: anywhere; }
+.hub-belt-slot select { width: 100%; min-height: 2rem; font: inherit; font-size: .85rem; }
+.hub-belt p { margin: 0; font-size: .8rem; color: #69492d; }
+.hub-bag-upgrade { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .6rem; margin: .55rem 1rem 0; padding: .45rem .6rem;
+  border: 1px solid var(--line); border-radius: 4px; }
+.hub-bag-upgrade p { flex: 1 1 14rem; margin: 0; font-size: .9rem; }
+.hub-bag-upgrade .action { min-height: 2.25rem; padding: .2rem .6rem; }
+.belt-actions { display: flex; flex-wrap: wrap; gap: .4rem; width: 100%; }
 .hub-tabs { display: flex; gap: .25rem; padding: .8rem 1rem 0; border-bottom: 1px solid var(--line); }
 .hub-tabs button { flex: 1 1 0; min-height: 2.75rem; font: inherit; color: var(--muted); background: transparent;
   border: 1px solid var(--line); border-bottom: none; border-radius: 3px 3px 0 0; cursor: pointer; }

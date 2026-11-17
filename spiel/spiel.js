@@ -435,7 +435,7 @@
       (worn.filter(slot => slot !== "weapon").length ? " · " + worn.filter(slot => slot !== "weapon")
         .map(slot => slotLabels[slot] + ": " + world.items[equipment[slot]]).join(" · ") : "");
     const site = rules.storageSite(state);
-    el("bag-summary").textContent = "Rucksack " + rules.slotsUsed(state) + " / " + rules.bagSlots + " Plätze · Zentrallager " +
+    el("bag-summary").textContent = "Rucksack " + rules.slotsUsed(state) + " / " + rules.bagLimit(state) + " Plätze · Zentrallager " +
       state.storage.length + " Gegenstände" + (site && !state.combat ? " · hier erreichbar." : "");
     const inventory = el("inventory");
     inventory.replaceChildren();
@@ -473,7 +473,7 @@
       row.append(element("strong", "Herstellen: " + world.items[id]), element("p", recipe.text));
       const enough = Object.entries(recipe.ingredients).every(([item, count]) => state.inventory.filter(entry => entry === item).length >= count);
       button(row, "Herstellen · " + Object.entries(recipe.ingredients).map(([item, count]) => count + " × " + world.items[item]).join(", "),
-        () => update(rules.craft(state, id)), { disabled: Boolean(state.combat) || !state.health || !enough || state.inventory.length >= 200 });
+        () => update(rules.craft(state, id)), { disabled: Boolean(state.combat) || !state.health || !enough || state.inventory.length >= rules.itemCap });
       inventory.append(row);
     }
     if (el("inventory-hub").open) renderHub();
@@ -627,6 +627,62 @@
     all.disabled = Boolean(state.combat) || !state.health || !rules.equipmentSlots.some(slot => state.equipment[slot]);
   }
 
+  // Gürtel: zwei Schnellzugriffsplätze für Verbrauchsgüter (Errata 10).
+  function renderBelt() {
+    const box = el("hub-belt");
+    box.replaceChildren(element("h4", "Gürtel · 2 Ladungen"));
+    const slots = element("div");
+    slots.className = "hub-belt-slots";
+    const belt = rules.belt(state);
+    belt.forEach((id, index) => {
+      const slot = element("div");
+      slot.className = "hub-belt-slot";
+      slot.append(element("strong", id ? world.items[id] : "Leer"));
+      if (state.combat) {
+        if (id) button(slot, "Sofort verwenden", () => {
+          el("inventory-hub").close();
+          quickUse(index);
+        }, { disabled: !rules.canUse(state, id, selectedAlly()) });
+      } else {
+        const select = element("select");
+        select.setAttribute("aria-label", "Gürtelplatz " + (index + 1));
+        select.append(new Option("Leer", ""));
+        for (const supply of new Set(state.inventory)) {
+          if (world.supplies[supply]) select.append(new Option(world.items[supply], supply));
+        }
+        select.value = id ?? "";
+        select.disabled = !state.health;
+        select.addEventListener("change", () => {
+          hubAction(rules.setBelt(state, index, select.value || null));
+          el("hub-belt").querySelectorAll("select")[index]?.focus();
+        });
+        slot.append(select);
+      }
+      slots.append(slot);
+    });
+    box.append(slots, element("p", "Gürtelgegenstände wirken im Kampf, ohne deine Aktion zu verbrauchen."));
+  }
+
+  function renderBagUpgrade() {
+    const box = el("hub-bag-upgrade");
+    const plan = rules.bagUpgrade(state);
+    box.hidden = hub.tab !== "bag" || !plan;
+    box.replaceChildren();
+    if (box.hidden) return;
+    const material = Object.entries(plan.material).map(([id, count]) => count + "× " + world.items[id]).join(", ");
+    box.append(element("p", "Rucksack-Ausbau " + plan.stufe + ": " + plan.name + " · " + plan.plaetze + " Plätze" +
+      (plan.trade ? "" : " · nur mit Handel mit Zwergen oder den Freien Häfen (25 Ruf)") +
+      (rules.storageOpen(state) ? "" : " · beim Sattler einer Stadt mit Zentrallager")));
+    const open = rules.storageOpen(state);
+    button(box, plan.silber + " Silber", () => hubAction(rules.upgradeBag(state, "silver")), { disabled: !open || !plan.silverReady });
+    button(box, material, () => hubAction(rules.upgradeBag(state, "material")), { disabled: !open || !plan.materialReady });
+  }
+
+  async function quickUse(index) {
+    const next = rules.quickUse(state, index, selectedAlly());
+    if (next !== state) update(next);
+  }
+
   function itemTile(id, count) {
     const storageTab = hub.tab === "storage";
     const gear = world.gear[id];
@@ -698,6 +754,11 @@
       control.addEventListener("click", callback);
       extras.append(control);
     };
+    if (!storageTab && supply && !state.combat) {
+      const free = rules.belt(state).indexOf(null);
+      small("An den Gürtel", () => hubAction(rules.setBelt(state, free, id)), free < 0 || !state.health ||
+        rules.belt(state).filter(entry => entry === id).length >= count);
+    }
     if (!storageTab && rules.storageOpen(state) && !rules.isQuestItem(id)) {
       small("Ins Lager", () => hubAction(rules.store(state, id, 1)), !rules.canStore(state, id));
       if (count > 1) small("Alle ins Lager", () => hubAction(rules.store(state, id, count)), !rules.canStore(state, id));
@@ -723,7 +784,9 @@
     el("hub-silver").textContent = state.silver + " Silber";
     renderDoll();
     renderStats();
-    const tabs = { bag: "Rucksack · " + rules.slotsUsed(state) + " / " + rules.bagSlots,
+    renderBelt();
+    renderBagUpgrade();
+    const tabs = { bag: "Rucksack · " + rules.slotsUsed(state) + " / " + rules.bagLimit(state),
       storage: "Zentrallager · " + state.storage.length };
     for (const [tab, label] of Object.entries(tabs)) {
       const control = el("hub-tab-" + tab);
@@ -733,7 +796,7 @@
     }
     const capacity = el("hub-capacity");
     capacity.hidden = hub.tab !== "bag";
-    capacity.max = rules.bagSlots;
+    capacity.max = rules.bagLimit(state);
     capacity.value = rules.slotsUsed(state);
     el("hub-hint").textContent = hub.tab === "storage"
       ? (open ? "Klick auf einen Gegenstand nimmt ihn heraus." : "Herausnehmen kannst du in jeder Stadt: Kornwik, Heidvang, Eiswacht, Glutberg.")
@@ -1027,10 +1090,10 @@
 
   function equipmentText(member) {
     const kit = rules.memberEquipment(state, member);
-    return "Waffe: " + (world.items[kit.weapon] ?? "Eigener Kampfstil") +
-      " · Rüstung: " + (world.items[kit.armor] ?? "Keine") +
-      " · Angriff +" + (world.gear[kit.weapon]?.power ?? 0) +
-      " · Eigener Schutz +" + (world.gear[kit.armor]?.armor ?? 0);
+    const armor = Object.values(kit).reduce((sum, id) => sum + (world.gear[id]?.armor ?? 0), 0);
+    const worn = rules.equipmentSlots.filter(slot => slot !== "weapon" && kit[slot]).map(slot => slotLabels[slot] + ": " + world.items[kit[slot]]);
+    return "Waffe: " + (world.items[kit.weapon] ?? "Eigener Kampfstil") + (worn.length ? " · " + worn.join(" · ") : "") +
+      " · Angriff +" + (world.gear[kit.weapon]?.power ?? 0) + " · Eigener Schutz +" + armor;
   }
 
   const openEquipment = new Set();
@@ -1047,13 +1110,13 @@
     });
     details.append(element("summary", "Ausrüstung ändern"));
     const kit = rules.memberEquipment(state, member);
-    for (const [slot, title] of [["weapon", "Waffe"], ["armor", "Rüstung"]]) {
+    for (const [slot, title] of rules.equipmentSlots.map(entry => [entry, slotLabels[entry]])) {
       const label = element("label", title);
       const select = element("select");
       select.setAttribute("aria-label", world.companions[member].name + " · " + title);
-      select.append(new Option(slot === "weapon" ? "Eigener Kampfstil" : "Keine Rüstung", ""));
+      select.append(new Option(slot === "weapon" ? "Eigener Kampfstil" : "Leer", ""));
       for (const id of new Set(state.inventory)) {
-        if (world.gear[id]?.slot !== slot) continue;
+        if (world.gear[id]?.slot !== rules.slotKinds[slot]) continue;
         const free = state.inventory.filter(item => item === id).length - rules.assigned(state, id);
         const option = new Option(world.items[id] + (free === 0 && kit[slot] !== id ? " · Vergeben" : ""), id);
         option.disabled = free === 0 && kit[slot] !== id;
@@ -1065,7 +1128,7 @@
         const id = select.value || kit[slot];
         if (id && select.value !== (kit[slot] ?? "")) {
           openEquipment.add(member);
-          update(rules.equip(state, id, member));
+          update(rules.equip(state, id, member, slot));
           const label = world.companions[member].name + " · " + title;
           [...el("party-members").querySelectorAll("select")].find(control => control.getAttribute("aria-label") === label)?.focus();
         }
@@ -1130,7 +1193,8 @@
     for (const id of state.party) {
       const companion = world.companions[id];
       const row = element("li");
-      row.append(element("strong", companion.name + " · " + klassen.grundklassen[companion.klasse].name));
+      row.append(element("strong", companion.name + " · " + klassen.grundklassen[companion.klasse].name +
+        " · Stufe " + rules.memberLevel(state, id) + (companion.soeldner ? " · Söldner" : "")));
       row.append(element("div", companion.ability + " · " + companionEffect(companion) + " · Einmal pro Kampf"));
       allyCondition(row, id);
       renderMemberEquipment(row, id);
@@ -1140,13 +1204,13 @@
       const relation = rules.relationship(state, id);
       const oath = { none: "", promised: "Versprechen offen", fulfilled: "Versprechen gehalten", broken: "Versprechen gebrochen" };
       const bond = { none: "", romance: "Romanze", friendship: "Enge Freundschaft" };
-      row.append(element("p", ["Sympathie " + relation.score, oath[relation.oath], bond[relation.bond]].filter(Boolean).join(" · ")));
+      if (!companion.soeldner) row.append(element("p", ["Sympathie " + relation.score, oath[relation.oath], bond[relation.bond]].filter(Boolean).join(" · ")));
       if (relation.oath === "promised") row.append(element("p", world.recruitmentQuests[id].text));
       const labels = { talk: "Am Rastplatz sprechen", gift: "Geschenk annehmen", romance: "Über Gefühle sprechen", friendship: "Freundschaft vertiefen" };
       for (const action of rules.bondActions(state, id)) {
         button(row, labels[action], () => update(rules.bondWith(state, id, action)));
       }
-      if (state.scene === "watch-yard" && !state.combat) {
+      if ((state.scene === "watch-yard" || rules.storageSite(state)) && !state.combat) {
         button(row, companion.name + " verabschieden", () => update(rules.dismiss(state, id)));
       }
       members.append(row);
@@ -1471,6 +1535,15 @@
         control.dataset.battleAction = id;
       }
       button(actions, "Gegenstand", () => openHub());
+      if (rules.canEvade(state)) {
+        const evade = button(actions, "Dem Hinterhalt ausweichen · ohne Kampf-EP", () => battleAction("evade"));
+        evade.dataset.battleAction = "evade";
+      }
+      rules.belt(state).forEach((id, index) => {
+        if (!id) return;
+        button(actions, "Gürtel · " + world.items[id] + " · ohne Aktion", () => quickUse(index),
+          { disabled: !rules.canUse(state, id, selectedAlly()) });
+      });
       if (world.fights[combat.id].regeneration) {
         button(actions, "Mit Fackel angreifen · schwächt den Gegenangriff und stoppt Regeneration", () => battleAction("torch"));
       }
@@ -1507,7 +1580,7 @@
             gear?.magic ? "+" + gear.magic + " Glutschaden" : gear?.travel ? "+" + gear.travel + " auf List unterwegs" :
             supply?.heal ? "+" + supply.heal + " LP" : "+" + supply.ember + " Glut";
           button(stock, world.items[id] + " · " + effect + " · " + price + " Silber", () => update(rules.trade(state, id, true)),
-            { disabled: price > state.silver || state.inventory.length >= 180 });
+            { disabled: price > state.silver || state.inventory.length >= rules.itemCap - 20 });
         }
         const trophies = Object.entries(world.salePrices).filter(([id]) => state.inventory.includes(id));
         if (trophies.length) stock.append(element("h3", "Trophäen verkaufen"));
@@ -1594,16 +1667,24 @@
         recruitment.className = "recruitment";
         recruitment.append(element("h3", "Gefährten vor Ort"));
         if (state.party.length >= rules.partyLimit) {
-          recruitment.append(element("p", "Deine Gruppe ist voll. Am Wachhof kannst du jemanden verabschieden."));
+          recruitment.append(element("p", "Deine Gruppe ist voll. Am Wachhof oder in einer Stadt mit Zentrallager kannst du jemanden verabschieden."));
         }
         for (const [id, companion] of candidates) {
           const candidate = element("article");
           candidate.append(element("h4", companion.name + " · " + klassen.grundklassen[companion.klasse].name),
             element("p", companion.introduction),
             element("p", companion.ability + " · " + companionEffect(companion)));
-          candidate.append(element("p", "Sympathie: " + rules.relationship(state, id).score));
+          if (!companion.soeldner) candidate.append(element("p", "Sympathie: " + rules.relationship(state, id).score));
           const status = rules.recruitment(state, id);
-          if (status === "ready") {
+          if (status === "hire") {
+            const cost = rules.hireCost(state, id);
+            candidate.append(element("p", "Söldner · startet auf Erfahrungsstufe " + Math.max(1, rules.level(state) - 1) +
+              (cost < companion.soeldner.kosten ? " · Charisma-Rabatt" : "")));
+            button(candidate, companion.name + " anwerben · " + cost + " Silber", () => update(rules.hire(state, id)),
+              { disabled: state.party.length >= rules.partyLimit || state.silver < cost });
+          } else if (status === "incompatible") {
+            candidate.append(element("p", "Volksgrenzen: Untote und Lebende reisen nicht zusammen, Orks und Zwerge ebenso wenig."));
+          } else if (status === "ready") {
             button(candidate, companion.name + " mitnehmen", () => update(rules.recruit(state, id)),
               { disabled: state.party.length >= rules.partyLimit });
           } else if (status === "promise") {

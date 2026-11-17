@@ -1,5 +1,5 @@
 const lands = [
-  { id: "valmarch", name: "Kronreich und Eispass", subtitle: "Menschen · Nordwesten · Kronreich und Orden der Flamme", level: "1–25", regions: [
+  { id: "valmarch", name: "Kronreich und Eispass", subtitle: "Menschen · Nordwesten · Kronreich und Orden der Flamme", level: "1–6 · Eispass 15–20", regions: [
     ["Kornwik", "Felder, Hecken, verbrannte Dörfer"],
     ["Heidvang", "Flussauen, Furten, Galgen, Schilf"],
     ["Eichenwald bei Heidvang", "Wagenwege und Bachläufe"],
@@ -27,14 +27,14 @@ const lands = [
     ["Krähenbeere", "Hecken", "giftig, Grundstoff für Klingengift"],
     ["Moorlicht-Moos", "Moor bei Eiswacht", "glimmt im Dunkeln, lindert Brand"],
   ] },
-  { id: "eryndor", name: "Eryndor", subtitle: "Untote · Hoher Norden · Gebiet der Erinnernden", level: "—", regions: [
+  { id: "eryndor", name: "Eryndor", subtitle: "Untote · Hoher Norden · Gebiet der Erinnernden", level: "15–20", regions: [
     ["Täler um Eryndor", "Nebeltäler, Gruften der Erinnernden und Dörfer der Blutholden"],
   ], fauna: [
     ["Grufthäuter", "Täler um Eryndor", "Jäger (nachts)", "Fledermäuse, so groß wie Hunde, Blutsog", "Licht, Feuer", "Hautflügel"],
   ], alpha: [], flora: [
     ["Blutdorn", "Täler um Eryndor", "von den Erinnernden gezüchtet, stärkt kurz, macht süchtig"],
   ] },
-  { id: "skarnheim", name: "Ordensland", subtitle: "Menschen · Orden der Flamme · Gebirge und Nordküste", level: "50–100", regions: [
+  { id: "skarnheim", name: "Ordensland", subtitle: "Menschen · Orden der Flamme · Gebirge und Nordküste", level: "15–20", regions: [
     ["Die Frostklippen", "Klippensteige am Glutberg und eisige Steilküsten an der Nordwacht"],
     ["Die Runenpässe", "Bergpässe und Wegzeichen in den Bergen des Ordens"],
     ["Die Tiefen", "Stollen und Glut-Adern unter den Bergen"],
@@ -60,7 +60,7 @@ const lands = [
     ["Glutpilz", "Tiefen", "gibt Glut zurück, verbrennt aber leicht"],
     ["Grauweide", "Aschefelder", "stirbt nicht in der Asche, Zutat für Aschenschutz"],
   ] },
-  { id: "sulkhar", name: "Ghor-Mahr und die Ork-Lande", subtitle: "Orks · Südwesten", level: "30–70", regions: [
+  { id: "sulkhar", name: "Ghor-Mahr und die Ork-Lande", subtitle: "Orks · Südwesten", level: "11–15", regions: [
     ["Die Weiten", "Grasland und Weidegründe der Grünen Banner"],
     ["Die Glasebene", "Ebene aus geschmolzenem Sand am Rand der Lavafelder, Land der Staubreiter"],
     ["Die Schlackenschmieden", "Werkstätten an den Glutspalten von Ghor-Mahr, Gebiet des Aschenclans"],
@@ -82,7 +82,7 @@ const lands = [
     ["Glasblume", "Glasebene", "wächst aus geschmolzenem Sand, verstärkt Glutzauber"],
     ["Sklavenkraut", "Knocheninseln", "betäubt Schmerz, die Staubreiter geben es ihren Gefangenen"],
   ] },
-  { id: "ylvenhain", name: "Land des Weltenbaums", subtitle: "Elfen · Osten", level: "15–50", regions: [
+  { id: "ylvenhain", name: "Land des Weltenbaums", subtitle: "Elfen · Osten", level: "6–11", regions: [
     ["Der Saum", "Waldrand am Inneren Meer beim Laubmarkt, wo fremde Händler und Holzfäller anlanden"],
     ["Das Herzholz", "uralter Kernwald um den Weltenbaum, Gebiet der Hüter"],
     ["Die Weißen Höhen", "Hochland unter den Gipfeln von Hochdorn, Gebiet der Dornenklingen"],
@@ -108,7 +108,7 @@ const lands = [
     ["Würgranke", "Saum", "fesselt, wer sie berührt, Fallen für Holzfäller"],
     ["Schattenlotus", "Nebelmarschen", "Grundstoff für die Gifte der Schattenblüte"],
   ] },
-  { id: "splitterinseln", name: "Meere und Inseln", subtitle: "Inneres Meer · Freie Häfen, Zollinseln und Funkeninsel", level: "15–50", regions: [
+  { id: "splitterinseln", name: "Meere und Inseln", subtitle: "Inneres Meer · Freie Häfen, Zollinseln und Funkeninsel", level: "1–6", regions: [
     ["Die Freien Häfen", "Hafenstädte, Kais und Lagerhäuser an der Ostküste der Menschen"],
     ["Die Riffe", "Korallenriffe, Wracks und seichte Lagunen um die Zollinseln"],
     ["Die Funkeninsel", "schwarz verbrannte Felsen und Schwefelquellen vor der Ostküste der Zwerge"],
