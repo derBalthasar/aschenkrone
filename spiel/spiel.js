@@ -1567,7 +1567,12 @@
     knight: ["mann-01", 2], mage: ["frau-01", 0], priest: ["frau-01", 2],
     ranger: ["frau-01", 1], thief: ["mann-01", 0], necromancer: ["mann-01", 3],
     paladin: ["frau-01", 3], druid: ["mann-01", 1], warrior: ["frau-01", 1],
+    steppenreiter: ["mann-01", 1], grenzbogner: ["frau-01", 2], flammenknecht: ["mann-01", 2], feldscherin: ["frau-01", 0],
   };
+  const volkPortraits = { menschen: "mann-01", elfen: "mann-02", zwerge: "mann-03", orks: "mann-04", untote: "mann-06" };
+  // Begleiter ohne eigenes Porträt (z. B. neue Söldner oder Gesandte) bekommen das Grundporträt ihres Volkes.
+  const companionPortrait = (member) => companionPortraits[member] ??
+    [volkPortraits[world.companions[member]?.volk] ?? "mann-01", 0];
 
   function fighterCard(name, detail, member = null) {
     const card = element("article");
@@ -1579,7 +1584,7 @@
       setPortrait(portrait, state);
       portrait.removeAttribute("aria-label");
     } else {
-      const [id, variant] = companionPortraits[member];
+      const [id, variant] = companionPortrait(member);
       const art = portraits.get(id, variant);
       portrait.style.backgroundImage = 'url("profilbilder/bilder/' + art.file + '")';
       portrait.style.backgroundPosition = art.position;
