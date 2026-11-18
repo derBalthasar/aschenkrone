@@ -8,7 +8,7 @@ Stand: 18. 11. 2026. Grundlage ist die Ausarbeitung von Gemini (Quelltext in `qu
 3. Der dritte Begleiter ist Zollhauptmann Halvor Eisentau (salzwacht_q10, `comp_haefen_halvor`).
 4. Alle Städte haben am Aushang Stufe 1–5.
 5. Das Alphatier von Zollholm heißt **Die Schwarze Krake** (bei Gemini „Mutter Tiefe“), auch im Bestiarium „Meere und Inseln“.
-6. Akt 5 beginnt mit dem Kriegsrat in Perlvik. Danach legt die Flotte im echten Starthafen der gewählten Route ab (siehe unten).
+6. Akt 5 heißt „Über das Innere Meer“ (bei Gemini „Die Flotte gen Norden“) und beginnt mit dem Kriegsrat in Perlvik. Danach legt die Flotte im echten Starthafen der gewählten Route ab (siehe unten).
 
 **Spielregel für Wegaufträge:** Ein Kampfauftrag wird auf einem Weg ausgelöst, der am Auftragsort beginnt und ins Land der Menschen führt. Seewege in fremdes Land (etwa M39 nach Draugrsund) lösen nichts aus; solche Aufträge erledigt der Held im Hafen vor dem Auslaufen.
 
@@ -65,8 +65,10 @@ Kronhall / Glutberg, Kronhall, Salzwacht / Perlvik · enthält Volksquest: Das A
 2. **Das Große Thing** (Kronhall): Thingsprecherin Solveig Valsdottir, Kronprinzessin Astrid und Hochmeisterin Ragna Glutherz besiegeln die Vereinigung der drei Menschenfraktionen; du steigst zum Bannerjarl auf.
 3. **Die Flotte gen Norden** (Salzwacht / Perlvik): Admiral Knut Salzhand rüstet in Salzwacht und Perlvik die größte Armada der Menschen für die Überfahrt.
 
-### Akt 5 „Die Flotte gen Norden“ (Stufe 19–20)
+### Akt 5 „Über das Innere Meer“ (Stufe 19–20)
 Perlvik (Kriegsrat) -> Starthafen der Route -> frei wählbarer Kontinent
+
+> Änderung Henry (18. 11. 2026): Bei Gemini „Die Flotte gen Norden“. Das Ziel ist frei wählbar, darum heißt der Akt wie bei Kronreich und Orden.
 
 1. **Kriegsrat und Auslaufen der Armada** (Perlvik): Im Haupthafen Perlvik tagt der letzte Kriegsrat der vereinten Menschen. Hier wählst du das Ziel der Armada: die Elfen im Osten, die Orks im Südwesten oder die Zwerge im Südosten, jeweils als Bündnis oder um sie zu unterwerfen, oder als extrem schweren Weg die Untoten im hohen Norden. Danach verlegt die Flotte in den Starthafen ihrer Route und läuft dort aus: Zollholm für die Elfen (M53) und die Zwerge (M52, M55, M57), Westvik oder Sandvik für die Orks (M09, M06, M02, M05), Tranvik (M50, M51) oder Nordwacht (M13) für die Untoten.
    > Änderung Henry (18. 11. 2026): Kriegsrat mit Zielwahl im Haupthafen, Abfahrt aus dem echten Starthafen der Route.

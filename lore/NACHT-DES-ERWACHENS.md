@@ -89,7 +89,7 @@ Seit 18. 11. 2026 nach Geminis Aufbau, wie beim Kronreich und beim Orden (Einzel
 2. Akt 2/3, Die Kronschuld (freie Reihenfolge; erster Zweig Stufe 6–10, zweiter 11–15): Korn gegen Schuldscheine in Grenzmarkt und Haraldstad, Verhandlung mit Astrid in Kronhall, Kornwagen an die Küste.
 3. Akt 2/3, Gold und Eisen (freie Reihenfolge): Über Wachtfeuer und Lichtheim nach Brandstein, Schwefel für die Schiffskanonen, Pakt am Glutberg. Danach zusätzlich zur Klassen-Spezialisierung „Schwarzpulver-Armada“ oder „Goldene Gilde“.
 4. Akt 4, Das Alte Reich & Der Bleiche Skalde (Stufe 16–18, enthält die Volksquest): Erzpriester Thorvald wird als Bleicher Skalde entlarvt. Das Große Thing, der Held wird Bannerjarl.
-5. Akt 5, Die Flotte gen Norden (Stufe 19–20): Kriegsrat in Perlvik mit freier Wahl des Ziels, dann Abfahrt aus dem Starthafen der Route. Ende von Kapitel 1.
+5. Akt 5, Über das Innere Meer (Stufe 19–20, bei Gemini „Die Flotte gen Norden“): Kriegsrat in Perlvik mit freier Wahl des Ziels, dann Abfahrt aus dem Starthafen der Route. Ende von Kapitel 1.
 
 Die frühere Aktfolge (Akt 3 „Der Handel mit den Grünen Bannern“) entfällt. Die Kreuzung mit den Grünen Bannern (deren Akt 2 „Der Grünmarkt“) hat damit auf Seiten der Häfen keinen Akt mehr; das wird mit den Ork-Quests geklärt.
 

@@ -95,7 +95,7 @@ const startpunkte = (() => {
         text: "Im ersten Licht siehst du Perlvik über dem Wasser rauchen. Die Elfenhändler bedanken sich leise. Die Gilde wird wissen wollen, wer das Gildenhaus angezündet hat und wohin die Schriften gebracht wurden.",
       },
       // Akt 2 und 3 in freier Reihenfolge (Gemini-Aufbau, Henry 18. 11. 2026, lore/quests/HAEFEN.md).
-      akte: ["Die Zollinseln", "Die Kronschuld", "Gold und Eisen", "Das Alte Reich & Der Bleiche Skalde", "Die Flotte gen Norden"],
+      akte: ["Die Zollinseln", "Die Kronschuld", "Gold und Eisen", "Das Alte Reich & Der Bleiche Skalde", "Über das Innere Meer"],
     },
     orden: {
       ort: "Aschenkloster", volk: "menschen", prolog: "Die Nacht der kalten Feuer", motto: "Solange die Flamme brennt",

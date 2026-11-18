@@ -337,7 +337,7 @@ const kampf = (() => {
       ["Akt 5 Über das Innere Meer", "19–20", "19–20"]],
     haefen: [["Prolog", "1–3", "1–2"], ["Akt 1 Die Zollinseln", "1–5", "1–5"], ["Akt 2/3 erster Zweig (Kronreich oder Orden)", "6–10", "6–10"],
       ["Akt 2/3 zweiter Zweig (der andere)", "11–15", "11–15"], ["Akt 4 Das Alte Reich & Der Bleiche Skalde (mit Volksquest)", "16–18", "16–18"],
-      ["Akt 5 Die Flotte gen Norden", "19–20", "19–20"]],
+      ["Akt 5 Über das Innere Meer", "19–20", "19–20"]],
   };
 
   // Gegner für kommende Quests. Werte ergeben sich aus gegnerWerte(rang, stufe).

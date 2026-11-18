@@ -324,7 +324,8 @@ const haefen = {
     "haefen_act5/1": kriegsratSchritt("Perlvik"),
   },
   aktAenderungen: {
-    haefen_act5: { ort: "Perlvik (Kriegsrat) -> Starthafen der Route -> frei wählbarer Kontinent" },
+    haefen_act5: { titel: "Über das Innere Meer", ort: "Perlvik (Kriegsrat) -> Starthafen der Route -> frei wählbarer Kontinent",
+      vermerk: "Änderung Henry (18. 11. 2026): Bei Gemini „Die Flotte gen Norden“. Das Ziel ist frei wählbar, darum heißt der Akt wie bei Kronreich und Orden." },
   },
   kriegsrat: ["perlvik"],
   prologText: "Herbst 612 n. E., die Nacht des Erwachens: Ein Schmugglerschiff aus dem Norden läuft in Perlvik ein. Im Laderaum " +
