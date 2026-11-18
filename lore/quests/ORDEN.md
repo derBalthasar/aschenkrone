@@ -9,7 +9,7 @@ Stand: 18. 11. 2026. Grundlage ist die Ausarbeitung von Gemini in drei Teilen (Q
 4. Akt 5 heißt **„Über das Innere Meer“** wie beim Kronreich.
 5. Der Korntreck geht von Kronhall über **P02 zurück nach Eiswacht**, also wirklich über den Eispass.
 
-**Weitere Prüfvermerke:** brandstein_q04 nennt S29, Grenzmarkt liegt aber erst hinter Sigrunsheim (S29, dann S45). Die Dornenklingen haben in ihrem Akt 3 „Klinge und Flamme“ noch eine Kreuzung mit dem früheren Orden-Akt 4 „Die Elfen am Weltenbaum“, den es nach Geminis Aufbau nicht mehr gibt (wird mit den Elfen-Quests geklärt).
+**Weitere Änderung Henry (18. 11. 2026):** brandstein_q04 nennt jetzt den ganzen Weg nach Grenzmarkt (S29, dann S45); der Held fängt die Schmuggler auf S29 ab. **Prüfvermerk:** Die Dornenklingen haben in ihrem Akt 3 „Klinge und Flamme“ noch eine Kreuzung mit dem früheren Orden-Akt 4 „Die Elfen am Weltenbaum“, den es nach Geminis Aufbau nicht mehr gibt (wird mit den Elfen-Quests geklärt).
 
 | Teil | Stand im Spiel |
 | --- | --- |
@@ -128,7 +128,7 @@ Nordwacht / Glutvik -> Seewege -> frei wählbarer Kontinent
 - **Schwefel für das heilige Feuer** (Fraktion): Sichere den Transport von reinem Schwefel aus der Schwefelgrube für die Runenschmieden. Lohn: +7 Glaube, 30 Silber. Gegner: Stollenkriecher. Wege: D30 Brandstein – Schwefelgrube.
 - **Kohle aus Feuerhof** (Dorf-Verbindung): Verteidige die Köhler von Feuerhof gegen Wegelagerer an der Südgrenze. Lohn: 30 Silber, +5 Glaube. Gegner: Wegelagerer. Wege: D29 Brandstein – Feuerhof.
 - **Zollstreit mit Eikmark** (Kaltfrieden (Kronreich)): Auf der Grenzstraße S01 blockieren Kronreich-Wachen eine Lieferung Runenerz. Lohn: 40 Silber, Kaltfrieden-Lore. Wege: S01 Eikmark – Brandstein.
-- **Pulverschmuggel nach Grenzmarkt** (Kaltfrieden (Häfen)): Schmuggler wollen Schwefel aus Brandstein über die Bergpfade an die Freien Häfen verkaufen. Lohn: 45 Silber, +4 Glaube. Gegner: Schmuggler. Wege: S29 Brandstein – Sigrunsheim. *Prüfen: S29 führt nur bis Sigrunsheim. Nach Grenzmarkt geht es von dort über S45 weiter.*
+- **Pulverschmuggel nach Grenzmarkt** (Kaltfrieden (Häfen)): Schmuggler wollen Schwefel aus Brandstein über S29 und weiter über S45 an die Freien Häfen in Grenzmarkt verkaufen. Fang sie auf S29 ab, bevor sie Sigrunsheim erreichen. Lohn: 45 Silber, +4 Glaube. Gegner: Schmuggler. Wege: S29 Brandstein – Sigrunsheim, S45 Sigrunsheim – Grenzmarkt. *Änderung Henry (18. 11. 2026): Bei Gemini nur S29. Nach Grenzmarkt führt S29 bis Sigrunsheim und dann S45.*
 - **Die erloschenen Öfen** (Kult-Spur): Acht Kultisten sabotieren die Schmelzöfen von Brandstein, damit keine Runenwaffen mehr geschmiedet werden können. Lohn: Untoten-Bedrohung -3, Glutklinge. Gegner: Kultisten.
 - **Die Tiefe der Zwerge** (Weltkonflikt (Zwerge)): Ein alter Runenmeister erzählt, wie die Zwerge im Südosten einst den Orden das Runenschmieden lehrten, bevor der Streit um die Tiefenglut ausbrach. Lohn: Welt-Lore, 30 Silber.
 - **Glutwurm im Schwefelschacht** (Nacht des Erwachens): Nach dem Ausbruch des Mutterbergs dringt Hitze aus der Tiefe, und ein Glutwurm bedroht die Grube. Lohn: 55 Silber, Glutpanzer-Rüstung. Gegner: Glutwurm. Wege: D30 Brandstein – Schwefelgrube.

@@ -127,6 +127,8 @@ test("Fraktionsreihe Orden folgt Geminis Aufbau, mit Henrys Änderungen", () => 
   const treck = reihe.akte.find((akt) => akt.id === "orden_branch_kronreich").schritte[2];
   assert.match(treck.text, /P02/);
   assert.doesNotMatch(treck.text, /S01|S04/);
+  const brandstein = D.orden.orte.brandstein.auftraege.find((q) => q.id === "brandstein_q04");
+  assert.deepEqual(brandstein.wege, ["S29", "S45"]);
 });
 
 test("Gebietsstufe hängt von der Fraktion des Helden ab", () => {

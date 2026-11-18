@@ -185,12 +185,14 @@ const orden = {
   teil2: ["orden-teil2a-nebenquests.json", "orden-teil2b-nebenquests.json"],
   hinweise: {
     glutberg_q10: "Änderung Henry (18. 11. 2026): Skarn der Weiße Bär bleibt das Alphatier von Eiswacht. Glutberg bekommt die Mutter der Tiefen, so kommt jedes Alphatier des Ordens einmal vor.",
-    brandstein_q04: "Prüfen: S29 führt nur bis Sigrunsheim. Nach Grenzmarkt geht es von dort über S45 weiter.",
+    brandstein_q04: "Änderung Henry (18. 11. 2026): Bei Gemini nur S29. Nach Grenzmarkt führt S29 bis Sigrunsheim und dann S45.",
     aschenkloster_q10: "Änderung Henry (18. 11. 2026): Bei Gemini hieß er Bruder Bjarne Eisenrun. Bjarne ist schon Ser Bjarne vom Eispass.",
     brandstein_q10: "Änderung Henry (18. 11. 2026): Bei Gemini hieß sie Solveig Gluthand. Solveig ist schon Thingsprecherin Solveig Valsdottir.",
   },
   // Henry, 18. 11. 2026: Glutberg bekommt statt eines zweiten Skarn die Mutter der Tiefen (Bestiarium „Ordensland“).
   ersatz: {
+    brandstein_q04: { description: "Schmuggler wollen Schwefel aus Brandstein über S29 und weiter über S45 an die Freien Häfen " +
+      "in Grenzmarkt verkaufen. Fang sie auf S29 ab, bevor sie Sigrunsheim erreichen.", roads: ["S29", "S45"] },
     glutberg_q10: { title: "Alphatier: Die Mutter der Tiefen",
       description: "Seit dem Beben im Süden kriechen Stollenkriecher aus den Felsspalten unter dem Gipfel. Pilger in der Herberge " +
         "flüstern von ihrer Königin, der Mutter der Tiefen, die ganze Minen leert. Steig in die Spalten unter dem Glutberg und töte sie.",
