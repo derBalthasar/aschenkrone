@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Aschenkrone · Pixelfiguren</title>
+    <link rel="stylesheet" href="../../bestiarium/stil.css" />
+    <link rel="stylesheet" href="../stil.css" />
+    <script defer src="../klassen.js"></script>
+    <script defer src="../pixelkampf.js"></script>
+    <script defer src="figuren.js"></script>
+  </head>
+  <body>
+    <main class="pixel-gallery">
+      <header>
+        <p class="wordmark">Aschenkrone</p>
+        <h1>Klassen und Völker in Pixeln</h1>
+        <a href="../../index.html">Zum Spiel</a> ·
+        <a href="index.html">Zur Kampfdemo</a>
+      </header>
+      <p>
+        Fünf Völker, 15 Fraktionen und 90 Fraktionsklassen. Wähle eine Figur, um
+        ihren Angriff auf der Bühne anzusehen. Im Spiel wird ihre angelegte
+        Ausrüstung verwendet.
+      </p>
+      <div class="pixel-gallery-filters">
+        <label>Fraktion<select id="faction"></select></label>
+        <label
+          >Aussehen<select id="sex">
+            <option value="frau">Weiblich</option>
+            <option value="mann">Männlich</option>
+          </select></label
+        >
+        <label
+          >Variante<select id="variant">
+            <option value="0">1</option>
+            <option value="1">2</option>
+            <option value="2">3</option>
+            <option value="3">4</option>
+          </select></label
+        >
+      </div>
+      <div id="stage"></div>
+      <p id="selection" role="status">Wähle eine Klasse.</p>
+      <div id="figures" class="pixel-gallery-grid"></div>
+    </main>
+  </body>
+</html>

@@ -25,6 +25,12 @@
   let animating = false;
   let lastBattleMessages = [];
   const battleStepMs = 248;
+  let pixelBattle = null;
+  let pixelSettings = { speed: 1, motion: true };
+  try {
+    const saved = JSON.parse(localStorage.getItem("aschenkrone.pixelkampf") ?? "null");
+    if (saved && Number.isInteger(saved.speed) && saved.speed >= 1 && saved.speed <= 5 && typeof saved.motion === "boolean") pixelSettings = saved;
+  } catch { /* Ohne lokalen Speicher gelten die Standardwerte. */ }
   let editingLegacy = false;
   const pointControls = new Map();
   const skillControls = new Map();
@@ -814,8 +820,16 @@
   }
 
   async function quickUse(index) {
-    const next = rules.quickUse(state, index, selectedAlly());
-    if (next !== state) update(next);
+    if (animating) return;
+    const previous = state;
+    const events = [];
+    const supply = rules.belt(previous)[index];
+    const next = rules.quickUse(previous, index, selectedAlly(), events);
+    if (next === previous) return;
+    if (previous.combat && events.length) {
+      if (el("inventory-hub").open) el("inventory-hub").close();
+      await playBattleEvents(previous, next, events, "herb", supply);
+    } else update(next);
   }
 
   function itemTile(id, count) {
@@ -1623,6 +1637,7 @@
   }
 
   function renderBattle(content) {
+    pixelBattle?.destroy();
     const battlefield = element("section");
     battlefield.className = "battlefield";
     battlefield.setAttribute("aria-label", "Kampfübersicht");
@@ -1721,6 +1736,7 @@
       card.addEventListener("click", () => {
         if (animating) return;
         enemyTarget = enemy.id;
+        pixelBattle?.select(enemy.id);
         for (const entry of enemies.children) entry.setAttribute("aria-pressed", Number(entry.dataset.enemy) === enemyTarget);
         summary.textContent = "Ziel: " + enemy.name;
       });
@@ -1740,7 +1756,33 @@
     for (const message of lastBattleMessages) messages.append(element("li", message));
     log.append(messages);
     log.hidden = !lastBattleMessages.length;
-    battlefield.append(header, sequence, allyPicker("Kampf"), group, opponents, summary, announcement, log);
+    battlefield.append(header);
+    const allies = rules.allies(state).map(ally => {
+      const hero = ally.id === "hero";
+      const member = hero ? null : world.companions[ally.id];
+      const gear = hero ? state.equipment : rules.memberEquipment(state, ally.id);
+      // Begleiter ohne Volksangabe sind laut Gruppenregeln Menschen. Magische
+      // Rollen verwenden den menschlichen Zauberstil, ohne ihre Spieldaten zu ändern.
+      const faction = hero ? state.faction : member.faction ??
+        (member.klasse === "magier" || member.klasse === "heiler" && ally.id !== "feldscherin" ? "orden" : "kronreich");
+      const look = pixelCombat.appearance({ faction, role: hero ? state.role : member.klasse,
+        volk: hero ? klassen.fraktionen[state.faction].volk : member.volk ?? "menschen",
+        weapon: hero ? rules.weapon(state) : gear.weapon || undefined, armor: gear.armor, offhand: gear.offhand, head: gear.head,
+        variant: hero ? state.variant : companionPortrait(ally.id)[1],
+        appearance: hero ? state.appearance : companionPortrait(ally.id)[0].startsWith("frau") ? "frau" : "mann", special: hero && Boolean(state.build.spez), master: hero && Boolean(state.build.meister) });
+      return { id: ally.id, name: ally.name, hp: ally.health, max: ally.max, look };
+    });
+    pixelBattle = pixelCombat.makeScene(battlefield, { allies,
+      enemies: targets.map(enemy => ({ id: enemy.id, name: enemy.name, hp: enemy.health, max: enemy.max, creature: state.combat.id })),
+      ...pixelSettings, selected: enemyTarget,
+      onTarget(id) { if (!animating) opponents.querySelector('[data-enemy="' + id + '"]')?.click(); },
+      onAlly(id) { if (!animating) { allyTarget = id; render(); } },
+    });
+    pixelBattle.root.addEventListener("pixel-settings", event => {
+      pixelSettings = event.detail;
+      try { localStorage.setItem("aschenkrone.pixelkampf", JSON.stringify(pixelSettings)); } catch { /* Optionaler Einstellungsspeicher. */ }
+    });
+    battlefield.append(sequence, allyPicker("Kampf"), group, opponents, summary, announcement, log);
     content.append(battlefield);
   }
 
@@ -1750,6 +1792,10 @@
     const events = [];
     const next = rules.strike(previous, action, Math.random, item, enemyTarget, events, selectedAlly());
     if (next === previous) return;
+    await playBattleEvents(previous, next, events, action, item);
+  }
+
+  async function playBattleEvents(previous, next, events, action, item) {
     lastBattleMessages = events.map(event => battleMessage(event, previous));
     if (!events.length || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       update(next);
@@ -1760,8 +1806,12 @@
     state = next;
     save();
     const panel = el("play");
-    panel.inert = true;
+    // Die Spielaktionen sperren, die Tempo- und Weiter-Steuerung aber bedienbar halten.
+    const locked = Array.from(panel.querySelectorAll("button, input, select, a, summary"))
+      .filter(control => !pixelBattle.root.contains(control)).map(control => [control, control.inert]);
+    for (const [control] of locked) control.inert = true;
     panel.setAttribute("aria-busy", "true");
+    pixelBattle.root.scrollIntoView({ block: "start", behavior: "smooth" });
     try {
       for (const event of events) {
         const retaliates = ["retaliate", "afflict"].includes(event.kind);
@@ -1778,26 +1828,36 @@
         panel.querySelector(".battle-announcement").textContent = battleMessage(event, previous);
         actor?.classList.add("is-acting");
         actor?.classList.add(retaliates ? "enemy-lunge" : event.kind === "cover" ? "fighter-cover" : "fighter-lunge");
+        // Dieselben Regelereignisse treiben die Pixelbühne und die Karten an.
+        // Jedes Ergebnis bleibt bis „Weiter“ stehen; es wird nicht erneut gewürfelt.
         let marker;
-        if (target && event.value > 0) {
-          const healing = ["heal", "revive"].includes(event.kind);
-          if (!healing) target.classList.add("fighter-hit");
-          marker = element("span", (healing ? "+" : "−") + event.value);
-          marker.className = "hit-value";
-          if (healing) marker.classList.add("healing-value");
-          marker.setAttribute("aria-hidden", "true");
-          target.append(marker);
-          const meter = target.querySelector("progress");
-          if (meter) meter.value = Math.min(meter.max, Math.max(0, meter.value + (healing ? event.value : -event.value)));
-        }
-        await new Promise(resolve => setTimeout(resolve, battleStepMs));
+        await pixelBattle.animate(event, event.actor === "hero" ? action : "support", event.actor === "hero" && action === "herb" ? item : undefined, true, () => {
+          if (target && event.value > 0) {
+            const healing = ["heal", "revive"].includes(event.kind);
+            if (!healing) target.classList.add("fighter-hit");
+            marker = element("span", (healing ? "+" : "−") + event.value);
+            marker.className = "hit-value";
+            if (healing) marker.classList.add("healing-value");
+            marker.setAttribute("aria-hidden", "true");
+            target.append(marker);
+            const meter = target.querySelector("progress");
+            if (meter) {
+              meter.value = Math.min(meter.max, Math.max(0, meter.value + (healing ? event.value : -event.value)));
+              const label = target.querySelector(".fighter-vitals small");
+              if (label) label.textContent = meter.value + " / " + meter.max + " LP";
+              if (target.dataset.actor) target.classList.toggle("is-fallen", !meter.value);
+              if (event.kind === "revive") target.querySelector(".ally-status")?.remove();
+            }
+          }
+        });
+        await new Promise(resolve => setTimeout(resolve, battleStepMs / pixelSettings.speed));
         actor?.classList.remove("is-acting", "enemy-lunge", "fighter-cover", "fighter-lunge");
         target?.classList.remove("fighter-hit");
         marker?.remove();
       }
     } finally {
       animating = false;
-      panel.inert = false;
+      for (const [control, inert] of locked) control.inert = inert;
       panel.removeAttribute("aria-busy");
       render();
       showTurnStatus(previous, next);

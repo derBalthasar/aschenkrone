@@ -22,6 +22,8 @@ jobs:
           node --check spiel/klassen.js
           node --check spiel/faehigkeiten.js
           node --check spiel/kampf.js
+          node --check spiel/pixelkampf.js
+          node --check spiel/pixelkampf/figuren.js
           node --check spiel/welt.js
           node --check spiel/regeln.js
           node --check spiel/spiel.js
@@ -34,4 +36,5 @@ jobs:
         run: |
           node --test spiel/regeln.test.cjs
           node --test spiel/kampf.test.cjs
+          node --test spiel/pixelkampf.test.cjs
           node --test spiel/karte.test.cjs
