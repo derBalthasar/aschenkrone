@@ -20,6 +20,17 @@ const nebenquests = (() => {
     return stufen ? stufen[Math.min(Math.max(0, abgeschlosseneZweige | 0), stufen.length - 1)] : null;
   };
 
+  // Gebietsstufe hängt von der Fraktion des Helden ab (Henry, 18. 11. 2026): Im Land der eigenen Fraktion gilt die Stufe
+  // des Aushangs (Startgebiet), im Land einer Schwesterfraktion die Stufe des Schwester-Zweigs, in dem der Held dorthin
+  // kommt. Für Helden anderer Völker bleibt die Gebietsstufe aus dem Bestiarium (null).
+  const stufenFuer = (id, heldFraktion) => {
+    const eintrag = fuerOrt(id);
+    if (!eintrag) return null;
+    if (eintrag.fraktion === heldFraktion) return eintrag.stufen;
+    if (D[heldFraktion]?.volk && D[heldFraktion].volk === D[eintrag.fraktion].volk) return D[heldFraktion].reihe.zweigStufen.join(" oder ");
+    return null;
+  };
+
   // „S16“ → „Kornwik – Kronhall“, unbekannte Kennungen bleiben leer.
   const wegName = (kennung) => {
     const ende = D.wegKennungen[kennung];
@@ -27,6 +38,6 @@ const nebenquests = (() => {
   };
   const wegeImText = (text) => [...new Set(String(text).match(/\b[SPMD]\d\d\b/g) ?? [])].filter((k) => D.wegKennungen[k]);
 
-  return { daten: D, fuerOrt, reihe, zweigStufen, wegName, wegeImText };
+  return { daten: D, fuerOrt, reihe, zweigStufen, stufenFuer, wegName, wegeImText };
 })();
 if (typeof module !== "undefined") module.exports = nebenquests;

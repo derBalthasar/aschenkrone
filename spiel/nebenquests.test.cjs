@@ -100,7 +100,7 @@ test("Fraktionsreihe Kronreich folgt Geminis Aufbau", () => {
   assert.deepEqual(akte, reihe.akte.map((akt) => akt.titel));
 });
 
-test("Fraktionsreihe Orden folgt Geminis Aufbau, Begleiter und offene Fragen sind vermerkt", () => {
+test("Fraktionsreihe Orden folgt Geminis Aufbau, mit Henrys Änderungen", () => {
   const reihe = nebenquests.reihe("orden");
   assert.deepEqual(reihe.akte.map((akt) => akt.nr), ["1", "2/3", "2/3", "4", "5"]);
   assert.equal(reihe.prolog.titel, "Die Nacht der kalten Feuer");
@@ -119,21 +119,35 @@ test("Fraktionsreihe Orden folgt Geminis Aufbau, Begleiter und offene Fragen sin
   const quelle = fs.readFileSync(path.join(root, "spiel/startpunkte.js"), "utf8");
   const akte = JSON.parse(quelle.match(/akte: (\["Die flackernde Flamme"[^\]]*\])/)[1]);
   assert.deepEqual(akte, reihe.akte.map((akt) => akt.titel));
-  // Offene Fragen an Henry (18. 11. 2026) bleiben sichtbar, bis er entschieden hat.
-  for (const id of ["glutberg_q10", "brandstein_q04", "aschenkloster_q10", "brandstein_q10"]) {
-    const ort = id.split("_")[0];
-    assert.ok(D.orden.orte[ort].auftraege.find((q) => q.id === id).hinweis, id);
-  }
+  // Henrys Antworten vom 18. 11. 2026 (alle fünf Vorschläge angenommen).
+  assert.equal(reihe.akte.at(-1).titel, "Über das Innere Meer");
+  assert.deepEqual(reihe.begleiter.map((b) => b.name), ["Bruder Halvar Eisenrun", "Runenpriesterin Gunhild Gluthand", "Späher Malte Sturmauge"]);
+  const texte = JSON.stringify([reihe.akte, Object.values(D.orden.orte).flatMap((o) => o.auftraege.map((q) => [q.titel, q.text, q.lohn]))]);
+  assert.ok(!texte.includes("Bjarne Eisenrun") && !texte.includes("Solveig Gluthand"));
+  const treck = reihe.akte.find((akt) => akt.id === "orden_branch_kronreich").schritte[2];
+  assert.match(treck.text, /P02/);
+  assert.doesNotMatch(treck.text, /S01|S04/);
 });
 
-test("Alphatiere des Ordens stammen aus dem Bestiarium", () => {
+test("Gebietsstufe hängt von der Fraktion des Helden ab", () => {
+  assert.equal(nebenquests.stufenFuer("glutberg", "orden"), "1-5");
+  assert.equal(nebenquests.stufenFuer("glutberg", "kronreich"), "6-10 oder 11-15");
+  assert.equal(nebenquests.stufenFuer("kronhall", "orden"), "6-10 oder 11-15");
+  assert.equal(nebenquests.stufenFuer("kronhall", "kronreich"), D.kronreich.orte.kronhall.stufen);
+  assert.equal(nebenquests.stufenFuer("glutberg", "dornenklingen"), null);
+});
+
+test("Alphatiere des Ordens stammen aus dem Bestiarium und kommen je einmal vor", () => {
   const bestiarium = fs.readFileSync(path.join(root, "bestiarium/daten.js"), "utf8");
+  const namen = [];
   for (const eintrag of Object.values(D.orden.orte)) {
     for (const auftrag of eintrag.auftraege.filter((q) => q.art === "Alphatier-Jagd")) {
       const name = auftrag.titel.replace("Alphatier: ", "");
       assert.ok(bestiarium.includes(name.replace("Skarn der", "Skarn, der")), auftrag.id + ": " + name);
+      namen.push(name);
     }
   }
+  assert.deepEqual(namen.sort(), ["Der Letzte Mammut", "Die Mutter der Tiefen", "Skarn der Weiße Bär"]);
 });
 
 test("die erzeugte Datei entspricht Quelle und Skript", () => {

@@ -2210,7 +2210,8 @@
     if (!eintrag?.auftraege.length) return null;
     const box = element("details");
     box.className = "welt-aushang";
-    box.append(element("summary", "Aushang in " + ort.name + " · " + eintrag.auftraege.length + " Aufträge · Stufe " + eintrag.stufen));
+    const stufen = nebenquests.stufenFuer(ort.id, state.faction);
+    box.append(element("summary", "Aushang in " + ort.name + " · " + eintrag.auftraege.length + " Aufträge" + (stufen ? " · Stufe " + stufen : "")));
     const stand = element("p", eintrag.stand + (eintrag.weg ? " Dorfweg " + eintrag.weg + ": " + nebenquests.wegName(eintrag.weg) + "." : ""));
     stand.className = "welt-aushang-stand";
     box.append(stand);

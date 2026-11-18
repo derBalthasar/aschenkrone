@@ -53,31 +53,34 @@ const wegKennungen = {
   D45: ["wachtfeuer", "holzfaellerby"], D46: ["wachtfeuer", "wachthof"],
 };
 
-const korrekturen = [["Irrglühte", "Irrglut"]];
+// Henry, 18. 11. 2026: Die Orden-Begleiter heißen anders, weil Bjarne (Ser Bjarne vom Eispass) und Solveig
+// (Thingsprecherin Solveig Valsdottir) schon vergeben sind.
+const korrekturen = [["Irrglühte", "Irrglut"], ["Bjarne Eisenrun", "Halvar Eisenrun"], ["Solveig Gluthand", "Gunhild Gluthand"]];
 const text = (wert) => korrekturen.reduce((s, [alt, neu]) => s.split(alt).join(neu), wert);
 const lies = (datei) => JSON.parse(fs.readFileSync(path.join(root, "quellen/gemini", datei), "utf8"));
 // Dorfnamen sind nicht weltweit eindeutig (Ziegenalm gibt es zweimal), daher über die Stadt auflösen.
 const dorfId = (name, stadtId) => Object.values(knoten.alle).find((o) => o.name === name && o.stadt === stadtId)?.id;
 
 // Ein Auftrag. Neue Gemini-Lieferungen nennen Wege (roads) und Gegner (enemies) eigens; beides wird übernommen.
-function auftrag(q, art, hinweise) {
+function auftrag(roh, art, hinweise, ersatz = {}) {
+  const q = { ...roh, ...(ersatz[roh.id] ?? {}) };
   for (const k of q.roads ?? []) if (!wegKennungen[k]) throw new Error(q.id + ": unbekannter Weg " + k);
   return { id: q.id, titel: text(q.title), art: text(q.category ?? art), text: text(q.description), lohn: text(q.reward),
     ...(q.roads?.length ? { wege: q.roads } : {}), ...(q.enemies?.length ? { gegner: q.enemies.map(text) } : {}),
     ...(q.openPoint ? { offen: q.openPoint } : {}), ...(hinweise[q.id] ? { hinweis: hinweise[q.id] } : {}) };
 }
 
-function orteAus(quelle, hinweise) {
+function orteAus(quelle, hinweise, ersatz) {
   const orte = {};
   for (const stadt of quelle.cities) {
     const id = knoten.nachName[stadt.city];
     if (!id) throw new Error("Unbekannte Stadt: " + stadt.city);
-    orte[id] = { stufen: stadt.levelRange, auftraege: stadt.sideQuests.map((q) => auftrag(q, undefined, hinweise)) };
+    orte[id] = { stufen: stadt.levelRange, auftraege: stadt.sideQuests.map((q) => auftrag(q, undefined, hinweise, ersatz)) };
     for (const dorf of stadt.villages) {
       const id2 = dorfId(dorf.village, id);
       if (!id2) throw new Error("Unbekanntes Dorf: " + dorf.village + " bei " + stadt.city);
       orte[id2] = { stufen: stadt.levelRange, weg: dorf.road, ertrag: dorf.yield,
-        auftraege: dorf.quests.map((q) => auftrag(q, "Dorfauftrag", hinweise)) };
+        auftraege: dorf.quests.map((q) => auftrag(q, "Dorfauftrag", hinweise, ersatz)) };
     }
   }
   return orte;
@@ -123,7 +126,7 @@ function reiheAus(teil1, f) {
     begleiter: teil1.companions.map((c) => {
       const klasse = f.begleiterKlassen?.[c.id] ?? c.class;
       if (!klasse) throw new Error("Begleiter ohne Klasse: " + c.name);
-      return { id: c.id, name: c.name, rolle: c.role, klasse, ort: knoten.nachName[c.recruitLocation],
+      return { id: c.id, name: text(c.name), rolle: c.role, klasse, ort: knoten.nachName[c.recruitLocation],
         akt: c.recruitAct, auftrag: c.questId, faehigkeit: c.ability, ...(f.begleiterVermerke?.[c.id] ? { vermerk: f.begleiterVermerke[c.id] } : {}) };
     }),
     geheim: f.geheim,
@@ -176,28 +179,38 @@ const kronreich = {
 
 // ---------- Orden der Flamme ----------
 // Gemini, 18. 11. 2026: Hauptquest und Nebenquests Teil A (6 Städte) und Teil B (5 Städte).
-// Offene Fragen an Henry stehen als Prüfvermerk am Auftrag oder Schritt.
+// Henry hat am 18. 11. 2026 alle fünf Vorschläge angenommen (Skarn, Gebietsstufe, Namen, Akt-5-Titel, Korntreck).
 const orden = {
   teil1: "orden-teil1-hauptquest.json",
   teil2: ["orden-teil2a-nebenquests.json", "orden-teil2b-nebenquests.json"],
   hinweise: {
-    glutberg_q10: "Offene Frage an Henry: Skarn der Weiße Bär ist auch das Alphatier von Eiswacht (eiswacht_q10). Vorschlag: Skarn bleibt in Eiswacht (Frostklippen), Glutberg bekommt die Mutter der Tiefen.",
-    eiswacht_q10: "Offene Frage an Henry: Skarn steht auch in Glutberg (glutberg_q10).",
+    glutberg_q10: "Änderung Henry (18. 11. 2026): Skarn der Weiße Bär bleibt das Alphatier von Eiswacht. Glutberg bekommt die Mutter der Tiefen, so kommt jedes Alphatier des Ordens einmal vor.",
     brandstein_q04: "Prüfen: S29 führt nur bis Sigrunsheim. Nach Grenzmarkt geht es von dort über S45 weiter.",
-    aschenkloster_q10: "Offene Frage an Henry: Der Name Bjarne ist schon vergeben (Ser Bjarne vom Eispass, Marschall in Eiswacht). Vorschlag: Bruder Halvar Eisenrun.",
-    brandstein_q10: "Offene Frage an Henry: Der Name Solveig ist schon vergeben (Thingsprecherin Solveig Valsdottir). Vorschlag: Runenpriesterin Gunhild Gluthand.",
+    aschenkloster_q10: "Änderung Henry (18. 11. 2026): Bei Gemini hieß er Bruder Bjarne Eisenrun. Bjarne ist schon Ser Bjarne vom Eispass.",
+    brandstein_q10: "Änderung Henry (18. 11. 2026): Bei Gemini hieß sie Solveig Gluthand. Solveig ist schon Thingsprecherin Solveig Valsdottir.",
+  },
+  // Henry, 18. 11. 2026: Glutberg bekommt statt eines zweiten Skarn die Mutter der Tiefen (Bestiarium „Ordensland“).
+  ersatz: {
+    glutberg_q10: { title: "Alphatier: Die Mutter der Tiefen",
+      description: "Seit dem Beben im Süden kriechen Stollenkriecher aus den Felsspalten unter dem Gipfel. Pilger in der Herberge " +
+        "flüstern von ihrer Königin, der Mutter der Tiefen, die ganze Minen leert. Steig in die Spalten unter dem Glutberg und töte sie.",
+      roads: [], enemies: ["Die Mutter der Tiefen", "Stollenkriecher"], reward: "65 Silber, Trophäe der Mutter der Tiefen" },
   },
   aenderungen: {
     "orden_branch_kronreich/3": {
-      vermerk: "Offene Frage an Henry: Der Zweig heißt „Korn über den Eispass“, der Treck läuft aber über S04 und S01, nicht über den Eispass. Vorschlag: zurück über P02 nach Eiswacht, passend zur Kronreich-Seite.",
+      ort: "Kronhall / Eiswacht",
+      titel: "Der Korntreck über den Eispass",
+      text: "Du sicherst den Korntreck von Kronhall über Pass P02 zurück nach Eiswacht. Auf dem Pass warten Schnee, Wegelagerer und die Zöllner beider Seiten.",
+      vermerk: "Änderung Henry (18. 11. 2026): Bei Gemini lief der Treck über S04 und S01 nach Brandstein, also nicht über den Eispass. Jetzt passt er zur Kronreich-Seite („Der Zug über den Eispass“).",
     },
     "orden_act4/1": {
       vermerk: "Wie beim Kronreich: Der Bleiche Skalde ist Erzpriester Thorvald und wird in Akt 4 entlarvt (Henry, 18. 11. 2026). In Akt 1 tritt er unerkannt auf.",
     },
   },
   aktAenderungen: {
-    orden_act5: { ort: "Nordwacht / Glutvik -> Seewege -> frei wählbarer Kontinent",
-      vermerk: "Offene Frage an Henry: Nur der Weg zu den Untoten führt über das Nordmeer. Vorschlag: Titel „Über das Innere Meer“ wie beim Kronreich." },
+    orden_branch_kronreich: { ort: "Eiswacht, Kronhall" },
+    orden_act5: { titel: "Über das Innere Meer", ort: "Nordwacht / Glutvik -> Seewege -> frei wählbarer Kontinent",
+      vermerk: "Änderung Henry (18. 11. 2026): Bei Gemini „Über das Nordmeer“. Das Ziel ist frei wählbar, und nur der Weg zu den Untoten führt über das Nordmeer." },
   },
   prologText: "Herbst 612 n. E., die Nacht des Erwachens: Novizenweihe im Aschenkloster, ein gefallener Bruder steht im Kreuzgang " +
     "wieder auf, Kultisten löschen die Wachfeuer von Nordwacht, und am Glutberg flackert die Ewige Flamme. (Zusammenfassung des Prologs im Spiel.)",
@@ -207,11 +220,11 @@ const orden = {
 };
 
 function fraktion(f) {
-  const orte = Object.assign({}, ...f.teil2.map((d) => orteAus(lies(d), f.hinweise)));
+  const orte = Object.assign({}, ...f.teil2.map((d) => orteAus(lies(d), f.hinweise, f.ersatz)));
   for (const id of Object.keys(f.hinweise)) {
     if (!Object.values(orte).some((o) => o.auftraege.some((q) => q.id === id))) throw new Error("Hinweis ohne Auftrag: " + id);
   }
-  return { reihe: reiheAus(lies(f.teil1), f), quelle: f.quelle, stand: f.stand, ...(f.fehlt ? { fehlt: f.fehlt } : {}), orte };
+  return { volk: "menschen", reihe: reiheAus(lies(f.teil1), f), quelle: f.quelle, stand: f.stand, ...(f.fehlt ? { fehlt: f.fehlt } : {}), orte };
 }
 
 const daten = { kronreich: fraktion(kronreich), orden: fraktion(orden), wegKennungen };
