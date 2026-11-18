@@ -23,6 +23,8 @@ jobs:
           node --check spiel/faehigkeiten.js
           node --check spiel/kampf.js
           node --check spiel/welt.js
+          node --check spiel/systeme-daten.js
+          node --check spiel/systeme.js
           node --check spiel/regeln.js
           node --check spiel/spiel.js
           node --check spiel/karte-daten.js
@@ -41,3 +43,4 @@ jobs:
           node --test spiel/karte.test.cjs
           node --test spiel/nebenquests.test.cjs
           node --test spiel/reisekarte.test.cjs
+          node --test spiel/systeme.test.cjs

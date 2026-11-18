@@ -8,7 +8,7 @@ const vm = require("node:vm");
 
 const root = path.join(__dirname, "..");
 const context = vm.createContext({ structuredClone });
-for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/faehigkeiten.js", "spiel/kampf.js", "spiel/startpunkte.js", "spiel/welt.js", "spiel/knoten-daten.js", "spiel/knoten.js", "spiel/nebenquests-daten.js", "spiel/nebenquests.js", "spiel/regeln.js"]) {
+for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/faehigkeiten.js", "spiel/kampf.js", "spiel/startpunkte.js", "spiel/welt.js", "spiel/knoten-daten.js", "spiel/knoten.js", "spiel/nebenquests-daten.js", "spiel/nebenquests.js", "spiel/systeme-daten.js", "spiel/systeme.js", "spiel/regeln.js"]) {
   vm.runInContext(fs.readFileSync(path.join(root, file), "utf8"), context, { filename: file });
 }
 const rules = vm.runInContext("rules", context);
@@ -91,7 +91,7 @@ same(rules.kraft(huskarl), { ausdauer: 10, mana: 0 });
 same(rules.kraft({ ...huskarl, xp: 19000 }), { ausdauer: 19, mana: 0 });
 const priest = rules.create("Tala", "orden", "frau", 1, "magier");
 assert.equal(rules.kraft(priest).mana, 2 * priest.build.fertigkeiten.magie);
-assert.equal(rules.resourceName(priest), "Glaube");
+assert.equal(rules.resourceName(priest), "Nahrung", "Menschen: Vorrat ist Nahrung (Henry, 18. 11. 2026)");
 // Fraktionsressource und Kampfressource sind ein Vorrat von 0 bis 100, Start 42 (Technische Spezifikation).
 assert.equal(priest.ressource, 42);
 
@@ -164,8 +164,8 @@ const legendStart = { ...legend, combat: { ...legend.combat, feinde: [{ ...legen
 const storm = rules.strike(legendStart, "f20", highRoll);
 assert.equal(storm.ressource, legendStart.ressource - 3);
 assert.equal(rules.abilityState(storm, "f20"), "schon genutzt");
-assert.equal(rules.abilityState({ ...legendStart, ressource: 2 }, "f20"), "zu wenig Korn");
-assert.equal(rules.abilityState({ ...legendStart, ressource: 3 }, "f20"), "zu wenig Korn");
+assert.equal(rules.abilityState({ ...legendStart, ressource: 2 }, "f20"), "zu wenig Nahrung");
+assert.equal(rules.abilityState({ ...legendStart, ressource: 3 }, "f20"), "zu wenig Nahrung");
 assert.equal(rules.abilityState({ ...legendStart, ressource: 4 }, "f20"), null);
 // Grundangriff steigt auf den Stufen 4, 8, 12, 16 und 20 um je +1.
 assert.equal(rules.kampfwerte(legend).grundangriff, 5);

@@ -107,7 +107,7 @@ const klassen = (() => {
   const k = (name, spielweise, ressource, a, b) => ({ name, spielweise, ressource, a, b });
   const fraktionen = {
     kronreich: {
-      name: "Kronreich", volk: "menschen", schwierigkeit: "leicht", ressource: "Korn", magie: false,
+      name: "Kronreich", volk: "menschen", schwierigkeit: "leicht", ressource: "Nahrung", magie: false,
       bonus: { strength: 1, mind: -1, presence: 1 },
       profile: { magier: "skalde", heiler: "feldscher" },
       klassen: {
@@ -138,7 +138,7 @@ const klassen = (() => {
       },
     },
     haefen: {
-      name: "Freie Häfen", volk: "menschen", schwierigkeit: "mittel", ressource: "Gold", magie: false,
+      name: "Freie Häfen", volk: "menschen", schwierigkeit: "mittel", ressource: "Nahrung", magie: false,
       bonus: { agility: 1, will: -1, presence: 1 },
       profile: { magier: "pulvermeister", heiler: "feldscher" },
       klassen: {
@@ -169,7 +169,7 @@ const klassen = (() => {
       },
     },
     orden: {
-      name: "Orden der Flamme", volk: "menschen", schwierigkeit: "schwer", ressource: "Glaube", magie: true,
+      name: "Orden der Flamme", volk: "menschen", schwierigkeit: "schwer", ressource: "Nahrung", magie: true,
       bonus: { agility: -1, mind: 1, will: 2, presence: -1 },
       klassen: {
         krieger: k("Flammenritter", "Paladin mit Flammenrunen, Elite gegen Untote",

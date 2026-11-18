@@ -2325,7 +2325,9 @@
     const box = element("div");
     box.className = "welt-meters";
     for (const leiste of rules.weltLeisten(state)) box.append(weltMeter(leiste.name, leiste.wert, 100, leiste.schwelle));
-    box.append(weltMeter(rules.resourceName(state) + " (Vorrat)", state.ressource, rules.vorratMax));
+    box.append(weltMeter(rules.resourceName(state) + (rules.lage(state) ? " (Gepäck)" : " (Vorrat)"), state.ressource, rules.vorratMax));
+    const lage = rules.lage(state);
+    if (lage) box.append(weltMeter("Moral · " + lage.moralStufe.name + (lage.entkraeftet ? " · entkräftet" : ""), lage.moral, 100));
     return box;
   }
 
@@ -2337,7 +2339,11 @@
     if (wert.welke >= 50) lines.push("Welke " + wert.welke + ": Der Weltenbaum wirft sein Laub.");
     if (wert.untote >= 50) lines.push("Untoten-Bedrohung " + wert.untote + ": Der Kult breitet sich aus.");
     if (wert.orks >= 55) lines.push("Ork-Bedrohung " + wert.orks + ": Raubzüge an den Küsten.");
-    if (state.ressource <= 5) lines.push(rules.resourceName(state) + " fast aufgebraucht: Bei 0 zerfällt deine Fraktion. Hol Ertrag aus deinen Dörfern.");
+    const lage = rules.lage(state);
+    if (lage?.entkraeftet) lines.push("Entkräftet: Jede Etappe ohne Nahrung kostet 15 Moral. Bei Nahrung 0 und Moral 0 zerfällt die Gruppe. Hol Nahrung aus dem Kontor oder kaufe welche.");
+    else if (lage && state.ressource <= 5) lines.push("Nahrung fast aufgebraucht: Ohne Nahrung wird die Gruppe entkräftet und verliert Moral. Hol Nahrung aus dem Kontor.");
+    else if (state.ressource <= 5) lines.push(rules.resourceName(state) + " fast aufgebraucht: Bei 0 zerfällt deine Fraktion. Hol Ertrag aus deinen Dörfern.");
+    if (lage?.geaechtet) lines.push("Geächtet bei deiner eigenen Fraktion: kein Handel im Kontor, kein Zehnt, Torzoll an den Stadttoren.");
     return lines;
   }
 
@@ -2356,6 +2362,8 @@
     for (const [label, value] of [["Ort", ort.name], ["Typ", knoten.typNamen[ort.typ] + (ort.hatHafen && ort.typ !== "hafenstadt" ? " mit Hafen" : "")],
       ["Fraktion", fraktion.name + (ort.fraktion === state.faction ? " · eigene" : (state.vertraege ?? []).includes(ort.fraktion) ? " · Vertragspartner" : "")],
       ["Zeit", "Herbst 612 n. E. · Runde " + state.runde], ["Silber", String(state.silver)],
+      ...(rules.lage(state) ? [["Ruf", rules.lage(state).ruf + " · " + rules.lage(state).rang.name],
+        ["Zehnt", rules.lage(state).befreit + " Dörfer befreit · nächster in " + rules.lage(state).naechsterZehnt + " Etappen"]] : []),
       ["Marken", state.marks.length ? String(state.marks.length) : "keine"]]) {
       const item = element("div");
       item.append(element("dt", label), element("dd", value));
@@ -2403,6 +2411,8 @@
       if (rules.handlungHier(state)) button(krise, "Zur Handlung zurückkehren", () => update(rules.zurHandlung(state)), { story: true });
     }
     content.append(krise);
+    const tat = weltTat();
+    if (tat) content.append(tat);
     const offen = weltAuftraege();
     if (offen) content.append(offen);
     const aushang = weltAushang(ort);
@@ -2595,6 +2605,58 @@
     return box;
   }
 
+  // Ausgang eines Auftrags der Menschen: gute Tat, Söldner-Weg, schlechte Tat (Ruf-Datei 2.0).
+  function weltTat() {
+    const wahl = rules.taten(state);
+    if (!wahl.length) return null;
+    const box = element("section");
+    box.className = "welt-krise welt-tat";
+    box.append(element("h3", "Wie endest du den Auftrag?"));
+    for (const t of wahl) {
+      const folgen = ["Ruf " + (t.ruf > 0 ? "+" : "") + t.ruf, t.silber ? "+" + t.silber + " Silber" : "",
+        t.nahrung ? "+" + t.nahrung + " Nahrung" : "", t.befreit ? "befreit die Dörfer der Stadt" : ""].filter(Boolean).join(" · ");
+      button(box, t.name + " · " + folgen, () => update(rules.tatWaehlen(state, t.id)), { story: true });
+      box.append(element("p", t.text));
+    }
+    return box;
+  }
+
+  // Kontor der Menschen: gemeinsames Rohstofflager aller Städte einer Fraktion.
+  function weltKontor(panel) {
+    const info = rules.kontorInfo(state);
+    if (!info) return;
+    panel.append(element("h3", "Kontor · " + info.name + " · Rang " + info.rang.name + " (Ruf " + info.ruf + ")"));
+    panel.append(element("p", "Das Kontor teilen alle Städte von " + info.name + ". Preise: Kauf ×" + info.rang.kauf + ", Verkauf ×" + info.rang.verkauf +
+      (info.rang.handel ? "." : ". Geächtet: kein Handel, Abheben bleibt erlaubt.")));
+    const list = element("div");
+    list.className = "actions trade-list";
+    for (const r of info.rohstoffe) {
+      list.append(element("p", r.name + ": " + r.menge + " im Kontor"));
+      button(list, "1 kaufen · " + r.kauf + " Silber", () => update(rules.kontorHandel(state, r.id, 1, true)), { disabled: Boolean(r.kaufGrund) });
+      button(list, "10 kaufen · " + r.kauf10 + " Silber", () => update(rules.kontorHandel(state, r.id, 10, true)), { disabled: Boolean(r.kauf10Grund) });
+      button(list, "1 verkaufen · +" + r.verkauf + " Silber", () => update(rules.kontorHandel(state, r.id, 1, false)), { disabled: Boolean(r.verkaufGrund) });
+    }
+    panel.append(list);
+    const nahrung = element("div");
+    nahrung.className = "actions";
+    nahrung.append(element("p", "Nahrung im Gepäck: " + state.ressource + " / " + rules.vorratMax + "."));
+    button(nahrung, "5 Nahrung aus dem Kontor nehmen" + (info.abhebenGrund ? " · " + info.abhebenGrund : ""),
+      () => update(rules.nahrungTragen(state, 5, false)), { disabled: Boolean(info.abhebenGrund) });
+    button(nahrung, "5 Nahrung ins Kontor legen" + (info.einlagernGrund ? " · " + info.einlagernGrund : ""),
+      () => update(rules.nahrungTragen(state, 5, true)), { disabled: Boolean(info.einlagernGrund) });
+    panel.append(nahrung);
+    panel.append(element("h3", rules.systeme.daten.kriegskasse.titel));
+    panel.append(element("p", Object.entries(info.kasseBedarf).map(([r, n]) => rules.systeme.daten.rohstoffe[r].name + " " + info.kasse[r] + " / " + n).join(" · ") +
+      (info.kasseVoll ? ". Die Armada kann auslaufen." : ". Die gefüllte Kasse bringt die Armada in Akt 5 über das Meer. Jede Spende +2 Ruf je Einheit.")));
+    const kasse = element("div");
+    kasse.className = "actions";
+    for (const sp of info.spenden) {
+      button(kasse, "5 " + rules.systeme.daten.rohstoffe[sp.id].name + " spenden" + (sp.grund ? " · " + sp.grund : ""),
+        () => update(rules.spenden(state, sp.id, 5)), { disabled: Boolean(sp.grund) });
+    }
+    panel.append(kasse);
+  }
+
   function weltHofstaat(panel, ort) {
     panel.append(element("h3", "Hofstaat und Diplomatie"));
     const vertraege = (state.vertraege ?? []).map(id => klassen.fraktionen[id].name);
@@ -2644,9 +2706,16 @@
     const rastGrund = rules.rastGrund(state);
     panel.append(element("p", "LP " + state.health + " / " + rules.healthLimit(state) + " · Glut " + state.ember + " / " + rules.emberLimit(state) +
       ". Die Rast stellt die ganze Gruppe wieder her."));
-    button(panel, "Rasten · 1 " + rules.resourceName(state) + (rastGrund ? " · " + rastGrund : ""), () => update(rules.rast(state)),
+    const rastKosten = rules.rastKosten(state);
+    button(panel, "Rasten · " + (rastKosten ? rastKosten + " " + rules.resourceName(state) : "frei") + (rastGrund ? " · " + rastGrund : ""), () => update(rules.rast(state)),
       { disabled: Boolean(rastGrund) });
-    if (ort.typ === "dorf") {
+    weltKontor(panel);
+    if (ort.typ === "dorf" && rules.lage(state)) {
+      const frei = (state.befreit ?? []).includes(ort.id);
+      panel.append(element("h3", "Dorf und Zehnt"), element("p", ort.name + " liefert " + ort.ertrag + " an " + knoten.get(ort.stadt).name + ". " +
+        (frei ? "Das Dorf ist befreit und liefert ab Ruf 20 alle " + rules.systeme.daten.zehnt.etappen + " Etappen seinen Zehnt ins Kontor."
+          : "Befreie es über den ersten Auftrag (q01) von " + knoten.get(ort.stadt).name + " mit guter Tat oder Söldner-Weg.")));
+    } else if (ort.typ === "dorf") {
       panel.append(element("h3", "Ertrag des Dorfes"));
       panel.append(element("p", ort.name + " liefert " + ort.ertrag + " an " + knoten.get(ort.stadt).name + "."));
       const grund = rules.ertragGrund(state);
@@ -2655,7 +2724,8 @@
     } else {
       const doerfer = knoten.doerfer(ort.id).map(id => knoten.get(id));
       panel.append(element("h3", "Dörfer"), element("p", doerfer.map(dorf => dorf.name + " (" + dorf.ertrag + ")").join(", ") +
-        (ort.fraktion === state.faction ? ". Dörfer deiner Fraktion liefern alle " + rules.ertragPause + " Runden +" + rules.ertragMenge + " " +
+        (rules.lage(state) ? ". Befreite Dörfer liefern ab Ruf 20 alle " + rules.systeme.daten.zehnt.etappen + " Etappen ihren Zehnt ins Kontor." :
+        ort.fraktion === state.faction ? ". Dörfer deiner Fraktion liefern alle " + rules.ertragPause + " Runden +" + rules.ertragMenge + " " +
           rules.resourceName(state) + "." : ".")));
     }
     panel.append(element("h3", "Zentrallager und Rucksack"));

@@ -8,7 +8,7 @@ const vm = require("node:vm");
 const root = path.join(__dirname, "..");
 const context = vm.createContext({ structuredClone });
 
-for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/faehigkeiten.js", "spiel/kampf.js", "spiel/startpunkte.js", "spiel/welt.js", "spiel/knoten-daten.js", "spiel/knoten.js", "spiel/nebenquests-daten.js", "spiel/nebenquests.js", "spiel/regeln.js"]) {
+for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/faehigkeiten.js", "spiel/kampf.js", "spiel/startpunkte.js", "spiel/welt.js", "spiel/knoten-daten.js", "spiel/knoten.js", "spiel/nebenquests-daten.js", "spiel/nebenquests.js", "spiel/systeme-daten.js", "spiel/systeme.js", "spiel/regeln.js"]) {
   vm.runInContext(fs.readFileSync(path.join(root, file), "utf8"), context, { filename: file });
 }
 
@@ -1413,8 +1413,22 @@ console.log("Reisebegegnungen (ruhig, scheu, Jäger, Alphatier, Ausweichen) gepr
   assert.equal(doom.scene, "weltende");
   assert.equal(doom.niederlage, "glut");
   assert.equal(rules.read(JSON.stringify(doom)).scene, "weltende");
+  // Patch 2.3.0: Menschen verhungern nicht sofort. Bei Nahrung 0 ist die Gruppe entkräftet, jede Etappe ohne Nahrung
+  // kostet 15 Moral, verloren ist erst bei Nahrung 0 und Moral 0. Essen oder Rasten beendet „Entkräftet“.
   const hunger = rules.reise({ ...hub, ressource: 1 }, "heidvang");
-  assert.equal(hunger.niederlage, "vorrat");
+  assert.equal(hunger.niederlage, null);
+  assert.equal(hunger.ressource, 0);
+  assert.equal(hunger.entkraeftet, true);
+  assert.equal(hunger.moral, 60, "Die letzte Mahlzeit reicht noch für diese Etappe");
+  const hungrig = rules.reise(hunger, hub.knoten);
+  assert.equal(hungrig.knoten, hub.knoten);
+  assert.equal(hungrig.moral, 45, "Etappe ohne Nahrung: −15 Moral");
+  assert.equal(hungrig.niederlage, null);
+  const gebrochen = rules.reise({ ...hungrig, moral: 15 }, "heidvang");
+  assert.equal(gebrochen.niederlage, "verhungert");
+  assert.equal(gebrochen.scene, "weltende");
+  assert.match(rules.niederlagen.verhungert, /Verhungert und gebrochen/);
+  assert.equal(rules.rastGrund(hungrig), "zu wenig Nahrung");
   assert.throws(() => rules.read(JSON.stringify({ ...hub, scene: "weltende" })), /beschädigt/);
 
   // Seewege: eigener Hafen oder Handelsvertrag, 15 Silber je Überfahrt.
@@ -1481,21 +1495,29 @@ console.log("Reisebegegnungen (ruhig, scheu, Jäger, Alphatier, Ausweichen) gepr
   assert.ok(stollen.health < 30 && stollen.health > 0, "Misslungene Probe kostet LP");
   assert.equal(stollen.weltLeisten.glut, 30 + 1 + 1, "Stollen +1 und Rundenanstieg +1");
 
-  // Rast: volle LP, kostet 1 Vorrat, nie den letzten.
+  // Rast: volle LP. Menschen zahlen 3 Nahrung (nie die letzte) und gewinnen 12 Moral; als Bannerjarl
+  // rasten sie in den Städten der eigenen Fraktion umsonst. Andere Völker zahlen weiter 1 Vorrat.
   const tired = { ...hub, health: 3 };
   const rested = rules.rast(tired);
   assert.equal(rested.health, rules.healthLimit(rested));
-  assert.equal(rested.ressource, 41);
-  assert.equal(rules.rast({ ...tired, ressource: 1 }).health, 3);
-  // Dörfer der eigenen Fraktion liefern +5, danach 10 Runden Pause.
+  assert.equal(rested.ressource, 39);
+  assert.equal(rested.moral, 72);
+  assert.equal(rules.rast({ ...tired, ressource: 3 }).health, 3);
+  const jarl = rules.rast({ ...tired, factionRuf: { ...tired.factionRuf, groves: 60 } });
+  assert.equal(jarl.ressource, 42, "Bannerjarl rastet umsonst");
+  const zwergDorf = Object.values(vm.runInContext("knoten", context).alle).find(o => o.typ === "dorf" && o.fraktion === "tiefgraeber");
+  const zwergHub = { ...dwarf, scene: "weltknoten", knoten: zwergDorf.id, runde: 0 };
+  assert.equal(rules.rast({ ...zwergHub, health: 3 }).ressource, 41);
+  // Dörfer liefern bei den anderen Völkern +5, danach 10 Runden Pause. Bei den Menschen liefern befreite
+  // Dörfer stattdessen ihren Zehnt alle 6 Etappen ins Kontor (Patch 2.0.0 Punkt 6).
   const garbenfeld = rules.reise(hub, "garbenfeld");
-  assert.equal(rules.ertragGrund(garbenfeld), null);
-  const harvested = rules.ertragEinholen(garbenfeld);
-  assert.equal(harvested.ressource, garbenfeld.ressource + 5);
+  assert.match(rules.ertragGrund(garbenfeld), /Zehnt alle 6 Etappen/);
+  assert.equal(rules.ertragGrund(zwergHub), null);
+  const harvested = rules.ertragEinholen(zwergHub);
+  assert.equal(harvested.ressource, zwergHub.ressource + 5);
   assert.match(rules.ertragGrund(harvested), /wieder bereit in 10 Runden/);
-  assert.equal(rules.read(JSON.stringify(harvested)).ertraege.garbenfeld, 1);
-  assert.equal(rules.ertragGrund({ ...hub, knoten: "netzby" }), null);
-  assert.equal(rules.ertragGrund({ ...hub, knoten: "perlstrand" }), "nur in Dörfern der eigenen Fraktion");
+  assert.equal(rules.read(JSON.stringify(harvested)).ertraege[zwergDorf.id], 0);
+  assert.equal(rules.ertragGrund({ ...zwergHub, knoten: "perlstrand" }), "nur in Dörfern der eigenen Fraktion");
   // Zentrallager: Hauptstädte und eigene Städte, keine Dörfer.
   assert.equal(rules.storageSite({ ...hub, knoten: "eryndor" }), "Zentrallager · Eryndor");
   assert.equal(rules.storageSite({ ...hub, knoten: "salzwacht" }), null);
@@ -1630,7 +1652,44 @@ console.log("Charakter-Entwurf geprüft.");
   const nachher = rules.reiseZiele(grenze).find(weg => weg.zielId === "brandstein");
   assert.equal(nachher.kostenRessource, vorher - 1);
   assert.equal(nachher.rabatt, true);
+  // Ruf-Datei 2.0: Erst die Entscheidung über den Ausgang, dann geht die Reise weiter.
+  assert.equal(grenze.tatOffen, "eikmark_q10");
+  assert.equal(rules.reise(grenze, "brandstein"), grenze);
+  assert.equal(rules.taten(grenze).length, 3);
+  grenze = rules.tatWaehlen(grenze, "pragmatisch");
+  assert.equal(grenze.tatOffen, null);
+  assert.equal(grenze.factionRuf.groves, 3);
   assert.equal(rules.reise(grenze, "brandstein").ressource, grenze.ressource - (vorher - 1));
+
+  // Dorfbefreiung (Patch 2.1.0 Punkt 4): q01 mit guter Tat befreit alle Dörfer der Stadt, schlechte Tat nicht.
+  let korn = rules.auftragAusfuehren(rules.auftragAnnehmen(imOrt("kronreich", "kronhall"), "kronhall_q01"), "kronhall_q01");
+  assert.equal(rules.taten(korn).find(t => t.id === "gut").befreit, true);
+  const boese = rules.tatWaehlen(korn, "boese");
+  assert.deepEqual(plain(boese.befreit), []);
+  assert.equal(boese.factionRuf.groves, -18);
+  assert.equal(boese.moral, 52);
+  korn = rules.tatWaehlen(korn, "gut");
+  assert.deepEqual(plain(korn.befreit), ["koenigsau", "muehlbach", "weizenhof"]);
+  assert.equal(korn.factionRuf.groves, 12);
+  assert.equal(korn.moral, 66);
+  // Zehnt: ab Ruf 20 liefern befreite Dörfer alle 6 Etappen ins Kontor (Kronreich-Nahrung 6 je Dorf).
+  let zehnt = { ...korn, factionRuf: { ...korn.factionRuf, groves: 20 } };
+  for (let i = 0; i < 6; i++) zehnt = rules.reise(zehnt, rules.reiseZiele(zehnt).find(w => !w.grund && w.kantenTyp !== "seeweg").zielId);
+  assert.equal(zehnt.etappen, 6);
+  assert.ok(Object.values(plain(zehnt.kontor.kronreich)).reduce((a, b) => a + b, 0) >= 15, "Zehnt im Kontor");
+  // Kontor in Kronhall: Rohstoffe kaufen und Nahrung tragen; geächtet kein Handel, Abheben bleibt erlaubt.
+  let kontor = { ...imOrt("kronreich", "kronhall"), silver: 200 };
+  assert.equal(rules.kontorInfo(kontor).rang.id, "fremder");
+  kontor = rules.kontorHandel(kontor, "holz", 10, true);
+  assert.equal(kontor.kontor.kronreich.holz, 10);
+  assert.equal(kontor.silver, 200 - 54, "Bündel 10 Holz zu 54 Silber");
+  kontor = rules.nahrungTragen(kontor, 20, true);
+  assert.equal(kontor.kontor.kronreich.nahrung, 20);
+  const acht = { ...kontor, factionRuf: { ...kontor.factionRuf, groves: -30 }, ressource: 0, entkraeftet: true };
+  assert.equal(rules.kontorHandel(acht, "holz", 1, true), acht);
+  const satt = rules.nahrungTragen(acht, 5, false);
+  assert.equal(satt.ressource, 5);
+  assert.equal(satt.entkraeftet, false, "Nahrung aufnehmen beendet Entkräftet");
 
   // Trophäen sind verkäuflich, auch beim Händler einer Stadt mit Zentrallager.
   assert.equal(world.items["beute-pelz-von-graufang"], "Pelz von Graufang");
