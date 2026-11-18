@@ -187,6 +187,16 @@ const kriegsratSchritt = (ort) => ({
 // Der Bleiche Skalde (Henry, 18. 11. 2026): Erzpriester Thorvald, entlarvt in Akt 4. Er erklärt die Untoten-Bedrohung.
 const skalde = "Erzpriester Thorvald vom Glutberg";
 
+// Henry, 18. 11. 2026: Runen- und Glutgegenstände sind Gruppen-Relikte (quellen/henry/relikte.json).
+const relikte = JSON.parse(fs.readFileSync(path.join(root, "quellen/henry/relikte.json"), "utf8"));
+const reliktHinweis = (id) => {
+  const r = relikte.relicItems.find((item) => item.sourceQuest === id);
+  const wer = Object.entries(relikte.partyRelicSystem.factionPermissions).filter(([, typen]) => typen.includes(r.relicType))
+    .map(([f]) => ({ kronreich: "Kronreich", orden: "Orden der Flamme", haefen: "Freie Häfen" })[f]);
+  return "Gruppen-Relikt (Henry, 18. 11. 2026): " + r.name + " stärkt als einziges aktives Relikt die ganze Gruppe (" +
+    r.partyBuff.label + "). Nutzbar für " + wer.join(", ") + "; alle anderen verkaufen es für " + r.sellValue + " Silber.";
+};
+
 // ---------- Kronreich ----------
 // Henry, 18. 11. 2026: Runenwaffen darf das Kronreich tragen, Glutwaffen nicht.
 const kronreich = {
@@ -245,6 +255,7 @@ const orden = {
   teil1: "orden-teil1-hauptquest.json",
   teil2: ["orden-teil2a-nebenquests.json", "orden-teil2b-nebenquests.json"],
   hinweise: {
+    aschenkloster_q07: reliktHinweis("aschenkloster_q07"), glutberg_q08: reliktHinweis("glutberg_q08"),
     glutberg_q10: "Änderung Henry (18. 11. 2026): Skarn der Weiße Bär bleibt das Alphatier von Eiswacht. Glutberg bekommt die Mutter der Tiefen, so kommt jedes Alphatier des Ordens einmal vor.",
     brandstein_q04: "Änderung Henry (18. 11. 2026): Bei Gemini nur S29. Nach Grenzmarkt führt S29 bis Sigrunsheim und dann S45.",
     aschenkloster_q10: "Änderung Henry (18. 11. 2026): Bei Gemini hieß er Bruder Bjarne Eisenrun. Bjarne ist schon Ser Bjarne vom Eispass.",
@@ -291,13 +302,12 @@ const orden = {
 // ---------- Freie Häfen ----------
 // Gemini, 18. 11. 2026: Hauptquest, Nebenquests Teil A (Perlvik, Silberholm, Skerheim, Tranvik, Zollholm) und Teil B
 // (Ankerfjord, Bernsvik, Grenzmarkt, Möwenstad, Nebelvik, Salzwacht). Silberholm q01–q08 hat Henry am 18. 11. 2026 nachgeliefert.
-const rune = "Runengegenstand: Für die Freien Häfen tragbar (Henry, 18. 11. 2026). Bis es Ausrüstungswerte dafür gibt, liegt er als Beute im Rucksack.";
 const haefen = {
   teil1: "haefen-teil1-hauptquest.json",
   teil2: ["haefen-teil2a-nebenquests.json", "haefen-teil2b-nebenquests.json"],
   hinweise: {
-    ankerfjord_q04: rune, grenzmarkt_q04: rune, silberholm_q04: rune,
-    nebelvik_q04: "Glutgegenstand: Die Glutlaterne taugt nur als Handelsware und Beute zum Verkauf (Henry, 18. 11. 2026).",
+    ankerfjord_q04: reliktHinweis("ankerfjord_q04"), grenzmarkt_q04: reliktHinweis("grenzmarkt_q04"),
+    silberholm_q04: reliktHinweis("silberholm_q04"), nebelvik_q04: reliktHinweis("nebelvik_q04"),
     zollholm_q10: "Änderung Henry (18. 11. 2026): Bei Gemini „Mutter Tiefe“. Umbenannt in „Die Schwarze Krake“, damit sie nicht mit der Mutter der Tiefen aus dem Ordensland verwechselt wird.",
     skerheim_q07: "Gemini schrieb „Haizahn-Harpoon“. Im Spiel heißt der Lohn Haizahn-Harpune.",
   },
@@ -394,7 +404,8 @@ const gegnerAusText = [
   [/Banditen|Wegelagerer|Viehdiebe|Lederdiebe|Diebe/, "wegelagerer"],
 ];
 
-const gegenstandNachName = { Heilmittel: "harzverband", Heiltrank: "harzverband", Gegenmittel: "gegengift", Gegengift: "gegengift" };
+const gegenstandNachName = { Heilmittel: "harzverband", Heiltrank: "harzverband", Gegenmittel: "gegengift", Gegengift: "gegengift",
+  ...Object.fromEntries(relikte.relicItems.map((r) => [r.name, r.id])) };
 // Lohnteile, die kein Gegenstand sind, sondern als Vermerk (Wissen, Ruf, spätere Folgen) im Spielstand bleiben.
 const vermerkMuster = /Lore|Ruf|Bonus|bonus|Segen|in Akt|Akt \d|Begleiter|Frühwarnung|Flotte|Schutz |Überfallgefahr|kosten? \d Vorrat|Spur|Beweise|Briefe|hält|können|dauerhaft|sicherer|geschützt/;
 const slug = (t) => t.toLowerCase().replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -456,6 +467,12 @@ orden.id = "orden";
 haefen.id = "haefen";
 const daten = { kronreich: fraktion(kronreich), orden: fraktion(orden), haefen: fraktion(haefen), wegKennungen, gegnerTypen };
 daten.trophaeen = trophaeen;
+// Jedes Relikt muss als Lohn seines Quellauftrags vorkommen.
+for (const r of relikte.relicItems) {
+  const q = ["kronreich", "orden", "haefen"].flatMap((f) => Object.values(daten[f].orte).flatMap((o) => o.auftraege)).find((a) => a.id === r.sourceQuest);
+  if (!q?.spiel.lohn.some((l) => l.gegenstaende.includes(r.id))) throw new Error("Relikt ohne Quellauftrag: " + r.id);
+}
+daten.relikte = { system: relikte.partyRelicSystem, gegenstaende: relikte.relicItems };
 
 const kopf = `"use strict";
 

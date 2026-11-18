@@ -188,7 +188,7 @@ const rules = (() => {
       weltLeisten: { ...leistenStart }, runde: 0, knoten: null, handlung: null, vertraege: [], ertraege: {}, niederlage: null,
       weltAuftraege: {}, hauptquest: null,
       party: [], companionEquipment: {}, partyVitals: {}, heroStatus: {}, companionXp: {},
-      rucksack: 0, guertel: Array(beltSize).fill(null),
+      rucksack: 0, guertel: Array(beltSize).fill(null), relikt: null,
       relationships: {}, factionRuf: {}, companionQuests: {}, crafted: [], questClock: 0, questLog: {},
       marks: [], journal: [], combat: null,
     };
@@ -326,6 +326,10 @@ const rules = (() => {
     state.umschulung ??= false;
     state.rausch ??= false;
     state.storage ??= [];
+    state.relikt ??= null;
+    for (const liste of [state.inventory, state.storage]) if (Array.isArray(liste)) {
+      liste.forEach((id, index) => { if (own(alteRelikte, id)) liste[index] = alteRelikte[id]; });
+    }
     state.rucksack ??= 0;
     state.companionXp ??= {};
     state.guertel = Array.from({ length: beltSize }, (_, index) => {
@@ -419,6 +423,7 @@ const rules = (() => {
         !Object.keys(state.companionEquipment).every(id => state.party.includes(id)) ||
         Object.keys(world.gear).some(id => assigned(state, id) > state.inventory.filter(item => item === id).length) ||
         !validList(state.marks, (id) => typeof id === "string" && id.length <= 40, 100) ||
+        (state.relikt !== null && !(own(relikte, state.relikt) && reliktErlaubt(state.faction, state.relikt))) ||
         !validList(state.journal, (entry) => typeof entry === "string" && entry.length <= 300, 16) ||
         (state.health === 0) !== (state.scene === "defeat") ||
         (combat !== null && !validCombat(state, combat))) {
@@ -867,7 +872,7 @@ const rules = (() => {
     if (!handelOffen(previous)) return previous;
     const prices = buying ? world.shop : world.salePrices;
     if (!own(prices, id)) return previous;
-    const price = prices[id];
+    const price = preis(previous, id, buying);
     const index = previous.inventory.indexOf(id);
     if (!buying && assigned(previous, id) >= previous.inventory.filter(item => item === id).length) return previous;
     if (buying ? previous.silver < price || previous.inventory.length >= itemCap - 20 : index === -1) return previous;
@@ -1017,6 +1022,7 @@ const rules = (() => {
     if (slot) return slot;
     if (own(world.supplies, id)) return "supply";
     if (questItems.has(id)) return "quest";
+    if (own(relikte, id)) return "relikt";
     return "trophy";
   }
 
@@ -1409,7 +1415,7 @@ const rules = (() => {
       // Optionale Probe auf List oder Fernkampf. Misslingt sie, flieht das Tier ohne Folgen.
       const key = skillValue(state, "fernkampf") > skillValue(state, "list") ? "fernkampf" : "list";
       const dice = 1 + Math.floor(travelDice() * 20);
-      const bonus = skillValue(state, key);
+      const bonus = skillValue(state, key) + reliktWert(state, "partyPerception");
       const passed = dice + bonus >= 12;
       note(state, "Unterwegs kreuzt ein Rothirsch den Weg. " + K.fertigkeiten[key].name + " " + dice + " + " + bonus + " gegen 12. " +
         (passed ? "Du sammelst am Wegrand Galgenwurz, während das Tier äst." : "Das Tier flieht ins Unterholz."));
@@ -1428,7 +1434,7 @@ const rules = (() => {
   function canEvade(state) {
     const combat = state.combat;
     return Boolean(combat?.hinterhalt && combat.round === 0 &&
-      (skillValue(state, "list") >= 3 || ["spaeher", "schurke"].includes(state.role)));
+      (skillValue(state, "list") + reliktWert(state, "partyPerception") >= 3 || ["spaeher", "schurke"].includes(state.role)));
   }
 
   function markDeed(state, mark) {
@@ -1587,7 +1593,12 @@ const rules = (() => {
     const table = world.encounterTables[weg.sicherheit === "kernland" ? "kernland" : "grenzland"];
     const roll = Math.floor(travelDice() * 100);
     let summe = 0;
-    const kind = table.find(([weight]) => roll < (summe += weight))?.[1] ?? "ruhig";
+    let kind = table.find(([weight]) => roll < (summe += weight))?.[1] ?? "ruhig";
+    // Runenkompass: Auf Seewegen bleibt ein Teil der Gefahren aus.
+    if (weg.kantenTyp === "seeweg" && kind !== "ruhig" && travelDice() < reliktWert(state, "seaDangerReduction")) {
+      note(state, "Der " + relikte[state.relikt].name + " weist euch einen sicheren Kurs.");
+      kind = "ruhig";
+    }
     const pick = (list) => list[Math.floor(travelDice() * list.length) % list.length];
     if (kind === "ruhig") {
       note(state, "Unterwegs: " + pick(weg.sicherheit === "grenzland" ? [...world.quietTexts, ...world.rumorTexts] : world.quietTexts));
@@ -1596,7 +1607,7 @@ const rules = (() => {
     if (kind === "scheu") {
       const key = skillValue(state, "fernkampf") > skillValue(state, "list") ? "fernkampf" : "list";
       const dice = 1 + Math.floor(travelDice() * 20);
-      const bonus = skillValue(state, key);
+      const bonus = skillValue(state, key) + reliktWert(state, "partyPerception");
       const passed = dice + bonus >= 12;
       note(state, "Unterwegs kreuzt ein scheues Tier den Weg. " + K.fertigkeiten[key].name + " " + dice + " + " + bonus + " gegen 12. " +
         (passed ? "Du sammelst am Wegrand Galgenwurz, während es äst." : "Das Tier flieht ins Unterholz."));
@@ -1755,6 +1766,85 @@ const rules = (() => {
   for (const [id, name] of Object.entries(NQ?.daten.trophaeen ?? {})) {
     world.items[id] ??= name;
     world.salePrices[id] ??= trophaeenPreis;
+  }
+
+  // Gruppen-Relikte (Henry, 18. 11. 2026, quellen/henry/relikte.json): Höchstens ein Relikt ist aktiv und stärkt die
+  // ganze Gruppe. Es liegt getrennt von der Ausrüstung, wechselt nur außerhalb des Kampfes, und das vorige Relikt
+  // kehrt in den Rucksack zurück. Welche Art (Rune, Glut) eine Fraktion nutzen darf, legt factionPermissions fest;
+  // alle anderen verkaufen das Relikt.
+  const reliktSystem = NQ?.daten.relikte?.system ?? { factionPermissions: {} };
+  const relikte = Object.fromEntries((NQ?.daten.relikte?.gegenstaende ?? []).map(relikt => [relikt.id, relikt]));
+  for (const relikt of Object.values(relikte)) {
+    world.items[relikt.id] = relikt.name;
+    world.salePrices[relikt.id] = relikt.sellValue;
+  }
+  // Spielstände von heute Vormittag kannten die Runengegenstände noch als Trophäen.
+  const alteRelikte = { "beute-runenkompass": "relic_runenkompass", "beute-runenwaage": "relic_runenwaage",
+    "beute-runen-amulett": "relic_runen_amulett", "beute-runen-fokus": "relic_runen_fokus", "beute-glutlaterne": "relic_glutlaterne",
+    "beute-glutstein-amulett": "relic_glutstein_amulett" };
+  // Gegner, die mit Feuer oder Kälte angreifen (für Feuer- und Kälteschutz der Relikte).
+  const gegnerElement = { irrglut: "feuer", glutkaefer: "feuer", "jagd-irrglut": "feuer", "nacht-tiefgraeber": "feuer",
+    "auftrag-glutkaefer": "feuer", "auftrag-glutwurm": "feuer", "auftrag-irrglut": "feuer",
+    frostbaer: "kaelte", "auftrag-frostbaer": "kaelte", "auftrag-eishauer": "kaelte", "auftrag-schneeschleicher": "kaelte",
+    "auftrag-skarn": "kaelte" };
+  const reliktErlaubt = (faction, id) => (reliktSystem.factionPermissions[faction] ?? []).includes(relikte[id]?.relicType);
+  const reliktWert = (state, key) => (state.relikt && relikte[state.relikt]?.partyBuff[key]) || 0;
+  // Wirkungen, für die es im Spiel noch keine Regel gibt, bleiben vermerkt und greifen später.
+  const reliktWirkungen = {
+    seaDangerReduction: (v) => ["Gefahr auf Seewegen −" + Math.round(v * 100) + " %", true],
+    partyPerception: (v) => ["Wahrnehmung +" + v + " (Proben unterwegs, Hinterhalte erkennen)", true],
+    sellPriceBonus: (v) => ["Verkaufspreise +" + Math.round(v * 100) + " %", true],
+    buyPriceDiscount: (v) => ["Einkaufspreise −" + Math.round(v * 100) + " %", true],
+    partyResistance: (v) => ["Rüstung der ganzen Gruppe +" + v, true],
+    partyMorale: (v) => ["Moral +" + v + " (wirkt, sobald es Moral gibt)", false],
+    partyMagicPower: (v) => ["Glut- und Zauberschaden der Gruppe +" + v, true],
+    damageVsUndead: (v) => ["Schaden gegen Untote +" + Math.round(v * 100) + " %", true],
+    fireDamage: (v) => ["Feuerschaden der Gruppe +" + v, true],
+    nightAmbushImmunity: () => ["Schutz vor nächtlichen Hinterhalten (wirkt, sobald es Tag und Nacht gibt)", false],
+    fireResistance: (v) => ["Feuerangriffe −" + v + " Schaden", true],
+    coldDamageReduction: (v) => ["Kälteangriffe −" + Math.round(v * 100) + " % Schaden", true],
+  };
+  const reliktTexte = (id) => Object.entries(relikte[id].partyBuff).filter(([key]) => key !== "label")
+    .map(([key, value]) => reliktWirkungen[key]?.(value) ?? [key + " " + value, false]);
+
+  function reliktGrund(state, id) {
+    if (state.combat) return "nicht im Kampf";
+    if (!state.health) return "nur lebend";
+    if (id === null) return state.relikt ? null : "kein Relikt aktiv";
+    if (!own(relikte, id)) return "kein Relikt";
+    if (state.relikt === id) return "schon aktiv";
+    if (!state.inventory.includes(id)) return "nicht im Rucksack";
+    if (!reliktErlaubt(state.faction, id)) return relikte[id].relicType === "glut" ? "Glutrelikt: für deine Fraktion verboten" : "für deine Fraktion nicht nutzbar";
+    return null;
+  }
+
+  function setRelikt(previous, id) {
+    if (reliktGrund(previous, id)) return previous;
+    const state = structuredClone(previous);
+    const vorher = state.relikt;
+    if (id) state.inventory.splice(state.inventory.indexOf(id), 1);
+    state.relikt = id;
+    if (vorher) receive(state, [vorher]);
+    note(state, id ? relikte[id].name + " ist jetzt das Relikt der Gruppe: " + relikte[id].partyBuff.label + "." +
+      (vorher ? " " + relikte[vorher].name + " kehrt in den Rucksack zurück." : "")
+      : relikte[vorher].name + " kehrt in den Rucksack zurück. Die Gruppe trägt kein Relikt.");
+    return state;
+  }
+
+  function reliktStand(state) {
+    const eintrag = (id) => ({ id, name: relikte[id].name, art: relikte[id].relicType, label: relikte[id].partyBuff.label,
+      wirkungen: reliktTexte(id).map(([text, aktiv]) => ({ text, aktiv })), wert: relikte[id].sellValue,
+      grund: reliktGrund(state, id) });
+    return { aktiv: state.relikt ? eintrag(state.relikt) : null,
+      rucksack: [...new Set(state.inventory.filter(id => own(relikte, id)))].map(eintrag) };
+  }
+
+  // Preise beim Händler, mit der Runenwaage als aktivem Relikt.
+  function preis(state, id, buying) {
+    const grund = (buying ? world.shop : world.salePrices)[id];
+    if (grund === undefined) return null;
+    return buying ? Math.max(1, Math.round(grund * (1 - reliktWert(state, "buyPriceDiscount"))))
+      : Math.round(grund * (1 + reliktWert(state, "sellPriceBonus")));
   }
 
   // Gegner der Aufträge. Wo es den Gegner schon gibt, gelten seine Werte, sein Bild und sein Zusatzangriff.
@@ -2281,7 +2371,7 @@ const rules = (() => {
     } else if (action === "ember" && cast(state, 2)) {
       round.usedFire = true;
       const role = kit(state);
-      const damage = role.attack.power + damageValue(state, role.attack.skill) + (result.emberBonus ?? 0) + gearBonus(state, "magic") + rage;
+      const damage = role.attack.power + damageValue(state, role.attack.skill) + (result.emberBonus ?? 0) + gearBonus(state, "magic") + reliktWert(state, "partyMagicPower") + rage;
       dealDamage(state, selected.id, damage, { fire: true, round });
       note(state, role.attack.name + " verursacht " + damage + " Schaden.");
     } else if (action === "restore" && cast(state, -2)) {
@@ -2344,6 +2434,9 @@ const rules = (() => {
   function dealDamage(state, id, amount, { fire = false, round, actor = "hero" } = {}) {
     const foe = state.combat.feinde[id];
     if (!foe || foe.lp <= 0 || amount <= 0) return 0;
+    // Relikte der Gruppe: Feuerschaden und Schaden gegen Untote.
+    if (fire) amount += reliktWert(state, "fireDamage");
+    if (foe.tags.includes("untot")) amount = Math.round(amount * (1 + reliktWert(state, "damageVsUndead")));
     const value = Math.min(foe.lp, amount + (foe.status.verwundbar?.wert ?? 0));
     foe.lp -= value;
     if (fire && round) round.usedFire = true;
@@ -2405,7 +2498,7 @@ const rules = (() => {
     const factor = (ability.spezialisiert ? 1 + kampf.spezVerstaerkung : 1) * (boosted ? 1 + kampf.ressourceVerstaerkung : 1);
     const invisibleBefore = held.unsichtbar > 0;
     const skill = combatSkill(state, ability.zahlung);
-    const bonus = skillValue(state, skill) + (ability.zahlung === "M" ? gearBonus(state, "magic") : 0);
+    const bonus = skillValue(state, skill) + (ability.zahlung === "M" ? gearBonus(state, "magic") + reliktWert(state, "partyMagicPower") : 0);
     const living = turn.feinde.map((foe, id) => ({ foe, id })).filter(({ foe }) => foe.lp > 0);
     const order = [...living.filter(({ id }) => id === selectedId), ...living.filter(({ id }) => id !== selectedId)].map(({ id }) => id);
     const count = r.ziele === "alle" ? order.length : r.ziele ?? 1;
@@ -2599,7 +2692,8 @@ const rules = (() => {
         if (member.fire) round.usedFire = true;
         const healing = healAlly(state, patient.id, member.heal ?? 0, id, round.events);
         if (member.cleanse) turn.bleeding = 0;
-        const damage = (member.damage ? member.damage + (weaponGear?.power ?? 0) + (weaponGear?.magic ?? 0) : 0) +
+        const damage = (member.damage ? member.damage + (weaponGear?.power ?? 0) + (weaponGear?.magic ?? 0) +
+          (member.fire ? reliktWert(state, "partyMagicPower") : 0) : 0) +
           (turn.id === "felsgreif" ? (member.airborne ?? 0) : 0);
         if (damage) dealDamage(state, goal(), damage + extra, { fire: Boolean(member.fire), round, actor: id });
         else if (!healing) round.events.push({ kind: "cover", actor: id });
@@ -2720,6 +2814,9 @@ const rules = (() => {
         for (let action = 0; action < foe.aktionen; action++) {
           let damage = foe.schaden - (status.langsam ? 1 : 0) - (status.schwach?.wert ?? 0) +
             (index === 0 && action === 0 ? special?.damage ?? 0 : 0);
+          // Relikte der Gruppe: Schutz vor Feuer- und Kälteangriffen.
+          if (gegnerElement[turn.id] === "feuer") damage -= reliktWert(state, "fireResistance");
+          if (gegnerElement[turn.id] === "kaelte") damage = Math.round(damage * (1 - reliktWert(state, "coldDamageReduction")));
           damage = Math.max(0, damage);
           // Köder und Wälle ziehen die Angriffe auf sich, Unsichtbare werden nicht angegriffen.
           const decoy = turn.diener.find((summon) => summon.koeder && summon.lp > 0);
@@ -2732,7 +2829,7 @@ const rules = (() => {
           if (!active.length) { sparedByStealth = true; continue; }
           const victim = active[victimCursor++ % active.length];
           const heroTarget = victim.id === "hero";
-          const armor = heroTarget ? gearBonus(state, "armor") : memberGearBonus(state, victim.id, "armor");
+          const armor = (heroTarget ? gearBonus(state, "armor") : memberGearBonus(state, victim.id, "armor")) + reliktWert(state, "partyResistance");
           const reduction = Math.floor(((heroTarget ? protection(state) : 2) + armor) / 2);
           const defense = heroTarget && round.guarding ? Math.max(6, round.ward) : round.ward;
           const guarding = defense > 0;
@@ -2966,7 +3063,7 @@ const rules = (() => {
   }
 
   return { awardXp, abilities, abilityState: (state, id) => state.combat ? abilityState(state, id).reason : "nur im Kampf", kampfwerte, kraft,
-    level, resourceName, combatSkill, create, read, choices, unequip, equipmentSlots, slotKinds, targetSlot, gearStats, equipPreview, gearBonus, bagSlots, category, slotsUsed, fits, storageSite, storageOpen, canStore, canRetrieve,
+    level, resourceName, combatSkill, create, read, setRelikt, reliktGrund, reliktStand, preis, choices, unequip, equipmentSlots, slotKinds, targetSlot, gearStats, equipPreview, gearBonus, bagSlots, category, slotsUsed, fits, storageSite, storageOpen, canStore, canRetrieve,
     store, retrieve, isQuestItem: id => questItems.has(id), bagLimit, bagUpgrade, upgradeBag, belt, setBelt, quickUse, beltSize,
     stackLimit, itemCap, hire, hireCost, compatible, memberLevel, setTravelDice, canEvade, travelEncounter, choose, route, retrain, specialize, ascend, weapon, equip, use, canUse, strike,
     attributes, baseAttributes, defaultBuild, suggestSkills, buildProblem, skillLimits, skillPoints, cap, modifier, originOf, profile,

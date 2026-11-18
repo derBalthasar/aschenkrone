@@ -489,9 +489,9 @@
   const slotLabels = { weapon: "Rechte Hand", offhand: "Linke Hand", head: "Kopf", neck: "Hals", armor: "Körper",
     legs: "Beine", ring1: "Ring", ring2: "Ring" };
   const kindLabels = { weapon: "Waffe", offhand: "Schild", head: "Kopf", neck: "Hals", armor: "Körper", legs: "Beine",
-    ring: "Ring", supply: "Verbrauchsgut", trophy: "Trophäe und Fund", quest: "Questgegenstand" };
+    ring: "Ring", supply: "Verbrauchsgut", trophy: "Trophäe und Fund", quest: "Questgegenstand", relikt: "Gruppen-Relikt" };
   const groups = [["Waffen und Schilde", ["weapon", "offhand"]], ["Rüstung", ["head", "armor", "legs"]],
-    ["Schmuck", ["neck", "ring"]], ["Verbrauchsgüter", ["supply"]], ["Trophäen und Funde", ["trophy"]],
+    ["Schmuck", ["neck", "ring"]], ["Verbrauchsgüter", ["supply"]], ["Gruppen-Relikte", ["relikt"]], ["Trophäen und Funde", ["trophy"]],
     ["Questgegenstände", ["quest"]]];
   const statLabels = [["damage", "Schaden"], ["pierce", "Durchschlag"], ["armor", "Rüstung"], ["magic", "Glutschaden"],
     ["travel", "List unterwegs"], ["airborne", "gegen Flieger"]];
@@ -798,6 +798,41 @@
     box.append(slots, element("p", "Gürtelgegenstände wirken im Kampf, ohne deine Aktion zu verbrauchen."));
   }
 
+  // Gruppen-Relikt (Henry, 18. 11. 2026): ein aktives Relikt für die ganze Gruppe, getrennt von der Ausrüstung.
+  function renderRelikt() {
+    const box = el("hub-relikt");
+    const stand = rules.reliktStand(state);
+    box.hidden = !stand.aktiv && !stand.rucksack.length;
+    box.replaceChildren();
+    if (box.hidden) return;
+    box.append(element("h4", "Gruppen-Relikt"));
+    const wirkung = (relikt) => {
+      const list = element("ul");
+      for (const w of relikt.wirkungen) {
+        const item = element("li", w.text);
+        if (!w.aktiv) item.className = "hub-relikt-spaeter";
+        list.append(item);
+      }
+      return list;
+    };
+    const aktiv = element("div");
+    aktiv.className = "hub-relikt-aktiv";
+    if (stand.aktiv) {
+      aktiv.append(element("strong", stand.aktiv.name + " · " + stand.aktiv.label), wirkung(stand.aktiv));
+      button(aktiv, "Ablegen", () => hubAction(rules.setRelikt(state, null)), { disabled: Boolean(rules.reliktGrund(state, null)) });
+    } else aktiv.append(element("strong", "Kein Relikt aktiv"));
+    box.append(aktiv);
+    for (const relikt of stand.rucksack) {
+      const row = element("div");
+      row.className = "hub-relikt-wahl";
+      row.append(element("strong", relikt.name + " · " + relikt.label), wirkung(relikt));
+      button(row, relikt.grund ? relikt.grund + " · Wert " + relikt.wert + " Silber" : (stand.aktiv ? "Wechseln" : "Aktivieren"),
+        () => hubAction(rules.setRelikt(state, relikt.id)), { disabled: Boolean(relikt.grund) });
+      box.append(row);
+    }
+    box.append(element("p", "Nur ein Relikt wirkt, für die ganze Gruppe. Wechsel nur außerhalb des Kampfes; das vorige Relikt kehrt in den Rucksack zurück."));
+  }
+
   function renderBagUpgrade() {
     const box = el("hub-bag-upgrade");
     const plan = rules.bagUpgrade(state);
@@ -920,6 +955,7 @@
     renderDoll();
     renderStats();
     renderBelt();
+    renderRelikt();
     renderBagUpgrade();
     const tabs = { bag: "Rucksack · " + rules.slotsUsed(state) + " / " + rules.bagLimit(state),
       storage: "Zentrallager · " + state.storage.length };
@@ -2322,7 +2358,8 @@
     const stock = element("div");
     stock.className = "actions trade-list";
     stock.append(element("h3", "Kaufen · " + state.silver + " Silber verfügbar"));
-    for (const [id, price] of Object.entries(world.shop)) {
+    for (const id of Object.keys(world.shop)) {
+      const price = rules.preis(state, id, true);
       const gear = world.gear[id];
       const supply = world.supplies[id];
       const effect = gear?.power ? gear.power + " Grundschaden" : gear?.armor ? gear.armor + " Rüstung" :
@@ -2331,7 +2368,7 @@
       button(stock, world.items[id] + " · " + effect + " · " + price + " Silber", () => update(rules.trade(state, id, true)),
         { disabled: price > state.silver || state.inventory.length >= rules.itemCap - 20 });
     }
-    const trophies = Object.entries(world.salePrices).filter(([id]) => state.inventory.includes(id));
+    const trophies = Object.keys(world.salePrices).filter(id => state.inventory.includes(id)).map(id => [id, rules.preis(state, id, false)]);
     if (trophies.length) stock.append(element("h3", "Trophäen verkaufen"));
     for (const [id, price] of trophies) {
       button(stock, world.items[id] + " · +" + price + " Silber", () => update(rules.trade(state, id, false)));

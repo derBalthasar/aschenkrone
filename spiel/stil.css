@@ -317,6 +317,15 @@ button.map-marker[aria-pressed="true"] { background: #694623; }
 .hub-belt-slot strong { overflow-wrap: anywhere; }
 .hub-belt-slot select { width: 100%; min-height: 2rem; font: inherit; font-size: .85rem; }
 .hub-belt p { margin: 0; font-size: .8rem; color: #69492d; }
+.hub-relikt { display: grid; gap: .35rem; margin-top: .55rem; padding-top: .45rem; border-top: 1px solid #ad906655; }
+.hub-relikt[hidden] { display: none; }
+.hub-relikt h4 { margin: 0; font-size: .9rem; color: #69492d; }
+.hub-relikt-aktiv, .hub-relikt-wahl { display: grid; gap: .2rem; padding: .35rem .45rem; background: #f4e8d0; border: 1px solid #96734c; border-radius: 3px; min-width: 0; }
+.hub-relikt-wahl { border-style: dashed; }
+.hub-relikt strong { overflow-wrap: anywhere; }
+.hub-relikt ul { margin: 0; padding-left: 1.1rem; font-size: .85rem; }
+.hub-relikt-spaeter { color: #69492d; font-style: italic; }
+.hub-relikt p { margin: 0; font-size: .8rem; color: #69492d; }
 .hub-bag-upgrade { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .6rem; margin: .55rem 1rem 0; padding: .45rem .6rem;
   border: 1px solid var(--line); border-radius: 4px; }
 .hub-bag-upgrade p { flex: 1 1 14rem; margin: 0; font-size: .9rem; }

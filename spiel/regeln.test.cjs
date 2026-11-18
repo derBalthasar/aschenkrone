@@ -1703,6 +1703,40 @@ console.log("Charakter-Entwurf geprüft.");
   assert.match(zoll.journal.at(-1), /M31/);
   assert.equal(rules.auftragGrund(imOrt("kronreich", "perlvik"), "perlvik_q01"), null, "Schwesterfraktionen nehmen Häfen-Aufträge an");
 
+  {
+    // Gruppen-Relikte (Henry, 18. 11. 2026): eins aktiv, Wechsel außerhalb des Kampfes, Rechte je Fraktion.
+    const basis = imOrt("haefen", "perlvik");
+    let haendlerin = { ...basis, inventory: [...basis.inventory, "relic_runenwaage", "relic_runenkompass", "relic_glutlaterne", "beute-seekarte"] };
+    assert.equal(rules.reliktGrund(haendlerin, "relic_glutlaterne"), "Glutrelikt: für deine Fraktion verboten");
+    assert.equal(rules.setRelikt(haendlerin, "relic_glutlaterne"), haendlerin);
+    const vorher = rules.preis(haendlerin, "beute-seekarte", false);
+    haendlerin = rules.setRelikt(haendlerin, "relic_runenwaage");
+    assert.equal(haendlerin.relikt, "relic_runenwaage");
+    assert.ok(!haendlerin.inventory.includes("relic_runenwaage"));
+    assert.equal(rules.preis(haendlerin, "beute-seekarte", false), Math.round(vorher * 1.15));
+    assert.equal(rules.preis(haendlerin, "relic_glutlaterne", false), Math.round(55 * 1.15));
+    const verkauft = rules.trade(haendlerin, "relic_glutlaterne", false);
+    assert.equal(verkauft.silver, haendlerin.silver + Math.round(55 * 1.15));
+    haendlerin = rules.setRelikt(haendlerin, "relic_runenkompass");
+    assert.equal(haendlerin.relikt, "relic_runenkompass");
+    assert.ok(haendlerin.inventory.includes("relic_runenwaage"), "das vorige Relikt kehrt in den Rucksack zurück");
+    assert.equal(reload(haendlerin).relikt, "relic_runenkompass");
+    assert.equal(rules.reliktStand(haendlerin).aktiv.label, "Seefahrer-Weisung");
+    const abgelegt = rules.setRelikt(haendlerin, null);
+    assert.equal(abgelegt.relikt, null);
+    assert.ok(abgelegt.inventory.includes("relic_runenkompass"));
+    assert.throws(() => reload({ ...haendlerin, relikt: "relic_glutlaterne" }), /beschädigt/);
+    // Der Orden darf Glutrelikte tragen; im Kampf wird nicht gewechselt.
+    const ordenBasis = imOrt("orden", "glutberg");
+    let flamme = { ...ordenBasis, inventory: [...ordenBasis.inventory, "relic_glutstein_amulett"] };
+    flamme = { ...flamme, health: rules.healthLimit(flamme) };
+    assert.equal(rules.reliktGrund(flamme, "relic_glutstein_amulett"), null);
+    const amulett = rules.setRelikt(flamme, "relic_glutstein_amulett");
+    assert.equal(rules.reliktGrund({ ...amulett, combat: {} }, null), "nicht im Kampf");
+    // Ältere Spielstände: Runengegenstände als Trophäe werden zum Relikt.
+    assert.deepEqual(reload({ ...held, inventory: [...held.inventory, "beute-runenkompass"] }).inventory.at(-1), "relic_runenkompass");
+  }
+
   // Beschädigte Einträge werden abgelehnt.
   assert.throws(() => reload({ ...held, weltAuftraege: { erfunden_q01: { status: "aktiv", wahl: 0 } } }), /beschädigt/);
   assert.throws(() => reload({ ...held, weltAuftraege: { kronhall_q04: { status: "aktiv", wahl: 1 } } }), /beschädigt/);

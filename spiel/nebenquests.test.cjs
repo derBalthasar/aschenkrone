@@ -232,3 +232,17 @@ test("je Fraktion 11 Städte mit q01 bis q10, 23 Dörfer mit Dorfweg, drei Begle
   assert.deepEqual(D.haefen.reihe.begleiter.map(b => b.id), ["comp_haefen_karen", "comp_haefen_soren", "comp_haefen_halvor"]);
   assert.deepEqual(D.haefen.reihe.begleiter.map(b => b.auftrag), ["perlvik_q10", "nebelvik_q10", "salzwacht_q10"]);
 });
+
+// Henry, 18. 11. 2026: Runen- und Glutgegenstände sind Gruppen-Relikte und kommen als Lohn ihres Quellauftrags.
+test("Gruppen-Relikte stammen aus ihrem Auftrag, Rechte je Fraktion", () => {
+  const { system, gegenstaende } = D.relikte;
+  assert.equal(system.maxActiveRelics, 1);
+  assert.deepEqual(system.factionPermissions, { kronreich: ["rune"], haefen: ["rune"], orden: ["rune", "glut"] });
+  const alle = ["kronreich", "orden", "haefen"].flatMap((f) => Object.values(D[f].orte).flatMap((o) => o.auftraege));
+  for (const relikt of gegenstaende) {
+    const auftrag = alle.find((q) => q.id === relikt.sourceQuest);
+    assert.ok(auftrag.spiel.lohn[0].gegenstaende.includes(relikt.id), relikt.id);
+    assert.match(auftrag.hinweis, /Gruppen-Relikt/);
+    assert.ok(!D.trophaeen["beute-" + relikt.name.toLowerCase()], relikt.name + " ist keine Trophäe mehr");
+  }
+});
