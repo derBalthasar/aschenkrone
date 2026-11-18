@@ -2319,6 +2319,8 @@ const rules = (() => {
     const stufe = SY.moralStufe(state);
     return { moral: SY.moral(state), moralStufe: stufe, entkraeftet: Boolean(state.entkraeftet), etappen: state.etappen ?? 0,
       naechsterZehnt: SY.daten.zehnt.etappen - ((state.etappen ?? 0) % SY.daten.zehnt.etappen),
+      naechsterUeberfall: SY.daten.garnison.etappen - ((state.etappen ?? 0) % SY.daten.garnison.etappen),
+      kontor: { ...SY.kontor(state, state.faction) }, klasse: SY.klasseVon(state.faction, state.role),
       befreit: (state.befreit ?? []).length, rang: SY.rufRang(SY.ruf(state, state.faction)), ruf: SY.ruf(state, state.faction),
       geaechtet: SY.geaechtet(state) };
   }

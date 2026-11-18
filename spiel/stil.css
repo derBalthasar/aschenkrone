@@ -971,3 +971,18 @@ h1, h2 { font-family: var(--font-title); letter-spacing: .01em; }
   .rk-zoom #rk-zoom-label { display: none; }
   .rk-legend { display: none; }
 }
+
+/* Patch 2.5.0: Etappen-HUD, Strategiekarte, Rohstoffleiste und Hauptknopf Aufbruch */
+.welt-modus { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .8rem; }
+.welt-modus button[aria-pressed="true"] { color: #fff0d5; background: #4c3120; border-color: #4c3120; }
+.welt-tabs button.welt-tab-primary { font-weight: 700; border-color: #4c3120; }
+.welt-rohstoffe { display: flex; flex-wrap: wrap; gap: .35rem .9rem; margin: .6rem 0 0; padding: .45rem .6rem; list-style: none;
+  border: 1px solid #ad9066; background: rgba(255, 248, 232, .45); }
+.welt-rohstoffe li { display: flex; gap: .35rem; align-items: baseline; font-size: .9rem; }
+.welt-rohstoffe span { color: #6b4f33; }
+.welt-tabelle { overflow-x: auto; }
+.welt-strategie table { border-collapse: collapse; min-width: 34rem; font-size: .9rem; }
+.welt-strategie th, .welt-strategie td { padding: .3rem .5rem; border-bottom: 1px solid #c9ad84; text-align: left; font-variant-numeric: tabular-nums; }
+.vital-nahrung { --bar: #8a6a2c; }
+.vital-moral { --bar: #4f6b8a; }
+.trade-list .actions { margin-bottom: .4rem; }
