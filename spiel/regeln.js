@@ -1591,7 +1591,7 @@ const rules = (() => {
       const kosten = wegKosten(state, state.knoten, weg);
       return { ...weg, kostenRessource: kosten, rabatt: kosten < weg.kostenRessource, ziel: N.get(weg.zielId),
         grund: reiseGrund(state, weg.zielId), letzterVorrat: kosten >= (state.ressource ?? 0),
-        auftrag: wegAuftrag(state, state.knoten, weg.zielId) };
+        auftrag: wegAuftrag(state, state.knoten, weg.zielId), ...wegInfo(state.knoten, weg) };
     });
   }
 
@@ -1604,6 +1604,13 @@ const rules = (() => {
     if (!daten) return world.encounterTables[weg.sicherheit === "kernland" ? "kernland" : "grenzland"];
     const jaeger = Math.round(daten.gefahr * 100);
     return [[100 - jaeger - 20, "ruhig"], [20, "scheu"], [jaeger, "jaeger"]];
+  }
+  // Kennung, Hinterhalt-Gefahr und Gegner eines Weges für Aufbruch und Reisekarte.
+  function wegInfo(von, weg) {
+    const daten = wegDaten(von, weg.zielId);
+    const gefahr = daten ? daten.gefahr : begegnungsTabelle(weg, null).find(([, art]) => art === "jaeger")[0] / 100;
+    const gegner = weg.kantenTyp === "seeweg" ? [] : daten?.gegner.length ? daten.gegner : jaegerNachFraktion[N.get(weg.zielId).fraktion] ?? [];
+    return { kennung: wegKennung(von, weg.zielId), gefahr, gegner: gegner.map(id => world.fights[id].name) };
   }
   function knotenBegegnung(state, weg, ziel, von = null) {
     const daten = von ? wegDaten(von, ziel.id) : null;

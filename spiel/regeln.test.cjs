@@ -1449,6 +1449,14 @@ console.log("Reisebegegnungen (ruhig, scheu, Jäger, Alphatier, Ausweichen) gepr
   {
     const folge = (values) => { let index = 0; rules.setTravelDice(() => values[Math.min(index++, values.length - 1)]); };
     const amPass = { ...hub, knoten: "eiswacht", health: rules.healthLimit(hub) };
+    // Aufbruch und Reisekarte zeigen Kennung, Gefahr und Gegner des Weges.
+    const passWeg = rules.reiseZiele(amPass).find(weg => weg.zielId === "brandstein");
+    assert.equal(passWeg.kennung, "P03");
+    assert.equal(passWeg.gefahr, 0.25);
+    same(passWeg.gegner, ["jagd-grauwolf", "auftrag-klippenwyrm"].map(id => world.fights[id].name));
+    const seeWeg = rules.reiseZiele({ ...hub, knoten: "westvik" }).find(weg => weg.kantenTyp === "seeweg");
+    assert.match(seeWeg.kennung, /^M\d\d$/);
+    same(seeWeg.gegner, [], "Auf See gibt es noch keine Kämpfe");
     folge([0.74]);
     assert.equal(rules.reise(amPass, "brandstein").combat, null, "74 liegt noch unter 55 ruhig + 20 scheu");
     folge([0.75, 0.5, 0.9, 0]);

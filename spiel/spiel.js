@@ -244,6 +244,7 @@
   function showHome(message = "") {
     if (el("inventory-hub").open) el("inventory-hub").close();
     if (el("character-sheet").open) el("character-sheet").close();
+    if (el("reisekarte").open) el("reisekarte").close();
     show("home");
     el("continue").hidden = state === null;
     el("home-status").textContent = message;
@@ -1008,6 +1009,252 @@
     }
     if (!container.children.length) container.append(element("p", kind ? "Im Rucksack liegt nichts Passendes." :
       hub.tab === "bag" ? "Dein Rucksack ist leer." : "Im Zentrallager liegt nichts."));
+  }
+
+  // ---- Reisekarte als Pop-up (Gemini, 18. 11. 2026): Menschenlande und Seewege auf einer Seite. ----
+  // Ein Klick auf einen Ort zeigt Weg, Kosten, Gefahr und Gegner. Nachbarorte lassen sich direkt bereisen,
+  // eine Etappe nach der anderen, wie unter „Aufbruch“.
+  const rkZoomStufen = [1, 1.5, 2, 3];
+  // Dorfnamen erst auf Wunsch, sonst wird das Kernland unlesbar. Auf dem Handy startet die Karte vergrößert.
+  const rk = { zoom: null, auswahl: null, zeigen: { strasse: true, pass: true, dorfweg: true, seeweg: true, doerfer: false } };
+  const rkFilterNamen = { ...reisekarte.wegArtNamen, doerfer: "Dorfnamen" };
+  const rkVolkNamen = { orks: "Orks", untote: "Untote", elfen: "Elfen", zwerge: "Zwerge", menschen: "Menschen" };
+
+  function svgElement(tag, attributes, parent) {
+    const node = document.createElementNS(svgNs, tag);
+    for (const [key, value] of Object.entries(attributes)) node.setAttribute(key, value);
+    parent?.append(node);
+    return node;
+  }
+
+  function rkPercent(value) {
+    return Math.round(value * 100) + " %";
+  }
+
+  function renderReisekarte() {
+    if (!state) return;
+    const hier = rules.aktuellerKnoten(state);
+    const ziele = new Map(rules.reiseZiele(state).map(weg => [weg.zielId, weg]));
+    const hierKnoten = hier ? knoten.get(hier) : null;
+    el("rk-place").textContent = reisekarte.titel + " · " + (!hierKnoten ? "Du bist unterwegs in der Handlung" :
+      reisekarte.hat(hier) ? "Du bist in " + hierKnoten.name : hierKnoten.name + " liegt außerhalb dieser Karte");
+
+    const filter = el("rk-filter");
+    filter.replaceChildren();
+    for (const [key, label] of Object.entries(rkFilterNamen)) {
+      const control = element("button", label);
+      control.type = "button";
+      control.className = "rk-toggle rk-toggle-" + key;
+      control.setAttribute("aria-pressed", rk.zeigen[key]);
+      control.addEventListener("click", () => {
+        rk.zeigen[key] = !rk.zeigen[key];
+        renderReisekarte();
+        filter.querySelector(".rk-toggle-" + key)?.focus();
+      });
+      filter.append(control);
+    }
+    el("rk-zoom-label").textContent = Math.round(rkZoomStufen[rk.zoom] * 100) + " %";
+    for (const control of document.querySelectorAll("[data-rk-zoom]")) {
+      const next = rk.zoom + Number(control.dataset.rkZoom);
+      control.disabled = next < 0 || next >= rkZoomStufen.length;
+    }
+
+    const W = reisekarte.breite;
+    const H = reisekarte.hoehe;
+    const board = el("rk-svg");
+    board.setAttribute("viewBox", "0 0 " + W + " " + H);
+    board.style.width = rkZoomStufen[rk.zoom] * 100 + "%";
+    // Schrift und Punkte wachsen beim Vergrößern nur halb so stark mit, so rücken die Namen auseinander.
+    board.style.setProperty("--rk-z", Math.sqrt(rkZoomStufen[rk.zoom]));
+    board.replaceChildren();
+    svgElement("rect", { class: "rk-meer", x: 0, y: 0, width: W, height: H }, board);
+    // Land: breite Bänder entlang der Landwege und Flecken um jeden Ort. Seewege bleiben offen.
+    const land = svgElement("g", { class: "rk-land", "aria-hidden": "true" }, board);
+    for (const weg of reisekarte.landwege) {
+      const [x1, y1] = reisekarte.lage(weg.a);
+      const [x2, y2] = reisekarte.lage(weg.b);
+      svgElement("line", { x1, y1, x2, y2, class: "rk-landband" }, land);
+    }
+    for (const ort of reisekarte.orte) {
+      svgElement("circle", { cx: ort.x, cy: ort.y, r: ort.typ === "dorf" ? 10 : ort.uebersee ? 15 : 17,
+        class: "rk-landfleck rk-volk-" + ort.volk }, land);
+    }
+
+    const aktivNach = (weg) => hier && (weg.a === hier || weg.b === hier) && ziele.has(weg.a === hier ? weg.b : weg.a);
+    const wegGruppe = svgElement("g", { class: "rk-wege", "aria-hidden": "true" }, board);
+    for (const weg of reisekarte.wege) {
+      if (!rk.zeigen[weg.art] && !aktivNach(weg)) continue;
+      const [x1, y1] = reisekarte.lage(weg.a);
+      const [x2, y2] = reisekarte.lage(weg.b);
+      const linie = svgElement("line", { x1, y1, x2, y2,
+        class: "rk-weg rk-" + weg.art + " rk-" + weg.sicherheit + (aktivNach(weg) ? " rk-aktiv" : "") }, wegGruppe);
+      svgElement("title", {}, linie).textContent = weg.kennung;
+    }
+
+    const orteGruppe = svgElement("g", { class: "rk-orte" }, board);
+    for (const ort of [...reisekarte.orte].reverse()) {
+      const weg = ziele.get(ort.id);
+      const wichtig = ort.id === hier || weg || ort.id === rk.auswahl;
+      if (ort.typ === "dorf" && !rk.zeigen.dorfweg && !wichtig) continue;
+      const klassenListe = ["rk-ort", "rk-typ-" + ort.typ, "rk-volk-" + ort.volk];
+      if (ort.hafen) klassenListe.push("rk-hafen");
+      if (ort.uebersee) klassenListe.push("rk-uebersee");
+      if (ort.id === hier) klassenListe.push("rk-hier");
+      if (weg) klassenListe.push(weg.grund ? "rk-gesperrt" : "rk-ziel");
+      if (ort.id === rk.auswahl) klassenListe.push("rk-gewaehlt");
+      const gruppe = svgElement("g", { class: klassenListe.join(" "), transform: "translate(" + ort.x + " " + ort.y + ")",
+        role: "button", tabindex: ort.typ === "dorf" && !wichtig ? -1 : 0, "data-ort": ort.id,
+        "aria-label": ort.name + " · " + knoten.typNamen[ort.typ] + (ort.id === hier ? " · Du bist hier" : weg ? " · erreichbar" : "") }, orteGruppe);
+      if (ort.id === hier) svgElement("circle", { r: 11, class: "rk-puls" }, gruppe);
+      if (ort.id === rk.auswahl) svgElement("circle", { r: 9, class: "rk-ring" }, gruppe);
+      if (weg) svgElement("circle", { r: 7.5, class: "rk-zielring" }, gruppe);
+      if (ort.uebersee) svgElement("rect", { x: -4, y: -4, width: 8, height: 8, transform: "rotate(45)", class: "rk-punkt" }, gruppe);
+      else svgElement("circle", { r: ort.typ === "dorf" ? 2.6 : ort.typ === "hauptstadt" ? 6 : 4.5, class: "rk-punkt" }, gruppe);
+      if (ort.typ === "hauptstadt") svgElement("circle", { r: 2.2, class: "rk-kern" }, gruppe);
+      // Größere Trefferfläche für Finger und Maus.
+      svgElement("circle", { r: ort.typ === "dorf" ? 7 : 10, class: "rk-treffer" }, gruppe);
+      if (ort.typ !== "dorf" || rk.zeigen.doerfer || wichtig) {
+        const links = ort.x > W - 80;
+        const name = svgElement("text", { x: links ? -8 : 8, y: ort.typ === "dorf" ? 2.5 : 3.5, "text-anchor": links ? "end" : "start",
+          class: "rk-name" + (ort.typ === "dorf" ? " rk-name-dorf" : "") }, gruppe);
+        name.textContent = ort.name;
+      }
+      const waehlen = () => {
+        rk.auswahl = ort.id;
+        renderReisekarte();
+        board.querySelector('[data-ort="' + ort.id + '"]')?.focus();
+      };
+      gruppe.addEventListener("click", waehlen);
+      gruppe.addEventListener("keydown", event => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        waehlen();
+      });
+    }
+    renderReisekarteInfo(hier, ziele);
+  }
+
+  function renderReisekarteInfo(hier, ziele) {
+    const info = el("rk-info");
+    info.replaceChildren();
+    const reisen = state.scene === "weltknoten" && !state.combat && state.health > 0;
+    const id = rk.auswahl && reisekarte.hat(rk.auswahl) ? rk.auswahl : hier && reisekarte.hat(hier) ? hier : null;
+    if (!id) {
+      info.append(element("p", hier ? "Dein Standort liegt außerhalb dieser Karte. Wähle einen Ort, um seine Wege zu sehen." :
+        "Wähle einen Ort, um seine Wege zu sehen. Reisen kannst du von der Weltreise aus."));
+      return;
+    }
+    const ort = knoten.get(id);
+    const kartenOrt = reisekarte.orte.find(entry => entry.id === id);
+    info.append(element("h3", ort.name));
+    const herkunft = element("p", knoten.typNamen[ort.typ] + (ort.hatHafen && ort.typ !== "hafenstadt" ? " mit Hafen" : "") + " · " +
+      (klassen.fraktionen[ort.fraktion]?.name ?? ort.fraktion) + (kartenOrt.uebersee ? " · " + rkVolkNamen[kartenOrt.volk] + ", Übersee" : ""));
+    herkunft.className = "rk-herkunft";
+    info.append(herkunft);
+    if (id === hier) info.append(element("p", "Du bist hier."));
+
+    const weg = ziele.get(id);
+    if (weg) {
+      const daten = element("dl");
+      daten.className = "rk-daten";
+      const zeile = (label, wert) => daten.append(element("dt", label), element("dd", wert));
+      const kosten = [weg.kostenRessource ? weg.kostenRessource + " " + rules.resourceName(state) : "",
+        weg.kostenGold ? weg.kostenGold + " Silber" : ""].filter(Boolean).join(" + ") || "frei";
+      zeile("Weg", (weg.kennung ? weg.kennung + " · " : "") + knoten.kantenNamen[weg.kantenTyp] + (weg.pass ? " (" + weg.pass + ")" : ""));
+      zeile("Zone", knoten.sicherheitNamen[weg.sicherheit]);
+      zeile("Kosten", kosten + (weg.rabatt ? " (Auftrag: 1 günstiger)" : ""));
+      zeile("Hinterhalt", rkPercent(weg.gefahr));
+      zeile("Gegner", weg.kantenTyp === "seeweg" ? "noch keine Kämpfe auf See" : weg.gegner.join(", ") || "keine");
+      info.append(daten);
+      if (weg.auftrag) {
+        const auftrag = rules.auftraege(state).find(entry => entry.id === weg.auftrag);
+        const hinweis = element("p", "Auftrag unterwegs: " + auftrag.titel + ".");
+        hinweis.className = "welt-aushang-hinweis";
+        info.append(hinweis);
+      }
+      if (weg.letzterVorrat && !weg.grund) {
+        const warn = element("p", "Achtung: Diese Reise braucht deinen letzten Vorrat.");
+        warn.className = "welt-alarm";
+        info.append(warn);
+      }
+      const reise = element("div");
+      reise.className = "actions";
+      button(reise, "Reise nach " + ort.name + (weg.grund ? " · " + weg.grund : ""), () => {
+        rk.auswahl = null;
+        welt.tab = "aufbruch";
+        update(rules.reise(state, id));
+        // Ein Hinterhalt oder eine Szene der Handlung braucht das Hauptfenster.
+        if (state.combat || state.scene !== "weltknoten") el("reisekarte").close();
+        else el("rk-scroll").focus();
+      }, { disabled: !reisen || Boolean(weg.grund), story: true });
+      info.append(reise);
+    } else if (id !== hier) {
+      info.append(element("p", hier && reisekarte.hat(hier) ? "Kein direkter Weg von deinem Standort. Reisen geht nur von Ort zu Ort, jede Etappe einzeln." :
+        "Reisen kannst du von der Weltreise aus."));
+    }
+    if (id === hier && !reisen) {
+      info.append(element("p", state.combat ? "Im Kampf kannst du die Karte nur ansehen." :
+        state.scene === "weltknoten" ? "Ohne Lebenspunkte kannst du nicht reisen." : "Reisen kannst du, sobald du in der Weltreise bist."));
+    }
+
+    const wege = reisekarte.wegeVon(id);
+    if (wege.length) {
+      info.append(element("h4", "Wege von " + ort.name));
+      const liste = element("ul");
+      liste.className = "rk-wegliste";
+      for (const eintrag of wege) {
+        const anderer = eintrag.a === id ? eintrag.b : eintrag.a;
+        const item = element("li");
+        const wahl = element("button", knoten.get(anderer).name);
+        wahl.type = "button";
+        wahl.className = "rk-link" + (ziele.has(anderer) && id === hier ? " rk-link-ziel" : "");
+        wahl.addEventListener("click", () => {
+          rk.auswahl = anderer;
+          renderReisekarte();
+          el("rk-info").querySelector("h3")?.setAttribute("tabindex", "-1");
+          el("rk-info").querySelector("h3")?.focus();
+        });
+        item.append(element("span", eintrag.kennung), wahl);
+        liste.append(item);
+      }
+      info.append(liste);
+    }
+  }
+
+  function openReisekarte() {
+    if (!state) return;
+    if (el("inventory-hub").open) el("inventory-hub").close();
+    if (el("character-sheet").open) el("character-sheet").close();
+    rk.auswahl = null;
+    rk.zoom ??= window.matchMedia("(max-width: 42rem)").matches ? 2 : 1;
+    renderReisekarte();
+    el("reisekarte").showModal();
+    rkZentrieren();
+    el("rk-close").focus();
+  }
+
+  // Den Standort in die Mitte des sichtbaren Ausschnitts rücken.
+  function rkZentrieren() {
+    const hier = rules.aktuellerKnoten(state);
+    const punkt = hier && reisekarte.lage(hier);
+    const scroll = el("rk-scroll");
+    if (!punkt) return;
+    const board = el("rk-svg");
+    scroll.scrollLeft = punkt[0] / reisekarte.breite * board.clientWidth - scroll.clientWidth / 2;
+    scroll.scrollTop = punkt[1] / reisekarte.hoehe * board.clientHeight - scroll.clientHeight / 2;
+  }
+
+  for (const opener of document.querySelectorAll("[data-reisekarte-open]")) opener.addEventListener("click", openReisekarte);
+  el("rk-close").addEventListener("click", () => el("reisekarte").close());
+  el("reisekarte").addEventListener("click", event => {
+    if (event.target === event.currentTarget) event.currentTarget.close();
+  });
+  for (const control of document.querySelectorAll("[data-rk-zoom]")) {
+    control.addEventListener("click", () => {
+      rk.zoom = Math.max(0, Math.min(rkZoomStufen.length - 1, rk.zoom + Number(control.dataset.rkZoom)));
+      renderReisekarte();
+      rkZentrieren();
+    });
   }
 
   for (const opener of document.querySelectorAll("[data-hub-open]")) opener.addEventListener("click", openHub);
@@ -2420,7 +2667,8 @@
   function weltAufbruch(panel, ort) {
     panel.append(element("h3", "Aufbruch"));
     panel.append(element("p", "Jede Reise ist eine Runde: Die Weltleisten ändern sich, und unterwegs würfelt das Land eine Begegnung aus. " +
-      "Kernland ist zu 70 % ruhig, Grenzland, Pässe und Seewege nur zu 40 %."));
+      "Jeder Weg hat seine eigene Gefahr für einen Hinterhalt. Die Reisekarte zeigt alle Wege auf einen Blick."));
+    button(panel, "Reisekarte öffnen", openReisekarte);
     const list = element("ul");
     list.className = "welt-ziele";
     const ziele = rules.reiseZiele(state).sort((a, b) => (a.ziel.typ === "dorf") - (b.ziel.typ === "dorf") || a.ziel.name.localeCompare(b.ziel.name, "de"));
@@ -2431,7 +2679,7 @@
       head.className = "welt-ziel-head";
       head.append(element("strong", weg.ziel.name), element("span", knoten.typNamen[weg.ziel.typ] + " · " + klassen.fraktionen[weg.ziel.fraktion].name));
       const kosten = [weg.kostenRessource ? weg.kostenRessource + " " + rules.resourceName(state) : "", weg.kostenGold ? weg.kostenGold + " Silber" : ""].filter(Boolean).join(" + ");
-      const risiko = weg.sicherheit === "kernland" ? "Risiko gering" : "Risiko hoch";
+      const risiko = "Hinterhalt " + rkPercent(weg.gefahr) + (weg.gegner.length ? " (" + weg.gegner.join(", ") + ")" : "");
       const info = element("p", knoten.kantenNamen[weg.kantenTyp] + (weg.pass ? " (" + weg.pass + ")" : "") + " · " +
         knoten.sicherheitNamen[weg.sicherheit] + " · " + risiko + " · " + kosten +
         (weg.probe ? " · Probe auf Willenskraft oder Intelligenz, Glut +" + weg.glut : "") +
@@ -2651,6 +2899,7 @@
     renderScene();
     renderMap();
     if (el("character-sheet").open) renderSheet();
+    if (el("reisekarte").open) renderReisekarte();
   }
 
   for (const [id, data] of Object.entries(klassen.voelker)) volk.add(new Option(data.name, id));
