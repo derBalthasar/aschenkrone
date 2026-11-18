@@ -11,7 +11,7 @@ Stand: 18. 11. 2026. Grundlage ist die Ausarbeitung von Gemini (Quelltext unver�
 6. Die Fraktions-Spezialisierung kommt **zusätzlich** zur Spezialisierung der Klasse.
 7. **Runenwaffen darf das Kronreich tragen, Glutwaffen nicht.**
 8. Akt 5: Das Ziel der Überfahrt ist **frei wählbar**. Elfen, Orks und Zwerge kann man als Verbündete gewinnen oder unterwerfen. Wer zum Kontinent der Untoten segelt, um die Untoten-Bedrohung zu vernichten, wählt den extrem schweren Weg.
-9. Keine zwei Späher unter den Begleitern: Wulfgar bleibt Späher (im Kronreich „Steppenreiter“), Fenris wird Krieger (Huskarl). Diese Klassenwahl ist vorläufig und von Henry noch zu bestätigen.
+9. Keine zwei Späher unter den Begleitern: Wulfgar bleibt Späher (im Kronreich „Steppenreiter“), Fenris wird Krieger (Huskarl). Von Henry bestätigt (18. 11. 2026).
 
 | Teil | Stand im Spiel |
 | --- | --- |
@@ -76,7 +76,7 @@ Die Gruppengrenze im Spiel liegt bei 3 Gefährten plus Held (`rules.partyLimit`)
 | --- | --- | --- | --- | --- | --- |
 | Sigrid Eisenschild | Schildmaid / Tank | Wächter (Burgvogt) | Kronhall, Akt 1 | kronhall_q10 „Die eiserne Schuld“ | Unbrechbarer Schildwall |
 | Wulfgar Rossbrecher | Kavallerist / Späher | Späher (Steppenreiter) | Rosshag, Akt 2 | rosshag_q10 „Der Eid der Reiter“ | Sturmangriff der Steppe |
-| Fenris Ulfsson | Meister-Bogenschütze | Krieger (Huskarl), vorläufig | Ulfsborg, Akt 3 | ulfsborg_q10 „Der Jäger von Wolfstal“ | Blattschuss aus dem Hinterhalt |
+| Fenris Ulfsson | Meister-Bogenschütze | Krieger (Huskarl) | Ulfsborg, Akt 3 | ulfsborg_q10 „Der Jäger von Wolfstal“ | Blattschuss aus dem Hinterhalt |
 
 ## Offene Frage an Henry
 
