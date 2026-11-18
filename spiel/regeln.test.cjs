@@ -520,7 +520,7 @@ assert.equal(updated.scene, yard.scene);
 assert.equal(updated.role, "spaeher");
 assert.equal(updated.faction, "haefen");
 assert.equal(updated.umschulung, false);
-assert.equal(rules.title(updated), "Seeschütze");
+assert.equal(rules.title(updated), "Schwarzschütze");
 assert.ok(yard.inventory.every(item => updated.inventory.includes(item)));
 assert.equal(rules.weapon(updated), "bogen");
 assert.equal(reload(updated).faction, "haefen");
@@ -1540,6 +1540,13 @@ console.log("Reisebegegnungen (ruhig, scheu, Jäger, Alphatier, Ausweichen) gepr
   assert.match(ambush.combat.id, /^sys-ENM_OF_/);
   const sysFeind = rules.systeme.gegnerNach[ambush.combat.id.slice(4)];
   assert.equal(ambush.combat.feinde[0].max, rules.systeme.kampfWerte(sysFeind.id, ambush.combat.feinde[0].stufe).lp);
+  // Patch 2.5.1: Systemgegner tragen ihre Rüstung in den Kampf (prozentuale Minderung mit Konstante 14).
+  assert.equal(ambush.combat.feinde[0].ruestung ?? 0, rules.systeme.kampfWerte(sysFeind.id, ambush.combat.feinde[0].stufe).ruestung);
+  {
+    const vorher = ambush.combat.feinde[0].lp;
+    const nachher = rules.strike(ambush, "spear", highRoll);
+    if (nachher.combat) assert.ok(vorher - nachher.combat.feinde[0].lp >= 1, "Rüstung lässt mindestens 1 Schaden durch");
+  }
   assert.equal(ambush.combat.weiter, "weltknoten");
   assert.equal(rules.read(JSON.stringify(ambush)).combat.weiter, "weltknoten");
   const evaded = rules.strike(ambush, "evade");
@@ -1566,10 +1573,12 @@ console.log("Weltebene (Knotennetz, Weltleisten, Vorrat, Seewege, Pässe, Stolle
   assert.equal(plan.stufenpunkte, 0);
   same(plan.training, { strength: 1, will: 1 });
   assert.equal(rules.entwurf(ready, { training: { strength: 3 } }), ready, "Zu viele Punkte: nichts wird gespeichert");
-  const spez = rules.entwurf({ ...ready, questStufe: 3 }, { training: { strength: 2 }, spez: { variante: "a", grundwert: "will", fertigkeit: "mut" } });
+  // Menschen spezialisieren sich ab Erfahrungsstufe 10 (Patch 2.0.0 Punkt 9), Quest-Stufe 3 reicht nicht mehr.
+  assert.equal(rules.spezBereit({ ...ready, questStufe: 3 }), false);
+  const spez = rules.entwurf({ ...ready, xp: 4500 }, { training: { strength: 2 }, spez: { variante: "a", grundwert: "will", fertigkeit: "mut" } });
   assert.equal(spez.build.spez.variante, "a");
   assert.equal(spez.build.fertigkeiten.mut, ready.build.fertigkeiten.mut + 1);
-  assert.equal(rules.entwurf(ready, { spez: { variante: "a", grundwert: "will", fertigkeit: "mut" } }), ready, "Spezialisierung erst ab Quest-Stufe 3");
+  assert.equal(rules.entwurf(ready, { spez: { variante: "a", grundwert: "will", fertigkeit: "mut" } }), ready, "Spezialisierung erst ab Erfahrungsstufe 10");
 }
 console.log("Charakter-Entwurf geprüft.");
 

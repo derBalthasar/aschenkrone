@@ -24,8 +24,10 @@ assert.equal(S.signaturRang(25), 4);
 
 // Schaden (Patch 2.2.0): Rüstung prozentual, mindestens 1, Durchdringung senkt die Rüstung.
 assert.equal(S.schaden(100, 0), 100);
-assert.equal(S.schaden(100, 50), 50);
-assert.equal(S.schaden(100, 100, 0.5), 50);
+// Patch 2.5.1: Konstante 14 nach dem Teilen durch 3,5.
+assert.equal(S.schaden(100, 14), 50);
+assert.equal(S.schaden(90, 7), 60);
+assert.equal(S.schaden(100, 28, 0.5), 50);
 assert.equal(S.schaden(0.4, 100), 1);
 assert.equal(S.rohSchaden(10, 16, 1.5, true), 40.5);
 assert.equal(S.maxMana(12, 11), 12 + 12 + 5);

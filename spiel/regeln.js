@@ -770,7 +770,13 @@ const rules = (() => {
   }
   const gearSkill = (gear) => gear.skill ?? ({ strength: "nahkampf", agility: gear.airborne ? "fernkampf" : "nahkampf", mind: "magie" })[gear.stat];
   // Lebenspunkte hängen an der Rolle und der Erfahrungsstufe (Kampfdokument).
-  const healthLimit = (state) => kampf.lebenspunkte(profile(state.faction, state.role), kampf.stufeAus(state.xp ?? 0));
+  // Menschen (Patch 2.4.0): Grund-LP aus Henrys Klassen geteilt durch 3,5, Zuwachs je Stufe wie im Kampfdokument.
+  const healthLimit = (state) => {
+    const neu = SY.istMensch(state.faction) && SY.daten.menschenKlassen[state.faction]?.[state.role];
+    const stufe = kampf.stufeAus(state.xp ?? 0);
+    return neu ? neu.lp + kampf.lpTabelle[profile(state.faction, state.role)][1] * (stufe - 1)
+      : kampf.lebenspunkte(profile(state.faction, state.role), stufe);
+  };
   const legacyHealthLimit = (state) => 18 + heroAttributes(state).strength + 2 * state.build.fertigkeiten.verteidigung;
   const emberLimit = (state) => 1 + Math.floor(heroAttributes(state).will / 3);
   // Halten und Blocken über Verteidigung, Ausweichen über Geschick.
@@ -796,8 +802,13 @@ const rules = (() => {
   }
 
   // Spezialisierung ab Quest-Stufe 3: Titel, +1 Fertigkeitspunkt, +1 Grundwert. Die Wahl gilt für immer.
+  // Patch 2.0.0 Punkt 9: Menschen spezialisieren sich ab Erfahrungsstufe 10, die anderen Völker ab Quest-Stufe 3.
+  const spezBereit = (state) => SY.istMensch(state.faction) ? level(state) >= 10 : state.questStufe >= K.regeln.spezialisierungStufe;
+  const spezHinweis = (state) => SY.istMensch(state.faction) ? "ab Erfahrungsstufe 10" : "ab Quest-Stufe " + K.regeln.spezialisierungStufe;
+  // Patch 2.1.0 Punkt 11: Bei den Menschen ersetzt Rang 4 der Signaturfähigkeit (Stufe 25) die Meisterklasse.
+  const meisterBereit = (state) => !SY.istMensch(state.faction) && Boolean(state.build.spez) && !state.build.meister && state.vereinigt;
   function specialize(previous, variante, grundwert, fertigkeit) {
-    if (previous.build.spez || previous.questStufe < K.regeln.spezialisierungStufe || previous.combat || !previous.health ||
+    if (previous.build.spez || !spezBereit(previous) || previous.combat || !previous.health ||
         !["a", "b"].includes(variante) || !own(K.fertigkeiten, fertigkeit)) return previous;
     const build = structuredClone(previous.build);
     build.spez = { variante, grundwert };
@@ -814,7 +825,7 @@ const rules = (() => {
 
   // Meisterklasse nach der Vereinigung des eigenen Volkes: +1 Fertigkeitspunkt und +2 Grundwerte.
   function ascend(previous, grundwerte, fertigkeit) {
-    if (!previous.build.spez || previous.build.meister || !previous.vereinigt || previous.combat || !previous.health ||
+    if (!meisterBereit(previous) || previous.combat || !previous.health ||
         !own(K.fertigkeiten, fertigkeit)) return previous;
     const build = structuredClone(previous.build);
     build.meister = { grundwerte: { ...grundwerte } };
@@ -2006,6 +2017,7 @@ const rules = (() => {
       world.gear[g.id] = { slot, stat: fokus ? "mind" : fern || g.equipCategory === "DOLCH_KLINGE" ? "agility" : "strength",
         ...(g.equipCategory === "DOLCH_KLINGE" ? { skill: "nahkampf" } : {}),
         power: SY.skaliert(w.attack), pierce: sysWert(w.armorPen, 10),
+        ...(w.armorPen ? { durchdringung: w.armorPen / 100 } : {}), ...(w.critChance ? { krit: w.critChance } : {}),
         magic: sysWert(w.fireDamage, 5) + sysWert(w.willpower, 3),
         ...(/ZWEIHAND|BOGEN|GEWEHR|STAB/.test(g.equipCategory) ? { twoHanded: true } : {}) };
     } else if (slot) {
@@ -2575,6 +2587,13 @@ const rules = (() => {
     const stufe = level(state);
     const extra = Math.floor((stufe - 1) / 2);
     const magie = K.fraktionen[state.faction].magie ? state.build.fertigkeiten.magie : 0;
+    // Menschen (Patch 2.1.0 Punkt 10, 2.4.0): Mana nur für Pyromant, Kleriker der Flamme, Glutpaladin und Inquisitor,
+    // 12 + Willenskraft + Intelligenz/2.
+    const klasse = menschenKlasse(state);
+    if (klasse) {
+      const werte = heroAttributes(state);
+      return { ausdauer: 10 + extra, mana: klasse.mana ? SY.maxMana(werte.will, werte.mind) : 0 };
+    }
     return { ausdauer: 10 + extra, mana: magie > 0 ? 2 * magie + extra : 0 };
   };
   const resourceName = (state) => K.fraktionen[state.faction].ressource;
@@ -2594,10 +2613,19 @@ const rules = (() => {
   function abilities(state) {
     const stufe = level(state);
     const spez = state.build.spez?.variante;
-    const list = kampf.klassenFaehigkeiten(state.faction, state.role).map((f) => ({
+    const signatur = SY.istMensch(state.faction) ? faehigkeiten.fraktionen[state.faction].klassen[state.role].signatur : null;
+    let list = kampf.klassenFaehigkeiten(state.faction, state.role).map((f) => ({
       ...f, frei: stufe >= f.stufe,
-      spezialisiert: (spez === "a" && f.stufe === 6) || (spez === "b" && f.stufe === 10),
+      spezialisiert: !signatur && ((spez === "a" && f.stufe === 6) || (spez === "b" && f.stufe === 10)),
     }));
+    if (signatur) {
+      // Stufe 15 und 20: Signaturfähigkeit der gewählten Spezialisierung in Rang 2 und 3; Rang 3 ersetzt Rang 2.
+      list = list.map((f) => {
+        if (f.stufe < 15) return f;
+        const [name, wirkung, zahlung] = signatur[spez ?? "a"][f.stufe === 15 ? 0 : 1];
+        return { ...f, name, wirkung, zahlung, regel: kampf.lies(wirkung), frei: f.frei && Boolean(spez), signatur: true };
+      }).filter((f) => !(f.stufe === 15 && stufe >= 20 && spez));
+    }
     if (state.build.meister) {
       for (const f of kampf.meisterFaehigkeiten(state.faction, state.role)) list.push({ ...f, frei: stufe >= f.stufe, spezialisiert: false });
     }
@@ -2656,7 +2684,7 @@ const rules = (() => {
       const lp = group ? values.lp : Math.round(values.lp * (1 + 0.25 * size));
       const name = index === 0 ? (group?.leader ?? fight.name ?? creature.name) : group.ally + " " + index;
       return { name, rang: spec.rang, stufe: spec.stufe, lp, max: lp, schaden: values.schaden, aktionen: values.aktionen,
-        geschick, tags: spec.tags ?? [], status: {} };
+        geschick, tags: spec.tags ?? [], status: {}, ...(fight.system && values.ruestung ? { ruestung: values.ruestung } : {}) };
     });
   }
 
@@ -2833,6 +2861,21 @@ const rules = (() => {
     // Relikte der Gruppe: Feuerschaden und Schaden gegen Untote.
     if (fire) amount += reliktWert(state, "fireDamage");
     if (foe.tags.includes("untot")) amount = Math.round(amount * (1 + reliktWert(state, "damageVsUndead")));
+    // Patch 2.2.0/2.5.1: Kritische Treffer (×1,5) nach Kritchance der Waffe, ohne Zufall über einen Zähler,
+    // und Rüstung der Systemgegner als prozentuale Minderung mit Konstante 14, gesenkt durch Durchschlag.
+    if (actor === "hero" && menschen(state)) {
+      const gear = world.gear[weapon(state)] ?? {};
+      if (gear.krit) {
+        const held = state.combat.held;
+        held.kritZaehler = (held.kritZaehler ?? 0) + gear.krit;
+        if (held.kritZaehler >= 100) {
+          held.kritZaehler -= 100;
+          amount = Math.floor(amount * SY.daten.kampf.krit);
+          note(state, "Kritischer Treffer gegen " + foe.name + " (×" + String(SY.daten.kampf.krit).replace(".", ",") + ").");
+        }
+      }
+    }
+    if (foe.ruestung) amount = SY.schaden(amount, foe.ruestung, actor === "hero" ? world.gear[weapon(state)]?.durchdringung ?? 0 : 0);
     const value = Math.min(foe.lp, amount + (foe.status.verwundbar?.wert ?? 0));
     foe.lp -= value;
     if (fire && round) round.usedFire = true;
@@ -3228,10 +3271,17 @@ const rules = (() => {
           const victim = active[victimCursor++ % active.length];
           const heroTarget = victim.id === "hero";
           const armor = (heroTarget ? gearBonus(state, "armor") : memberGearBonus(state, victim.id, "armor")) + reliktWert(state, "partyResistance");
-          const reduction = Math.floor(((heroTarget ? protection(state) : 2) + armor) / 2);
           const defense = heroTarget && round.guarding ? Math.max(6, round.ward) : round.ward;
           const guarding = defense > 0;
-          let hit = Math.max(guarding ? 0 : 1, damage - reduction - defense);
+          let hit;
+          if (menschen(state)) {
+            // Patch 2.2.0/2.5.1: Rüstung mindert prozentual (Konstante 14); Klassenrüstung zählt beim Helden mit.
+            const klassenRuestung = heroTarget ? SY.daten.menschenKlassen[state.faction]?.[state.role]?.ruestung ?? 0 : 2;
+            hit = damage > 0 ? Math.max(guarding ? 0 : 1, SY.schaden(damage, klassenRuestung + armor) - defense) : 0;
+          } else {
+            const reduction = Math.floor(((heroTarget ? protection(state) : 2) + armor) / 2);
+            hit = Math.max(guarding ? 0 : 1, damage - reduction - defense);
+          }
           if (heroTarget) {
             if (index === 0 && action === 0) { heroHit = true; heroGuarded = guarding; }
             const absorbed = Math.min(held.schild, hit);
@@ -3293,7 +3343,7 @@ const rules = (() => {
     const held = turn.held;
     const max = kraft(state);
     held.ausdauer = Math.min(max.ausdauer, held.ausdauer + 2);
-    held.mana = Math.min(max.mana, held.mana + 2);
+    held.mana = Math.min(max.mana, held.mana + (menschen(state) ? SY.daten.kampf.mana.jeZug : 2));
     for (const id of Object.keys(held.abklingen)) {
       if (--held.abklingen[id] <= 0) delete held.abklingen[id];
     }
@@ -3477,7 +3527,7 @@ const rules = (() => {
     weltLeisten, leistenNamen, leistenStart, gegenkraefte, niederlagen, vorratMax, vorratStart, seewegSilber, vorratAnwerbung,
     vertragKosten, ertragMenge, ertragPause, weltRunde, aktuellerKnoten, weltOffen, betreteWelt, handlungHier, zurHandlung,
     reiseGrund, reiseZiele, reise, rastGrund, rastKosten, handelOffen,
-    taten, tatWaehlen, ausruester, ausruesterHandel, ausruestungGrund, handwerkListe, handwerk, schmiedeInfo, schmieden, kontorInfo, kontorHandel, nahrungTragen, spenden, lage, systeme: SY,
+    spezBereit, spezHinweis, meisterBereit, taten, tatWaehlen, ausruester, ausruesterHandel, ausruestungGrund, handwerkListe, handwerk, schmiedeInfo, schmieden, kontorInfo, kontorHandel, nahrungTragen, spenden, lage, systeme: SY,
     auftragGrund, auftragAnnehmen, ausfuehrenGrund, auftragAusfuehren, aushang, auftraege, hauptquest, hauptGrund, hauptWeiter, auftragEp, rast, ertragGrund, ertragEinholen, vertragGrund, vertragSchliessen, entwurf,
     levelThresholds: Array.from({ length: kampf.maxStufe }, (_, index) => kampf.epFuer(index + 1)) };
 })();

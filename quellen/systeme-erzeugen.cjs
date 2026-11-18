@@ -17,6 +17,7 @@ const p200 = lies("patch-2.0.0").decisions;
 const p210 = { ...lies("patch-2.1.0").decisionsPart1, ...lies("patch-2.1.0").decisionsPart2 };
 const p220 = lies("patch-2.2.0");
 const p240 = lies("patch-2.4.0").normalizationRule;
+const p251 = lies("patch-2.5.1").armorMitigationFormulaUpdate;
 const oekonomie = lies("oekonomie-1");
 const katalog = lies("oekonomie-2");
 const ressourcen = lies("ressourcen");
@@ -192,6 +193,68 @@ for (const [datei, fraktion] of [["kronreich", "kronreich"], ["orden", "orden"],
 pruefe(Object.keys(klassen).length === 18, "18 Klassen erwartet");
 const signaturRaenge = lies("klassen-orden-2").specializationRules.signatureSkillRankScaling;
 
+// ---- Fähigkeiten der Menschen-Klassen im Wortlaut des Kampfdokuments (Patch 2.0.0 Punkt 1, Patch 2.4.0) ----
+// Die Kampfregeln (spiel/kampf.js) lesen Wirkungstexte. Henrys Multiplikatoren werden auf den Grundschaden 6 des
+// Kampfdokuments bezogen (Multiplikator 1,0 = „6 Schaden“). Stufe 1/3/6/10: Klassenfähigkeiten, Stufe 15 und 20:
+// Signaturfähigkeit der gewählten Spezialisierung in Rang 2 und 3 (+25 % je Rang).
+const GRUND = 6;
+const dotArt = (typ) => /gift|saeure/.test(typ) ? "Gift" : /brenn|glut/.test(typ) ? "Brand" : /blutung/.test(typ) ? "Blutung" : null;
+function wirkungstext(f, rang = 1) {
+  const teile = [];
+  const faktor = 1 + 0.25 * (rang - 1);
+  const alleFeinde = ["all_enemies", "front_row", "all_allies_and_enemies", "all_enemies_and_allies"].includes(f.target);
+  if (f.hits && f.damageMultPerHit) teile.push(f.hits + " Hiebe, je " + Math.max(1, Math.round(GRUND * f.damageMultPerHit * faktor)) + " Schaden");
+  else if (f.damageMult) teile.push(Math.max(1, Math.round(GRUND * f.damageMult * faktor)) + " Schaden" + (alleFeinde ? " an allen Feinden" : ""));
+  const st = f.statusEffect;
+  if (st) {
+    const dauer = st.duration ?? 2;
+    const art = dotArt(st.type);
+    if (art) teile.push("Ziel " + dauer + " Runden je " + (/schwer|toedlich|weisse/.test(st.type) ? 3 : 2) + " " + art);
+    if (/betaeubt|gefesselt/.test(st.type)) teile.push("Ziel 1 Runde betäubt");
+    if (/verlangsamt|laehmung/.test(st.type)) teile.push("Ziel " + dauer + " Runden verlangsamt");
+    if (/furcht/.test(st.type)) teile.push("Ziel 1 Runde in Furcht");
+    if (/geblendet/.test(st.type)) teile.push("Ziel trifft " + dauer + " Runden −2");
+    if (/markiert|zermuerbt|ruestung/.test(st.type)) teile.push("Ziel nimmt " + dauer + " Runden +2 Schaden von allen");
+    if (/stille/.test(st.type)) teile.push("Schweigen");
+  }
+  if (f.healMult) teile.push((f.target === "all_allies" ? "Gruppe: heilt " : "heilt ") + Math.max(1, Math.round(GRUND * f.healMult * faktor)));
+  if (f.shieldAmountFormula) teile.push(Math.round(7 * faktor) + " Schild");
+  if (f.buffEffect?.armorBonus) teile.push(Math.max(1, Math.round(f.buffEffect.armorBonus / 3.5 * 2 * faktor)) + " Schild");
+  if (f.buffEffect?.attackBonus) teile.push("Gruppe " + (f.buffEffect.duration ?? 2) + " Runden +" + Math.max(1, Math.round(f.buffEffect.attackBonus * 8)) + " Schaden");
+  if ((f.counterReflectRatio || f.buffEffect?.incomingDamageMult || f.buffEffect?.damageReduction) && !f.shieldAmountFormula && !f.buffEffect?.armorBonus) teile.push(Math.round(5 * faktor) + " Schild");
+  if (f.selfHealRatio) teile.push("jeder Treffer heilt ihn um " + Math.max(1, Math.round(f.selfHealRatio * 10)));
+  if (f.cleansesBleedAndPoison || f.cleansesAllDebuffs || f.cleanseDebuffs || f.cleansesPoisonAndDisease) teile.push("entfernt Gift");
+  if (f.bonusVsUndead || f.undeadDamageMult || f.bonusVsBurningOrUndead) teile.push("gegen Untote +3");
+  if (f.armorIgnore) teile.push("durchdringt die halbe Rüstung");
+  if (f.buffEffect?.damageBonus || f.buffEffect?.initiativeBonus || f.staminaRestoreFormula)
+    teile.push("Gruppe " + (f.buffEffect?.duration ?? 2) + " Runden +" + Math.round(2 * faktor) + " Schaden");
+  if (f.buffEffect?.dodgeBonus) teile.push((f.buffEffect.duration ?? 2) + " Runden unsichtbar");
+  if (f.buffEffect?.nextAttackGuaranteedCrit || f.buffEffect?.selfGuaranteedCritNextTurn) teile.push("nächster Angriff +" + Math.round(4 * faktor));
+  // Wiederbeleben: Gefährten haben im Kampf keine eigene Wiederbelebung, der Schutz geht auf den Helden.
+  if (f.reviveHpRatio || f.deathWardTurns) teile.push("heilt " + Math.round(8 * faktor) + ", hält in dieser Schlacht einen tödlichen Treffer mit 1 LP aus");
+  return teile.join(", ") || "Stärkt die Gruppe";
+}
+const rollenName = { krieger: "Nahkampf", waechter: "Schutz der Gruppe", spaeher: "Fernkampf und Spurensuche", magier: "Zauber und Kriegskunst",
+  heiler: "Heilung", schurke: "List und Hinterhalt" };
+const wertName = { strength: "Stärke", agility: "Geschick", will: "Willenskraft", mind: "Intelligenz" };
+const menschenKlassen = {};
+for (const k of Object.values(klassen)) {
+  const zahlung = (f) => (f.kosten === "mana" ? "M" : "A");
+  const [a, b] = k.spezialisierungen;
+  (menschenKlassen[k.fraktion] ??= {})[k.rolle] = {
+    id: k.id, name: k.name, spielweise: rollenName[k.rolle] + " mit " + wertName[k.hauptwert] + (k.mana ? ", Mana für Glutmagie und Gebete" : ""),
+    ressource: k.synergie.name + ": " + k.synergie.effect,
+    a: [a.name, a.passiveEffect.name + ": " + a.passiveEffect.effect], b: [b.name, b.passiveEffect.name + ": " + b.passiveEffect.effect],
+    zahlung: k.mana ? "M" : "A",
+    // Stufe 1 ist im Kampf zugleich der Grundangriff: Ohne eigenen Schaden schlägt der Held dabei mit 6 zu.
+    liste: k.faehigkeiten.map((f, i) => [f.name, (i === 0 && !f.damageMult && !f.damageMultPerHit ? GRUND + " Schaden, " : "") + wirkungstext(f), zahlung(f)]),
+    signatur: Object.fromEntries([["a", a], ["b", b]].map(([v, o]) => [v, [2, 3].map((rang) =>
+      [o.signatureSkill.name + " (Rang " + rang + ")", wirkungstext(o.signatureSkill, rang), zahlung(o.signatureSkill)])])),
+    lp: Math.max(1, Math.round(k.werte.lp / p240.scaleDivisor)), ruestung: Math.max(1, Math.round(k.werte.ruestung / p240.scaleDivisor)),
+  };
+}
+
+
 // ---- Bau: Phasen, Siedlungsstufen, Gebäude, Garnison (Bau-Datei, Patch 1.6.0, 1.6.1, 2.1.0 Punkte 5 und 7) ----
 const gebaeude = Object.fromEntries(p160b.buildingsCatalog.map((g) => [g.id, { id: g.id, name: g.name, ort: g.locationType, phase: g.unlockPhase,
   ruf: g.requiredRep, kosten: kosten(g.cost), verteidigung: g.defenseBonus, wirkung: g.effect }]));
@@ -241,7 +304,7 @@ const aufstieg = { maxStufe: 30, schritte: Object.fromEntries(Object.entries(sch
 // (Kampfdokument 17. 11.) für alle Fraktionen gilt. Mana auf derselben Skala: 12 + Willenskraft + Int/2, +1 je Zug.
 const manaTraenke = Object.fromEntries(Object.entries(p240.normalizedManaAndStaminaScale).filter(([k]) => k.startsWith("POT_MANA"))
   .map(([k, v]) => [k, parseInt(v, 10)]));
-const kampfRegeln = { krit: p210["9_humanDamageFormula"].critMultiplier, ruestungsKonstante: 50, skalaTeiler: p240.scaleDivisor,
+const kampfRegeln = { krit: p210["9_humanDamageFormula"].critMultiplier, ruestungsKonstante: p251.replacesConstant50With, skalaTeiler: p240.scaleDivisor,
   mana: { basis: 12, wille: 1, intelligenz: 0.5, jeZug: p240.normalizedManaAndStaminaScale.manaRegenPerTurn, traenke: manaTraenke } };
 
 // ---- Strategie-Ansicht (Bau-Datei) ----
@@ -254,7 +317,7 @@ if (fehler.length) {
 
 const daten = { rohstoffe, rufRaenge, rufAusloeser, taten, fraktionsHandel, reise, doerfer, zehnt, wiederaufbau, stadtZustand,
   kriegskasse, moral, gegenstaende, ausruestungsRechte, handwerk, schmiede, gegnerRegionen, beutePools, klassen, signaturRaenge,
-  gebaeude, siedlungsStufen, garnison, phasen, vorgebaut, endgame: endgameAktivitaeten, meisterwerk, aufstieg, kampf: kampfRegeln, ansicht };
+  gebaeude, siedlungsStufen, garnison, phasen, vorgebaut, endgame: endgameAktivitaeten, meisterwerk, aufstieg, kampf: kampfRegeln, ansicht, menschenKlassen };
 const ziel = path.join(__dirname, "..", "spiel", "systeme-daten.js");
 fs.writeFileSync(ziel, "\"use strict\";\n\n// Erzeugt von quellen/systeme-erzeugen.cjs aus quellen/henry/systeme/. Nicht von Hand ändern,\n" +
   "// sondern die Quelle oder das Skript anpassen und neu ausführen.\nconst systemDaten = " + JSON.stringify(daten) +

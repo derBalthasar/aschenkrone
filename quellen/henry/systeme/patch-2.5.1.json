@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "2.5.1",
+  "module": "armor_constant_normalization_patch",
+  "armorMitigationFormulaUpdate": {
+    "replacesConstant50With": 14,
+    "reason": "Anpassung an den Skalierungsdivisor 3.5 (50 / 3.5 = 14.28 -> 14), damit Rüstung exakt dieselbe prozentuale Wirkung behält.",
+    "formula": "finalDamage = max(1, floor(rawDamage * (14 / (14 + effectiveArmor))))",
+    "effectiveArmorFormula": "effectiveArmor = targetArmor * (1 - armorPenPercent)",
+    "reductionExamples": {
+      "armor_0": "0.0 % Schadensreduktion",
+      "armor_7": "33.3 % Schadensreduktion",
+      "armor_14": "50.0 % Schadensreduktion",
+      "armor_28": "66.7 % Schadensreduktion"
+    }
+  }
+}

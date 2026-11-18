@@ -1396,7 +1396,7 @@
         ["Volk", klassen.voelker[faction.volk].name],
         ["Fraktion", faction.name],
         ["Grundklasse", klassen.grundklassen[rules.profile(state.faction, state.role)].name],
-        ["Spezialisierung", state.build.spez ? klasse[state.build.spez.variante][0] : "ab Quest-Stufe " + klassen.regeln.spezialisierungStufe],
+        ["Spezialisierung", state.build.spez ? klasse[state.build.spez.variante][0] : rules.spezHinweis(state)],
         ["Magie", faction.magie ? "Ja" : "Keine Magie"],
       ]), intro),
       sheetSection("Grundwerte", sheetStats(attributeValues(rules.heroAttributes(state)))),
@@ -1464,8 +1464,8 @@
   function entwurfQuellen() {
     const quellen = [];
     if (state.stufenpunkte) quellen.push(["stufe", "Stufenpunkte"]);
-    if (!state.build.spez && state.questStufe >= klassen.regeln.spezialisierungStufe) quellen.push(["spez", "Spezialisierung"]);
-    if (state.build.spez && !state.build.meister && state.vereinigt) quellen.push(["meister", "Meisterklasse"]);
+    if (!state.build.spez && rules.spezBereit(state)) quellen.push(["spez", "Spezialisierung"]);
+    if (rules.meisterBereit(state)) quellen.push(["meister", "Meisterklasse"]);
     return quellen;
   }
   // Build und Training so, wie sie nach dem Speichern wären.
@@ -1529,8 +1529,9 @@
   function renderSheetAufstieg(panel) {
     const quellen = entwurfQuellen();
     if (!quellen.length) {
-      const note = element("p", "Zurzeit ist nichts zu verteilen. Grundwertpunkte aus früheren Stufenaufstiegen, die Spezialisierung ab Quest-Stufe " +
-        klassen.regeln.spezialisierungStufe + " (derzeit " + state.questStufe + ") und die Meisterklasse nach der Vereinigung deines Volkes erscheinen hier.");
+      const note = element("p", "Zurzeit ist nichts zu verteilen. Grundwertpunkte aus früheren Stufenaufstiegen, die Spezialisierung " +
+        rules.spezHinweis(state) + (rules.systeme.istMensch(state.faction) ? " (derzeit Stufe " + rules.level(state) + ") erscheinen hier."
+          : " (derzeit " + state.questStufe + ") und die Meisterklasse nach der Vereinigung deines Volkes erscheinen hier."));
       note.className = "sheet-note";
       panel.append(note);
       return;
@@ -2926,8 +2927,8 @@
     panel.append(element("p", rules.title(state) + " · Erfahrungsstufe " + progress.level + " · " + progress.xp + " EP"));
     const open = [];
     if (progress.points) open.push(progress.points + " Grundwertpunkte");
-    if (!state.build.spez && state.questStufe >= klassen.regeln.spezialisierungStufe) open.push("Spezialisierung");
-    if (state.build.spez && !state.build.meister && state.vereinigt) open.push("Meisterklasse");
+    if (!state.build.spez && rules.spezBereit(state)) open.push("Spezialisierung");
+    if (rules.meisterBereit(state)) open.push("Meisterklasse");
     panel.append(element("p", open.length ? "Offen: " + open.join(", ") + "." : "Zurzeit ist nichts zu verteilen."));
     button(panel, "Charakterfenster öffnen", () => openSheet(open.length ? "aufstieg" : "werte"));
   }
@@ -3077,8 +3078,7 @@
     if (spez) {
       lines.push(element("p", "Spezialisierung " + data[spez.variante][0] + ": " + data[spez.variante][1] + "."));
     } else {
-      lines.push(element("p", "Spezialisierung ab Quest-Stufe " + klassen.regeln.spezialisierungStufe + " (derzeit " + state.questStufe + "): " +
-        data.a[0] + " oder " + data.b[0] + "."));
+      lines.push(element("p", "Spezialisierung " + rules.spezHinweis(state) + ": " + data.a[0] + " oder " + data.b[0] + "."));
     }
     lines.push(element("p", state.build.meister ? "Meisterklasse " + rules.title(state) + " · " + master.faehigkeit + "."
       : "Meisterklasse nach der " + master.vereinigung + ": " + master.name + "."));

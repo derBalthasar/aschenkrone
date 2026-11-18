@@ -41,7 +41,8 @@ for (const [faction, data] of Object.entries(F.fraktionen)) {
       assert.ok(r.schaden !== undefined || r.heilung || r.hot || r.schild || r.dot || r.diener || r.staerkung || r.naechster ||
         r.unsichtbar || r.furcht || r.betaeuben || r.verlangsamen || r.verspotten || r.schwaechen || r.verwundbar ||
         r.zielAngriff || r.todesschutz, faction + " " + role + " " + f.name + ": " + f.wirkung);
-      if (f.stufe === 1) assert.ok([4, 6].includes(r.schaden), f.name);
+      // Menschen: Henrys Klassen (18. 11. 2026), Grundschaden 6 × Multiplikator.
+      if (f.stufe === 1) assert.ok(K.fraktionen[faction].volk === "menschen" ? r.schaden >= 6 : [4, 6].includes(r.schaden), f.name);
     }
   }
 }
@@ -51,11 +52,13 @@ for (const volk of Object.keys(K.voelker)) assert.equal(F.meister[volk].length, 
 // Stichproben aus dem Kampfdokument.
 const ability = (faction, role, stufe) => kampf.klassenFaehigkeiten(faction, role).find((f) => f.stufe === stufe);
 same(ability("faeulnisbrut", "magier", 3).regel.diener, { anzahl: 1, lp: 8, schaden: 3, runden: 2, name: "Gebundener", koeder: false });
-assert.equal(ability("kronreich", "krieger", 10).regel.ziele, 3);
-assert.equal(ability("orden", "magier", 20).regel.ziele, "alle");
-assert.equal(ability("haefen", "schurke", 10).regel.dot.wert, 7);
+// Menschen: neue Klassen nach Henry (Patch 2.0.0), Stufe 15/20 = Signatur der Spezialisierung.
+assert.equal(K.fraktionen.kronreich.klassen.krieger.name, "Blutritter der Krone");
+assert.equal(ability("kronreich", "krieger", 6).regel.ziele, "alle");
+assert.equal(ability("kronreich", "krieger", 1).regel.dot.wert, 2);
+assert.equal(ability("orden", "magier", 1).zahlung, "M");
+assert.equal(ability("kronreich", "schurke", 10).regel.treffer, 3);
 assert.equal(ability("hof", "krieger", 20).regel.todesschutz.lp, 12);
-assert.equal(ability("kronreich", "schurke", 10).regel.sonst, 12);
 assert.equal(ability("dornenklingen", "krieger", 3).regel.treffer, 2);
 assert.equal(ability("aschenclan", "magier", 3).regel.staerkung.wert, 2);
 
@@ -81,16 +84,21 @@ same([lp("schurke", 1), lp("schurke", 20)], [28, 66]);
 same([lp("spaeher", 1), lp("spaeher", 20)], [26, 64]);
 same([lp("feldscher", 1), lp("heiler", 20)], [26, 64]);
 same([lp("skalde", 1), lp("magier", 20)], [22, 60]);
+// Menschen (Patch 2.4.0): Henrys Grund-LP ÷ 3,5 (Blutritter 130 → 37, Runenskalde 100 → 29), Zuwachs wie bisher.
 const huskarl = rules.create("Tala", "kronreich", "frau", 1, "krieger");
-assert.equal(rules.healthLimit(huskarl), 34);
-assert.equal(rules.healthLimit({ ...huskarl, xp: 19000 }), 91);
-assert.equal(rules.healthLimit(rules.create("Tala", "kronreich", "frau", 1, "magier")), 22);
+assert.equal(rules.healthLimit(huskarl), 37);
+assert.equal(rules.healthLimit({ ...huskarl, xp: 19000 }), 94);
+assert.equal(rules.healthLimit(rules.create("Tala", "kronreich", "frau", 1, "magier")), 29);
+assert.equal(rules.healthLimit(rules.create("Brom", "tiefgraeber", "mann", 0, "krieger")), 34, "andere Völker unverändert");
 
 // ---- Ausdauer und Mana ----
 same(rules.kraft(huskarl), { ausdauer: 10, mana: 0 });
 same(rules.kraft({ ...huskarl, xp: 19000 }), { ausdauer: 19, mana: 0 });
 const priest = rules.create("Tala", "orden", "frau", 1, "magier");
-assert.equal(rules.kraft(priest).mana, 2 * priest.build.fertigkeiten.magie);
+// Pyromant (Patch 2.4.0): 12 + Willenskraft + Intelligenz/2.
+const priestWerte = rules.heroAttributes(priest);
+assert.equal(rules.kraft(priest).mana, 12 + priestWerte.will + Math.floor(priestWerte.mind / 2));
+assert.equal(rules.kraft(rules.create("Tala", "orden", "frau", 1, "schurke")).mana, 0, "Schatten-Vollstrecker ohne Mana");
 assert.equal(rules.resourceName(priest), "Nahrung", "Menschen: Vorrat ist Nahrung (Henry, 18. 11. 2026)");
 // Fraktionsressource und Kampfressource sind ein Vorrat von 0 bis 100, Start 42 (Technische Spezifikation).
 assert.equal(priest.ressource, 42);
@@ -124,17 +132,22 @@ assert.equal(start.combat.feinde[0].schaden, 5);
 assert.equal(start.combat.held.ausdauer, 10);
 same(rules.abilities(start).filter((f) => f.frei).map((f) => f.id), ["f1"]);
 
-// Grundangriff: 6 + Nahkampf + Bonus aus Stärke + Waffe (Axt 6: +1).
+// Grundangriff: Schaden der Stufe-1-Fähigkeit + Nahkampf + Bonus aus Stärke + Waffe (Axt 6: +1).
+// Beim Blutritter der Krone ist das der Scharfrichter-Hieb (6 × 1,4 = 8).
 const values = rules.heroAttributes(start);
-const expected = 6 + start.build.fertigkeiten.nahkampf + rules.modifier(values.strength) + 1;
+const f1Schaden = rules.abilities(start).find((f) => f.id === "f1").regel.schaden;
+assert.equal(f1Schaden, 8);
+const expected = f1Schaden + start.build.fertigkeiten.nahkampf + rules.modifier(values.strength) + 1;
 const basic = rules.strike(start, "spear", highRoll);
-assert.equal(basic.combat.feinde[0].lp, 20 - expected);
-assert.equal(rules.strike(start, "f1", highRoll).combat.feinde[0].lp, 20 - expected);
+// Dazu blutet der Keiler am Rundenende für 2.
+assert.equal(basic.combat.feinde[0].lp, 20 - expected - 2);
+assert.equal(rules.strike(start, "f1", highRoll).combat.feinde[0].lp, 20 - expected - 2);
 // Nicht freigeschaltete Fähigkeiten gehen nicht.
 assert.equal(rules.strike(start, "f3"), start);
 
-// Stufe 3: Schildstoß kostet 3 Ausdauer und hat 1 Runde Abklingzeit, Ausdauer füllt sich um 2.
-const level3 = keilerFight("kronreich", "krieger", 300);
+// Stufe 3: Blutrausch der Ahnen kostet 3 Ausdauer und hat 1 Runde Abklingzeit, Ausdauer füllt sich um 2.
+const level3Kampf = keilerFight("kronreich", "krieger", 300);
+const level3 = { ...level3Kampf, combat: { ...level3Kampf.combat, feinde: [{ ...level3Kampf.combat.feinde[0], lp: 500, max: 500 }] } };
 assert.equal(rules.progression(level3).level, 3);
 const shove = rules.strike(level3, "f3", highRoll);
 assert.equal(rules.kraft(level3).ausdauer, 11); // +1 je zwei Erfahrungsstufen
@@ -143,8 +156,7 @@ assert.equal(rules.abilityState(shove, "f3"), "Abklingzeit 1");
 assert.equal(rules.strike(shove, "f3"), shove);
 const afterCooldown = rules.strike(shove, "guard");
 assert.equal(rules.abilityState(afterCooldown, "f3"), null);
-// Schildstoß stößt zurück: Ziel 1 Runde verlangsamt (−1 Schaden).
-assert.ok(shove.journal.some((entry) => /Schildstoß: \d+ Schaden, verlangsamt/.test(entry)));
+assert.ok(shove.journal.some((entry) => /Blutrausch der Ahnen: \d+ Schaden/.test(entry)));
 
 // Verstärken mit Fraktionsressource: +25 % Wirkung für 1 Korn.
 const boosted = rules.strike(level3, "f3+", highRoll);
@@ -159,7 +171,12 @@ assert.equal(rules.strike({ ...level3, ressource: 2 }, "f3+", highRoll).ressourc
 assert.equal(rules.strike(level3, "f1+"), level3);
 
 // Stufe 20: einmal pro Schlacht, 8 Ausdauer und 3 Fraktionsressource.
-const legend = keilerFight("kronreich", "krieger", 19000);
+// Bei den Menschen ist Stufe 20 die Signaturfähigkeit der Spezialisierung (Rang 3), ohne Spezialisierung gesperrt.
+const legendOhne = keilerFight("kronreich", "krieger", 19000);
+assert.equal(rules.abilities(legendOhne).find((f) => f.id === "f20").frei, false);
+const legend = { ...legendOhne, build: { ...legendOhne.build, spez: { variante: "a", grundwert: "strength" } } };
+assert.equal(rules.abilities(legend).find((f) => f.id === "f20").name, "Königliches Richturteil (Rang 3)");
+assert.ok(!rules.abilities(legend).some((f) => f.id === "f15"), "Rang 3 ersetzt Rang 2");
 const legendStart = { ...legend, combat: { ...legend.combat, feinde: [{ ...legend.combat.feinde[0], lp: 500, max: 500 }] } };
 const storm = rules.strike(legendStart, "f20", highRoll);
 assert.equal(storm.ressource, legendStart.ressource - 3);
@@ -176,7 +193,8 @@ assert.ok(rules.modifier(rules.heroAttributes(clever).mind) >= 1);
 assert.ok(rules.abilities(clever).find((f) => f.id === "f3").kostenWert < 3);
 
 // Spezialisierung A verstärkt die Stufe-6-Fähigkeit um 50 %.
-const lasso = keilerFight("kronreich", "spaeher", 1500);
+// (Bei den Menschen ersetzt die Signaturfähigkeit diese Verstärkung, deshalb hier die Schattenblüte mit dem Schlafpfeil.)
+const lasso = keilerFight("schattenbluete", "spaeher", 1500);
 const lassoSpez = { ...lasso, build: { ...lasso.build, spez: { variante: "a", grundwert: "agility" } } };
 assert.ok(rules.abilities(lassoSpez).find((f) => f.id === "f6").spezialisiert);
 assert.ok(!rules.abilities(lassoSpez).find((f) => f.id === "f10").spezialisiert);
@@ -215,7 +233,7 @@ const hurt = { ...healer, health: 5 };
 assert.ok(rules.strike(hurt, "f3", highRoll).health > 5);
 
 // Schild fängt Schaden ab und verfällt nach 3 Runden.
-const warden = keilerFight("kronreich", "waechter", 1500);
+const warden = keilerFight("tiefes-koenigreich", "waechter", 1500);
 const walled = rules.strike(warden, "f6", highRoll);
 assert.equal(walled.health, warden.health);
 assert.ok(walled.combat.held.schild > 0);
@@ -227,9 +245,18 @@ assert.ok(start.journal.some((entry) => /greift zuerst an/.test(entry)));
 // Jede Klasse kann im Kampf jede ihrer Fähigkeiten einsetzen, der Spielstand bleibt gültig.
 for (const faction of Object.keys(K.fraktionen)) {
   for (const role of K.klassenFolge) {
-    let state = keilerFight(faction, role, 19000);
-    state = { ...state, ressource: 20, combat: { ...state.combat, feinde: [{ ...state.combat.feinde[0], lp: 2000, max: 2000 }] } };
-    for (const id of ["f20", "f15", "f10", "f6", "f3", "f1"]) {
+    // Menschen mit Spezialisierung, damit auch die Signaturfähigkeit (Stufe 20) frei ist.
+    let held = full(hero(faction, role, 19000));
+    if (K.fraktionen[faction].volk === "menschen") {
+      held = Object.keys(K.fertigkeiten).flatMap((fert) => Object.keys(K.grundwerte).map((wert) => [fert, wert]))
+        .map(([fert, wert]) => rules.specialize(held, "a", wert, fert)).find((next) => next.build.spez) ?? held;
+      assert.ok(held.build.spez, faction + " " + role + " Spezialisierung");
+    }
+    let state = fightAs(held);
+    state = { ...state, health: rules.healthLimit(state), ressource: 20,
+      combat: { ...state.combat, feinde: [{ ...state.combat.feinde[0], lp: 2000, max: 2000 }] } };
+    const ids = rules.abilities(state).map((f) => f.id);
+    for (const id of ["f20", "f15", "f10", "f6", "f3", "f1"].filter((id) => ids.includes(id))) {
       state = { ...state, health: rules.healthLimit(state), combat: { ...state.combat, held: { ...state.combat.held, abklingen: {},
         ausdauer: rules.kraft(state).ausdauer, mana: rules.kraft(state).mana } } };
       const next = rules.strike(state, id, highRoll);
