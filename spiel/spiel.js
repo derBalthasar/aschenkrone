@@ -2172,6 +2172,11 @@
       kopf.append(element("strong", "Akt " + akt.nr + " · " + akt.titel), " · Stufe " + akt.stufen +
         (akt.freieReihenfolge ? " · freie Reihenfolge (empfohlen als " + akt.empfohlen + "., mit " + akt.schwester + ")" : ""));
       item.append(kopf, element("p", akt.ort + (akt.volksquest ? " · enthält " + akt.volksquest : "")));
+      if (akt.vermerk) {
+        const vermerk = element("p", akt.vermerk);
+        vermerk.className = "welt-aushang-hinweis";
+        item.append(vermerk);
+      }
       const schritte = element("ol");
       for (const schritt of akt.schritte) {
         const zeile = element("li");

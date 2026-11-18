@@ -133,7 +133,7 @@ const startpunkte = (() => {
         place: "Glutberg · Halle der Ewigen Flamme", title: "Die Flamme flackert",
         text: "Die Ewige Flamme ist fast erloschen. Nur ein kleiner blauer Rest brennt noch auf dem Altar. Die Ritter stehen stumm davor. Niemand weiß, wie lange sie noch hält.",
       },
-      akte: ["Die flackernde Flamme", "Verräter im Feuer", "Der Kreuzzug ruft", "Die Elfen am Weltenbaum", "Über das Nordmeer"],
+      akte: ["Die flackernde Flamme", "Korn über den Eispass", "Schiffe für den Kreuzzug", "Verräter im Feuer & Das Alte Reich", "Über das Nordmeer"],
     },
     // ---------------------------------------------------------------- Elfen
     dornenklingen: {

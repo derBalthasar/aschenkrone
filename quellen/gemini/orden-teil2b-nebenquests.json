@@ -1,0 +1,982 @@
+{
+ "faction": "Orden der Flamme",
+ "section": "Sidequests Part B (Cities 7-11 of 11)",
+ "cities": [
+  {
+   "city": "Lichtheim",
+   "type": "Stadt",
+   "levelRange": "1-5",
+   "sideQuests": [
+    {
+     "id": "lichtheim_q01",
+     "title": "Die Kerzen von Bienental",
+     "category": "Fraktion",
+     "description": "Sichere den Wachstransport aus Bienental über D37 für die Kapellen von Lichtheim.",
+     "roads": [
+      "D37"
+     ],
+     "enemies": [
+      "Grauwölfe"
+     ],
+     "reward": "25 Silber, +7 Glaube",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "lichtheim_q02",
+     "title": "Gebete in Kapellby",
+     "category": "Dorf-Verbindung",
+     "description": "Pilger auf D38 nach Kapellby werden von Wegelagerern überfallen.",
+     "roads": [
+      "D38"
+     ],
+     "enemies": [
+      "Wegelagerer"
+     ],
+     "reward": "25 Silber, +6 Glaube",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "lichtheim_q03",
+     "title": "Der verirrte Kronreich-Bote",
+     "category": "Kaltfrieden (Kronreich)",
+     "description": "Ein Bote aus dem Kronreich, der über Brandstein (S28) kam, wurde im Tal festgehalten. Entscheide über seine Freilassung.",
+     "roads": [
+      "S28"
+     ],
+     "enemies": [],
+     "reward": "35 Silber (oder +7 Glaube)",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "lichtheim_q04",
+     "title": "Geschmuggelter Bernstein",
+     "category": "Kaltfrieden (Häfen)",
+     "description": "Ein Hehler verkauft unverzollten Bernstein aus den Freien Häfen auf dem Markt von Lichtheim.",
+     "roads": [],
+     "enemies": [
+      "Schmuggler"
+     ],
+     "reward": "40 Silber, Kaltfrieden-Lore",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "lichtheim_q05",
+     "title": "Flüstern in der Krypta",
+     "category": "Kult-Spur",
+     "description": "Acht Kultisten der Bleichen Ewigkeit halten in einer verlassenen Talkapelle geheime Messen für die Toten des Nordens ab.",
+     "roads": [],
+     "enemies": [
+      "Kultisten"
+     ],
+     "reward": "Untoten-Bedrohung -3, 35 Silber",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "lichtheim_q06",
+     "title": "Der Runenstein des Ersten Hochmeisters",
+     "category": "Lore",
+     "description": "Entziffere eine verwitterte Runensäule im Zentrum von Lichtheim, die von der Gründung des Ordens vor über 270 Jahren erzählt.",
+     "roads": [],
+     "enemies": [
+      "Runenfresser"
+     ],
+     "reward": "30 Silber, +6 Glaube, Ordens-Lore",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "lichtheim_q07",
+     "title": "Warum der Mutterberg brennt",
+     "category": "Weltkonflikt (Zwerge/Orks)",
+     "description": "Ein weitgereister Priester in Lichtheim erklärt den Zusammenhang zwischen dem Ausbruch des Mutterbergs im Süden und dem Vormarsch der Orks und Untoten.",
+     "roads": [],
+     "enemies": [],
+     "reward": "25 Silber, Welt-Lore",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "lichtheim_q08",
+     "title": "Aschenmammut im Hochtal",
+     "category": "Bestiarium",
+     "description": "Ein rasendes Aschenmammut hat sich aus den Aschefeldern verirrt und bedroht die Straße S36 zum Glutberg.",
+     "roads": [
+      "S36"
+     ],
+     "enemies": [
+      "Aschenmammut"
+     ],
+     "reward": "55 Silber, Mammutzahn-Talisman",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "lichtheim_q09",
+     "title": "Grauweiden gegen den Husten",
+     "category": "Nacht des Erwachens",
+     "description": "Sammle Rinde der Grauweide für einen Sud gegen den Ascheregen-Husten der Talbewohner.",
+     "roads": [],
+     "enemies": [
+      "Stollenkriecher"
+     ],
+     "reward": "20 Silber, 2x Heilmittel",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "lichtheim_q10",
+     "title": "Alphatier: Der Letzte Mammut",
+     "category": "Alphatier-Jagd",
+     "description": "In den Aschefeldern östlich von Lichtheim (richtung S43) streift Der Letzte Mammut umher und zerstört ganze Karawanen.",
+     "roads": [
+      "S43"
+     ],
+     "enemies": [
+      "Der Letzte Mammut"
+     ],
+     "reward": "65 Silber, Trophäe des Letzten Mammuts",
+     "deadlineRounds": null,
+     "openPoint": null
+    }
+   ],
+   "villages": [
+    {
+     "village": "Kapellby",
+     "road": "D38",
+     "yield": "Glaube",
+     "quests": [
+      {
+       "id": "kapellby_q01",
+       "title": "Die gestohlene Altarkerze",
+       "description": "Verfolge Diebe, die die geweihte Altarkerze aus der Dorfkapelle entwendet haben.",
+       "roads": [
+        "D38"
+       ],
+       "enemies": [
+        "Wegelagerer"
+       ],
+       "reward": "20 Silber, +6 Glaube",
+       "deadlineRounds": null,
+       "openPoint": null
+      }
+     ]
+    },
+    {
+     "village": "Bienental",
+     "road": "D37",
+     "yield": "Wachs",
+     "quests": [
+      {
+       "id": "bienental_q01",
+       "title": "Honig und Runenflechte",
+       "description": "Schütze die Imker vor Runenfressern, die das geweihte Wachs fressen.",
+       "roads": [
+        "D37"
+       ],
+       "enemies": [
+        "Runenfresser"
+       ],
+       "reward": "25 Silber, Heilhonig",
+       "deadlineRounds": null,
+       "openPoint": null
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "city": "Nordwacht",
+   "type": "Hafenstadt",
+   "levelRange": "1-5",
+   "sideQuests": [
+    {
+     "id": "nordwacht_q01",
+     "title": "Tran für den großen Leuchtturm",
+     "category": "Fraktion",
+     "description": "Sichere den Transport von Waltran aus Leuchtfeuer über D39, damit das Hauptfeuer an der Nordküste nicht erlischt.",
+     "roads": [
+      "D39"
+     ],
+     "enemies": [
+      "Wegelagerer"
+     ],
+     "reward": "25 Silber, +7 Glaube",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "nordwacht_q02",
+     "title": "Die Fischer von Robbenstrand",
+     "category": "Dorf-Verbindung",
+     "description": "Verteidige die Fischer von Robbenstrand (D40) gegen ein Rudel hungriger Frostbären.",
+     "roads": [
+      "D40"
+     ],
+     "enemies": [
+      "Frostbär"
+     ],
+     "reward": "25 Silber, +5 Glaube",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "nordwacht_q03",
+     "title": "Gestrandete Seefahrer aus dem Kronreich",
+     "category": "Kaltfrieden (Kronreich)",
+     "description": "An der Eisküste stranden überlebende Seeleute aus dem Kronreich. Entscheide, ob du ihnen Zuflucht gewährst oder sie als Spione festsetzt.",
+     "roads": [],
+     "enemies": [],
+     "reward": "35 Silber (oder +6 Glaube & Kaltfrieden-Lore)",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "nordwacht_q04",
+     "title": "Schmuggel auf der Nordroute",
+     "category": "Kaltfrieden (Häfen)",
+     "description": "Ein Kaperschiff aus Bernsvik (M12) oder Tranvik (M14) versucht nachts ohne Licht an den Klippen vorbei nach Osten zu segeln.",
+     "roads": [
+      "M12",
+      "M14"
+     ],
+     "enemies": [
+      "Schmuggler"
+     ],
+     "reward": "45 Silber, Seekarte des Nordmeers",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "nordwacht_q05",
+     "title": "Die erloschenen Wachfeuer",
+     "category": "Kult-Spur",
+     "description": "Sieben abtrünnige Ritter des Kults der Bleichen Ewigkeit löschen heimlich die Signalfeuer entlang der Küste nach Glutvik (S39), um untoten Schiffen freie Fahrt zu geben.",
+     "roads": [
+      "S39"
+     ],
+     "enemies": [
+      "Kultisten"
+     ],
+     "reward": "Untoten-Bedrohung -4, 40 Silber",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "nordwacht_q06",
+     "title": "Segel aus Draugrsund",
+     "category": "Weltkonflikt (Untote)",
+     "description": "Späher sichten auf dem Seeweg M13 Richtung Draugrsund schwarze Segel ohne Ruderschlag. Birg eine versiegelte Flaschenpost vom Strand.",
+     "roads": [
+      "M13"
+     ],
+     "enemies": [
+      "Schneeschleicher"
+     ],
+     "reward": "30 Silber, Welt-Lore (Untote)",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "nordwacht_q07",
+     "title": "Warum die Elfen das Meer meiden",
+     "category": "Weltkonflikt (Elfen)",
+     "description": "Ein alter Leuchtturmwärter erzählt von den uralten Verträgen der Seefahrt und warum die Elfen seit dem Erwachen der Fäulnis keine Schiffe mehr nach Norden schicken.",
+     "roads": [],
+     "enemies": [],
+     "reward": "25 Silber, Welt-Lore (Elfen)",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "nordwacht_q08",
+     "title": "Eishauer an der Steilküste",
+     "category": "Bestiarium",
+     "description": "Ein Rudel Eishauer blockiert den Nachschubweg S44 nach Thorvaldsklipp.",
+     "roads": [
+      "S44"
+     ],
+     "enemies": [
+      "Eishauer"
+     ],
+     "reward": "40 Silber, Eishauer-Speer",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "nordwacht_q09",
+     "title": "Aschenschnee im Hafenbecken",
+     "category": "Nacht des Erwachens",
+     "description": "Schwarzer Ascheregen und Eis verstopfen die Hafenausfahrt; hilf den Wachen beim Freiräumen und wehre Aschenkrähen ab.",
+     "roads": [],
+     "enemies": [
+      "Aschenkrähen"
+     ],
+     "reward": "25 Silber, +5 Glaube",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "nordwacht_q10",
+     "title": "Der letzte Wachposten im Eis",
+     "category": "Begleiter (3/3)",
+     "description": "Späher Malte Sturmauge hält nach dem Prolog-Angriff allein den zerstörten äußeren Wachturm gegen Kultisten und Schneeschleicher. Entsetze ihn und sichere die Signalhörner.",
+     "roads": [
+      "D39"
+     ],
+     "enemies": [
+      "Kultisten",
+      "Schneeschleicher"
+     ],
+     "reward": "Begleiter: Späher Malte Sturmauge (3/3)",
+     "deadlineRounds": null,
+     "openPoint": null
+    }
+   ],
+   "villages": [
+    {
+     "village": "Leuchtfeuer",
+     "road": "D39",
+     "yield": "Tran",
+     "quests": [
+      {
+       "id": "leuchtfeuer_q01",
+       "title": "Das zerbrochene Spiegelglas",
+       "description": "Bringe geschliffenes Glas und geweihtes Öl nach Leuchtfeuer, um das Küstenfeuer wieder weit sichtbar zu machen.",
+       "roads": [
+        "D39"
+       ],
+       "enemies": [
+        "Grauwölfe"
+       ],
+       "reward": "25 Silber, +5 Glaube",
+       "deadlineRounds": null,
+       "openPoint": null
+      }
+     ]
+    },
+    {
+     "village": "Robbenstrand",
+     "road": "D40",
+     "yield": "Fisch",
+     "quests": [
+      {
+       "id": "robbenstrand_q01",
+       "title": "Plünderer am Eisstrand",
+       "description": "Vertreibe Deserteure, die den Wintervorrat an Trockenfisch stehlen wollen.",
+       "roads": [
+        "D40"
+       ],
+       "enemies": [
+        "Deserteure"
+       ],
+       "reward": "20 Silber, Fischtran-Salbe",
+       "deadlineRounds": null,
+       "openPoint": null
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "city": "Sigrunsheim",
+   "type": "Stadt",
+   "levelRange": "2-5",
+   "sideQuests": [
+    {
+     "id": "sigrunsheim_q01",
+     "title": "Das Wasser von Sigrunsquell",
+     "category": "Fraktion",
+     "description": "Eskortiere Priesterinnen auf D42 nach Sigrunsquell, um geweihtes Quellwasser für die Kranken im Ordensland zu schöpfen.",
+     "roads": [
+      "D42"
+     ],
+     "enemies": [
+      "Grauwölfe"
+     ],
+     "reward": "+8 Glaube, 20 Silber, 2x Heilmittel",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "sigrunsheim_q02",
+     "title": "Gerste aus dem Südtal",
+     "category": "Dorf-Verbindung",
+     "description": "Schütze die Bauern von Gerstenhof (D41) vor Wegelagerern aus dem Grenzland.",
+     "roads": [
+      "D41"
+     ],
+     "enemies": [
+      "Wegelagerer"
+     ],
+     "reward": "25 Silber, +5 Glaube",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "sigrunsheim_q03",
+     "title": "Zollstreit vor Grenzmarkt",
+     "category": "Kaltfrieden (Häfen)",
+     "description": "Auf der Grenzstraße S45 nach Grenzmarkt verlangen bewaffnete Söldner der Freien Häfen Wegezoll von Ordenspilgern.",
+     "roads": [
+      "S45"
+     ],
+     "enemies": [
+      "Schmuggler"
+     ],
+     "reward": "40 Silber, Kaltfrieden-Lore",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "sigrunsheim_q04",
+     "title": "Der Flüchtling aus Eikmark",
+     "category": "Kaltfrieden (Kronreich)",
+     "description": "Ein desertierter Hauptmann aus dem Kronreich versteckt sich in den Nadelwäldern nahe S29 und bietet Informationen über Jarl Ragnvalds Truppen.",
+     "roads": [
+      "S29"
+     ],
+     "enemies": [
+      "Deserteure"
+     ],
+     "reward": "35 Silber, Kronreich-Lore",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "sigrunsheim_q05",
+     "title": "Vergiftete Quelle",
+     "category": "Kult-Spur",
+     "description": "Sechs Kultisten der Bleichen Ewigkeit versuchen nachts, das heilige Wasser von Sigrunsquell (D42) mit Totenstaub zu entweihen.",
+     "roads": [
+      "D42"
+     ],
+     "enemies": [
+      "Kultisten"
+     ],
+     "reward": "Untoten-Bedrohung -3, 35 Silber",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "sigrunsheim_q06",
+     "title": "Der Pakt der alten Quellen",
+     "category": "Weltkonflikt (Zwerge)",
+     "description": "In einer Felsgrotte nahe Sigrunsquell finden sich Zwergenrunen, die erklären, warum die unterirdischen Wasseradern seit dem Ausbruch des Mutterbergs kochen.",
+     "roads": [
+      "D42"
+     ],
+     "enemies": [
+      "Glutwurm"
+     ],
+     "reward": "30 Silber, Welt-Lore (Zwerge)",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "sigrunsheim_q07",
+     "title": "Die trockenen Brunnen im Südwesten",
+     "category": "Weltkonflikt (Orks)",
+     "description": "Ein weitgereister Händler aus Grenzmarkt (S45) berichtet, dass die Orks der Staubreiter nur wegen der versiegten Brunnen nach dem Erdbeben in den Krieg ziehen.",
+     "roads": [
+      "S45"
+     ],
+     "enemies": [],
+     "reward": "25 Silber, Welt-Lore (Orks)",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "sigrunsheim_q08",
+     "title": "Runenfresser im Nadelwald",
+     "category": "Bestiarium",
+     "description": "Runenfresser zerstören die Schutzsteine entlang der Straße S41 nach Lichtheim.",
+     "roads": [
+      "S41"
+     ],
+     "enemies": [
+      "Runenfresser"
+     ],
+     "reward": "40 Silber, Runen-Amulett",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "sigrunsheim_q09",
+     "title": "Ascheregen auf den Gerstenfeldern",
+     "category": "Nacht des Erwachens",
+     "description": "Hilf den Bauern von Gerstenhof, die Felder von Vulkanasche zu reinigen und Aschenkrähen zu vertreiben.",
+     "roads": [
+      "D41"
+     ],
+     "enemies": [
+      "Aschenkrähen"
+     ],
+     "reward": "20 Silber, +5 Glaube",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "sigrunsheim_q10",
+     "title": "Die gesegneten Banner von Sigrunsheim",
+     "category": "Gewichtig",
+     "description": "Weihe die Kriegsbanner des Ordens in Sigrunsquell und entsende Boten über S46 nach Wachtfeuer. Stärkt die Moral der Paladine in Akt 4.",
+     "roads": [
+      "D42",
+      "S46"
+     ],
+     "enemies": [
+      "Kultisten"
+     ],
+     "reward": "+10 Glaube; Moral-Bonus im Großen Thing (Akt 4)",
+     "deadlineRounds": null,
+     "openPoint": null
+    }
+   ],
+   "villages": [
+    {
+     "village": "Sigrunsquell",
+     "road": "D42",
+     "yield": "Glaube",
+     "quests": [
+      {
+       "id": "sigrunsquell_q01",
+       "title": "Die stummen Pilger",
+       "description": "Entlarve drei als Pilger verkleidete Spione, die das Quellheiligtum auskundschaften.",
+       "roads": [
+        "D42"
+       ],
+       "enemies": [
+        "Spione"
+       ],
+       "reward": "25 Silber, +5 Glaube",
+       "deadlineRounds": null,
+       "openPoint": null
+      }
+     ]
+    },
+    {
+     "village": "Gerstenhof",
+     "road": "D41",
+     "yield": "Gerste",
+     "quests": [
+      {
+       "id": "gerstenhof_q01",
+       "title": "Wölfe am Mühlbach",
+       "description": "Vertreibe ein Rudel Grauwölfe, das die Kornsäcke am Bachlauf bedroht.",
+       "roads": [
+        "D41"
+       ],
+       "enemies": [
+        "Grauwölfe"
+       ],
+       "reward": "20 Silber, +4 Glaube",
+       "deadlineRounds": null,
+       "openPoint": null
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "city": "Thorvaldsklipp",
+   "type": "Stadt",
+   "levelRange": "1-5",
+   "sideQuests": [
+    {
+     "id": "thorvaldsklipp_q01",
+     "title": "Der Aufstieg zum Gebetsfels",
+     "category": "Fraktion",
+     "description": "Sichere den vereisten Pilgerpfad D43 zum Gebetsfels gegen Schneeschleicher.",
+     "roads": [
+      "D43"
+     ],
+     "enemies": [
+      "Schneeschleicher"
+     ],
+     "reward": "+7 Glaube, 25 Silber",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "thorvaldsklipp_q02",
+     "title": "Wolle und Hammelfleisch",
+     "category": "Dorf-Verbindung",
+     "description": "Schütze die Hirten von Kliffhof (D44) vor einem hungrigen Frostbären.",
+     "roads": [
+      "D44"
+     ],
+     "enemies": [
+      "Frostbär"
+     ],
+     "reward": "25 Silber, +5 Glaube, Wollmantel",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "thorvaldsklipp_q03",
+     "title": "Der Knoten der Bergwege",
+     "category": "Fraktion",
+     "description": "Stelle die weggespülten Wegweiser und Schutzhütten entlang der Straßen S38 (Glutberg) und S33 (Eiswacht) wieder her.",
+     "roads": [
+      "S38",
+      "S33"
+     ],
+     "enemies": [
+      "Grauwölfe"
+     ],
+     "reward": "30 Silber, +6 Glaube",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "thorvaldsklipp_q04",
+     "title": "Geschmuggelte Kronwaffen",
+     "category": "Kaltfrieden (Kronreich)",
+     "description": "Ein Waffenschmuggler aus dem Kronreich verkauft gestohlene Reichsschwerter an Wegelagerer auf S30.",
+     "roads": [
+      "S30"
+     ],
+     "enemies": [
+      "Schmuggler"
+     ],
+     "reward": "40 Silber, Breitschwert",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "thorvaldsklipp_q05",
+     "title": "Der falsche Reliquienhändler",
+     "category": "Kaltfrieden (Häfen)",
+     "description": "Ein Händler aus den Freien Häfen bietet gefälschte Runenamulette aus Tranvik an.",
+     "roads": [],
+     "enemies": [
+      "Schmuggler"
+     ],
+     "reward": "35 Silber, +4 Glaube",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "thorvaldsklipp_q06",
+     "title": "Schatten am Gebetsfels",
+     "category": "Kult-Spur",
+     "description": "Neun Kultisten der Bleichen Ewigkeit versuchen nachts, die uralten Gebetsrunen auf D43 mit schwarzer Asche unlesbar zu machen.",
+     "roads": [
+      "D43"
+     ],
+     "enemies": [
+      "Kultisten"
+     ],
+     "reward": "Untoten-Bedrohung -3, 40 Silber",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "thorvaldsklipp_q07",
+     "title": "Die Inschrift der Alten",
+     "category": "Weltkonflikt (Untote/Zwerge)",
+     "description": "Am Gebetsfels entzifferst du eine uralte Chronik über den ersten Pakt zwischen Zwergen und Menschen gegen die Untoten im hohen Norden.",
+     "roads": [
+      "D43"
+     ],
+     "enemies": [],
+     "reward": "25 Silber, Welt-Lore",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "thorvaldsklipp_q08",
+     "title": "Klippenwyrm an der Steilwand",
+     "category": "Bestiarium",
+     "description": "Ein Klippenwyrm blockiert die Straße S40 nach Glutvik.",
+     "roads": [
+      "S40"
+     ],
+     "enemies": [
+      "Klippenwyrm"
+     ],
+     "reward": "50 Silber, Wyrmleder-Rüstung",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "thorvaldsklipp_q09",
+     "title": "Aschesturm auf den Gipfeln",
+     "category": "Nacht des Erwachens",
+     "description": "Rette verschüttete Bergwächter nach einem Ascheregen und bekämpfe Stollenkriecher.",
+     "roads": [
+      "S38"
+     ],
+     "enemies": [
+      "Stollenkriecher"
+     ],
+     "reward": "30 Silber, +5 Glaube",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "thorvaldsklipp_q10",
+     "title": "Die Signalglocke von Thorvaldsklipp",
+     "category": "Gewichtig",
+     "description": "Repariere die große Sturmglocke auf den Klippen, damit Glutberg, Eiswacht und Nordwacht bei Angriffen sofort gewarnt werden.",
+     "roads": [
+      "S38",
+      "S33",
+      "S44"
+     ],
+     "enemies": [
+      "Eishauer"
+     ],
+     "reward": "Untoten-Bedrohung -3; Schutz vor Hinterhalten im Kerngebirge",
+     "deadlineRounds": null,
+     "openPoint": null
+    }
+   ],
+   "villages": [
+    {
+     "village": "Gebetsfels",
+     "road": "D43",
+     "yield": "Glaube",
+     "quests": [
+      {
+       "id": "gebetsfels_q01",
+       "title": "Die erloschenen Kerzen",
+       "description": "Bringe geweihtes Wachs zum Gipfelschrein und vertreibe Aschenkrähen.",
+       "roads": [
+        "D43"
+       ],
+       "enemies": [
+        "Aschenkrähen"
+       ],
+       "reward": "20 Silber, +6 Glaube",
+       "deadlineRounds": null,
+       "openPoint": null
+      }
+     ]
+    },
+    {
+     "village": "Kliffhof",
+     "road": "D44",
+     "yield": "Schafe",
+     "quests": [
+      {
+       "id": "kliffhof_q01",
+       "title": "Die verlorene Herde",
+       "description": "Finde die verirrten Schafe im Nebel und wehre Grauwölfe ab.",
+       "roads": [
+        "D44"
+       ],
+       "enemies": [
+        "Grauwölfe"
+       ],
+       "reward": "20 Silber, +4 Glaube",
+       "deadlineRounds": null,
+       "openPoint": null
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "city": "Wachtfeuer",
+   "type": "Stadt",
+   "levelRange": "2-5",
+   "sideQuests": [
+    {
+     "id": "wachtfeuer_q01",
+     "title": "Bauholz für die Palisaden",
+     "category": "Fraktion",
+     "description": "Sichere den Holztransport aus Holzfällerby über D45 für die Befestigungen an der Ostgrenze.",
+     "roads": [
+      "D45"
+     ],
+     "enemies": [
+      "Grauwölfe"
+     ],
+     "reward": "25 Silber, +6 Glaube",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "wachtfeuer_q02",
+     "title": "Korn aus dem Wachthof",
+     "category": "Dorf-Verbindung",
+     "description": "Schütze die wenigen Kornfelder des Ordens bei Wachthof (D46) vor Plünderern.",
+     "roads": [
+      "D46"
+     ],
+     "enemies": [
+      "Wegelagerer"
+     ],
+     "reward": "25 Silber, +6 Glaube",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "wachtfeuer_q03",
+     "title": "Die Grenze nach Bernsvik",
+     "category": "Kaltfrieden (Häfen)",
+     "description": "Auf der Grenzstraße S47 nach Bernsvik überfallen Schmuggler eine Ordenskarawane mit Bernsteintalismanen.",
+     "roads": [
+      "S47"
+     ],
+     "enemies": [
+      "Schmuggler"
+     ],
+     "reward": "45 Silber, Kaltfrieden-Lore",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "wachtfeuer_q04",
+     "title": "Der Deserteur aus Haraldstad",
+     "category": "Kaltfrieden (Kronreich)",
+     "description": "Ein entlaufener Soldat aus dem Kronreich berichtet von Unruhen und Kornknappheit im Süden.",
+     "roads": [],
+     "enemies": [
+      "Deserteure"
+     ],
+     "reward": "35 Silber, Kronreich-Lore",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "wachtfeuer_q05",
+     "title": "Verrat am Ostfeuer",
+     "category": "Kult-Spur",
+     "description": "Sieben Kultisten der Bleichen Ewigkeit wollen den großen Wachturm von Wachtfeuer niederbrennen, um die Verbindung nach Bernsvik (S47) abzuschneiden.",
+     "roads": [
+      "S47"
+     ],
+     "enemies": [
+      "Kultisten"
+     ],
+     "reward": "Untoten-Bedrohung -3, 40 Silber",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "wachtfeuer_q06",
+     "title": "Elfenholz und Menschenaxt",
+     "category": "Weltkonflikt (Elfen)",
+     "description": "Ein alter Holzfäller in Holzfällerby (D45) zeigt dir ein versteinertes Stück Elfenholz aus dem Osten und erklärt den alten Streit um die Wälder.",
+     "roads": [
+      "D45"
+     ],
+     "enemies": [],
+     "reward": "25 Silber, Welt-Lore (Elfen)",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "wachtfeuer_q07",
+     "title": "Kunde aus Draugrsund",
+     "category": "Weltkonflikt (Untote)",
+     "description": "Ein Kaufmann aus Bernsvik (S47) bringt beunruhigende Berichte über untote Kriegsschiffe im Inneren Meer.",
+     "roads": [
+      "S47"
+     ],
+     "enemies": [],
+     "reward": "30 Silber, Welt-Lore (Untote)",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "wachtfeuer_q08",
+     "title": "Frostbär im Nadelwald",
+     "category": "Bestiarium",
+     "description": "Ein riesiger Frostbär blockiert die Straße S27 nach Aschenkloster.",
+     "roads": [
+      "S27"
+     ],
+     "enemies": [
+      "Frostbär"
+     ],
+     "reward": "45 Silber, Frostbären-Rüstung",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "wachtfeuer_q09",
+     "title": "Aschenregen im Waldtal",
+     "category": "Nacht des Erwachens",
+     "description": "Vulkanasche vergiftet die Bäche im Tal; besorge Frostlilien zur Reinigung des Wassers.",
+     "roads": [
+      "D46"
+     ],
+     "enemies": [
+      "Schneeschleicher"
+     ],
+     "reward": "25 Silber, 2x Heilmittel",
+     "deadlineRounds": null,
+     "openPoint": null
+    },
+    {
+     "id": "wachtfeuer_q10",
+     "title": "Die Wacht an der Oststraße",
+     "category": "Gewichtig",
+     "description": "Errichte einen befestigten Außenposten auf der Grenzstraße S47 nach Bernsvik.",
+     "roads": [
+      "S47"
+     ],
+     "enemies": [
+      "Wegelagerer",
+      "Schmuggler"
+     ],
+     "reward": "Reisen auf S47 kosten 1 Vorrat weniger; Verhandlungsbonus in Bernsvik",
+     "deadlineRounds": null,
+     "openPoint": null
+    }
+   ],
+   "villages": [
+    {
+     "village": "Holzfällerby",
+     "road": "D45",
+     "yield": "Holz",
+     "quests": [
+      {
+       "id": "holzfaellerby_q01",
+       "title": "Die umgestürzten Kiefern",
+       "description": "Räume die Straße nach einem Sturm frei und wehre ein Rudel Grauwölfe ab.",
+       "roads": [
+        "D45"
+       ],
+       "enemies": [
+        "Grauwölfe"
+       ],
+       "reward": "20 Silber, +5 Glaube",
+       "deadlineRounds": null,
+       "openPoint": null
+      }
+     ]
+    },
+    {
+     "village": "Wachthof",
+     "road": "D46",
+     "yield": "Korn",
+     "quests": [
+      {
+       "id": "wachthof_q01",
+       "title": "Aschenkrähen auf der Saat",
+       "description": "Vertreibe einen Schwarm Aschenkrähen von den kostbaren Kornfeldern.",
+       "roads": [
+        "D46"
+       ],
+       "enemies": [
+        "Aschenkrähen"
+       ],
+       "reward": "20 Silber, +5 Glaube",
+       "deadlineRounds": null,
+       "openPoint": null
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

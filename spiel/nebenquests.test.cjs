@@ -1,6 +1,6 @@
 "use strict";
 
-// Nebenquests (Gemini-Ausarbeitung Kronreich, 18. 11. 2026): Orte, Dörfer und Weg-Kennungen müssen zum Knotennetz passen.
+// Nebenquests (Gemini-Ausarbeitung Kronreich und Orden der Flamme, 18. 11. 2026): Orte, Dörfer und Weg-Kennungen müssen zum Knotennetz passen.
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -21,19 +21,23 @@ test("jede Weg-Kennung ist eine echte Kante im Knotennetz", () => {
   }
 });
 
-test("alle 34 Orte des Kronreichs haben einen Aushang, die Städte je zehn Aufträge", () => {
-  const orte = Object.values(knoten.alle).filter((ort) => ort.fraktion === "kronreich");
-  assert.equal(orte.length, 34);
-  for (const ort of orte) {
-    const eintrag = nebenquests.fuerOrt(ort.id);
-    assert.ok(eintrag?.auftraege.length, "kein Aushang: " + ort.name);
-    if (ort.typ !== "dorf") assert.equal(eintrag.auftraege.length, 10, ort.name);
+const FRAKTIONEN = { kronreich: 136, orden: 133 };
+
+test("alle 34 Orte von Kronreich und Orden haben einen Aushang, die Städte je zehn Aufträge", () => {
+  for (const fraktion of Object.keys(FRAKTIONEN)) {
+    const orte = Object.values(knoten.alle).filter((ort) => ort.fraktion === fraktion);
+    assert.equal(orte.length, 34, fraktion);
+    for (const ort of orte) {
+      const eintrag = nebenquests.fuerOrt(ort.id);
+      assert.ok(eintrag?.auftraege.length, "kein Aushang: " + ort.name);
+      if (ort.typ !== "dorf") assert.equal(eintrag.auftraege.length, 10, ort.name);
+    }
+    assert.equal(Object.keys(D[fraktion].orte).length, 34, fraktion);
   }
-  assert.equal(Object.keys(D.kronreich.orte).length, 34);
 });
 
 test("Dörfer hängen an ihrer Stadt, ihr Dorfweg und Ertrag stimmen", () => {
-  for (const [id, eintrag] of Object.entries(D.kronreich.orte)) {
+  for (const [id, eintrag] of Object.keys(FRAKTIONEN).flatMap((f) => Object.entries(D[f].orte))) {
     const ort = knoten.get(id);
     assert.ok(ort, "unbekannter Ort: " + id);
     if (ort.typ !== "dorf") continue;
@@ -43,19 +47,22 @@ test("Dörfer hängen an ihrer Stadt, ihr Dorfweg und Ertrag stimmen", () => {
 });
 
 test("Auftragskennungen sind eindeutig, gehören zum Ort und alle genannten Wege sind bekannt", () => {
-  const ids = new Set();
-  for (const [id, eintrag] of Object.entries(D.kronreich.orte)) {
-    for (const auftrag of eintrag.auftraege) {
-      assert.ok(!ids.has(auftrag.id), "doppelt: " + auftrag.id);
-      ids.add(auftrag.id);
-      assert.ok(auftrag.id.startsWith(id + "_q"), auftrag.id + " gehört nicht zu " + id);
-      for (const feld of ["titel", "art", "text", "lohn"]) assert.ok(auftrag[feld], auftrag.id + " ohne " + feld);
-      for (const kennung of String(auftrag.text + " " + auftrag.lohn).match(/\b[SPMD]\d\d\b/g) ?? []) {
-        assert.ok(nebenquests.wegName(kennung), auftrag.id + ": unbekannter Weg " + kennung);
+  for (const [fraktion, anzahl] of Object.entries(FRAKTIONEN)) {
+    const ids = new Set();
+    for (const [id, eintrag] of Object.entries(D[fraktion].orte)) {
+      for (const auftrag of eintrag.auftraege) {
+        for (const kennung of auftrag.wege ?? []) assert.ok(nebenquests.wegName(kennung), auftrag.id + ": unbekannter Weg " + kennung);
+        assert.ok(!ids.has(auftrag.id), "doppelt: " + auftrag.id);
+        ids.add(auftrag.id);
+        assert.ok(auftrag.id.startsWith(id + "_q"), auftrag.id + " gehört nicht zu " + id);
+        for (const feld of ["titel", "art", "text", "lohn"]) assert.ok(auftrag[feld], auftrag.id + " ohne " + feld);
+        for (const kennung of String(auftrag.text + " " + auftrag.lohn).match(/\b[SPMD]\d\d\b/g) ?? []) {
+          assert.ok(nebenquests.wegName(kennung), auftrag.id + ": unbekannter Weg " + kennung);
+        }
       }
     }
+    assert.equal(ids.size, anzahl, fraktion);
   }
-  assert.equal(ids.size, 136);
 });
 
 test("Stille Feder bleibt geheim, der Skalde wird in Akt 4 entdeckt, Bestiariumsnamen folgen dem Kanon", () => {
@@ -93,9 +100,47 @@ test("Fraktionsreihe Kronreich folgt Geminis Aufbau", () => {
   assert.deepEqual(akte, reihe.akte.map((akt) => akt.titel));
 });
 
+test("Fraktionsreihe Orden folgt Geminis Aufbau, Begleiter und offene Fragen sind vermerkt", () => {
+  const reihe = nebenquests.reihe("orden");
+  assert.deepEqual(reihe.akte.map((akt) => akt.nr), ["1", "2/3", "2/3", "4", "5"]);
+  assert.equal(reihe.prolog.titel, "Die Nacht der kalten Feuer");
+  assert.ok(reihe.prolog.text);
+  assert.deepEqual(reihe.akte.filter((akt) => akt.freieReihenfolge).map((akt) => akt.schwester), ["Kronreich", "Freie Häfen"]);
+  const akt4 = reihe.akte.find((akt) => akt.nr === "4");
+  assert.match(akt4.schritte[0].text, /Erzpriester Thorvald/);
+  assert.match(reihe.akte.find((akt) => akt.nr === "5").schritte[2].ort, /frei wählbar/);
+  assert.equal(reihe.spezialisierung.zusaetzlich, "zusätzlich zur Spezialisierung der Klasse");
+  const klassen = reihe.begleiter.map((begleiter) => begleiter.klasse);
+  assert.equal(new Set(klassen).size, klassen.length, "Begleiter brauchen verschiedene Klassen");
+  for (const begleiter of reihe.begleiter) {
+    assert.equal(knoten.get(begleiter.ort)?.fraktion, "orden", begleiter.name);
+    assert.ok(D.orden.orte[begleiter.ort].auftraege.some((q) => q.id === begleiter.auftrag), begleiter.auftrag);
+  }
+  const quelle = fs.readFileSync(path.join(root, "spiel/startpunkte.js"), "utf8");
+  const akte = JSON.parse(quelle.match(/akte: (\["Die flackernde Flamme"[^\]]*\])/)[1]);
+  assert.deepEqual(akte, reihe.akte.map((akt) => akt.titel));
+  // Offene Fragen an Henry (18. 11. 2026) bleiben sichtbar, bis er entschieden hat.
+  for (const id of ["glutberg_q10", "brandstein_q04", "aschenkloster_q10", "brandstein_q10"]) {
+    const ort = id.split("_")[0];
+    assert.ok(D.orden.orte[ort].auftraege.find((q) => q.id === id).hinweis, id);
+  }
+});
+
+test("Alphatiere des Ordens stammen aus dem Bestiarium", () => {
+  const bestiarium = fs.readFileSync(path.join(root, "bestiarium/daten.js"), "utf8");
+  for (const eintrag of Object.values(D.orden.orte)) {
+    for (const auftrag of eintrag.auftraege.filter((q) => q.art === "Alphatier-Jagd")) {
+      const name = auftrag.titel.replace("Alphatier: ", "");
+      assert.ok(bestiarium.includes(name.replace("Skarn der", "Skarn, der")), auftrag.id + ": " + name);
+    }
+  }
+});
+
 test("die erzeugte Datei entspricht Quelle und Skript", () => {
   const datei = fs.readFileSync(path.join(root, "spiel/nebenquests-daten.js"), "utf8");
-  const quelle = JSON.parse(fs.readFileSync(path.join(root, "quellen/gemini/kronreich-teil2-nebenquests.json"), "utf8"));
-  const titel = quelle.cities.flatMap((stadt) => [...stadt.sideQuests, ...stadt.villages.flatMap((dorf) => dorf.quests)]).map((q) => q.title);
-  for (const t of titel) assert.ok(datei.includes(JSON.stringify(t).slice(1, -1)), "fehlt: " + t);
+  for (const name of ["kronreich-teil2-nebenquests.json", "orden-teil2a-nebenquests.json", "orden-teil2b-nebenquests.json"]) {
+    const quelle = JSON.parse(fs.readFileSync(path.join(root, "quellen/gemini", name), "utf8"));
+    const titel = quelle.cities.flatMap((stadt) => [...stadt.sideQuests, ...stadt.villages.flatMap((dorf) => dorf.quests)]).map((q) => q.title);
+    for (const t of titel) assert.ok(datei.includes(JSON.stringify(t).slice(1, -1)), name + " fehlt: " + t);
+  }
 });

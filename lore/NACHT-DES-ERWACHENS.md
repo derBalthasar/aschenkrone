@@ -101,11 +101,15 @@ Der Held ist Novize im Aschenkloster und hat gerade seine Gelübde abgelegt.
 
 **Fraktionsreihe**
 
-1. Akt 1, Die flackernde Flamme: Herausfinden, warum die Flamme schwindet, und sie neu entfachen.
-2. Akt 2, Verräter im Feuer: Mit Freydis den Kult im Orden aufspüren. Die Spur führt zum Bleichen Skalden.
-3. Akt 3, Der Kreuzzug ruft: Kronreich und Häfen um Korn und Schiffe bitten oder sie zwingen. Spezialisierung wählen.
-4. Akt 4, Die Elfen am Weltenbaum: Gesandtschaft zur Wurzelhalle. Kaelith Eisdorn und die Dornenklingen empfangen den Helden als Waffenbruder.
-5. Akt 5, Über das Nordmeer: Der Kreuzzug sammelt sich am Glutberg. Treffen der drei Fraktionen. Leitet die Volksquest ein.
+Seit 18. 11. 2026 nach Geminis Aufbau, wie beim Kronreich (Einzelheiten und offene Fragen in [quests/ORDEN.md](quests/ORDEN.md)):
+
+1. Akt 1, Die flackernde Flamme (Stufe 1–5): Die Ewige Flamme erlischt. Wachs aus Lichtheim und Schwefel aus Brandstein holen, Freydis entlarvt einen Akolythen, der das heilige Öl verwässert. Die Flamme mit Gebeten oder mit Stahl und Asche nähren.
+2. Akt 2/3, Korn über den Eispass (freie Reihenfolge; erster Zweig Stufe 6–10, zweiter 11–15): Leere Kornspeicher in Eiswacht, Verhandlung in Kronhall mit Astrid und Ulf Grau, Korntreck. Heiliger Bund mit Harald IV. oder Kriegsrecht über die Grenzstädte.
+3. Akt 2/3, Schiffe für den Kreuzzug (freie Reihenfolge; erster Zweig Stufe 6–10, zweiter 11–15): Über Tranvik nach Bernsvik, Knochenfracht aus Draugrsund, Flottenvertrag in Perlvik. Tempelsilber zahlen oder Kult-Reeder enteignen. Danach zusätzlich zur Klassen-Spezialisierung „Sonnenklingen“ oder „Wächter der Asche“.
+4. Akt 4, Verräter im Feuer & Das Alte Reich (Stufe 16–18, enthält die Volksquest): Freydis findet Totenrunen im Glutberg. Erzpriester Thorvald ist der Bleiche Skalde und wird in der Halle der Ewigen Flamme gestellt. Danach das Große Thing, der Held wird Bannerjarl.
+5. Akt 5, Über das Nordmeer (Stufe 19–20, Titel offen): Die Kreuzzugsflotte läuft von Nordwacht und Glutvik aus, wehrt untote Schiffe ab und landet an einem frei wählbaren Kontinent. Ende von Kapitel 1.
+
+Die frühere Aktfolge (Akt 4 „Die Elfen am Weltenbaum“) entfällt. Die Kreuzung mit den Dornenklingen (deren Akt 3 „Klinge und Flamme“) hat damit auf Seiten des Ordens keinen Akt mehr; das wird mit den Elfen-Quests geklärt.
 
 ### Volksquest Menschen: „Das Alte Reich“
 
