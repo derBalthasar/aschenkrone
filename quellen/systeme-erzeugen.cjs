@@ -16,6 +16,7 @@ const p161 = lies("patch-1.6.1");
 const p200 = lies("patch-2.0.0").decisions;
 const p210 = { ...lies("patch-2.1.0").decisionsPart1, ...lies("patch-2.1.0").decisionsPart2 };
 const p220 = lies("patch-2.2.0");
+const p240 = lies("patch-2.4.0").normalizationRule;
 const oekonomie = lies("oekonomie-1");
 const katalog = lies("oekonomie-2");
 const ressourcen = lies("ressourcen");
@@ -236,8 +237,12 @@ const aufstieg = { maxStufe: 30, schritte: Object.fromEntries(Object.entries(sch
     pfade: stufen.ancestralPrestigeSystem.perkTracks.map((t) => ({ id: t.id, name: t.name, max: t.maxPoints, wirkung: t.bonusPerPoint })) } };
 
 // ---- Kampf (Patch 2.1.0 Punkt 9, 2.2.0) ----
-const kampfRegeln = { krit: p210["9_humanDamageFormula"].critMultiplier, ruestungsKonstante: 50,
-  mana: { basis: 40, wille: 3, intelligenz: 2, jeZug: p220.manaSystemSpecification.manaRegenerationPerTurn } };
+// Patch 2.4.0: Henrys Werte (Klassen, Gegner, Ausrüstung, Tränke) werden durch 3,5 geteilt, damit ein Kampfsystem
+// (Kampfdokument 17. 11.) für alle Fraktionen gilt. Mana auf derselben Skala: 12 + Willenskraft + Int/2, +1 je Zug.
+const manaTraenke = Object.fromEntries(Object.entries(p240.normalizedManaAndStaminaScale).filter(([k]) => k.startsWith("POT_MANA"))
+  .map(([k, v]) => [k, parseInt(v, 10)]));
+const kampfRegeln = { krit: p210["9_humanDamageFormula"].critMultiplier, ruestungsKonstante: 50, skalaTeiler: p240.scaleDivisor,
+  mana: { basis: 12, wille: 1, intelligenz: 0.5, jeZug: p240.normalizedManaAndStaminaScale.manaRegenPerTurn, traenke: manaTraenke } };
 
 // ---- Strategie-Ansicht (Bau-Datei) ----
 const ansicht = { taste: bau.uiModes.toggleHotkey, modi: bau.uiModes.modes.map((m) => ({ id: m.id, name: m.label, text: m.description })) };

@@ -28,7 +28,10 @@ assert.equal(S.schaden(100, 50), 50);
 assert.equal(S.schaden(100, 100, 0.5), 50);
 assert.equal(S.schaden(0.4, 100), 1);
 assert.equal(S.rohSchaden(10, 16, 1.5, true), 40.5);
-assert.equal(S.maxMana(12, 10), 40 + 36 + 20);
+assert.equal(S.maxMana(12, 11), 12 + 12 + 5);
+assert.equal(S.skaliert(35), 10);
+assert.equal(S.skaliert(180), 51);
+assert.equal(S.skaliert(0.4), 1);
 
 // Ruf-Ränge und Preise; geächtet ab −25.
 assert.equal(S.rufRang(-25).id, "geaechtet");

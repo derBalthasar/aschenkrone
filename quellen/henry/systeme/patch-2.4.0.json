@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "2.4.0",
+  "module": "combat_scale_normalization_patch",
+  "normalizationRule": {
+    "targetScale": "COMBAT_DOC_17_11_UNIFIED_SCALE",
+    "scaleDivisor": 3.5,
+    "scaleMultiplier": 0.2857,
+    "roundingMode": "ROUND_NEAREST_MIN_1",
+    "appliesTo": [
+      "HUMAN_18_CLASSES_AND_36_SPECIALIZATIONS_BASE_STATS",
+      "33_NEW_HUMAN_REALM_ENEMIES_AND_MINIBOSSES",
+      "3_ASCHERISS_BOSSES",
+      "EQUIPMENT_ATTACK_AND_ARMOR_VALUES_18_11",
+      "CONSUMABLE_HEAL_AND_BOMB_FLAT_VALUES"
+    ],
+    "unchangedSystems": [
+      "PERCENTAGE_ARMOR_FORMULA: finalDamage = max(1, floor(rawDamage * (50 / (50 + targetArmor))))",
+      "PERCENTAGE_BONUSES_AND_CHANCES",
+      "RESOURCE_COSTS_AND_SILVER_PRICES",
+      "MORALE_AND_REPUTATION_VALUES"
+    ],
+    "normalizedConsumableExamples": {
+      "POT_HEILUNG_1": "round(35 / 3.5) = 10 LP",
+      "POT_HEILUNG_2": "round(85 / 3.5) = 24 LP",
+      "POT_HEILUNG_3": "round(180 / 3.5) = 51 LP",
+      "CON_SPLITTERBOMBE": "round(35 / 3.5) = 10 Flächenschaden",
+      "CON_WEIHWASSER": "round(45 / 3.5) = 13 Feuerschaden"
+    },
+    "normalizedManaAndStaminaScale": {
+      "maxManaFormula": "maxMana = 12 + WILLENSKRAFT + floor(INTELLIGENZ * 0.5)",
+      "manaRegenPerTurn": 1,
+      "POT_MANA_1": "9 Mana",
+      "POT_MANA_2": "21 Mana",
+      "POT_MANA_3": "46 Mana"
+    }
+  }
+}

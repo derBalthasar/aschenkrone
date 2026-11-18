@@ -1478,7 +1478,8 @@ console.log("Reisebegegnungen (ruhig, scheu, Jäger, Alphatier, Ausweichen) gepr
     assert.equal(wyrm.combat.id, "auftrag-klippenwyrm");
     assert.equal(wyrm.combat.weiter, "weltknoten");
     folge([0.75, 0.5, 0, 0]);
-    assert.equal(rules.reise(amPass, "brandstein").combat.id, "jagd-grauwolf");
+    // Gewöhnliche Jäger kommen bei den Menschen aus dem Gegnerpool der Region (Patch 2.1.0 Punkt 8).
+    assert.match(rules.reise(amPass, "brandstein").combat.id, /^sys-ENM_/);
     rules.setTravelDice(() => 0);
   }
 
@@ -1535,7 +1536,10 @@ console.log("Reisebegegnungen (ruhig, scheu, Jäger, Alphatier, Ausweichen) gepr
   { let index = 0; const werte = [0.7, 0.5, 0]; rules.setTravelDice(() => werte[Math.min(index++, werte.length - 1)]); }
   const ambush = rules.reise({ ...toHeidvang, xp: 300, health: 60 }, "eiswacht");
   rules.setTravelDice(() => 0);
-  assert.equal(ambush.combat.id, "jagd-grauwolf");
+  // Gegnerpool des Ordens (Eiswacht), Werte aus Henrys Gegnerdatei geteilt durch 3,5 (Patch 2.4.0).
+  assert.match(ambush.combat.id, /^sys-ENM_OF_/);
+  const sysFeind = rules.systeme.gegnerNach[ambush.combat.id.slice(4)];
+  assert.equal(ambush.combat.feinde[0].max, rules.systeme.kampfWerte(sysFeind.id, ambush.combat.feinde[0].stufe).lp);
   assert.equal(ambush.combat.weiter, "weltknoten");
   assert.equal(rules.read(JSON.stringify(ambush)).combat.weiter, "weltknoten");
   const evaded = rules.strike(ambush, "evade");
@@ -1544,6 +1548,9 @@ console.log("Reisebegegnungen (ruhig, scheu, Jäger, Alphatier, Ausweichen) gepr
   for (let turn = 0; won.combat && turn < 40; turn++) won = rules.strike(won, "spear", highRoll);
   assert.equal(won.scene, "weltknoten");
   assert.equal(won.knoten, "eiswacht");
+  assert.ok(won.silver > ambush.silver, "Silber aus der Beute");
+  assert.ok(won.journal.some(text => text.startsWith("Beute: ")));
+  assert.equal(won.moral, ambush.moral + 4, "Sieg +4 Moral");
   // Elfenland hat noch keine Tierwerte: Ein Jäger-Wurf bleibt dort ein Hinweis ohne Kampf.
   rules.setTravelDice(() => 0.5);
   const elves = rules.reise({ ...hub, knoten: "hochdorn" }, knoten.get("hochdorn").verbindungen.find(weg => weg.sicherheit === "grenzland" && weg.kantenTyp === "strasse")?.zielId ?? "nordkap");
@@ -1690,6 +1697,36 @@ console.log("Charakter-Entwurf geprüft.");
   const satt = rules.nahrungTragen(acht, 5, false);
   assert.equal(satt.ressource, 5);
   assert.equal(satt.entkraeftet, false, "Nahrung aufnehmen beendet Entkräftet");
+
+  // Ausrüster der Menschen: Waren aus Henrys Ökonomie-Datei, Preise nach Ruf-Rang. Heiltrank I heilt 35 ÷ 3,5 = 10 LP.
+  let markt = { ...imOrt("kronreich", "kronhall"), silver: 300 };
+  const trank = rules.ausruester(markt).kaufen.find(w => w.id === "POT_HEILUNG_1");
+  assert.equal(trank.preis, 18);
+  markt = rules.ausruesterHandel(markt, "POT_HEILUNG_1", true);
+  assert.ok(markt.inventory.includes("POT_HEILUNG_1"));
+  assert.equal(markt.silver, 282);
+  assert.equal(world.supplies.POT_HEILUNG_1.heal, 10);
+  assert.equal(world.supplies.POT_HEILUNG_3.heal, 51);
+  assert.equal(world.supplies.POT_MANA_2.mana, 21);
+  assert.equal(world.gear.ARM_PLATTE_T3.armor, 7, "Rüstung 24 ÷ 3,5");
+  // Waffenrechte: Ein Krieger (Blutritter der Krone) trägt den Zweihänder, aber keinen Fokusstab.
+  assert.equal(rules.ausruestungGrund(markt, "WPN_ZWEIHAENDER_T2"), null);
+  assert.match(rules.ausruestungGrund(markt, "WPN_EICHENSTAB_T1"), /nicht für Blutritter der Krone/);
+  // Schmiede in Kronhall (vorgebaut): +1 kostet 45 Silber, 2 Eisen aus dem Kontor und 1 Wolfsfell.
+  let schmied = { ...markt, inventory: [...markt.inventory, "WPN_EISENSCHWERT_T1", "MAT_WOLFSFELL"], kontor: { kronreich: { nahrung: 0, holz: 0, eisen: 3, stein: 0, runensplitter: 0 } } };
+  assert.equal(rules.schmiedeInfo(schmied).stufe, 2);
+  schmied = rules.schmieden(schmied, "WPN_EISENSCHWERT_T1");
+  assert.equal(schmied.aufwertung.WPN_EISENSCHWERT_T1, 1);
+  assert.equal(schmied.kontor.kronreich.eisen, 1);
+  assert.ok(!schmied.inventory.includes("MAT_WOLFSFELL"));
+  assert.equal(rules.read(JSON.stringify(schmied)).aufwertung.WPN_EISENSCHWERT_T1, 1);
+  assert.match(rules.schmiedeInfo(schmied).teile.find(t => t.id === "WPN_EISENSCHWERT_T1").grund, /es fehlt/);
+  // Feldhandwerk: Wundmeister rühren Gegengift aus Kräutern und Harz an, Krieger nicht.
+  const heiler = { ...imOrt("kronreich", "kronhall", { inventory: ["MAT_KRAEUTER", "MAT_HARZ"] }) };
+  assert.ok(rules.handwerkListe(heiler).find(r => r.id === "CRAFT_FIELD_GEGENGIFT").grund);
+  const wund = { ...rules.create("Ida", "kronreich", "frau", 1, "heiler"), scene: "weltknoten", knoten: "kronhall", inventory: ["MAT_KRAEUTER", "MAT_HARZ"] };
+  const gebraut = rules.handwerk(wund, "CRAFT_FIELD_GEGENGIFT");
+  assert.deepEqual(plain(gebraut.inventory), ["CON_GEGENGIFT"]);
 
   // Trophäen sind verkäuflich, auch beim Händler einer Stadt mit Zentrallager.
   assert.equal(world.items["beute-pelz-von-graufang"], "Pelz von Graufang");

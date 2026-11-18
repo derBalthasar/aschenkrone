@@ -2629,12 +2629,14 @@
     panel.append(element("p", "Das Kontor teilen alle Städte von " + info.name + ". Preise: Kauf ×" + info.rang.kauf + ", Verkauf ×" + info.rang.verkauf +
       (info.rang.handel ? "." : ". Geächtet: kein Handel, Abheben bleibt erlaubt.")));
     const list = element("div");
-    list.className = "actions trade-list";
+    list.className = "trade-list";
     for (const r of info.rohstoffe) {
-      list.append(element("p", r.name + ": " + r.menge + " im Kontor"));
-      button(list, "1 kaufen · " + r.kauf + " Silber", () => update(rules.kontorHandel(state, r.id, 1, true)), { disabled: Boolean(r.kaufGrund) });
-      button(list, "10 kaufen · " + r.kauf10 + " Silber", () => update(rules.kontorHandel(state, r.id, 10, true)), { disabled: Boolean(r.kauf10Grund) });
-      button(list, "1 verkaufen · +" + r.verkauf + " Silber", () => update(rules.kontorHandel(state, r.id, 1, false)), { disabled: Boolean(r.verkaufGrund) });
+      const zeile = element("div");
+      zeile.className = "actions";
+      list.append(element("p", r.name + ": " + r.menge + " im Kontor"), zeile);
+      button(zeile, "1 kaufen · " + r.kauf + " Silber", () => update(rules.kontorHandel(state, r.id, 1, true)), { disabled: Boolean(r.kaufGrund) });
+      button(zeile, "10 kaufen · " + r.kauf10 + " Silber", () => update(rules.kontorHandel(state, r.id, 10, true)), { disabled: Boolean(r.kauf10Grund) });
+      button(zeile, "1 verkaufen · +" + r.verkauf + " Silber", () => update(rules.kontorHandel(state, r.id, 1, false)), { disabled: Boolean(r.verkaufGrund) });
     }
     panel.append(list);
     const nahrung = element("div");
@@ -2655,6 +2657,62 @@
         () => update(rules.spenden(state, sp.id, 5)), { disabled: Boolean(sp.grund) });
     }
     panel.append(kasse);
+  }
+
+  // Ausrüster, Schmiede und Feldhandwerk der Menschen (Ökonomie-Datei, 18. 11. 2026).
+  function weltAusruester(panel) {
+    const markt = rules.ausruester(state);
+    if (!markt) return;
+    const box = element("details");
+    box.className = "trade-list";
+    box.append(element("summary", "Ausrüster · " + state.silver + " Silber" + (markt.handel ? "" : " · geächtet: kein Handel")));
+    const kaufen = element("div");
+    kaufen.className = "actions";
+    for (const w of markt.kaufen) {
+      button(kaufen, w.name + (w.tier ? " (Stufe " + w.tier + ")" : "") + " · " + w.preis + " Silber" + (w.passt ? "" : " · nicht für deine Klasse") +
+        (w.grund ? " · " + w.grund : ""), () => update(rules.ausruesterHandel(state, w.id, true)), { disabled: Boolean(w.grund) });
+    }
+    box.append(kaufen);
+    if (markt.verkaufen.length) {
+      box.append(element("h4", "Verkaufen"));
+      const verkaufen = element("div");
+      verkaufen.className = "actions";
+      for (const w of markt.verkaufen) {
+        button(verkaufen, w.name + " (" + w.anzahl + ") · +" + w.preis + " Silber" + (w.grund ? " · " + w.grund : ""),
+          () => update(rules.ausruesterHandel(state, w.id, false)), { disabled: Boolean(w.grund) });
+      }
+      box.append(verkaufen);
+    }
+    panel.append(box);
+  }
+  function weltSchmiede(panel) {
+    const info = rules.schmiedeInfo(state);
+    if (!info) return;
+    const box = element("details");
+    box.append(element("summary", "Schmiede · " + (info.stufe ? "Aufwerten bis +" + info.stufe : "keine Schmiede in dieser Stadt")));
+    const liste = element("div");
+    liste.className = "actions";
+    for (const t of info.teile) {
+      button(liste, t.name + (t.stufe ? " +" + t.stufe : "") + (t.kosten ? " → +" + t.ziel + " (+" + t.kosten.bonus + " %) · " + t.kosten.silber + " Silber, " +
+        t.kosten.material : "") + (t.grund ? " · " + t.grund : ""), () => update(rules.schmieden(state, t.id)), { disabled: Boolean(t.grund) });
+    }
+    if (!info.teile.length) liste.append(element("p", "Keine Ausrüstung im Rucksack."));
+    box.append(liste);
+    panel.append(box);
+  }
+  function weltHandwerk(panel) {
+    const rezepte = rules.handwerkListe(state);
+    if (!rezepte.length) return;
+    const box = element("details");
+    box.append(element("summary", "Feldhandwerk"));
+    const liste = element("div");
+    liste.className = "actions";
+    for (const r of rezepte) {
+      button(liste, r.name + " · " + r.anzahl + " × " + r.ergebnis + " aus " + r.zutaten + (r.grund ? " · " + r.grund : ""),
+        () => update(rules.handwerk(state, r.id)), { disabled: Boolean(r.grund) });
+    }
+    box.append(liste);
+    panel.append(box);
   }
 
   function weltHofstaat(panel, ort) {
@@ -2689,7 +2747,8 @@
       const supply = world.supplies[id];
       const effect = gear?.power ? gear.power + " Grundschaden" : gear?.armor ? gear.armor + " Rüstung" :
         gear?.magic ? "+" + gear.magic + " Glutschaden" : gear?.travel ? "+" + gear.travel + " auf List unterwegs" :
-        supply?.heal ? "+" + supply.heal + " LP" : "+" + supply.ember + " Glut";
+        supply?.heal ? "+" + supply.heal + " LP" : supply?.ember ? "+" + supply.ember + " Glut" :
+        supply?.revive ? "holt Gefallene mit " + supply.revive + " % LP zurück" : supply?.cure ? "heilt " + world.ailments[supply.cure].name : "";
       button(stock, world.items[id] + " · " + effect + " · " + price + " Silber", () => update(rules.trade(state, id, true)),
         { disabled: price > state.silver || state.inventory.length >= rules.itemCap - 20 });
     }
@@ -2734,8 +2793,14 @@
       : "Kein Zentrallager. Es steht in allen Hauptstädten und in den Städten deiner Fraktion."));
     button(panel, lager ? "Zentrallager und Rucksack öffnen" : "Rucksack öffnen", () => openHub());
     if (rules.handelOffen(state)) panel.append(handelBlock());
-    panel.append(element("h3", "Schmied und Heiler"));
-    panel.append(element("p", "Handwerk aus Trophäen und Flora folgt mit der Flora-und-Fauna-Ausarbeitung für alle Gebiete."));
+    if (rules.lage(state)) {
+      weltAusruester(panel);
+      weltSchmiede(panel);
+      weltHandwerk(panel);
+    } else {
+      panel.append(element("h3", "Schmied und Heiler"));
+      panel.append(element("p", "Handwerk aus Trophäen und Flora folgt mit der Flora-und-Fauna-Ausarbeitung für alle Gebiete."));
+    }
   }
 
   function weltHeld(panel) {

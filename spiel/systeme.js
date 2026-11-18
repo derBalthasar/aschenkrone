@@ -242,6 +242,15 @@ const systeme = (() => {
     return { stufe: s, lp: Math.round(g.werte.hp * (1 + 0.08 * plus)), angriff: Math.round(g.werte.attack * (1 + 0.08 * plus)),
       ruestung: g.werte.armor + Math.floor(plus / 3), tempo: g.werte.speed };
   }
+  // Umrechnung auf die Skala des Kampfdokuments vom 17. 11. (Helden 22–40 LP statt 90–150).
+  // Patch 2.4.0: Teiler 3,5, auf ganze Zahlen gerundet, mindestens 1.
+  const skala = 1 / D.kampf.skalaTeiler;
+  const skaliert = (wert) => Math.max(1, Math.round((wert ?? 0) / D.kampf.skalaTeiler));
+  function kampfWerte(id, stufe) {
+    const w = gegnerWerte(id, stufe);
+    if (!w) return null;
+    return { lp: skaliert(w.lp), schaden: skaliert(w.angriff), ruestung: skaliert(w.ruestung), aktionen: gegnerNach[id].miniboss ? 2 : 1 };
+  }
   // Begegnung auf einem Weg der Menschenlande: Miniboss nach Wegtyp (mit 5 Etappen Abklingzeit), sonst passender Gegner.
   function begegnung(state, region, typ, stufe, dice = Math.random) {
     const r = D.gegnerRegionen[region];
@@ -602,7 +611,8 @@ const systeme = (() => {
     const wirksam = Math.max(0, ruestung) * (1 - zwischen(durchdringung, 0, 1));
     return Math.max(1, Math.floor(roh * (D.kampf.ruestungsKonstante / (D.kampf.ruestungsKonstante + wirksam))));
   }
-  const maxMana = (wille, intelligenz) => D.kampf.mana.basis + D.kampf.mana.wille * wille + D.kampf.mana.intelligenz * intelligenz;
+  // Patch 2.4.0: maxMana = 12 + Willenskraft + floor(Intelligenz / 2).
+  const maxMana = (wille, intelligenz) => D.kampf.mana.basis + D.kampf.mana.wille * wille + Math.floor(D.kampf.mana.intelligenz * intelligenz);
   // Menschen-Klasse eines Helden: Fraktion und Grundklasse (Rolle).
   const klasseVon = (fraktion, rolle) => Object.values(D.klassen).find((k) => k.fraktion === fraktion && k.rolle === rolle) ?? null;
 
@@ -614,7 +624,7 @@ const systeme = (() => {
     kontor, kontorAm, preisFaktor, rohstoffPreis, handelGrund, handeln, nahrungGrund, nahrungTragen, bezahlbar, bezahle, kostenText,
     tatAnwenden, doerferVon, befreie, befreiteDoerfer, zehntErtrag, etappe,
     wegTyp, reiseNahrung, reiseGefahr,
-    gegnerListe, gegnerNach, gegnerWerte, begegnung, beute,
+    gegnerListe, gegnerNach, gegnerWerte, kampfWerte, skala, skaliert, begegnung, beute,
     ausruestungErlaubt, warenFaktor, gegenstandPreis,
     akt, phase, siedlungsStufe, gebaeudeIn, ausbauGrund, ausbauen, bauGrund, bauen, wegeAm, strasseGrund, strassePflastern,
     verteidigung, rekrutierenGrund, rekrutieren, ueberfall, reparierenGrund, reparieren,
