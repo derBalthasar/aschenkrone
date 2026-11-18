@@ -17,6 +17,9 @@ const rules = (() => {
   const beltSize = 2;
   // Technische Spezifikation (17. 11. 2026): Weltleisten, Fraktionsvorrat und Knotennetz.
   const N = knoten;
+  // Spielsysteme der Menschen (Henry, 18. 11. 2026): Kontor, Ruf-Ränge, Moral, Zehnt, Taten, Bau, Stufe 30.
+  const SY = systeme;
+  const menschen = (state) => SY.istMensch(state.faction);
   const leistenFolge = ["untote", "orks", "glut", "erzfieber", "welke"];
   const leistenStart = { untote: 35, orks: 40, glut: 30, erzfieber: 45, welke: 30 };
   const leistenNamen = { untote: "Untoten-Bedrohung", orks: "Ork-Bedrohung", glut: "Glut des Mutterbergs",
@@ -187,6 +190,7 @@ const rules = (() => {
       xp: 0, silver: 5, training: {}, stufenpunkte: 0, ressource: vorratStart, rewards: [],
       weltLeisten: { ...leistenStart }, runde: 0, knoten: null, handlung: null, vertraege: [], ertraege: {}, niederlage: null,
       weltAuftraege: {}, hauptquest: null,
+      moral: SY.daten.moral.start, entkraeftet: false, etappen: 0, kontor: {}, befreit: [], tatOffen: null,
       party: [], companionEquipment: {}, partyVitals: {}, heroStatus: {}, companionXp: {},
       rucksack: 0, guertel: Array(beltSize).fill(null), relikt: null,
       relationships: {}, factionRuf: {}, companionQuests: {}, crafted: [], questClock: 0, questLog: {},
@@ -342,6 +346,14 @@ const rules = (() => {
     }
     state.stufenpunkte ??= 0;
     state.ressource ??= 3;
+    // Spielsysteme der Menschen (18. 11. 2026): ältere Spielstände starten mit Moral 60 und leerem Kontor.
+    state.moral ??= SY.daten.moral.start;
+    state.entkraeftet ??= false;
+    state.etappen ??= 0;
+    state.kontor ??= {};
+    state.befreit ??= [];
+    state.tatOffen ??= null;
+    state.aufwertung ??= {};
     // Spielstände vor der Weltebene: Fraktionsressource und Kampfressource werden ein Vorrat von 0 bis 100.
     // Der alte Kampfvorrat (Start 3) kommt auf den neuen Startwert 42 obendrauf.
     if (!isRecord(state.weltLeisten)) {
@@ -498,6 +510,7 @@ const rules = (() => {
     if (next === previous) return previous;
     next.questClock = Math.min(1000000000, (previous.questClock ?? 0) + 1);
     syncQuests(next, previous.scene);
+    nahrungErhalten(next);
     return next;
   }
   const choose = (...args) => timedAction(args[0], chooseStep(...args));
@@ -935,6 +948,7 @@ const rules = (() => {
   function targetSlot(state, id, wanted) {
     const kind = world.gear[id]?.slot;
     if (!kind) return null;
+    if (ausruestungGrund(state, id)) return null;
     if (wanted) return slotKinds[wanted] === kind ? wanted : null;
     const slots = equipmentSlots.filter(slot => slotKinds[slot] === kind);
     return slots.find(slot => state.equipment[slot] === id) ?? slots.find(slot => !state.equipment[slot]) ?? slots[0];
@@ -991,7 +1005,7 @@ const rules = (() => {
     const weaponId = weapon(preview);
     const held = world.gear[weaponId];
     return {
-      damage: held.power + damageValue(state, gearSkill(held)), pierce: held.pierce ?? 0, armor: gearBonus(preview, "armor"),
+      damage: aufgewertet(preview, weaponId, held.power) + damageValue(state, gearSkill(held)), pierce: held.pierce ?? 0, armor: gearBonus(preview, "armor"),
       magic: gearBonus(preview, "magic"), travel: gearBonus(preview, "travel"), airborne: held.airborne ?? 0,
     };
   }
@@ -1224,6 +1238,9 @@ const rules = (() => {
     return Boolean(supply && target && state.health > 0 && state.inventory.includes(id) &&
       (supply.revive ? targetId !== "hero" && target.health === 0 : target.health > 0 &&
       ((supply.heal && target.health < target.max) || (supply.ember && targetId === "hero" && state.ember < emberLimit(state)) ||
+        // Patch 2.4.0: Mana- und Fokustränke wirken nur im Kampf und nur auf die Spielfigur.
+        (supply.mana && targetId === "hero" && state.combat && state.combat.held.mana < kraft(state).mana) ||
+        (supply.ausdauer && targetId === "hero" && state.combat && state.combat.held.ausdauer < kraft(state).ausdauer) ||
         (supply.cure && target.status[supply.cure]))));
   }
   function consume(state, id, targetId = "hero", events = []) {
@@ -1237,6 +1254,8 @@ const rules = (() => {
       events.push({ kind: "revive", actor: "hero", ally: targetId, value: restored });
     } else if (supply.heal) healAlly(state, targetId, supply.heal, "hero", events);
     if (supply.ember) state.ember = Math.min(emberLimit(state), state.ember + supply.ember);
+    if (supply.mana && state.combat) state.combat.held.mana = Math.min(kraft(state).mana, state.combat.held.mana + supply.mana);
+    if (supply.ausdauer && state.combat) state.combat.held.ausdauer = Math.min(kraft(state).ausdauer, state.combat.held.ausdauer + supply.ausdauer);
     if (supply.cure) {
       delete (targetId === "hero" ? state.heroStatus : state.partyVitals[targetId].status)[supply.cure];
       events.push({ kind: "cleanse", actor: "hero", ally: targetId });
@@ -1476,6 +1495,8 @@ const rules = (() => {
     erzfieber: "Das Erzfieber erreicht 100. Die Häuser der Zwerge fallen übereinander her.",
     welke: "Die Welke erreicht 100. Der Weltenbaum stirbt.",
     vorrat: "Der Fraktionsvorrat ist aufgebraucht. Ohne Nachschub zerfällt deine Fraktion.",
+    // Patch 2.3.0: Bei den Menschen endet das Spiel erst, wenn Nahrung und Moral beide auf 0 stehen.
+    verhungert: "Verhungert und gebrochen: Ohne Nahrung und ohne jeden Rest an Moral löst sich die Gruppe in der Asche auf.",
   };
 
   const leiste = (state, id) => state.weltLeisten?.[id] ?? leistenStart[id];
@@ -1506,7 +1527,9 @@ const rules = (() => {
 
   // Niederlage-Prüfung bei jedem Rundenwechsel: eine Leiste auf 100 oder der Vorrat auf 0.
   function pruefeNiederlage(state) {
-    const grund = leistenFolge.find((id) => leiste(state, id) >= 100) ?? ((state.ressource ?? 0) <= 0 ? "vorrat" : null);
+    const leer = (state.ressource ?? 0) <= 0;
+    const grund = leistenFolge.find((id) => leiste(state, id) >= 100) ??
+      (!leer ? null : !menschen(state) ? "vorrat" : SY.moral(state) <= 0 ? "verhungert" : null);
     if (!grund) return false;
     state.niederlage = grund;
     state.combat = null;
@@ -1566,6 +1589,7 @@ const rules = (() => {
 
   function reiseGrund(state, zielId) {
     if (state.scene !== "weltknoten" || state.combat || !state.health) return "nur in der Weltreise";
+    if (state.tatOffen) return "erst über den Ausgang des Auftrags entscheiden";
     const ort = N.get(state.knoten);
     const weg = N.verbindung(state.knoten, zielId);
     if (!ort || !weg) return "keine Verbindung";
@@ -1591,7 +1615,7 @@ const rules = (() => {
       const kosten = wegKosten(state, state.knoten, weg);
       return { ...weg, kostenRessource: kosten, rabatt: kosten < weg.kostenRessource, ziel: N.get(weg.zielId),
         grund: reiseGrund(state, weg.zielId), letzterVorrat: kosten >= (state.ressource ?? 0),
-        auftrag: wegAuftrag(state, state.knoten, weg.zielId), ...wegInfo(state.knoten, weg) };
+        auftrag: wegAuftrag(state, state.knoten, weg.zielId), ...wegInfo(state.knoten, weg, state) };
     });
   }
 
@@ -1600,20 +1624,26 @@ const rules = (() => {
   // Wegenetz der Menschen (Henry, 18. 11. 2026): Jeder Weg hat seine eigene Gefahr (Anteil der Jäger-Begegnungen)
   // und seine Gegner. Scheue Tiere bleiben bei 20 %, der Rest der Reise ist ruhig.
   const wegDaten = (von, zu) => NQ?.daten.wegenetz?.wege[wegKennung(von, zu)] ?? null;
+  // Patch 2.1.0 Punkt 8: Die Gefahr des Weges ist die Basis, Signalfeuer, Grenzstraße, Moral und Grenzläufer verschieben sie.
+  function wegDatenFuer(state, von, zu) {
+    const daten = wegDaten(von, zu);
+    if (!daten || !state || !menschen(state)) return daten;
+    return { ...daten, gefahr: SY.reiseGefahr(state, daten.gefahr, wegKennung(von, zu)) };
+  }
   function begegnungsTabelle(weg, daten) {
     if (!daten) return world.encounterTables[weg.sicherheit === "kernland" ? "kernland" : "grenzland"];
     const jaeger = Math.round(daten.gefahr * 100);
     return [[100 - jaeger - 20, "ruhig"], [20, "scheu"], [jaeger, "jaeger"]];
   }
   // Kennung, Hinterhalt-Gefahr und Gegner eines Weges für Aufbruch und Reisekarte.
-  function wegInfo(von, weg) {
-    const daten = wegDaten(von, weg.zielId);
+  function wegInfo(von, weg, state = null) {
+    const daten = wegDatenFuer(state, von, weg.zielId);
     const gefahr = daten ? daten.gefahr : begegnungsTabelle(weg, null).find(([, art]) => art === "jaeger")[0] / 100;
     const gegner = weg.kantenTyp === "seeweg" ? [] : daten?.gegner.length ? daten.gegner : jaegerNachFraktion[N.get(weg.zielId).fraktion] ?? [];
     return { kennung: wegKennung(von, weg.zielId), gefahr, gegner: gegner.map(id => world.fights[id].name) };
   }
   function knotenBegegnung(state, weg, ziel, von = null) {
-    const daten = von ? wegDaten(von, ziel.id) : null;
+    const daten = von ? wegDatenFuer(state, von, ziel.id) : null;
     const table = begegnungsTabelle(weg, daten);
     const roll = Math.floor(travelDice() * 100);
     let summe = 0;
@@ -1646,6 +1676,16 @@ const rules = (() => {
       return;
     }
     const fight = travelDice() < 0.1 ? pick(world.encounterPools.alpha) : pick(pool);
+    // Patch 2.1.0 Punkt 8: In den Menschenlanden kommen die gewöhnlichen Jäger aus dem Gegnerpool der Region, mit
+    // Miniboss-Chance je Wegart. Besondere Gegner des Wegenetzes (Eishauer, Klippenwyrm) bleiben an ihrem Weg.
+    if (menschen(state) && fight.startsWith("jagd-") && SY.daten.gegnerRegionen[ziel.fraktion]) {
+      const g = SY.begegnung(state, ziel.fraktion, SY.wegTyp(weg, von ? wegKennung(von, ziel.id) : null), gebietsStufe(state, ziel.id), travelDice);
+      note(state, (g.miniboss ? "Ein gefürchteter Gegner stellt sich euch in den Weg: " : "Hinterhalt unterwegs: ") + g.name + "!");
+      startFight(state, sysKampf(g.id), true, g.werte.stufe);
+      if (state.combat) Object.assign(state.combat, { weiter: "weltknoten", hinterhalt: !g.miniboss });
+      else if (!state.health) arrive(state, "defeat");
+      return;
+    }
     note(state, "Hinterhalt unterwegs: " + world.fights[fight].name + "!");
     // Einzelgegner aus dem Wegenetz (Eishauer, Klippenwyrm) kämpfen auf Gebietsstufe wie im Auftrag.
     startFight(state, fight, true, fight.startsWith("auftrag-") ? gebietsStufe(state, ziel.id) : null);
@@ -1659,7 +1699,9 @@ const rules = (() => {
     const weg = N.verbindung(state.knoten, zielId);
     const ziel = N.get(zielId);
     const von = state.knoten;
-    state.ressource -= wegKosten(state, von, weg);
+    const kosten = wegKosten(state, von, weg);
+    if (menschen(state)) nahrungVerbrauchen(state, kosten);
+    else state.ressource -= kosten;
     state.silver -= weg.kostenGold;
     if (weg.kostenGold) note(state, "Überfahrt nach " + ziel.name + " · " + weg.kostenGold + " Silber.");
     if (weg.probe) {
@@ -1677,7 +1719,9 @@ const rules = (() => {
     }
     state.knoten = zielId;
     weltRunde(state);
+    if (menschen(state)) for (const meldung of SY.etappe(state, travelDice)) note(state, meldung);
     if (pruefeNiederlage(state)) return state;
+    torzoll(state, ziel);
     note(state, "Ankunft in " + ziel.name + " (" + N.typNamen[ziel.typ] + ", " + K.fraktionen[ziel.fraktion].name + ").");
     const unterwegs = wegAuftrag(state, von, zielId);
     if (unterwegs) {
@@ -1690,22 +1734,65 @@ const rules = (() => {
   }
   const reise = (...args) => timedAction(args[0], reiseStep(...args));
 
+  // Patch 2.3.0: Reicht die Nahrung für eine Etappe nicht, ist die Gruppe entkräftet und verliert 15 Moral je Etappe.
+  function nahrungVerbrauchen(state, kosten) {
+    const fehlt = kosten > (state.ressource ?? 0);
+    state.ressource = Math.max(0, (state.ressource ?? 0) - kosten);
+    if (state.ressource > 0) return;
+    if (!state.entkraeftet) note(state, "Die Nahrung ist aufgebraucht. Die Gruppe ist entkräftet: Jede weitere Etappe ohne Nahrung kostet Moral.");
+    state.entkraeftet = true;
+    if (!fehlt) return;
+    const delta = SY.moralAendern(state, "hunger");
+    note(state, "Hunger zehrt an der Gruppe · Moral " + delta + " (jetzt " + SY.moral(state) + ").");
+  }
+  // Nahrung aufnehmen oder rasten beendet „Entkräftet“.
+  function nahrungErhalten(state) {
+    if (state.entkraeftet && (state.ressource ?? 0) > 0) {
+      state.entkraeftet = false;
+      note(state, "Die Gruppe hat wieder zu essen und ist nicht mehr entkräftet.");
+    }
+  }
+  // Geächtete zahlen Torzoll an den Städten der Menschen.
+  function torzoll(state, ziel) {
+    if (!menschen(state) || !SY.istMensch(ziel.fraktion) || ziel.typ === "dorf") return;
+    const zoll = Math.min(state.silver, SY.rufRang(SY.ruf(state, ziel.fraktion)).torzoll);
+    if (!zoll) return;
+    state.silver -= zoll;
+    note(state, "Die Wachen von " + ziel.name + " kennen deinen Ruf. Torzoll · −" + zoll + " Silber.");
+  }
+
   // Rast im Hub: volle LP, Glut und Zustände der Gruppe. Kostet 1 Fraktionsvorrat und darf ihn nicht aufbrauchen.
+  // Menschen (Ressourcen-Datei): Rast kostet 3 Nahrung, als Bannerjarl in den Städten der eigenen Fraktion nichts.
+  function rastKosten(state) {
+    if (!menschen(state)) return 1;
+    const ort = N.get(state.knoten);
+    return ort && ort.fraktion === state.faction && ort.typ !== "dorf" && SY.rufRang(SY.ruf(state, ort.fraktion)).freieRast ? 0
+      : SY.daten.reise.rast;
+  }
   function rastGrund(state) {
     if (state.scene !== "weltknoten" || state.combat || !state.health) return "nur in der Weltreise";
-    if ((state.ressource ?? 0) <= 1) return "zu wenig " + resourceName(state);
+    if (state.tatOffen) return "erst über den Ausgang des Auftrags entscheiden";
+    const kosten = rastKosten(state);
+    if (kosten && (state.ressource ?? 0) <= kosten) return "zu wenig " + resourceName(state);
     return null;
   }
   function rast(previous) {
     if (rastGrund(previous)) return previous;
     const state = structuredClone(previous);
-    state.ressource -= 1;
+    const kosten = rastKosten(state);
+    state.ressource -= kosten;
+    if (menschen(state)) {
+      SY.moralAendern(state, "rast");
+      state.entkraeftet = false;
+    }
     state.health = healthLimit(state);
     state.ember = emberLimit(state);
     state.heroStatus = {};
     ensureVitals(state);
     for (const id of state.party) state.partyVitals[id] = { health: memberHealthLimit(id, state), status: {} };
-    note(state, "Ihr rastet in " + N.get(state.knoten).name + ". Alle sind wieder bei Kräften · −1 " + resourceName(state) + ".");
+    note(state, "Ihr rastet in " + N.get(state.knoten).name + ". Alle sind wieder bei Kräften" +
+      (kosten ? " · −" + kosten + " " + resourceName(state) : " · als Bannerjarl ohne Kosten") +
+      (menschen(state) ? " · Moral " + SY.moral(state) : "") + ".");
     return state;
   }
 
@@ -1715,6 +1802,7 @@ const rules = (() => {
     const ort = N.get(state.knoten);
     if (ort.typ !== "dorf") return "nur in Dörfern";
     if (ort.fraktion !== state.faction) return "nur in Dörfern der eigenen Fraktion";
+    if (menschen(state)) return "befreite Dörfer liefern ihren Zehnt alle " + SY.daten.zehnt.etappen + " Etappen ins Kontor";
     const zuletzt = state.ertraege?.[ort.id];
     if (zuletzt !== undefined && state.runde - zuletzt < ertragPause) return "wieder bereit in " + (ertragPause - (state.runde - zuletzt)) + " Runden";
     if ((state.ressource ?? 0) >= vorratMax) return "Vorrat ist voll";
@@ -1901,6 +1989,74 @@ const rules = (() => {
       victoryText: "Der Kampf ist gewonnen." };
   }
 
+  // ---- Gegner, Beute und Ausrüstung der Menschenlande (Henry, 18. 11. 2026, Gegner- und Ökonomie-Datei) ----
+  // Patch 2.4.0: Henrys Werte rechnen 3,5-mal größer als das Kampfdokument vom 17. 11. Angriff, Rüstung und Heilwerte
+  // werden durch 3,5 geteilt, damit alle 15 Fraktionen und die Gefährten ein Kampfsystem teilen.
+  const sysSlots = { RECHTE_HAND: "weapon", LINKE_HAND: "offhand", KOPF: "head", HALS: "neck", KOERPER: "armor", BEINE: "legs", RING: "ring" };
+  const sysSeltenheit = { 2: "Ungewöhnlich", 3: "Selten", 4: "Episch" };
+  const sysWert = (wert, teiler) => Math.round((wert ?? 0) / teiler);
+  for (const g of Object.values(SY.daten.gegenstaende)) {
+    world.items[g.id] = g.name;
+    if (sysSeltenheit[g.tier] && g.slot) world.rarity[g.id] = sysSeltenheit[g.tier];
+    const slot = sysSlots[g.slot];
+    const w = g.stats ?? {};
+    if (slot === "weapon") {
+      const fern = /FERNKAMPF|SCHWARZPULVER/.test(g.equipCategory);
+      const fokus = /FOKUS/.test(g.equipCategory);
+      world.gear[g.id] = { slot, stat: fokus ? "mind" : fern || g.equipCategory === "DOLCH_KLINGE" ? "agility" : "strength",
+        ...(g.equipCategory === "DOLCH_KLINGE" ? { skill: "nahkampf" } : {}),
+        power: SY.skaliert(w.attack), pierce: sysWert(w.armorPen, 10),
+        magic: sysWert(w.fireDamage, 5) + sysWert(w.willpower, 3),
+        ...(/ZWEIHAND|BOGEN|GEWEHR|STAB/.test(g.equipCategory) ? { twoHanded: true } : {}) };
+    } else if (slot) {
+      world.gear[g.id] = { slot, armor: w.armor ? SY.skaliert(w.armor) : 0,
+        magic: sysWert(w.fireDamage, 5) + sysWert(w.willpower, 3) + sysWert(w.healingBonus, 15) };
+    }
+    const heilung = /Stellt im Kampf (\d+) LP/.exec(g.effect ?? "");
+    if (heilung) world.supplies[g.id] = { heal: SY.skaliert(Number(heilung[1])) };
+    else if (/^POT_MANA_/.test(g.id)) world.supplies[g.id] = { mana: SY.daten.kampf.mana.traenke[g.id] };
+    else if (/^POT_FOKUS_/.test(g.id)) world.supplies[g.id] = { ausdauer: SY.skaliert(Number(/(\d+) Ausdauer/.exec(g.effect)?.[1] ?? 25)) };
+    else if (g.id === "CON_GEGENGIFT") world.supplies[g.id] = { cure: "poison" };
+    else if (g.id === "CON_BRANDSALBE") world.supplies[g.id] = { cure: "burn" };
+  }
+  // Ähnlicher bestehender Gegner je Familie: liefert Grundwerte für Initiative und Proben, kein Bild (Bilder folgen später).
+  const sysVorlage = (g) => /wolf|keiler|bär|viper|krabbler|krähe|salamander|vurm|leviathan|troll|ursa|seeschreck|schluchtenj/i.test(g.name)
+    ? (/krähe/i.test(g.name) ? "galgenkraehe" : /keiler/i.test(g.name) ? "keiler" : /troll/i.test(g.name) ? "schlundtroll" : "grauwolf")
+    : "deserteure";
+  const sysKampf = (id) => "sys-" + id;
+  // Beute der Gegner der Menschenlande: Silber, Material, Tränke, Ausrüstung; Runensplitter gehen ins Kontor.
+  function systemBeute(state, gegnerId) {
+    const b = SY.beute(state, gegnerId, travelDice);
+    state.silver += b.silber;
+    const teile = [b.silber + " Silber"];
+    const sachen = [];
+    for (const { id, anzahl } of b.gegenstaende) {
+      if (id.startsWith("RES_")) {
+        const rohstoff = id.slice(4).toLowerCase();
+        if (menschen(state) && SY.daten.rohstoffe[rohstoff]) {
+          SY.kontor(state, state.faction)[rohstoff] += anzahl;
+          teile.push(anzahl + " " + SY.daten.rohstoffe[rohstoff].name + " ins Kontor");
+        }
+        continue;
+      }
+      if (!own(world.items, id)) continue;
+      for (let i = 0; i < anzahl; i++) sachen.push(id);
+      teile.push((anzahl > 1 ? anzahl + " × " : "") + world.items[id]);
+    }
+    receive(state, sachen);
+    note(state, "Beute: " + teile.join(", ") + ".");
+  }
+  for (const g of SY.gegnerListe) {
+    const id = sysKampf(g.id);
+    const vorlage = world.creatures[sysVorlage(g)];
+    world.creatures[id] = { name: g.name, stats: [...(vorlage?.stats ?? [24, 7, 2, 5])] };
+    world.fights[id] = { gegner: { rang: g.miniboss ? "elite" : "mitlaeufer", stufe: g.minStufe }, system: g.id, name: g.name, loot: [],
+      random: true, alpha: g.miniboss,
+      special: { name: g.miniboss ? "Wuchtschlag" : "Ansturm", warning: g.name + " holt aus.", damage: 1 },
+      victoryText: g.miniboss ? g.name + " fällt. Der Weg ist für eine Weile sicherer." : "Der Hinterhalt ist abgewehrt." };
+    world.battleRewards[id] = [0, 0];
+  }
+
   // Begleiter aus den Begleiter-Aufträgen (Henry, Punkt 4): Grundwerte ihrer Klasse wie bei den bestehenden Gefährten.
   const klassenWerte = { waechter: { health: 32, guard: 11 }, spaeher: { health: 28, damage: 10, airborne: 4 },
     krieger: { health: 36, damage: 12 }, magier: { health: 24, damage: 13, fire: true }, heiler: { health: 26, heal: 12, cleanse: true },
@@ -1999,6 +2155,7 @@ const rules = (() => {
     const auftrag = auftragIndex[id];
     if (!auftrag) return "unbekannter Auftrag";
     if (!imHub(state)) return "nur in der Weltreise";
+    if (state.tatOffen) return "erst über den Ausgang des letzten Auftrags entscheiden";
     if (state.knoten !== auftrag.ort) return "Aushang in " + N.get(auftrag.ort).name;
     if (!NQ.stufenFuer(auftrag.ort, state.faction)) return "nur für Helden des eigenen Volkes";
     const eintrag = state.weltAuftraege?.[id];
@@ -2022,6 +2179,7 @@ const rules = (() => {
     const auftrag = auftragIndex[id];
     if (!auftrag || state.weltAuftraege?.[id]?.status !== "aktiv") return "nicht angenommen";
     if (!imHub(state)) return "nur in der Weltreise";
+    if (state.tatOffen) return "erst über den Ausgang des letzten Auftrags entscheiden";
     if (auftrag.spiel.weg) return "unterwegs auf " + auftrag.spiel.weg;
     if (state.knoten !== auftrag.ort) return "in " + N.get(auftrag.ort).name;
     const lohn = auftragsLohn(state, id);
@@ -2058,6 +2216,12 @@ const rules = (() => {
     if (lohn.vermerke.length) folgen.push("vermerkt: " + lohn.vermerke.join(", "));
     if (folgen.length) note(state, folgen.join(" · ") + ".");
     grant(state, "auftrag-" + id, auftragEp, lohn.silber, lohn.gegenstaende, false);
+    // Ruf-Datei 2.0: Aufträge der Menschen enden mit einer Wahl: gute Tat, Söldner-Weg oder schlechte Tat.
+    if (menschen(state) && SY.istMensch(auftrag.fraktion)) {
+      state.tatOffen = id;
+      note(state, "Wie endest du den Auftrag? Gute Tat, Söldner-Weg oder schlechte Tat entscheiden über deinen Ruf bei " +
+        K.fraktionen[auftrag.fraktion].name + ".");
+    }
     const begleiter = begleiterNachAuftrag[id];
     if (begleiter) {
       const companion = world.companions[begleiter];
@@ -2065,6 +2229,213 @@ const rules = (() => {
         ? companion.name + " dankt dir. Mit dir zieht schon jemand dieser Klasse, deshalb bleibt " + companion.name + " in " + N.get(companion.knoten).name + "."
         : companion.name + " wartet in " + N.get(companion.knoten).name + " auf dich. Im Hofstaat kannst du " + companion.name + " in die Gruppe aufnehmen.");
     }
+  }
+
+  // Ausgang eines Auftrags (Ruf-Datei 2.0, Patch 2.1.0 Punkt 4): Ruf, Lohnfaktor, Moral. Gute Tat oder Söldner-Weg
+  // bei q01 einer Stadt befreit alle Dörfer dieser Stadt.
+  function taten(state) {
+    if (!state.tatOffen) return [];
+    const lohn = auftragsLohn(state, state.tatOffen).silber ?? 0;
+    return Object.entries(SY.daten.taten).map(([id, t]) => ({ id, name: t.name, text: t.text, ruf: t.ruf,
+      silber: Math.round(lohn * (t.silber - 1)), nahrung: t.rohstoffe, befreit: t.befreit && /_q01$/.test(state.tatOffen) }));
+  }
+  function tatWaehlen(previous, tat) {
+    if (!previous.tatOffen || !SY.daten.taten[tat]) return previous;
+    const state = structuredClone(previous);
+    const id = state.tatOffen;
+    const auftrag = auftragIndex[id];
+    const lohn = auftragsLohn(state, id).silber ?? 0;
+    const t = SY.daten.taten[tat];
+    const vorher = SY.ruf(state, auftrag.fraktion);
+    SY.rufAendern(state, auftrag.fraktion, t.ruf);
+    const extra = Math.round(lohn * (t.silber - 1));
+    state.silver += extra;
+    if (t.rohstoffe) state.ressource = Math.min(vorratMax, (state.ressource ?? 0) + t.rohstoffe);
+    const moral = SY.moralAendern(state, tat === "pragmatisch" ? "keins" : tat);
+    state.tatOffen = null;
+    const folgen = ["Ruf bei " + K.fraktionen[auftrag.fraktion].name + " " + (t.ruf > 0 ? "+" : "") + t.ruf + " (jetzt " + SY.ruf(state, auftrag.fraktion) + ")"];
+    if (extra) folgen.push("+" + extra + " Silber");
+    if (t.rohstoffe) folgen.push("+" + t.rohstoffe + " " + resourceName(state));
+    if (moral) folgen.push("Moral " + (moral > 0 ? "+" : "") + moral);
+    note(state, t.name + ": " + folgen.join(" · ") + ".");
+    const rangVorher = SY.rufRang(vorher).id;
+    const rang = SY.rufRang(SY.ruf(state, auftrag.fraktion));
+    if (rang.id !== rangVorher) note(state, "Dein Rang bei " + K.fraktionen[auftrag.fraktion].name + " ist jetzt: " + rang.name + ".");
+    if (t.befreit && /_q01$/.test(id)) {
+      const frei = SY.befreie(state, auftrag.ort);
+      if (frei.length) note(state, "Die Dörfer von " + N.get(auftrag.ort).name + " sind befreit: " + frei.map((d) => N.get(d).name).join(", ") +
+        ". Ab Ruf 20 liefern sie alle " + SY.daten.zehnt.etappen + " Etappen ihren Zehnt ins Kontor.");
+    }
+    nahrungErhalten(state);
+    return state;
+  }
+
+  // ---- Kontor der Menschen (Patch 2.1.0 Punkt 3): Rohstoffe kaufen, verkaufen, Nahrung tragen, Kriegskasse ----
+  function kontorInfo(state) {
+    if (!menschen(state) || state.scene !== "weltknoten") return null;
+    const fraktion = SY.kontorAm(state.knoten);
+    if (!fraktion) return null;
+    const rang = SY.rufRang(SY.ruf(state, fraktion));
+    return { fraktion, name: K.fraktionen[fraktion].name, rang, ruf: SY.ruf(state, fraktion), lager: { ...SY.kontor(state, fraktion) },
+      rohstoffe: SY.ROHSTOFFE.map((r) => ({ id: r, name: SY.daten.rohstoffe[r].name, menge: SY.kontor(state, fraktion)[r],
+        kauf: SY.rohstoffPreis(state, fraktion, r, 1, true), kauf10: SY.rohstoffPreis(state, fraktion, r, 10, true),
+        verkauf: SY.rohstoffPreis(state, fraktion, r, 1, false),
+        kaufGrund: SY.handelGrund(state, state.knoten, r, 1, true), kauf10Grund: SY.handelGrund(state, state.knoten, r, 10, true),
+        verkaufGrund: SY.handelGrund(state, state.knoten, r, 1, false) })),
+      abhebenGrund: SY.nahrungGrund(state, state.knoten, 5, false), einlagernGrund: SY.nahrungGrund(state, state.knoten, 5, true),
+      kasse: SY.kasse(state), kasseBedarf: SY.daten.kriegskasse.bedarf, kasseVoll: SY.kasseVoll(state),
+      spenden: Object.keys(SY.daten.kriegskasse.bedarf).map((r) => ({ id: r, grund: SY.spendenGrund(state, state.knoten, r, 5) })) };
+  }
+  const kontorAktion = (fn) => (previous, ...args) => {
+    if (!imHub(previous) || !menschen(previous) || previous.tatOffen) return previous;
+    const state = structuredClone(previous);
+    const ergebnis = fn(state, ...args);
+    if (ergebnis === false || ergebnis === null) return previous;
+    nahrungErhalten(state);
+    return state;
+  };
+  const kontorHandel = kontorAktion((state, rohstoff, menge, kaufen) => {
+    const preis = SY.handeln(state, state.knoten, rohstoff, menge, kaufen);
+    if (preis === false) return false;
+    note(state, (kaufen ? "Gekauft: " : "Verkauft: ") + menge + " " + SY.daten.rohstoffe[rohstoff].name + " · " + (kaufen ? "−" : "+") + preis + " Silber.");
+    return true;
+  });
+  const nahrungTragen = kontorAktion((state, menge, einlagern) => {
+    if (!SY.nahrungTragen(state, state.knoten, menge, einlagern)) return false;
+    note(state, menge + " Nahrung " + (einlagern ? "ins Kontor gelegt." : "aus dem Kontor genommen."));
+    return true;
+  });
+  const spenden = kontorAktion((state, rohstoff, menge) => {
+    const fraktion = SY.kontorAm(state.knoten);
+    if (!SY.spenden(state, state.knoten, rohstoff, menge)) return false;
+    note(state, menge + " " + SY.daten.rohstoffe[rohstoff].name + " für die " + SY.daten.kriegskasse.titel + " · Ruf bei " +
+      K.fraktionen[fraktion].name + " +" + SY.daten.rufAusloeser.donate_to_kontor.ruf * menge + "." +
+      (SY.kasseVoll(state) ? " Die Kriegskasse ist gefüllt: Die Armada kann auslaufen." : ""));
+    return true;
+  });
+  // Moral, Rang und Zustand für die Anzeige.
+  function lage(state) {
+    if (!menschen(state)) return null;
+    const stufe = SY.moralStufe(state);
+    return { moral: SY.moral(state), moralStufe: stufe, entkraeftet: Boolean(state.entkraeftet), etappen: state.etappen ?? 0,
+      naechsterZehnt: SY.daten.zehnt.etappen - ((state.etappen ?? 0) % SY.daten.zehnt.etappen),
+      naechsterUeberfall: SY.daten.garnison.etappen - ((state.etappen ?? 0) % SY.daten.garnison.etappen),
+      kontor: { ...SY.kontor(state, state.faction) }, klasse: SY.klasseVon(state.faction, state.role),
+      befreit: (state.befreit ?? []).length, rang: SY.rufRang(SY.ruf(state, state.faction)), ruf: SY.ruf(state, state.faction),
+      geaechtet: SY.geaechtet(state) };
+  }
+
+  // ---- Ausrüster, Handwerk und Schmiede der Menschen (Ökonomie-Datei, Patch 2.1.0 Punkt 5) ----
+  const menschenKlasse = (state) => menschen(state) ? SY.klasseVon(state.faction, state.role) : null;
+  // Waffen- und Rüstungsrechte der Klasse, Glut- und Runengegenstände je Fraktion.
+  function ausruestungGrund(state, id) {
+    const klasse = menschenKlasse(state);
+    if (!klasse || !SY.daten.gegenstaende[id]) return null;
+    return SY.ausruestungErlaubt(state.faction, klasse.id, id) ? null : "nicht für " + klasse.name;
+  }
+  const kaufWaren = Object.values(SY.daten.gegenstaende).filter((g) => g.source?.includes("KAUF") && g.baseBuyPrice);
+  function ausruester(state) {
+    if (!imHub(state) || !menschen(state) || !SY.kontorAm(state.knoten)) return null;
+    const rang = SY.rufRang(SY.ruf(state, SY.kontorAm(state.knoten)));
+    return {
+      kaufen: kaufWaren.map((g) => ({ id: g.id, name: g.name, tier: g.tier, effekt: g.effect ?? null, preis: SY.gegenstandPreis(state, state.knoten, g.id, true),
+        grund: ausruesterGrund(state, g.id, true), passt: !world.gear[g.id] || !ausruestungGrund(state, g.id) })),
+      verkaufen: [...new Set(state.inventory.filter((id) => SY.daten.gegenstaende[id]?.baseSellPrice))].map((id) => ({ id, name: world.items[id],
+        anzahl: state.inventory.filter((x) => x === id).length, preis: SY.gegenstandPreis(state, state.knoten, id, false),
+        grund: ausruesterGrund(state, id, false) })),
+      handel: rang.handel,
+    };
+  }
+  function ausruesterGrund(state, id, kaufen) {
+    if (!imHub(state) || !menschen(state)) return "nur in der Weltreise";
+    const fraktion = SY.kontorAm(state.knoten);
+    if (!fraktion) return "nur in Städten der Menschen";
+    if (!SY.rufRang(SY.ruf(state, fraktion)).handel) return "geächtet: kein Handel";
+    const preis = SY.gegenstandPreis(state, state.knoten, id, kaufen);
+    if (!preis) return "nicht im Handel";
+    if (kaufen) return state.silver < preis ? "zu wenig Silber" : state.inventory.length >= itemCap - 20 ? "Rucksack voll" : null;
+    return assigned(state, id) >= state.inventory.filter((x) => x === id).length ? "angelegt" : null;
+  }
+  function ausruesterHandel(previous, id, kaufen) {
+    if (ausruesterGrund(previous, id, kaufen)) return previous;
+    const state = structuredClone(previous);
+    const preis = SY.gegenstandPreis(state, state.knoten, id, kaufen);
+    state.silver += kaufen ? -preis : preis;
+    if (kaufen) receive(state, [id]);
+    else state.inventory.splice(state.inventory.indexOf(id), 1);
+    note(state, world.items[id] + (kaufen ? " gekauft · −" : " verkauft · +") + preis + " Silber.");
+    return state;
+  }
+  // Feldhandwerk: Rezepte je Klasse, Zutaten aus dem Rucksack.
+  function handwerkListe(state) {
+    const klasse = menschenKlasse(state);
+    if (!klasse) return [];
+    return SY.daten.handwerk.map((r) => ({ id: r.id, name: r.name, ergebnis: SY.daten.gegenstaende[r.outputItemId]?.name ?? r.outputItemId,
+      anzahl: r.outputCount, zutaten: r.ingredients.map((i) => i.count + " × " + (world.items[i.id] ?? i.id)).join(", "),
+      grund: handwerkGrund(state, r.id) }));
+  }
+  function handwerkGrund(state, rezeptId) {
+    if (state.combat || !state.health) return "nicht im Kampf";
+    const klasse = menschenKlasse(state);
+    if (!klasse) return "nur für Helden der Menschen";
+    return SY.handwerkGrund(state, rezeptId, klasse.id, (id) => state.inventory.filter((x) => x === id).length - assigned(state, id));
+  }
+  function handwerk(previous, rezeptId) {
+    if (handwerkGrund(previous, rezeptId)) return previous;
+    const state = structuredClone(previous);
+    const r = SY.daten.handwerk.find((x) => x.id === rezeptId);
+    for (const i of r.ingredients) for (let n = 0; n < i.count; n++) state.inventory.splice(state.inventory.indexOf(i.id), 1);
+    if (r.outputItemId === "RES_NAHRUNG") state.ressource = Math.min(vorratMax, state.ressource + r.outputCount);
+    else receive(state, Array(r.outputCount).fill(r.outputItemId));
+    note(state, r.name + ": " + r.outputCount + " × " + (r.outputItemId === "RES_NAHRUNG" ? "Nahrung" : world.items[r.outputItemId]) + ".");
+    nahrungErhalten(state);
+    return state;
+  }
+  // Schmiede: Ausrüstung um eine Stufe aufwerten. Eisen und Runensplitter aus dem Kontor, Material aus dem Rucksack.
+  function schmiedeInfo(state) {
+    if (!imHub(state) || !menschen(state) || !SY.kontorAm(state.knoten)) return null;
+    const stufe = SY.schmiedeStufe(state, state.knoten);
+    const teile = [...new Set(state.inventory.filter((id) => world.gear[id]?.slot))];
+    return { stufe, teile: teile.map((id) => {
+      const ziel = (state.aufwertung?.[id] ?? 0) + 1;
+      const kosten = SY.aufwertKosten(state, state.knoten, ziel);
+      return { id, name: world.items[id], stufe: ziel - 1, ziel, kosten: kosten && { silber: kosten.silber,
+        material: kosten.material.map((m) => m.count + " × " + (m.id.startsWith("RES_") ? SY.daten.rohstoffe[m.id.slice(4).toLowerCase()].name : world.items[m.id])).join(", "),
+        bonus: kosten.bonus }, grund: schmiedeGrund(state, id) };
+    }) };
+  }
+  function schmiedeGrund(state, id) {
+    if (!imHub(state) || !menschen(state)) return "nur in der Weltreise";
+    const fraktion = SY.kontorAm(state.knoten);
+    if (!fraktion) return "nur in Städten der Menschen";
+    if (!world.gear[id]?.slot || !state.inventory.includes(id)) return "keine Ausrüstung";
+    const ziel = (state.aufwertung?.[id] ?? 0) + 1;
+    if (ziel > 4) return "höchste Stufe";
+    const stufe = SY.schmiedeStufe(state, state.knoten);
+    if (!stufe) return "keine Schmiede in dieser Stadt";
+    if (ziel > stufe) return "+" + ziel + " braucht eine " + ["", "", "Stadtschmiede", "Meisterschmiede", "Runenschmiede"][ziel];
+    const k = SY.aufwertKosten(state, state.knoten, ziel);
+    if (state.silver < k.silber) return "zu wenig Silber";
+    for (const m of k.material) {
+      const vorrat = m.id.startsWith("RES_") ? SY.kontor(state, fraktion)[m.id.slice(4).toLowerCase()] : state.inventory.filter((x) => x === m.id).length;
+      if (vorrat < m.count) return "es fehlt " + (m.id.startsWith("RES_") ? SY.daten.rohstoffe[m.id.slice(4).toLowerCase()].name : world.items[m.id]);
+    }
+    return null;
+  }
+  function schmieden(previous, id) {
+    if (schmiedeGrund(previous, id)) return previous;
+    const state = structuredClone(previous);
+    const fraktion = SY.kontorAm(state.knoten);
+    const ziel = (state.aufwertung?.[id] ?? 0) + 1;
+    const k = SY.aufwertKosten(state, state.knoten, ziel);
+    state.silver -= k.silber;
+    for (const m of k.material) {
+      if (m.id.startsWith("RES_")) SY.kontor(state, fraktion)[m.id.slice(4).toLowerCase()] -= m.count;
+      else for (let n = 0; n < m.count; n++) state.inventory.splice(state.inventory.indexOf(m.id), 1);
+    }
+    (state.aufwertung ??= {})[id] = ziel;
+    note(state, world.items[id] + " ist jetzt +" + ziel + " (" + SY.daten.schmiede.stufen[ziel - 1].label.replace(/^\+\d+ /, "") + ", +" + k.bonus + " %) · −" + k.silber + " Silber.");
+    return state;
   }
 
   // Wegaufträge: Wer über den Weg reist, trifft auf die Gegner. Ein Auftrag je Reise, vor der Zufallsbegegnung.
@@ -2281,7 +2652,7 @@ const rules = (() => {
     const geschick = 8 + (creature.stats[3] ?? 5);
     const count = (spec.anzahl ?? 1) + (group ? Math.min(size, 6 - (spec.anzahl ?? 1)) : 0);
     return Array.from({ length: count }, (_, index) => {
-      const values = kampf.gegnerWerte(spec.rang, spec.stufe, 1 + size);
+      const values = fight.system ? SY.kampfWerte(fight.system, spec.stufe) : kampf.gegnerWerte(spec.rang, spec.stufe, 1 + size);
       const lp = group ? values.lp : Math.round(values.lp * (1 + 0.25 * size));
       const name = index === 0 ? (group?.leader ?? fight.name ?? creature.name) : group.ally + " " + index;
       return { name, rang: spec.rang, stufe: spec.stufe, lp, max: lp, schaden: values.schaden, aktionen: values.aktionen,
@@ -2779,6 +3150,8 @@ const rules = (() => {
     if (people(state.faction) === "orks") state.rausch = true;
     if (result.unlock) markDeed(state, result.unlock);
     state.ressource = Math.min(vorratMax, (state.ressource ?? 0) + 1);
+    if (menschen(state)) SY.moralAendern(state, result.alpha || foes.some((foe) => ["anfuehrer", "endgegner"].includes(foe.rang)) ? "bossSieg" : "sieg");
+    if (result.system) systemBeute(state, result.system);
     note(state, (result.victoryText ?? "Die Begegnung ist gewonnen.") + (result.loot.length ? " Du nimmst " +
       result.loot.map((id) => world.items[id]).join(" und ") + " mit." : "") + " +1 " + resourceName(state) + ".");
     // 50 EP für die gewonnene Schlacht und 10 EP je Stufe jedes besiegten Gegners.
@@ -2964,7 +3337,12 @@ const rules = (() => {
 
   // Summiert einen Ausrüstungswert über alle belegten Plätze (Waffe, Rüstung, Nebenhand, Schmuck).
   function gearBonus(state, key) {
-    return equipmentSlots.reduce((total, slot) => total + (world.gear[state.equipment?.[slot]]?.[key] ?? 0), 0);
+    return equipmentSlots.reduce((total, slot) => total + aufgewertet(state, state.equipment?.[slot], world.gear[state.equipment?.[slot]]?.[key] ?? 0), 0);
+  }
+  // Schmiede (Ökonomie-Datei): +1 bis +4 erhöhen Schaden und Rüstung um 15/30/50/75 %.
+  function aufgewertet(state, id, wert) {
+    const stufe = state.aufwertung?.[id] ?? 0;
+    return stufe && wert ? Math.round(wert * (1 + SY.daten.schmiede.stufen[stufe - 1].statBonusPercent / 100)) : wert;
   }
 
   function weapon(state) {
@@ -3098,7 +3476,8 @@ const rules = (() => {
     healthLimit, emberLimit, heroAttributes, ending, moorConsequences, effects,
     weltLeisten, leistenNamen, leistenStart, gegenkraefte, niederlagen, vorratMax, vorratStart, seewegSilber, vorratAnwerbung,
     vertragKosten, ertragMenge, ertragPause, weltRunde, aktuellerKnoten, weltOffen, betreteWelt, handlungHier, zurHandlung,
-    reiseGrund, reiseZiele, reise, rastGrund, handelOffen,
+    reiseGrund, reiseZiele, reise, rastGrund, rastKosten, handelOffen,
+    taten, tatWaehlen, ausruester, ausruesterHandel, ausruestungGrund, handwerkListe, handwerk, schmiedeInfo, schmieden, kontorInfo, kontorHandel, nahrungTragen, spenden, lage, systeme: SY,
     auftragGrund, auftragAnnehmen, ausfuehrenGrund, auftragAusfuehren, aushang, auftraege, hauptquest, hauptGrund, hauptWeiter, auftragEp, rast, ertragGrund, ertragEinholen, vertragGrund, vertragSchliessen, entwurf,
     levelThresholds: Array.from({ length: kampf.maxStufe }, (_, index) => kampf.epFuer(index + 1)) };
 })();

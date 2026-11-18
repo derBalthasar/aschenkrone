@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "2.3.0",
+  "module": "starvation_and_morale_defeat_patch",
+  "starvationAndDefeatRule": {
+    "replacesLegacyInstantDefeatAtZeroVorrat": true,
+    "onFoodReachesZero": {
+      "instantDefeat": false,
+      "applyCondition": "ENTKRAEFTET",
+      "moralePenaltyPerTravelEdge": -15
+    },
+    "defeatCondition": {
+      "conditionExpression": "food <= 0 && partyMorale <= 0",
+      "defeatReason": "Verhungert und gebrochen: Ohne Nahrung und ohne jeden Rest an Moral löst sich die Gruppe in der Asche auf."
+    },
+    "recoveryRule": "Sobald wieder mindestens 1 Nahrung im Inventar oder Kontor aufgenommen bzw. gerastet wird, endet der Zustand 'Entkräftet' und der Etappen-Abzug stoppt."
+  }
+}

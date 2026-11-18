@@ -1,0 +1,299 @@
+{
+  "schemaVersion": "1.4.0",
+  "module": "faction_enemies_orden_der_flamme_part_1",
+  "travelEncounterRules": {
+    "baseEncounterChancePerEdge": {
+      "KERNLAND": 0.25,
+      "DORF_WEG": 0.3,
+      "GRENZLAND": 0.45,
+      "PASS": 0.5,
+      "SEEWEG": 0.4
+    },
+    "minibossSpawnChanceOnEncounter": {
+      "KERNLAND": 0.05,
+      "DORF_WEG": 0.08,
+      "GRENZLAND": 0.16,
+      "PASS": 0.2,
+      "SEEWEG": 0.18
+    },
+    "minibossCooldownEdges": 5
+  },
+  "factionRegion": "ORDEN_DER_FLAMME",
+  "regionLabel": "Glutlande, Aschepässe & Klosterruinen des Ordens",
+  "regularEnemies": [
+    {
+      "id": "ENM_OF_SALAMANDER",
+      "name": "Glimmender Asche-Salamander",
+      "family": "WILDTIERE",
+      "difficulty": "LEICHT",
+      "minLevel": 1,
+      "maxLevel": 6,
+      "stats": {
+        "hp": 36,
+        "attack": 9,
+        "armor": 3,
+        "speed": 11
+      },
+      "weaknesses": [
+        "PHYSICAL"
+      ],
+      "resistances": [
+        "FIRE"
+      ]
+    },
+    {
+      "id": "ENM_OF_GLUTKRAEHE",
+      "name": "Schwelende Aschenkrähe",
+      "family": "WILDTIERE",
+      "difficulty": "LEICHT",
+      "minLevel": 2,
+      "maxLevel": 7,
+      "stats": {
+        "hp": 26,
+        "attack": 11,
+        "armor": 1,
+        "speed": 16
+      },
+      "weaknesses": [
+        "PHYSICAL"
+      ],
+      "resistances": [
+        "FIRE"
+      ]
+    },
+    {
+      "id": "ENM_OF_KETZER_ZELOT",
+      "name": "Abtrünniger Ketzer-Zelot",
+      "family": "KULTISTEN",
+      "difficulty": "MITTEL",
+      "minLevel": 5,
+      "maxLevel": 12,
+      "stats": {
+        "hp": 68,
+        "attack": 16,
+        "armor": 5,
+        "speed": 12
+      },
+      "weaknesses": [
+        "PHYSICAL"
+      ],
+      "resistances": [
+        "FIRE"
+      ]
+    },
+    {
+      "id": "ENM_OF_ASCHEPILGER",
+      "name": "Wahnsinniger Geißel-Pilger",
+      "family": "GESETZLOSE",
+      "difficulty": "MITTEL",
+      "minLevel": 6,
+      "maxLevel": 13,
+      "stats": {
+        "hp": 62,
+        "attack": 18,
+        "armor": 3,
+        "speed": 14
+      },
+      "weaknesses": [
+        "BLEED"
+      ],
+      "resistances": [
+        "FIRE"
+      ]
+    },
+    {
+      "id": "ENM_OF_SCHLACKENLAEUFER",
+      "name": "Glut-Schlackenläufer",
+      "family": "UNTOTE",
+      "difficulty": "MITTEL",
+      "minLevel": 8,
+      "maxLevel": 15,
+      "stats": {
+        "hp": 86,
+        "attack": 18,
+        "armor": 10,
+        "speed": 8
+      },
+      "weaknesses": [
+        "RUNEN_ITEM",
+        "ARMOR_PEN"
+      ],
+      "resistances": [
+        "FIRE",
+        "BLEED"
+      ]
+    },
+    {
+      "id": "ENM_OF_MAGMA_HYAENE",
+      "name": "Rußfell-Schluchtenjäger",
+      "family": "WILDTIERE",
+      "difficulty": "MITTEL",
+      "minLevel": 9,
+      "maxLevel": 16,
+      "stats": {
+        "hp": 74,
+        "attack": 20,
+        "armor": 5,
+        "speed": 15
+      },
+      "weaknesses": [
+        "BLEED"
+      ],
+      "resistances": [
+        "FIRE"
+      ]
+    },
+    {
+      "id": "ENM_OF_VERBRANNTER_EIDBRECHER",
+      "name": "Verbrannter Ordens-Eidbrecher",
+      "family": "KULTISTEN",
+      "difficulty": "SCHWER",
+      "minLevel": 12,
+      "maxLevel": 20,
+      "stats": {
+        "hp": 138,
+        "attack": 25,
+        "armor": 14,
+        "speed": 10
+      },
+      "weaknesses": [
+        "ARMOR_PEN"
+      ],
+      "resistances": [
+        "FIRE",
+        "HOLY"
+      ]
+    },
+    {
+      "id": "ENM_OF_GLUTBERG_AKOLYTH",
+      "name": "Blutrunen-Pyrohexer",
+      "family": "KULTISTEN",
+      "difficulty": "SCHWER",
+      "minLevel": 14,
+      "maxLevel": 22,
+      "stats": {
+        "hp": 112,
+        "attack": 29,
+        "armor": 6,
+        "speed": 12
+      },
+      "weaknesses": [
+        "PHYSICAL"
+      ],
+      "resistances": [
+        "FIRE",
+        "HOLY"
+      ]
+    }
+  ],
+  "randomMinibosses": [
+    {
+      "id": "MB_OF_INQUISITOR_VANE",
+      "name": "Inquisitor Vane der Verbrannte",
+      "title": "Abtrünniger Vollstrecker des Glutbergs",
+      "family": "KULTISTEN",
+      "difficulty": "BOSS",
+      "minLevel": 7,
+      "maxLevel": 18,
+      "spawnEdges": [
+        "GRENZLAND",
+        "PASS"
+      ],
+      "stats": {
+        "hp": 195,
+        "attack": 27,
+        "armor": 12,
+        "speed": 12
+      },
+      "weaknesses": [
+        "PHYSICAL",
+        "RUNEN_ITEM"
+      ],
+      "resistances": [
+        "FIRE",
+        "HOLY"
+      ],
+      "lootProfile": {
+        "dropTableTier": "SCHWER",
+        "guaranteedMaterial": {
+          "id": "MAT_ASCHBERNSTEIN",
+          "count": 2
+        },
+        "equipmentDropChance": 0.45,
+        "relicDropChance": 0.08
+      }
+    },
+    {
+      "id": "MB_OF_ASCHENDRACKE",
+      "name": "Ignis-Vurm, Schlund der Aschewüste",
+      "title": "Uralter Glut-Lindwurm",
+      "family": "WILDTIERE",
+      "difficulty": "BOSS",
+      "minLevel": 12,
+      "maxLevel": 22,
+      "spawnEdges": [
+        "GRENZLAND",
+        "PASS"
+      ],
+      "stats": {
+        "hp": 245,
+        "attack": 31,
+        "armor": 15,
+        "speed": 10
+      },
+      "weaknesses": [
+        "ARMOR_PEN",
+        "BLEED"
+      ],
+      "resistances": [
+        "FIRE"
+      ],
+      "lootProfile": {
+        "dropTableTier": "BOSS",
+        "guaranteedMaterial": {
+          "id": "MAT_KNOCHENPLATTE",
+          "count": 2
+        },
+        "equipmentDropChance": 0.5,
+        "relicDropChance": 0.1
+      }
+    },
+    {
+      "id": "MB_OF_ABT_MALAKOR",
+      "name": "Erzketzer Malakor von der Rußkapelle",
+      "title": "Verderbter Flammenpriester",
+      "family": "KULTISTEN",
+      "difficulty": "BOSS",
+      "minLevel": 10,
+      "maxLevel": 20,
+      "spawnEdges": [
+        "KERNLAND",
+        "DORF_WEG",
+        "GRENZLAND"
+      ],
+      "stats": {
+        "hp": 210,
+        "attack": 29,
+        "armor": 11,
+        "speed": 11
+      },
+      "weaknesses": [
+        "PHYSICAL",
+        "RUNEN_ITEM"
+      ],
+      "resistances": [
+        "FIRE",
+        "HOLY"
+      ],
+      "lootProfile": {
+        "dropTableTier": "SCHWER",
+        "guaranteedMaterial": {
+          "id": "VAL_RUNENTAFEL",
+          "count": 1
+        },
+        "equipmentDropChance": 0.45,
+        "relicDropChance": 0.09
+      }
+    }
+  ]
+}

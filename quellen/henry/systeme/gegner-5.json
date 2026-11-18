@@ -1,0 +1,540 @@
+{
+  "schemaVersion": "1.5.0",
+  "module": "faction_enemies_skills_and_loot_kronreich_part_2",
+  "factionRegion": "KRONREICH",
+  "regularEnemies": [
+    {
+      "id": "ENM_KR_GRAUFELL_JAEGER",
+      "name": "Nordmark-Graufellwolf",
+      "family": "WILDTIERE",
+      "difficulty": "LEICHT",
+      "minLevel": 1,
+      "maxLevel": 6,
+      "stats": {
+        "hp": 32,
+        "attack": 9,
+        "armor": 2,
+        "speed": 14
+      },
+      "weaknesses": [
+        "FIRE"
+      ],
+      "resistances": [],
+      "skills": [
+        {
+          "id": "SKL_WADENBISS",
+          "name": "Reißender Sprungbiss",
+          "type": "MELEE",
+          "damageMult": 1.05,
+          "statusEffect": "BLEED",
+          "statusChance": 0.3
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "WILDTIERE",
+        "materialRolls": 1,
+        "equipmentDropChance": 0.1,
+        "equipmentTierPool": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "ENM_KR_MOOR_WILDERER",
+      "name": "Verfemter Tann-Wilderer",
+      "family": "GESETZLOSE",
+      "difficulty": "LEICHT",
+      "minLevel": 2,
+      "maxLevel": 7,
+      "stats": {
+        "hp": 30,
+        "attack": 11,
+        "armor": 2,
+        "speed": 13
+      },
+      "weaknesses": [
+        "BLEED"
+      ],
+      "resistances": [],
+      "skills": [
+        {
+          "id": "SKL_JAGDPFEIL",
+          "name": "Gezielter Dornenpfeil",
+          "type": "RANGED_PHYSICAL",
+          "damageMult": 1.15,
+          "statusEffect": "BLEED",
+          "statusChance": 0.25
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "GESETZLOSE",
+        "materialRolls": 1,
+        "bonusMaterial": {
+          "id": "MAT_WOLFSFELL",
+          "chance": 0.2,
+          "count": 1
+        },
+        "equipmentDropChance": 0.12,
+        "equipmentTierPool": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "ENM_KR_GRENZLAND_RITTER",
+      "name": "Abtrünniger Grenzland-Knecht",
+      "family": "GESETZLOSE",
+      "difficulty": "MITTEL",
+      "minLevel": 5,
+      "maxLevel": 12,
+      "stats": {
+        "hp": 80,
+        "attack": 15,
+        "armor": 10,
+        "speed": 9
+      },
+      "weaknesses": [
+        "ARMOR_PEN"
+      ],
+      "resistances": [
+        "PHYSICAL"
+      ],
+      "skills": [
+        {
+          "id": "SKL_SCHILDSTOSS",
+          "name": "Eisenbeschlagener Schildstoß",
+          "type": "MELEE",
+          "damageMult": 1.05,
+          "statusEffect": "STUN",
+          "statusChance": 0.25
+        },
+        {
+          "id": "SKL_SCHILDWALL_HALTUNG",
+          "name": "Eiserne Deckung",
+          "type": "SELF_BUFF",
+          "effect": "+4 Rüstung für 2 Züge"
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "GESETZLOSE",
+        "materialRolls": 2,
+        "consumableDrop": {
+          "id": "CON_WETZSTEIN",
+          "chance": 0.2
+        },
+        "equipmentDropChance": 0.25,
+        "equipmentTierPool": [
+          1,
+          2
+        ]
+      }
+    },
+    {
+      "id": "ENM_KR_EISENKEILER",
+      "name": "Borstiger Eisenwald-Keiler",
+      "family": "WILDTIERE",
+      "difficulty": "MITTEL",
+      "minLevel": 6,
+      "maxLevel": 13,
+      "stats": {
+        "hp": 76,
+        "attack": 17,
+        "armor": 7,
+        "speed": 11
+      },
+      "weaknesses": [
+        "BLEED",
+        "FIRE"
+      ],
+      "resistances": [
+        "PHYSICAL"
+      ],
+      "skills": [
+        {
+          "id": "SKL_HAUER_STURM",
+          "name": "Unaufhaltsamer Hauerstoß",
+          "type": "MELEE",
+          "damageMult": 1.25,
+          "armorPen": 15,
+          "statusEffect": "BLEED",
+          "statusChance": 0.35
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "WILDTIERE",
+        "materialRolls": 2,
+        "equipmentDropChance": 0.2,
+        "equipmentTierPool": [
+          1,
+          2
+        ]
+      }
+    },
+    {
+      "id": "ENM_KR_HUEGELGRAB_WIEDERGAENGER",
+      "name": "Eidloser Hügelgrab-Krieger",
+      "family": "UNTOTE",
+      "difficulty": "MITTEL",
+      "minLevel": 7,
+      "maxLevel": 15,
+      "stats": {
+        "hp": 88,
+        "attack": 17,
+        "armor": 11,
+        "speed": 8
+      },
+      "weaknesses": [
+        "FIRE",
+        "HOLY",
+        "RUNEN_ITEM"
+      ],
+      "resistances": [
+        "POISON",
+        "BLEED"
+      ],
+      "skills": [
+        {
+          "id": "SKL_ROSTKLINGEN_HIEB",
+          "name": "Schartiger Grabklingen-Hieb",
+          "type": "MELEE",
+          "damageMult": 1.2,
+          "statusEffect": "POISON",
+          "statusChance": 0.25
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "UNTOTE",
+        "materialRolls": 2,
+        "equipmentDropChance": 0.26,
+        "equipmentTierPool": [
+          1,
+          2
+        ]
+      }
+    },
+    {
+      "id": "ENM_KR_BLUTSKALDE",
+      "name": "Verfluchter Flüsterskalde",
+      "family": "KULTISTEN",
+      "difficulty": "MITTEL",
+      "minLevel": 9,
+      "maxLevel": 16,
+      "stats": {
+        "hp": 66,
+        "attack": 19,
+        "armor": 4,
+        "speed": 12
+      },
+      "weaknesses": [
+        "PHYSICAL"
+      ],
+      "resistances": [
+        "POISON"
+      ],
+      "skills": [
+        {
+          "id": "SKL_KLAGELIED_VERZWEIFLUNG",
+          "name": "Lied der Kalten Asche",
+          "type": "AOE_DEBUFF",
+          "effect": "-15 % Angriff für alle Helden (2 Züge)"
+        },
+        {
+          "id": "SKL_RUNENSCHNITT",
+          "name": "Verderbter Runenschnitt",
+          "type": "MELEE",
+          "damageMult": 1.2,
+          "statusEffect": "BLEED",
+          "statusChance": 0.3
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "KULTISTEN",
+        "materialRolls": 2,
+        "bonusMaterial": {
+          "id": "VAL_RUNENTAFEL",
+          "chance": 0.2,
+          "count": 1
+        },
+        "equipmentDropChance": 0.26,
+        "equipmentTierPool": [
+          1,
+          2
+        ]
+      }
+    },
+    {
+      "id": "ENM_KR_GEBIRGSTROLL",
+      "name": "Graustein-Gebirgstroll",
+      "family": "WILDTIERE",
+      "difficulty": "SCHWER",
+      "minLevel": 10,
+      "maxLevel": 18,
+      "stats": {
+        "hp": 148,
+        "attack": 24,
+        "armor": 11,
+        "speed": 6
+      },
+      "weaknesses": [
+        "FIRE",
+        "BLEED"
+      ],
+      "resistances": [
+        "PHYSICAL"
+      ],
+      "skills": [
+        {
+          "id": "SKL_FELSKEULE",
+          "name": "Zermalmender Keulenschlag",
+          "type": "MELEE",
+          "damageMult": 1.35,
+          "statusEffect": "STUN",
+          "statusChance": 0.3
+        },
+        {
+          "id": "SKL_TROLLREGENERATION",
+          "name": "Zähes Trollblut",
+          "type": "SELF_HEAL",
+          "healAmount": 22
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "WILDTIERE",
+        "materialRolls": 3,
+        "equipmentDropChance": 0.36,
+        "equipmentTierPool": [
+          2,
+          3
+        ]
+      }
+    },
+    {
+      "id": "ENM_KR_AHNEN_SCHARFRICHTER",
+      "name": "Kopfjäger der Alten Mark",
+      "family": "UNTOTE",
+      "difficulty": "SCHWER",
+      "minLevel": 13,
+      "maxLevel": 21,
+      "stats": {
+        "hp": 136,
+        "attack": 27,
+        "armor": 13,
+        "speed": 10
+      },
+      "weaknesses": [
+        "FIRE",
+        "HOLY",
+        "RUNEN_ITEM"
+      ],
+      "resistances": [
+        "BLEED",
+        "POISON"
+      ],
+      "skills": [
+        {
+          "id": "SKL_RICHTBEIL",
+          "name": "Unerbittliches Richtbeil",
+          "type": "MELEE",
+          "damageMult": 1.4,
+          "armorPen": 25
+        },
+        {
+          "id": "SKL_RUNDUMSCHLAG",
+          "name": "Wirbel der Gefallenen",
+          "type": "AOE_PHYSICAL",
+          "damageMult": 0.85,
+          "statusEffect": "BLEED",
+          "statusChance": 0.3
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "UNTOTE",
+        "materialRolls": 3,
+        "consumableDrop": {
+          "id": "POT_HEILUNG_2",
+          "chance": 0.25
+        },
+        "equipmentDropChance": 0.4,
+        "equipmentTierPool": [
+          2,
+          3
+        ]
+      }
+    }
+  ],
+  "randomMinibosses": [
+    {
+      "id": "MB_KR_URSA_GRAUHAAR",
+      "name": "Ursa Grauhaar, Bestie vom Eisenpass",
+      "title": "Vernarbter Alphabär der Nordmark",
+      "family": "WILDTIERE",
+      "difficulty": "BOSS",
+      "minLevel": 6,
+      "maxLevel": 16,
+      "spawnEdges": [
+        "GRENZLAND",
+        "PASS"
+      ],
+      "stats": {
+        "hp": 195,
+        "attack": 26,
+        "armor": 10,
+        "speed": 11
+      },
+      "weaknesses": [
+        "FIRE",
+        "BLEED"
+      ],
+      "resistances": [
+        "PHYSICAL"
+      ],
+      "skills": [
+        {
+          "id": "SKL_PRANKENHIEB",
+          "name": "Zerfleischender Prankenhieb",
+          "type": "MELEE",
+          "damageMult": 1.35,
+          "statusEffect": "BLEED",
+          "statusChance": 0.5
+        },
+        {
+          "id": "SKL_GEBRUELL_NORDMARK",
+          "name": "Markerschütterndes Brüllen",
+          "type": "AOE_DEBUFF",
+          "effect": "-20 % Rüstung für alle Helden (2 Züge)"
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "WILDTIERE",
+        "materialRolls": 3,
+        "guaranteedMaterial": {
+          "id": "MAT_BAERENPELZ",
+          "count": 2
+        },
+        "equipmentDropChance": 0.45,
+        "equipmentTierPool": null,
+        "relicDropChance": 0.08
+      }
+    },
+    {
+      "id": "MB_KR_WULFGAR_EIDLOS",
+      "name": "Wulfgar der Eidlose",
+      "title": "Hauptmann der Schwarzen Kompanie",
+      "family": "GESETZLOSE",
+      "difficulty": "BOSS",
+      "minLevel": 11,
+      "maxLevel": 21,
+      "spawnEdges": [
+        "KERNLAND",
+        "GRENZLAND",
+        "PASS"
+      ],
+      "stats": {
+        "hp": 225,
+        "attack": 29,
+        "armor": 16,
+        "speed": 10
+      },
+      "weaknesses": [
+        "ARMOR_PEN"
+      ],
+      "resistances": [
+        "PHYSICAL"
+      ],
+      "skills": [
+        {
+          "id": "SKL_SPALTENDER_STURM",
+          "name": "Rüstungsbrecher der Mark",
+          "type": "MELEE",
+          "damageMult": 1.4,
+          "armorPen": 30
+        },
+        {
+          "id": "SKL_KRIEGSHORN_SOELDNER",
+          "name": "Befehl zum Niedermachen",
+          "type": "SELF_BUFF",
+          "effect": "+25 % Angriff und +20 % Krit-Chance für 2 Züge"
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "GESETZLOSE",
+        "materialRolls": 3,
+        "guaranteedMaterial": {
+          "id": "VAL_JARL_SIEGEL",
+          "count": 1
+        },
+        "equipmentDropChance": 0.5,
+        "equipmentTierPool": null,
+        "relicDropChance": 0.1
+      }
+    },
+    {
+      "id": "MB_KR_JARL_HRODGAR",
+      "name": "Hrodgar Knochenkrone",
+      "title": "Erweckter Grabhügel-Fürst",
+      "family": "UNTOTE",
+      "difficulty": "BOSS",
+      "minLevel": 13,
+      "maxLevel": 22,
+      "spawnEdges": [
+        "DORF_WEG",
+        "GRENZLAND"
+      ],
+      "stats": {
+        "hp": 235,
+        "attack": 28,
+        "armor": 15,
+        "speed": 8
+      },
+      "weaknesses": [
+        "FIRE",
+        "HOLY",
+        "RUNEN_ITEM"
+      ],
+      "resistances": [
+        "BLEED",
+        "POISON",
+        "PHYSICAL"
+      ],
+      "skills": [
+        {
+          "id": "SKL_FROSTKLINGE",
+          "name": "Griff der Kalten Erde",
+          "type": "MELEE",
+          "damageMult": 1.3,
+          "statusEffect": "STUN",
+          "statusChance": 0.3
+        },
+        {
+          "id": "SKL_GRABESKALT",
+          "name": "Hauch der Hügelgräber",
+          "type": "AOE_PHYSICAL",
+          "damageMult": 0.9,
+          "effect": "Entzieht 15 LP pro Ziel und heilt Hrodgar"
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "UNTOTE",
+        "materialRolls": 3,
+        "guaranteedMaterial": {
+          "id": "MAT_KNOCHENPLATTE",
+          "count": 2
+        },
+        "equipmentDropChance": 0.48,
+        "equipmentTierPool": null,
+        "relicDropChance": 0.09
+      }
+    }
+  ]
+}

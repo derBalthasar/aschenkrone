@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "1.6.1",
+  "module": "consistency_patch_harfe_werft_ep_outlaw",
+  "missingCatalogItemFix": {
+    "id": "OFF_AHNENHARFE_T4", "name": "Runenharfe der Alten Skalden", "slot": "LINKE_HAND", "equipCategory": "INSTRUMENT_NEBENHAND",
+    "magicTag": "RUNEN_ITEM", "tier": 4, "source": ["LOOT_ASCHERISS", "CRAFT_STADT"], "baseBuyPrice": 560, "baseSellPrice": 280,
+    "craftRecipe": { "building": "RUNENSCHMIEDE", "silver": 320, "materials": [ { "id": "RES_HOLZ", "count": 4 }, { "id": "MAT_BESTIENSEHNE", "count": 3 }, { "id": "RES_RUNENSPLITTER", "count": 2 } ] },
+    "stats": { "willpower": 6, "partyMoraleBaseBonus": 20, "hungerMoraleLossMultiplier": 0.5 }
+  },
+  "settlementTier3BuildingReferenceFix": {
+    "tier": 3, "name": "Hochzitadelle des Bannerjarls", "unlockedShipyardBuildingId": "BLD_KRIEGSWERFT",
+    "notes": "Es existiert nur die Große Kriegswerft (BLD_KRIEGSWERFT). In einer Hochzitadelle (Tier 3) schaltet sie zusätzlich den Bau der Armada-Flotte (Akt 4 -> 5) frei."
+  },
+  "endgameXpOverride": {
+    "useFixedNightragXp": true,
+    "fixedActivityXp": { "GRENZPATROUILLE": 180, "KARAWANEN_ESKORTE": 320, "SEE_KAPERFAHRT": 380, "ARENA_WAFFENGANG": 280, "ASCHERISS_DUNGEON": 550 }
+  },
+  "outlawRunRuleDefinition": {
+    "ruleId": "OUTLAW_RUN_CONDITION", "condition": "ownFactionReputation <= -25", "activeRank": "GEAECHTET",
+    "moraleOverrides": {
+      "QUEST_EVIL_DEED_DELTA": 6, "QUEST_GOOD_DEED_DELTA": -6,
+      "notes": "Solange der Spieler bei seiner eigenen Startfraktion den Rang 'Geächtet' (-100 bis -25) innehat, heben Schlechte Taten die Gruppenmoral (+6) und Gute Taten senken sie (-6). Sobald der Ruf auf -24 oder höher steigt, greifen wieder die Standard-Moralregeln."
+    }
+  }
+}

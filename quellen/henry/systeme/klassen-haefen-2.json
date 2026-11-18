@@ -1,0 +1,463 @@
+{
+  "version": "1.0.0",
+  "project": "Aschenkrone - Welt Odris",
+  "folk": "Menschen",
+  "faction": "Freie Häfen",
+  "magicAllowed": false,
+  "specializationRules": {
+    "unlockLevel": 10,
+    "selectionRule": "Spieler wählt bei Erreichen von Stufe 10 dauerhaft 1 von 2 Spezialisierungen pro Klasse.",
+    "stacksWithAct3FactionSpec": true,
+    "signatureSkillRankScaling": {
+      "rank1_lvl10": {
+        "powerMult": 1.0,
+        "staminaDelta": 0,
+        "statusChanceBonus": 0.0
+      },
+      "rank2_lvl15": {
+        "powerMult": 1.25,
+        "staminaDelta": -1,
+        "statusChanceBonus": 0.05
+      },
+      "rank3_lvl20": {
+        "powerMult": 1.5,
+        "staminaDelta": -2,
+        "statusChanceBonus": 0.1
+      },
+      "rank4_lvl25_master": {
+        "powerMult": 1.8,
+        "staminaDelta": -4,
+        "statusChanceBonus": 0.15
+      }
+    }
+  },
+  "classSpecializations": [
+    {
+      "parentClassId": "fh_sturmkorsar",
+      "parentClassName": "Sturmkorsar",
+      "options": [
+        {
+          "id": "spec_fh_blutenterer",
+          "name": "Blutenterer",
+          "theme": "Gnadenloser Schlächter der schwarzen Flotten – lebt für den Rausch des Nahkampfs.",
+          "statBonuses": {
+            "kraft": 3,
+            "geschick": 2,
+            "critDamageBonus": 0.25,
+            "lifesteal": 0.12
+          },
+          "passiveEffect": {
+            "name": "Durst der Planken",
+            "effect": "Jeder besiegte Gegner stellt sofort 15 % max. LP und 15 Ausdauer wieder her."
+          },
+          "worldResourceBonus": {
+            "name": "Plünderer-Kodex",
+            "effect": "+1 Eisen und +20 Silber Beute nach gewonnenen See-Kaperfahrten und Hafen-Kämpfen."
+          },
+          "signatureSkill": {
+            "id": "sig_blutenterer",
+            "unlockLevel": 10,
+            "name": "Kielholen & Schächten",
+            "staminaCost": 22,
+            "damageMult": 2.3,
+            "critBonus": 0.2,
+            "statusEffect": {
+              "type": "blutung",
+              "chance": 0.8,
+              "duration": 3,
+              "armorReduction": 3
+            }
+          }
+        },
+        {
+          "id": "spec_fh_flottenkapitaen",
+          "name": "Flottenkapitän",
+          "theme": "Taktischer Befehlshaber an Deck – koordiniert Salven und Entermanöver der gesamten Gruppe.",
+          "statBonuses": {
+            "kraft": 2,
+            "wille": 3,
+            "maxStamina": 15,
+            "initiative": 3
+          },
+          "passiveEffect": {
+            "name": "Eiserne Befehlsgewalt",
+            "effect": "Alle Gruppenmitglieder erhalten +12 % Angriff und +10 % Krit-Chance."
+          },
+          "worldResourceBonus": {
+            "name": "Kontor-Privileg",
+            "effect": "Seewege kosten zusätzlich -5 Silber (minimal 0 Silber bei Kriegswerft); +10 Garnisonsverteidigung in Hafenstädten."
+          },
+          "signatureSkill": {
+            "id": "sig_flottenkapitaen",
+            "unlockLevel": 10,
+            "name": "Breitseite & Enterbefehl",
+            "staminaCost": 20,
+            "target": "all_allies_and_enemies",
+            "damageMult": 1.25,
+            "buffEffect": {
+              "attackBonus": 0.25,
+              "initiativeBonus": 4,
+              "duration": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "parentClassId": "fh_tiefenwaechter",
+      "parentClassName": "Tiefenwächter",
+      "options": [
+        {
+          "id": "spec_fh_wrackkoloss",
+          "name": "Wrackkoloss",
+          "theme": "Unerschütterlicher Schwergepanzerter in geschwärztem Schiffsstahl und Messing.",
+          "statBonuses": {
+            "zaehigkeit": 4,
+            "kraft": 1,
+            "baseArmor": 5,
+            "maxHp": 45
+          },
+          "passiveEffect": {
+            "name": "Rumpf aus Eiche und Eisen",
+            "effect": "Reduziert jeglichen erlittenen Flächenschaden der gesamten Gruppe um 15 %; immun gegen Zurückstoßen."
+          },
+          "worldResourceBonus": {
+            "name": "Festungsbauer der Küste",
+            "effect": "Senkt Holz- und Steinkosten bei Hafen-Ausbauten und Kriegswerften um -1 Einheit (min. 1)."
+          },
+          "signatureSkill": {
+            "id": "sig_wrackkoloss",
+            "unlockLevel": 10,
+            "name": "Unbrechbarer Wellenbrecher",
+            "staminaCost": 20,
+            "target": "all_allies",
+            "shieldAmountFormula": "zaehigkeit * 3.0",
+            "buffEffect": {
+              "armorBonus": 6,
+              "damageReduction": 0.25,
+              "duration": 2
+            }
+          }
+        },
+        {
+          "id": "spec_fh_kettenmeister",
+          "name": "Kettenmeister",
+          "theme": "Kontrolliert das Schlachtfeld mit schweren Hafenketten, Enterhaken und Harpunen.",
+          "statBonuses": {
+            "zaehigkeit": 2,
+            "kraft": 3,
+            "baseArmor": 3,
+            "initiative": 2
+          },
+          "passiveEffect": {
+            "name": "Eiserne Schlinge",
+            "effect": "Kontert geblockte Nahkampfangriffe mit 80 % Waffenschaden und fesselt den Angreifer (-3 Initiative)."
+          },
+          "worldResourceBonus": {
+            "name": "Hafensperren-Wart",
+            "effect": "Senkt Gefahren-Chance auf allen Seewegen (M01–M57) dauerhaft um -15 %."
+          },
+          "signatureSkill": {
+            "id": "sig_kettenmeister",
+            "unlockLevel": 10,
+            "name": "Kettengefängnis der Tiefe",
+            "staminaCost": 20,
+            "target": "all_enemies",
+            "damageMult": 1.3,
+            "statusEffect": {
+              "type": "gefesselt_betaeubt",
+              "chance": 0.65,
+              "duration": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "parentClassId": "fh_schwarzschuetze",
+      "parentClassName": "Schwarzschütze",
+      "options": [
+        {
+          "id": "spec_fh_scharfrichter_der_see",
+          "name": "Kanonen- & Büchsenmeister",
+          "theme": "Nutzt schwere Steinschloss-Musketen und Panzerbrecher-Geschosse auf tödliche Distanz.",
+          "statBonuses": {
+            "geschick": 4,
+            "kraft": 1,
+            "critChance": 0.12,
+            "critDamageBonus": 0.35
+          },
+          "passiveEffect": {
+            "name": "Schwarzes Visier",
+            "effect": "Fernkampfangriffe ignorieren 50 % der gegnerischen Rüstung."
+          },
+          "worldResourceBonus": {
+            "name": "Wachposten der Handelswege",
+            "effect": "+15 Silber Einkommen pro Reise auf etablierten Reichs-Handelsrouten."
+          },
+          "signatureSkill": {
+            "id": "sig_buechsenmeister",
+            "unlockLevel": 10,
+            "name": "Donnerschlag-Salve",
+            "staminaCost": 24,
+            "damageMult": 2.65,
+            "armorIgnore": 0.75,
+            "critBonus": 0.3,
+            "statusEffect": {
+              "type": "betaeubt",
+              "chance": 0.5,
+              "duration": 1
+            }
+          }
+        },
+        {
+          "id": "spec_fh_harpunier",
+          "name": "Tiefsee-Harpunier",
+          "theme": "Spezialist für Bestienjagd, Widerhaken-Bolzen und tödliche Blutungen.",
+          "statBonuses": {
+            "geschick": 3,
+            "zaehigkeit": 2,
+            "dodgeChance": 0.1,
+            "initiative": 3
+          },
+          "passiveEffect": {
+            "name": "Blutspur im Wasser",
+            "effect": "+25 % Schaden gegen blutende oder gefesselte Ziele; +20 % Schaden gegen Bestien und Seeungeheuer."
+          },
+          "worldResourceBonus": {
+            "name": "Walfänger & Versorger",
+            "effect": "+2 Nahrung aus Küsten- und Hafendörfern im Schutzbund-Zehnt."
+          },
+          "signatureSkill": {
+            "id": "sig_harpunier",
+            "unlockLevel": 10,
+            "name": "Widerhaken-Todesstoß",
+            "staminaCost": 20,
+            "damageMult": 2.0,
+            "pullsBackRowToFront": true,
+            "statusEffect": {
+              "type": "schwere_blutung",
+              "chance": 0.85,
+              "duration": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "parentClassId": "fh_pulveralchemist",
+      "parentClassName": "Pulver-Alchemist",
+      "options": [
+        {
+          "id": "spec_fh_hoellenfeuer_pyrotechniker",
+          "name": "Höllenfeuer-Pyrotechniker",
+          "theme": "Entfesselt alchemisches Pech und Schwarzpulver-Infernos, die ganze Schlachtreihen einäschern.",
+          "statBonuses": {
+            "wille": 4,
+            "geschick": 1,
+            "maxStamina": 15,
+            "critChance": 0.08
+          },
+          "passiveEffect": {
+            "name": "Unlöschbares Pech",
+            "effect": "Brand-Effekte des Alchemisten halten +1 Runde länger und verursachen +35 % Schaden über Zeit."
+          },
+          "worldResourceBonus": {
+            "name": "Schwefel- & Erzschmelzer",
+            "effect": "+2 Eisen pro Kontor-Lieferung aus Bergbau- und Hafendörfern."
+          },
+          "signatureSkill": {
+            "id": "sig_hoellenfeuer",
+            "unlockLevel": 10,
+            "name": "Alchemistisches Inferno",
+            "staminaCost": 26,
+            "target": "all_enemies",
+            "damageMult": 2.15,
+            "armorIgnore": 0.5,
+            "statusEffect": {
+              "type": "brennen",
+              "chance": 0.9,
+              "duration": 3,
+              "armorReduction": 4
+            }
+          }
+        },
+        {
+          "id": "spec_fh_belagerungsingenieur",
+          "name": "Belagerungs-Ingenieur",
+          "theme": "Taktischer Sprengmeister – zerstört Befestigungen, Schilde und gegnerische Formationen.",
+          "statBonuses": {
+            "wille": 3,
+            "zaehigkeit": 2,
+            "baseArmor": 3,
+            "initiative": 2
+          },
+          "passiveEffect": {
+            "name": "Sprengladung",
+            "effect": "Alle Explosiv- und Blendangriffe kosten -3 Ausdauer und senken die gegnerische Rüstung um -3."
+          },
+          "worldResourceBonus": {
+            "name": "Meister der Steinbrüche & Wehranlagen",
+            "effect": "Senkt Stein- und Eisenkosten beim Ausbau von Stadt-Tiers und Grenzstraßen um -1 Einheit (min. 1)."
+          },
+          "signatureSkill": {
+            "id": "sig_belagerungsingenieur",
+            "unlockLevel": 10,
+            "name": "Kanonen- & Mörser-Sperrfeuer",
+            "staminaCost": 22,
+            "target": "all_enemies",
+            "damageMult": 1.75,
+            "statusEffect": {
+              "type": "betaeubt_geblendet",
+              "chance": 0.75,
+              "duration": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "parentClassId": "fh_seuchenmedikus",
+      "parentClassName": "Seuchenmedikus",
+      "options": [
+        {
+          "id": "spec_fh_vital_alchemist",
+          "name": "Vital-Alchemist",
+          "theme": "Meister der Destillate – hält die Gruppe durch starke Kampf-Elixiere nahezu unsterblich.",
+          "statBonuses": {
+            "wille": 4,
+            "zaehigkeit": 1,
+            "maxStamina": 15,
+            "maxHp": 20
+          },
+          "passiveEffect": {
+            "name": "Überfluss der Essenzen",
+            "effect": "+25 % Heilwirkung auf alle Fähigkeiten; geheilte Verbündete erhalten zusätzlich +8 Ausdauer."
+          },
+          "worldResourceBonus": {
+            "name": "Proviant-Konservierung",
+            "effect": "Lager-Rast verbraucht nur 2 Nahrung statt 3; +1 Nahrung im Schutzbund-Zehnt."
+          },
+          "signatureSkill": {
+            "id": "sig_vital_alchemist",
+            "unlockLevel": 10,
+            "name": "Elixier des Unsterblichen Sturms",
+            "staminaCost": 24,
+            "target": "all_allies",
+            "healMult": 1.65,
+            "cleansesAllDebuffs": true,
+            "buffEffect": {
+              "attackBonus": 0.15,
+              "damageReduction": 0.15,
+              "duration": 2
+            }
+          }
+        },
+        {
+          "id": "spec_fh_pestmeister",
+          "name": "Pest- & Säuremeister",
+          "theme": "Nutzt tödliche Toxine und ätzende Tinkturen, um Feinde bei lebendigem Leib zu zersetzen.",
+          "statBonuses": {
+            "wille": 3,
+            "geschick": 2,
+            "critChance": 0.1,
+            "initiative": 2
+          },
+          "passiveEffect": {
+            "name": "Ätzende Dämpfe",
+            "effect": "Jeder Gift- oder Säureangriff reduziert die gegnerische Rüstung um -2 und verhindert jegliche Feindheilung."
+          },
+          "worldResourceBonus": {
+            "name": "Alchemisten-Gilde",
+            "effect": "+25 % Verkaufserlös auf Monster-Beute und alchemistische Waren in allen Städten."
+          },
+          "signatureSkill": {
+            "id": "sig_pestmeister",
+            "unlockLevel": 10,
+            "name": "Schwarze Pestwolke",
+            "staminaCost": 22,
+            "target": "all_enemies",
+            "damageMult": 1.6,
+            "statusEffect": {
+              "type": "schweres_gift_saeure",
+              "chance": 0.9,
+              "duration": 3,
+              "armorReduction": 4
+            }
+          }
+        }
+      ]
+    },
+    {
+      "parentClassId": "fh_schattenfreibeuter",
+      "parentClassName": "Schattenfreibeuter",
+      "options": [
+        {
+          "id": "spec_fh_tiefsee_assassine",
+          "name": "Tiefsee-Assassine",
+          "theme": "Lautloser Klingenmörder der dunklen Gassen – tötet mit einem einzigen vergifteten Stoß.",
+          "statBonuses": {
+            "geschick": 4,
+            "kraft": 1,
+            "critChance": 0.12,
+            "critDamageBonus": 0.3
+          },
+          "passiveEffect": {
+            "name": "Schatten der Bilge",
+            "effect": "Startet jeden Kampf getarnt (+50 % Schaden und garantierter Krit im ersten Zug); +25 % Schaden gegen vergiftete Ziele."
+          },
+          "worldResourceBonus": {
+            "name": "Lautloser Einbruch",
+            "effect": "Umgeht alle Wegzölle; +30 % Silber-Beute aus Truhen und Überfällen."
+          },
+          "signatureSkill": {
+            "id": "sig_tiefsee_assassine",
+            "unlockLevel": 10,
+            "name": "Giftstoß ins Herz",
+            "staminaCost": 22,
+            "damageMult": 2.45,
+            "armorIgnore": 0.6,
+            "critBonus": 0.25,
+            "statusEffect": {
+              "type": "toedliches_gift",
+              "chance": 0.85,
+              "duration": 3
+            }
+          }
+        },
+        {
+          "id": "spec_fh_schmugglerschatten",
+          "name": "Schmugglerfürst",
+          "theme": "Meister der Täuschung, Blendgranaten und gestohlenen Vorräte.",
+          "statBonuses": {
+            "geschick": 3,
+            "wille": 2,
+            "dodgeChance": 0.15,
+            "initiative": 4
+          },
+          "passiveEffect": {
+            "name": "Doppeltes Spiel",
+            "effect": "Jedes erfolgreiche Ausweichen stellt 8 Ausdauer wieder her und gewährt einen kostenlosen Gegenstoß."
+          },
+          "worldResourceBonus": {
+            "name": "Schwarzer Markt von Odris",
+            "effect": "-15 % auf alle Händlerpreise; +1 zufällige Grundressource (Holz/Eisen/Stein/Nahrung) nach jedem gewonnenen Kampf."
+          },
+          "signatureSkill": {
+            "id": "sig_schmugglerschatten",
+            "unlockLevel": 10,
+            "name": "Raubzug im Nebel",
+            "staminaCost": 20,
+            "target": "all_enemies",
+            "damageMult": 1.35,
+            "stealsSilberFormula": "playerLevel * 12",
+            "buffEffect": {
+              "groupDodgeBonus": 0.35,
+              "duration": 2
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

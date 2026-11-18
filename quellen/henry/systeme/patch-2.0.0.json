@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "2.0.0",
+  "module": "master_architecture_harmonization_patch",
+  "decisions": {
+    "1_humanClassesReplacement": {
+      "action": "REPLACE_HUMAN_FACTION_CLASSES",
+      "affectedFactions": ["ORDEN_DER_FLAMME", "KRONREICH", "FREIE_HAEFEN"],
+      "other12Factions": "KEEP_COMBAT_DOC_17_11_UNTIL_UPDATED",
+      "skillProgressionMapping": {
+        "levels_1_3_6_10": "BASE_CLASS_SKILLS_1_TO_4",
+        "levels_15_and_20": "CLASS_SPECIALIZATION_SIGNATURE_SKILL_AND_RANKS",
+        "levels_22_24_26_28_30": "MASTER_TALENT_POINTS"
+      }
+    },
+    "2_nameCollisionFix": { "oldId": "BLUTRITTER", "newId": "BLUTRITTER_DER_KRONE", "newDisplayName": "Blutritter der Krone", "reason": "Vermeidet Namensdopplung mit der Untoten-Klasse 'Blutritter' (Hof der Bleichen Krone)." },
+    "3_coreAttributesMapping": {
+      "keepFiveCoreAttributes": ["STAERKE", "GESCHICK", "INTELLIGENZ", "WILLENSKRAFT", "CHARISMA"],
+      "legacyToCoreMapping": { "KRAFT": "STAERKE", "GESCHICK": "GESCHICK", "WILLE": "WILLENSKRAFT", "ZAEHIGKEIT": "WILLENSKRAFT" },
+      "notes": "In 'WILLENSKRAFT' sind sowohl magische/mentale Stärke als auch Halten, Blocken und Durchhalten vereint."
+    },
+    "4_levelCap30AndXpCurve": {
+      "maxLevel": 30,
+      "xpFormula": { "levels_1_to_20": "100 * level", "levels_21_to_30": "1200 + (level - 20) * 350" },
+      "actLevelRanges": {
+        "PROLOG": { "min": 1, "max": 3 }, "AKT_1": { "min": 1, "max": 5 }, "AKT_2_FIRST_BRANCH": { "min": 6, "max": 10 },
+        "AKT_3_SECOND_BRANCH": { "min": 11, "max": 15 }, "AKT_4_VOLKSQUEST_UND_THING": { "min": 16, "max": 22 },
+        "AKT_5_ZIELKONTINENTE": { "min": 20, "max": 26 }, "AKT_5_UNTOTEN_NORDEN": { "min": 25, "max": 30 }
+      },
+      "prestigeAfterMaxLevel": { "name": "Das Blut der Ahnen", "xpPerPrestigeRank": 5000 }
+    },
+    "5_resourcesMigration": {
+      "replaceLegacyVorratWith": "RES_NAHRUNG", "edgeTravelCostsReference": "RES_NAHRUNG",
+      "kontorStorageResources": ["RES_NAHRUNG", "RES_HOLZ", "RES_EISEN", "RES_STEIN", "RES_RUNENSPLITTER"],
+      "undeadCombatResourcesUnchanged": ["SEELEN", "FLEISCH", "BLUT"]
+    },
+    "6_villageTitheAuthoritativeRule": {
+      "sourceOfTruth": "RUF_DATEI_2_0", "turnTimerRemoved": true, "intervalTravelEdges": 6, "requiredReputation": 20,
+      "deliveryTarget": "NEXT_FACTION_KONTOR", "yieldPerVillage": { "STANDARD": 5, "KRONREICH_NAHRUNG": 6 }
+    },
+    "7_minorNumberConflictsResolution": {
+      "sourceOfTruth": "ECONOMY_AND_REPUTATION_V2", "villageRebuildReputationGain": 20,
+      "geachtetPriceMultipliers": { "buyMultiplier": 1.35, "sellMultiplier": 0.65, "smithingCostMultiplier": 1.35 }
+    },
+    "8_enemyScalingRule": {
+      "targetEnemies": "33_NEW_HUMAN_REALM_ENEMIES_AND_MINIBOSSES", "baseStatsUsage": "FIXED_STATS_AT_ENEMY_MIN_LEVEL",
+      "aboveMinLevelScaling": "USE_EXISTING_COMBAT_DOC_RANK_FORMULA", "registryTarget": "BESTIARIUM_VON_ODRIS", "artworkAssets": "DEFERRED_TO_DEDICATED_IMAGE_STEP"
+    },
+    "9_dualSpecializationRule": {
+      "classSpecializationUnlockLevel": 10, "factionSpecializationUnlockCondition": "COMPLETE_BOTH_SISTER_BRANCHES_ACT_2_AND_3", "stackingMode": "BOTH_ACTIVE_SIMULTANEOUSLY"
+    }
+  }
+}

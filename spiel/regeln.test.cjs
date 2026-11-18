@@ -8,7 +8,7 @@ const vm = require("node:vm");
 const root = path.join(__dirname, "..");
 const context = vm.createContext({ structuredClone });
 
-for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/faehigkeiten.js", "spiel/kampf.js", "spiel/startpunkte.js", "spiel/welt.js", "spiel/knoten-daten.js", "spiel/knoten.js", "spiel/nebenquests-daten.js", "spiel/nebenquests.js", "spiel/regeln.js"]) {
+for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/faehigkeiten.js", "spiel/kampf.js", "spiel/startpunkte.js", "spiel/welt.js", "spiel/knoten-daten.js", "spiel/knoten.js", "spiel/nebenquests-daten.js", "spiel/nebenquests.js", "spiel/systeme-daten.js", "spiel/systeme.js", "spiel/regeln.js"]) {
   vm.runInContext(fs.readFileSync(path.join(root, file), "utf8"), context, { filename: file });
 }
 
@@ -1413,8 +1413,22 @@ console.log("Reisebegegnungen (ruhig, scheu, Jäger, Alphatier, Ausweichen) gepr
   assert.equal(doom.scene, "weltende");
   assert.equal(doom.niederlage, "glut");
   assert.equal(rules.read(JSON.stringify(doom)).scene, "weltende");
+  // Patch 2.3.0: Menschen verhungern nicht sofort. Bei Nahrung 0 ist die Gruppe entkräftet, jede Etappe ohne Nahrung
+  // kostet 15 Moral, verloren ist erst bei Nahrung 0 und Moral 0. Essen oder Rasten beendet „Entkräftet“.
   const hunger = rules.reise({ ...hub, ressource: 1 }, "heidvang");
-  assert.equal(hunger.niederlage, "vorrat");
+  assert.equal(hunger.niederlage, null);
+  assert.equal(hunger.ressource, 0);
+  assert.equal(hunger.entkraeftet, true);
+  assert.equal(hunger.moral, 60, "Die letzte Mahlzeit reicht noch für diese Etappe");
+  const hungrig = rules.reise(hunger, hub.knoten);
+  assert.equal(hungrig.knoten, hub.knoten);
+  assert.equal(hungrig.moral, 45, "Etappe ohne Nahrung: −15 Moral");
+  assert.equal(hungrig.niederlage, null);
+  const gebrochen = rules.reise({ ...hungrig, moral: 15 }, "heidvang");
+  assert.equal(gebrochen.niederlage, "verhungert");
+  assert.equal(gebrochen.scene, "weltende");
+  assert.match(rules.niederlagen.verhungert, /Verhungert und gebrochen/);
+  assert.equal(rules.rastGrund(hungrig), "zu wenig Nahrung");
   assert.throws(() => rules.read(JSON.stringify({ ...hub, scene: "weltende" })), /beschädigt/);
 
   // Seewege: eigener Hafen oder Handelsvertrag, 15 Silber je Überfahrt.
@@ -1464,7 +1478,8 @@ console.log("Reisebegegnungen (ruhig, scheu, Jäger, Alphatier, Ausweichen) gepr
     assert.equal(wyrm.combat.id, "auftrag-klippenwyrm");
     assert.equal(wyrm.combat.weiter, "weltknoten");
     folge([0.75, 0.5, 0, 0]);
-    assert.equal(rules.reise(amPass, "brandstein").combat.id, "jagd-grauwolf");
+    // Gewöhnliche Jäger kommen bei den Menschen aus dem Gegnerpool der Region (Patch 2.1.0 Punkt 8).
+    assert.match(rules.reise(amPass, "brandstein").combat.id, /^sys-ENM_/);
     rules.setTravelDice(() => 0);
   }
 
@@ -1481,21 +1496,29 @@ console.log("Reisebegegnungen (ruhig, scheu, Jäger, Alphatier, Ausweichen) gepr
   assert.ok(stollen.health < 30 && stollen.health > 0, "Misslungene Probe kostet LP");
   assert.equal(stollen.weltLeisten.glut, 30 + 1 + 1, "Stollen +1 und Rundenanstieg +1");
 
-  // Rast: volle LP, kostet 1 Vorrat, nie den letzten.
+  // Rast: volle LP. Menschen zahlen 3 Nahrung (nie die letzte) und gewinnen 12 Moral; als Bannerjarl
+  // rasten sie in den Städten der eigenen Fraktion umsonst. Andere Völker zahlen weiter 1 Vorrat.
   const tired = { ...hub, health: 3 };
   const rested = rules.rast(tired);
   assert.equal(rested.health, rules.healthLimit(rested));
-  assert.equal(rested.ressource, 41);
-  assert.equal(rules.rast({ ...tired, ressource: 1 }).health, 3);
-  // Dörfer der eigenen Fraktion liefern +5, danach 10 Runden Pause.
+  assert.equal(rested.ressource, 39);
+  assert.equal(rested.moral, 72);
+  assert.equal(rules.rast({ ...tired, ressource: 3 }).health, 3);
+  const jarl = rules.rast({ ...tired, factionRuf: { ...tired.factionRuf, groves: 60 } });
+  assert.equal(jarl.ressource, 42, "Bannerjarl rastet umsonst");
+  const zwergDorf = Object.values(vm.runInContext("knoten", context).alle).find(o => o.typ === "dorf" && o.fraktion === "tiefgraeber");
+  const zwergHub = { ...dwarf, scene: "weltknoten", knoten: zwergDorf.id, runde: 0 };
+  assert.equal(rules.rast({ ...zwergHub, health: 3 }).ressource, 41);
+  // Dörfer liefern bei den anderen Völkern +5, danach 10 Runden Pause. Bei den Menschen liefern befreite
+  // Dörfer stattdessen ihren Zehnt alle 6 Etappen ins Kontor (Patch 2.0.0 Punkt 6).
   const garbenfeld = rules.reise(hub, "garbenfeld");
-  assert.equal(rules.ertragGrund(garbenfeld), null);
-  const harvested = rules.ertragEinholen(garbenfeld);
-  assert.equal(harvested.ressource, garbenfeld.ressource + 5);
+  assert.match(rules.ertragGrund(garbenfeld), /Zehnt alle 6 Etappen/);
+  assert.equal(rules.ertragGrund(zwergHub), null);
+  const harvested = rules.ertragEinholen(zwergHub);
+  assert.equal(harvested.ressource, zwergHub.ressource + 5);
   assert.match(rules.ertragGrund(harvested), /wieder bereit in 10 Runden/);
-  assert.equal(rules.read(JSON.stringify(harvested)).ertraege.garbenfeld, 1);
-  assert.equal(rules.ertragGrund({ ...hub, knoten: "netzby" }), null);
-  assert.equal(rules.ertragGrund({ ...hub, knoten: "perlstrand" }), "nur in Dörfern der eigenen Fraktion");
+  assert.equal(rules.read(JSON.stringify(harvested)).ertraege[zwergDorf.id], 0);
+  assert.equal(rules.ertragGrund({ ...zwergHub, knoten: "perlstrand" }), "nur in Dörfern der eigenen Fraktion");
   // Zentrallager: Hauptstädte und eigene Städte, keine Dörfer.
   assert.equal(rules.storageSite({ ...hub, knoten: "eryndor" }), "Zentrallager · Eryndor");
   assert.equal(rules.storageSite({ ...hub, knoten: "salzwacht" }), null);
@@ -1513,7 +1536,10 @@ console.log("Reisebegegnungen (ruhig, scheu, Jäger, Alphatier, Ausweichen) gepr
   { let index = 0; const werte = [0.7, 0.5, 0]; rules.setTravelDice(() => werte[Math.min(index++, werte.length - 1)]); }
   const ambush = rules.reise({ ...toHeidvang, xp: 300, health: 60 }, "eiswacht");
   rules.setTravelDice(() => 0);
-  assert.equal(ambush.combat.id, "jagd-grauwolf");
+  // Gegnerpool des Ordens (Eiswacht), Werte aus Henrys Gegnerdatei geteilt durch 3,5 (Patch 2.4.0).
+  assert.match(ambush.combat.id, /^sys-ENM_OF_/);
+  const sysFeind = rules.systeme.gegnerNach[ambush.combat.id.slice(4)];
+  assert.equal(ambush.combat.feinde[0].max, rules.systeme.kampfWerte(sysFeind.id, ambush.combat.feinde[0].stufe).lp);
   assert.equal(ambush.combat.weiter, "weltknoten");
   assert.equal(rules.read(JSON.stringify(ambush)).combat.weiter, "weltknoten");
   const evaded = rules.strike(ambush, "evade");
@@ -1522,6 +1548,9 @@ console.log("Reisebegegnungen (ruhig, scheu, Jäger, Alphatier, Ausweichen) gepr
   for (let turn = 0; won.combat && turn < 40; turn++) won = rules.strike(won, "spear", highRoll);
   assert.equal(won.scene, "weltknoten");
   assert.equal(won.knoten, "eiswacht");
+  assert.ok(won.silver > ambush.silver, "Silber aus der Beute");
+  assert.ok(won.journal.some(text => text.startsWith("Beute: ")));
+  assert.equal(won.moral, ambush.moral + 4, "Sieg +4 Moral");
   // Elfenland hat noch keine Tierwerte: Ein Jäger-Wurf bleibt dort ein Hinweis ohne Kampf.
   rules.setTravelDice(() => 0.5);
   const elves = rules.reise({ ...hub, knoten: "hochdorn" }, knoten.get("hochdorn").verbindungen.find(weg => weg.sicherheit === "grenzland" && weg.kantenTyp === "strasse")?.zielId ?? "nordkap");
@@ -1630,7 +1659,74 @@ console.log("Charakter-Entwurf geprüft.");
   const nachher = rules.reiseZiele(grenze).find(weg => weg.zielId === "brandstein");
   assert.equal(nachher.kostenRessource, vorher - 1);
   assert.equal(nachher.rabatt, true);
+  // Ruf-Datei 2.0: Erst die Entscheidung über den Ausgang, dann geht die Reise weiter.
+  assert.equal(grenze.tatOffen, "eikmark_q10");
+  assert.equal(rules.reise(grenze, "brandstein"), grenze);
+  assert.equal(rules.taten(grenze).length, 3);
+  grenze = rules.tatWaehlen(grenze, "pragmatisch");
+  assert.equal(grenze.tatOffen, null);
+  assert.equal(grenze.factionRuf.groves, 3);
   assert.equal(rules.reise(grenze, "brandstein").ressource, grenze.ressource - (vorher - 1));
+
+  // Dorfbefreiung (Patch 2.1.0 Punkt 4): q01 mit guter Tat befreit alle Dörfer der Stadt, schlechte Tat nicht.
+  let korn = rules.auftragAusfuehren(rules.auftragAnnehmen(imOrt("kronreich", "kronhall"), "kronhall_q01"), "kronhall_q01");
+  assert.equal(rules.taten(korn).find(t => t.id === "gut").befreit, true);
+  const boese = rules.tatWaehlen(korn, "boese");
+  assert.deepEqual(plain(boese.befreit), []);
+  assert.equal(boese.factionRuf.groves, -18);
+  assert.equal(boese.moral, 52);
+  korn = rules.tatWaehlen(korn, "gut");
+  assert.deepEqual(plain(korn.befreit), ["koenigsau", "muehlbach", "weizenhof"]);
+  assert.equal(korn.factionRuf.groves, 12);
+  assert.equal(korn.moral, 66);
+  // Zehnt: ab Ruf 20 liefern befreite Dörfer alle 6 Etappen ins Kontor (Kronreich-Nahrung 6 je Dorf).
+  let zehnt = { ...korn, factionRuf: { ...korn.factionRuf, groves: 20 } };
+  for (let i = 0; i < 6; i++) zehnt = rules.reise(zehnt, rules.reiseZiele(zehnt).find(w => !w.grund && w.kantenTyp !== "seeweg").zielId);
+  assert.equal(zehnt.etappen, 6);
+  assert.ok(Object.values(plain(zehnt.kontor.kronreich)).reduce((a, b) => a + b, 0) >= 15, "Zehnt im Kontor");
+  // Kontor in Kronhall: Rohstoffe kaufen und Nahrung tragen; geächtet kein Handel, Abheben bleibt erlaubt.
+  let kontor = { ...imOrt("kronreich", "kronhall"), silver: 200 };
+  assert.equal(rules.kontorInfo(kontor).rang.id, "fremder");
+  kontor = rules.kontorHandel(kontor, "holz", 10, true);
+  assert.equal(kontor.kontor.kronreich.holz, 10);
+  assert.equal(kontor.silver, 200 - 54, "Bündel 10 Holz zu 54 Silber");
+  kontor = rules.nahrungTragen(kontor, 20, true);
+  assert.equal(kontor.kontor.kronreich.nahrung, 20);
+  const acht = { ...kontor, factionRuf: { ...kontor.factionRuf, groves: -30 }, ressource: 0, entkraeftet: true };
+  assert.equal(rules.kontorHandel(acht, "holz", 1, true), acht);
+  const satt = rules.nahrungTragen(acht, 5, false);
+  assert.equal(satt.ressource, 5);
+  assert.equal(satt.entkraeftet, false, "Nahrung aufnehmen beendet Entkräftet");
+
+  // Ausrüster der Menschen: Waren aus Henrys Ökonomie-Datei, Preise nach Ruf-Rang. Heiltrank I heilt 35 ÷ 3,5 = 10 LP.
+  let markt = { ...imOrt("kronreich", "kronhall"), silver: 300 };
+  const trank = rules.ausruester(markt).kaufen.find(w => w.id === "POT_HEILUNG_1");
+  assert.equal(trank.preis, 18);
+  markt = rules.ausruesterHandel(markt, "POT_HEILUNG_1", true);
+  assert.ok(markt.inventory.includes("POT_HEILUNG_1"));
+  assert.equal(markt.silver, 282);
+  assert.equal(world.supplies.POT_HEILUNG_1.heal, 10);
+  assert.equal(world.supplies.POT_HEILUNG_3.heal, 51);
+  assert.equal(world.supplies.POT_MANA_2.mana, 21);
+  assert.equal(world.gear.ARM_PLATTE_T3.armor, 7, "Rüstung 24 ÷ 3,5");
+  // Waffenrechte: Ein Krieger (Blutritter der Krone) trägt den Zweihänder, aber keinen Fokusstab.
+  assert.equal(rules.ausruestungGrund(markt, "WPN_ZWEIHAENDER_T2"), null);
+  assert.match(rules.ausruestungGrund(markt, "WPN_EICHENSTAB_T1"), /nicht für Blutritter der Krone/);
+  // Schmiede in Kronhall (vorgebaut): +1 kostet 45 Silber, 2 Eisen aus dem Kontor und 1 Wolfsfell.
+  let schmied = { ...markt, inventory: [...markt.inventory, "WPN_EISENSCHWERT_T1", "MAT_WOLFSFELL"], kontor: { kronreich: { nahrung: 0, holz: 0, eisen: 3, stein: 0, runensplitter: 0 } } };
+  assert.equal(rules.schmiedeInfo(schmied).stufe, 2);
+  schmied = rules.schmieden(schmied, "WPN_EISENSCHWERT_T1");
+  assert.equal(schmied.aufwertung.WPN_EISENSCHWERT_T1, 1);
+  assert.equal(schmied.kontor.kronreich.eisen, 1);
+  assert.ok(!schmied.inventory.includes("MAT_WOLFSFELL"));
+  assert.equal(rules.read(JSON.stringify(schmied)).aufwertung.WPN_EISENSCHWERT_T1, 1);
+  assert.match(rules.schmiedeInfo(schmied).teile.find(t => t.id === "WPN_EISENSCHWERT_T1").grund, /es fehlt/);
+  // Feldhandwerk: Wundmeister rühren Gegengift aus Kräutern und Harz an, Krieger nicht.
+  const heiler = { ...imOrt("kronreich", "kronhall", { inventory: ["MAT_KRAEUTER", "MAT_HARZ"] }) };
+  assert.ok(rules.handwerkListe(heiler).find(r => r.id === "CRAFT_FIELD_GEGENGIFT").grund);
+  const wund = { ...rules.create("Ida", "kronreich", "frau", 1, "heiler"), scene: "weltknoten", knoten: "kronhall", inventory: ["MAT_KRAEUTER", "MAT_HARZ"] };
+  const gebraut = rules.handwerk(wund, "CRAFT_FIELD_GEGENGIFT");
+  assert.deepEqual(plain(gebraut.inventory), ["CON_GEGENGIFT"]);
 
   // Trophäen sind verkäuflich, auch beim Händler einer Stadt mit Zentrallager.
   assert.equal(world.items["beute-pelz-von-graufang"], "Pelz von Graufang");

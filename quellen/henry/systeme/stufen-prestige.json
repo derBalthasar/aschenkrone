@@ -1,0 +1,68 @@
+{
+  "version": "1.1.0",
+  "project": "Aschenkrone - Welt Odris",
+  "system": "extended_level_cap_and_ancestral_prestige",
+  "levelProgression": {
+    "previousCap": 20,
+    "newLevelCap": 30,
+    "storyActGuidelines": {
+      "prolog": "1-3",
+      "act1": "1-5",
+      "act2": "6-10",
+      "act3": "11-15",
+      "act4": "16-22",
+      "act5_standard": "20-26",
+      "act5_undead_north_and_endgame": "25-30"
+    },
+    "masterLevels": {
+      "range": "21-30",
+      "title": "Bannerjarl- & Hochmeister-Stufen",
+      "xpPerLevelFormula": "1200 + (level - 20) * 350",
+      "statGainPerLevel": {
+        "maxHp": 15,
+        "maxStamina": 5,
+        "baseAttack": 2,
+        "baseDefense": 1
+      },
+      "masterTalentPointLevels": null,
+      "enemyScalingRule": "Ascherisse, Grenzpatrouillen, Kaperfahrten, Belagerungen und Akt-5-Überseegegner skalieren dynamisch bis Stufe 30."
+    }
+  },
+  "ancestralPrestigeSystem": {
+    "id": "blut_der_ahnen",
+    "name": "Das Blut der Ahnen (Endgame-Prestige)",
+    "unlockCondition": {
+      "minLevel": 30
+    },
+    "resetCharacterOrWorld": false,
+    "xpPerAncestralRank": 5000,
+    "maxDisplayedRank": 10,
+    "infiniteOverflow": true,
+    "perkTracks": [
+      {
+        "id": "perk_ancestral_might",
+        "name": "Zorn der Alten Könige",
+        "maxPoints": 5,
+        "bonusPerPoint": "+5 % Schaden für die gesamte Gruppe (Held + 3 Begleiter)."
+      },
+      {
+        "id": "perk_iron_blood",
+        "name": "Eisernes Ahnenblut",
+        "maxPoints": 5,
+        "bonusPerPoint": "+25 maximale LP und +10 Ausdauer für alle Gruppenmitglieder."
+      },
+      {
+        "id": "perk_master_steward",
+        "name": "Erbe der Baumeister",
+        "maxPoints": 5,
+        "bonusPerPoint": "+15 % Silber-Ertrag aus Quests/Handel und -1 Ressource auf Baukosten (Minimum 1)."
+      },
+      {
+        "id": "perk_relic_resonance",
+        "name": "Runen-Resonanz",
+        "maxPoints": 5,
+        "bonusPerPoint": "Verstärkt den Effekt des ausgerüsteten Gruppen-Relikts um +10 %."
+      }
+    ]
+  }
+}

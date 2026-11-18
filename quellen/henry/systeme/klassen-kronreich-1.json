@@ -1,0 +1,424 @@
+{
+  "part": "2 of 3 (Kronreich - Full Combat Math, Unlock Levels, Prestige Scaling & World Resource Synergies)",
+  "version": "2.0.0",
+  "project": "Aschenkrone - Welt Odris",
+  "folk": "Menschen",
+  "faction": "Kronreich",
+  "magicAllowed": false,
+  "classes": [
+    {
+      "id": "kr_blutritter",
+      "baseClass": "krieger",
+      "name": "Blutritter",
+      "primaryStat": "kraft",
+      "combatStats": {
+        "baseHp": 130,
+        "baseStamina": 50,
+        "baseArmor": 7,
+        "baseCritChance": 0.12,
+        "baseDodgeChance": 0.05,
+        "initiative": 10
+      },
+      "worldAndResourceSynergy": {
+        "id": "syn_blutritter",
+        "name": "Blutzoll der Nordmarken",
+        "effect": "+1 zusätzliche Nahrung und +15 % Silber-Beute nach jedem gewonnenen Kampf gegen Banditen, Bestien oder Orks."
+      },
+      "skills": [
+        {
+          "id": "br_1",
+          "unlockLevel": 1,
+          "name": "Scharfrichter-Hieb",
+          "staminaCost": 12,
+          "damageMult": 1.4,
+          "critBonus": 0.08,
+          "statusEffect": {
+            "type": "blutung",
+            "chance": 0.55,
+            "duration": 3,
+            "armorReduction": 2
+          }
+        },
+        {
+          "id": "br_2",
+          "unlockLevel": 3,
+          "name": "Blutrausch der Ahnen",
+          "staminaCost": 10,
+          "selfHpCostRatio": 0.1,
+          "damageMult": 1.85,
+          "critBonus": 0.15,
+          "statusEffect": {
+            "type": "blutung",
+            "chance": 0.7,
+            "duration": 3
+          }
+        },
+        {
+          "id": "br_3",
+          "unlockLevel": 6,
+          "name": "Eisernes Wirbeln",
+          "staminaCost": 18,
+          "target": "front_row",
+          "damageMult": 1.25,
+          "critBonus": 0.08,
+          "statusEffect": {
+            "type": "blutung",
+            "chance": 0.45,
+            "duration": 2
+          }
+        },
+        {
+          "id": "br_4",
+          "unlockLevel": 10,
+          "name": "Todesurteil",
+          "staminaCost": 22,
+          "damageMult": 2.15,
+          "bonusBelowHpRatio": 0.4,
+          "bonusDamageMult": 0.5,
+          "resetCooldownOnKill": true
+        }
+      ]
+    },
+    {
+      "id": "kr_bastionaer",
+      "baseClass": "waechter",
+      "name": "Eiserner Bastionär",
+      "primaryStat": "zaehigkeit",
+      "combatStats": {
+        "baseHp": 150,
+        "baseStamina": 45,
+        "baseArmor": 13,
+        "baseCritChance": 0.05,
+        "baseDodgeChance": 0.02,
+        "initiative": 7
+      },
+      "worldAndResourceSynergy": {
+        "id": "syn_bastionaer",
+        "name": "Bollwerk der Alten Krone",
+        "effect": "Senkt Steinkosten beim Ausbau von Stadt-Tiers und Dorfpalisaden um -1 Stein (min. 1); +15 Garnisonsverteidigung in der aktuellen Stadt."
+      },
+      "skills": [
+        {
+          "id": "eb_1",
+          "unlockLevel": 1,
+          "name": "Schildwall der Krone",
+          "staminaCost": 14,
+          "buffEffect": {
+            "armorBonus": 7,
+            "guardAllies": true,
+            "damageReduction": 0.35,
+            "duration": 2
+          }
+        },
+        {
+          "id": "eb_2",
+          "unlockLevel": 3,
+          "name": "Eisenhammer-Stoß",
+          "staminaCost": 12,
+          "damageMult": 1.15,
+          "statusEffect": {
+            "type": "betaeubt",
+            "chance": 0.6,
+            "duration": 1,
+            "attackReduction": 0.2
+          }
+        },
+        {
+          "id": "eb_3",
+          "unlockLevel": 6,
+          "name": "Unbeugsamer Trotz",
+          "staminaCost": 16,
+          "selfHealRatio": 0.25,
+          "buffEffect": {
+            "armorBonus": 5,
+            "stunImmune": true,
+            "duration": 3
+          }
+        },
+        {
+          "id": "eb_4",
+          "unlockLevel": 10,
+          "name": "Eiserne Vergeltung",
+          "staminaCost": 18,
+          "counterReflectRatio": 0.65,
+          "statusEffect": {
+            "type": "blutung",
+            "chance": 0.5,
+            "duration": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "kr_daemmerungsjaeger",
+      "baseClass": "spaeher",
+      "name": "Dämmerungsjäger",
+      "primaryStat": "geschick",
+      "combatStats": {
+        "baseHp": 105,
+        "baseStamina": 55,
+        "baseArmor": 5,
+        "baseCritChance": 0.18,
+        "baseDodgeChance": 0.16,
+        "initiative": 14
+      },
+      "worldAndResourceSynergy": {
+        "id": "syn_daemmerungsjaeger",
+        "name": "Fährtenleser & Wildhüter",
+        "effect": "Senkt Nahrungskosten auf Grenzland-Straßen und Eispässen um -1 Nahrung (min. 1); -10 % Hinterhalt-Gefahr auf allen Landwegen."
+      },
+      "skills": [
+        {
+          "id": "dj_1",
+          "unlockLevel": 1,
+          "name": "Rabenpfeil",
+          "staminaCost": 12,
+          "damageMult": 1.35,
+          "armorIgnore": 0.25,
+          "critBonus": 0.12
+        },
+        {
+          "id": "dj_2",
+          "unlockLevel": 3,
+          "name": "Eiserne Wolfsfalle",
+          "staminaCost": 14,
+          "damageMult": 0.9,
+          "statusEffect": {
+            "type": "gefesselt",
+            "chance": 0.65,
+            "bleedDamage": true,
+            "duration": 2
+          }
+        },
+        {
+          "id": "dj_3",
+          "unlockLevel": 6,
+          "name": "Pfeilregen der Nordmark",
+          "staminaCost": 18,
+          "target": "all_enemies",
+          "damageMult": 1.05,
+          "critBonus": 0.08,
+          "statusEffect": {
+            "type": "verlangsamt",
+            "chance": 0.55,
+            "duration": 2
+          }
+        },
+        {
+          "id": "dj_4",
+          "unlockLevel": 10,
+          "name": "Tödliche Fährte",
+          "staminaCost": 20,
+          "statusEffect": {
+            "type": "markiert",
+            "chance": 1.0,
+            "incomingDamageBonus": 0.3,
+            "allAttacksCrit": true,
+            "duration": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "kr_runenskalde",
+      "baseClass": "magier",
+      "name": "Runenskalde",
+      "primaryStat": "wille",
+      "combatStats": {
+        "baseHp": 100,
+        "baseStamina": 65,
+        "baseArmor": 5,
+        "baseCritChance": 0.1,
+        "baseDodgeChance": 0.1,
+        "initiative": 13
+      },
+      "worldAndResourceSynergy": {
+        "id": "syn_runenskalde",
+        "name": "Stimme des Things",
+        "effect": "+3 Bonus-Ruf bei jeder ehrenhaften oder pragmatischen Quest-Entscheidung; -10 % Händlerpreise in allen Menschen-Städten."
+      },
+      "skills": [
+        {
+          "id": "rs_1",
+          "unlockLevel": 1,
+          "name": "Horn des Kriegszorns",
+          "staminaCost": 14,
+          "target": "all_allies",
+          "buffEffect": {
+            "attackBonus": 0.25,
+            "critBonus": 0.1,
+            "cleansesFear": true,
+            "duration": 3
+          }
+        },
+        {
+          "id": "rs_2",
+          "unlockLevel": 3,
+          "name": "Klagelied der Gefallenen",
+          "staminaCost": 14,
+          "target": "all_enemies",
+          "damageMult": 0.75,
+          "statusEffect": {
+            "type": "zermuerbt",
+            "chance": 0.65,
+            "attackReduction": 0.2,
+            "armorReduction": 2,
+            "duration": 2
+          }
+        },
+        {
+          "id": "rs_3",
+          "unlockLevel": 6,
+          "name": "Trommelwirbel des Eisens",
+          "staminaCost": 16,
+          "target": "all_allies",
+          "staminaRestoreFormula": "12 + (wille * 0.8)",
+          "buffEffect": {
+            "initiativeBonus": 3,
+            "duration": 2
+          }
+        },
+        {
+          "id": "rs_4",
+          "unlockLevel": 10,
+          "name": "Schrei des Alten Reiches",
+          "staminaCost": 22,
+          "target": "all_enemies",
+          "damageMult": 1.45,
+          "statusEffect": {
+            "type": "furcht_betaeubt",
+            "chance": 0.5,
+            "duration": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "kr_wundmeister",
+      "baseClass": "heiler",
+      "name": "Wundmeister",
+      "primaryStat": "wille",
+      "combatStats": {
+        "baseHp": 105,
+        "baseStamina": 60,
+        "baseArmor": 5,
+        "baseCritChance": 0.12,
+        "baseDodgeChance": 0.1,
+        "initiative": 12
+      },
+      "worldAndResourceSynergy": {
+        "id": "syn_wundmeister",
+        "name": "Meister der Vorrats- & Kräuterkunde",
+        "effect": "+1 Nahrung auf den Schutzbund-Zehnt aller befreiten Dörfer im Kronreich; Lager-Rast heilt alle Statuseffekte und +25 % mehr LP."
+      },
+      "skills": [
+        {
+          "id": "wm_1",
+          "unlockLevel": 1,
+          "name": "Anatomischer Stich & Giftkraut",
+          "staminaCost": 10,
+          "damageMult": 1.25,
+          "critBonus": 0.1,
+          "statusEffect": {
+            "type": "gift_blutung",
+            "chance": 0.6,
+            "duration": 3
+          }
+        },
+        {
+          "id": "wm_2",
+          "unlockLevel": 3,
+          "name": "Kräuterverband & Brenneisen",
+          "staminaCost": 12,
+          "healMult": 1.65,
+          "cleansesBleedAndPoison": true
+        },
+        {
+          "id": "wm_3",
+          "unlockLevel": 6,
+          "name": "Stärkungstrank der Nordmark",
+          "staminaCost": 18,
+          "target": "all_allies",
+          "healMult": 1.15,
+          "staminaRestore": 10
+        },
+        {
+          "id": "wm_4",
+          "unlockLevel": 10,
+          "name": "Lebensfunke-Tinktur",
+          "staminaCost": 20,
+          "reviveHpRatio": 0.45,
+          "buffEffect": {
+            "speedBonus": 0.3,
+            "dodgeBonus": 0.2,
+            "duration": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "kr_nachtklinge",
+      "baseClass": "schurke",
+      "name": "Nachtklinge",
+      "primaryStat": "geschick",
+      "combatStats": {
+        "baseHp": 95,
+        "baseStamina": 55,
+        "baseArmor": 4,
+        "baseCritChance": 0.22,
+        "baseDodgeChance": 0.22,
+        "initiative": 16
+      },
+      "worldAndResourceSynergy": {
+        "id": "syn_nachtklinge",
+        "name": "Kundschafter der Schattenwache",
+        "effect": "+25 % Silber aus Truhen und erpressten/geplünderten Vorräten; -1 Holz beim Errichten von Wachtürmen und Signalfeuern."
+      },
+      "skills": [
+        {
+          "id": "nk_1",
+          "unlockLevel": 1,
+          "name": "Sehnenschnitt",
+          "staminaCost": 12,
+          "damageMult": 1.3,
+          "critBonus": 0.15,
+          "statusEffect": {
+            "type": "blutung",
+            "chance": 0.65,
+            "initiativeReduction": 4,
+            "duration": 3
+          }
+        },
+        {
+          "id": "nk_2",
+          "unlockLevel": 3,
+          "name": "Nebelmantel",
+          "staminaCost": 14,
+          "buffEffect": {
+            "dodgeBonus": 0.6,
+            "nextAttackGuaranteedCrit": true,
+            "duration": 2
+          }
+        },
+        {
+          "id": "nk_3",
+          "unlockLevel": 6,
+          "name": "Schattenstich",
+          "staminaCost": 16,
+          "damageMult": 1.55,
+          "armorIgnore": 1.0,
+          "critBonus": 0.15
+        },
+        {
+          "id": "nk_4",
+          "unlockLevel": 10,
+          "name": "Gnadenloser Tanz",
+          "staminaCost": 20,
+          "hits": 3,
+          "damageMultPerHit": 0.85,
+          "bonusVsBleeding": 0.4
+        }
+      ]
+    }
+  ]
+}

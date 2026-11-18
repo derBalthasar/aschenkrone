@@ -1,0 +1,456 @@
+{
+  "version": "1.0.0",
+  "project": "Aschenkrone - Welt Odris",
+  "folk": "Menschen",
+  "faction": "Kronreich",
+  "magicAllowed": false,
+  "specializationRules": {
+    "unlockLevel": 10,
+    "selectionRule": "Spieler wählt bei Erreichen von Stufe 10 dauerhaft 1 von 2 Spezialisierungen pro Klasse.",
+    "stacksWithAct3FactionSpec": true,
+    "signatureSkillRankScaling": {
+      "rank1_lvl10": {
+        "powerMult": 1.0,
+        "staminaDelta": 0,
+        "statusChanceBonus": 0.0
+      },
+      "rank2_lvl15": {
+        "powerMult": 1.25,
+        "staminaDelta": -1,
+        "statusChanceBonus": 0.05
+      },
+      "rank3_lvl20": {
+        "powerMult": 1.5,
+        "staminaDelta": -2,
+        "statusChanceBonus": 0.1
+      },
+      "rank4_lvl25_master": {
+        "powerMult": 1.8,
+        "staminaDelta": -4,
+        "statusChanceBonus": 0.15
+      }
+    }
+  },
+  "classSpecializations": [
+    {
+      "parentClassId": "kr_blutritter",
+      "parentClassName": "Blutritter",
+      "options": [
+        {
+          "id": "spec_kr_koenigsscharfrichter",
+          "name": "Scharfrichter der Alten Krone",
+          "theme": "Ein gnadenloser Zweihand-Henker, der Rüstungen spaltet und mit jedem gefallenen Feind stärker wird.",
+          "statBonuses": {
+            "kraft": 4,
+            "zaehigkeit": 1,
+            "critDamageBonus": 0.3,
+            "lifesteal": 0.15
+          },
+          "passiveEffect": {
+            "name": "Ernte des Richtschwerts",
+            "effect": "Jeder besiegte Gegner stellt 20 % max. LP und 15 Ausdauer wieder her und gewährt +10 % Angriff (stapelbar)."
+          },
+          "worldResourceBonus": {
+            "name": "Kriegsbeute der Nordmark",
+            "effect": "+1 Eisen und +1 Nahrung Beute nach jedem gewonnenen Kampf gegen Banditen, Bestien oder Orks."
+          },
+          "signatureSkill": {
+            "id": "sig_koenigsscharfrichter",
+            "unlockLevel": 10,
+            "name": "Königliches Richturteil",
+            "staminaCost": 24,
+            "damageMult": 2.5,
+            "armorIgnore": 0.5,
+            "critBonus": 0.25,
+            "statusEffect": {
+              "type": "schwere_blutung",
+              "chance": 0.85,
+              "duration": 3,
+              "armorReduction": 3
+            }
+          }
+        },
+        {
+          "id": "spec_kr_ahnenberserker",
+          "name": "Ahnen-Berserker",
+          "theme": "Entfesselt den wilden Kampfrausch der alten Nordgeschlechter – unempfindlich gegen Schmerz und Furcht.",
+          "statBonuses": {
+            "kraft": 3,
+            "geschick": 2,
+            "critChance": 0.12,
+            "maxHp": 35
+          },
+          "passiveEffect": {
+            "name": "Zorn der Blutlinie",
+            "effect": "Unter 50 % LP erhält der Berserker +35 % Schaden, +20 % Ausweichen und ist immun gegen Betäubung & Furcht."
+          },
+          "worldResourceBonus": {
+            "name": "Furchtloser Plünderer",
+            "effect": "+25 % Silber-Ertrag aus Kämpfen und Kopfgeld-Patrouillen."
+          },
+          "signatureSkill": {
+            "id": "sig_ahnenberserker",
+            "unlockLevel": 10,
+            "name": "Blutsturm der Vorväter",
+            "staminaCost": 20,
+            "target": "all_enemies",
+            "selfHpCostRatio": 0.1,
+            "damageMult": 1.85,
+            "critBonus": 0.2,
+            "statusEffect": {
+              "type": "blutung",
+              "chance": 0.8,
+              "duration": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "parentClassId": "kr_bastionaer",
+      "parentClassName": "Eiserner Bastionär",
+      "options": [
+        {
+          "id": "spec_kr_schildwall_general",
+          "name": "Schildwall-Kommandant",
+          "theme": "Ein taktischer Heerführer in schwerem Stahl – schließt die Reihen und macht die gesamte Gruppe unbezwingbar.",
+          "statBonuses": {
+            "zaehigkeit": 3,
+            "kraft": 2,
+            "baseArmor": 5,
+            "maxHp": 40
+          },
+          "passiveEffect": {
+            "name": "Eiserne Phalanx",
+            "effect": "Alle Gruppenmitglieder erhalten +4 Rüstung und erleiden 15 % weniger Schaden."
+          },
+          "worldResourceBonus": {
+            "name": "Reichsfestungs-Meister",
+            "effect": "Senkt Steinkosten beim Befestigen von Grenzstraßen und Stadt-Tiers um -1 Stein (min. 1); +15 Garnisonsverteidigung."
+          },
+          "signatureSkill": {
+            "id": "sig_schildwall_general",
+            "unlockLevel": 10,
+            "name": "Unbrechbarer Schildwall",
+            "staminaCost": 22,
+            "target": "all_allies",
+            "shieldAmountFormula": "zaehigkeit * 3.2",
+            "buffEffect": {
+              "armorBonus": 7,
+              "stunImmune": true,
+              "duration": 2
+            }
+          }
+        },
+        {
+          "id": "spec_kr_eisenbrecher",
+          "name": "Eisenbrecher-Paladin der Krone",
+          "theme": "Zerschmettert gegnerische Schilde und Rüstungen mit einem gewaltigen Zweihand-Kriegshammer.",
+          "statBonuses": {
+            "zaehigkeit": 2,
+            "kraft": 3,
+            "baseArmor": 3,
+            "critDamageBonus": 0.2
+          },
+          "passiveEffect": {
+            "name": "Zermalmende Wucht",
+            "effect": "Jeder Nahkampftreffer senkt die gegnerische Rüstung dauerhaft um -1 und hat 25 % Chance auf Betäubung."
+          },
+          "worldResourceBonus": {
+            "name": "Schmiedegilde von Kronhall",
+            "effect": "Senkt Eisenkosten bei Waffen- und Rüstungs-Upgrades beim Schmied um -1 Eisen (min. 1)."
+          },
+          "signatureSkill": {
+            "id": "sig_eisenbrecher",
+            "unlockLevel": 10,
+            "name": "Erdbeben-Hammerschlag",
+            "staminaCost": 20,
+            "target": "front_row",
+            "damageMult": 1.65,
+            "statusEffect": {
+              "type": "betaeubt_ruestungsbruch",
+              "chance": 0.75,
+              "duration": 1,
+              "armorReduction": 4
+            }
+          }
+        }
+      ]
+    },
+    {
+      "parentClassId": "kr_daemmerungsjaeger",
+      "parentClassName": "Dämmerungsjäger",
+      "options": [
+        {
+          "id": "spec_kr_nordmark_scharfschuetze",
+          "name": "Meisterschütze der Nordmark",
+          "theme": "Durchbohrt selbst schwerste Plattenrüstungen mit schweren Eibenholz-Langbögen auf maximale Distanz.",
+          "statBonuses": {
+            "geschick": 4,
+            "kraft": 1,
+            "critChance": 0.15,
+            "critDamageBonus": 0.35
+          },
+          "passiveEffect": {
+            "name": "Adlerauge von Ulfsborg",
+            "effect": "Fernkampfangriffe ignorieren 50 % der Rüstung und können nicht verfehlt oder geblockt werden."
+          },
+          "worldResourceBonus": {
+            "name": "Wächter der Reichsstraßen",
+            "effect": "Senkt Hinterhalt-Gefahr auf allen Landstraßen und Eispässen um -15 %."
+          },
+          "signatureSkill": {
+            "id": "sig_nordmark_scharfschuetze",
+            "unlockLevel": 10,
+            "name": "Pfeil des Schicksals",
+            "staminaCost": 22,
+            "damageMult": 2.55,
+            "armorIgnore": 0.75,
+            "critBonus": 0.3
+          }
+        },
+        {
+          "id": "spec_kr_wildnis_fallensteller",
+          "name": "Bestienjäger & Fallenmeister",
+          "theme": "Beherrscht das Schlachtfeld mit Bärenfallen, Jagdhunden und tödlichen Pfeilsalven.",
+          "statBonuses": {
+            "geschick": 3,
+            "zaehigkeit": 2,
+            "dodgeChance": 0.12,
+            "initiative": 4
+          },
+          "passiveEffect": {
+            "name": "Meister der Jagd",
+            "effect": "+30 % Schaden gegen Bestien, Wölfe und Monstrositäten; Fallen halten +1 Runde länger."
+          },
+          "worldResourceBonus": {
+            "name": "Jägerbund der Wälder",
+            "effect": "+2 Nahrung und +1 Holz aus Dorf-Zehnten; Lager-Rast verbraucht -1 Nahrung (min. 1)."
+          },
+          "signatureSkill": {
+            "id": "sig_wildnis_fallensteller",
+            "unlockLevel": 10,
+            "name": "Todesnetz der Wildnis",
+            "staminaCost": 20,
+            "target": "all_enemies",
+            "damageMult": 1.45,
+            "statusEffect": {
+              "type": "gefesselt_blutung",
+              "chance": 0.85,
+              "duration": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "parentClassId": "kr_runenskalde",
+      "parentClassName": "Runenskalde",
+      "options": [
+        {
+          "id": "spec_kr_kriegsherold",
+          "name": "Kriegsherold des Alten Reiches",
+          "theme": "Seine uralten Schlachtenhörner und Heldengesänge entfesseln übermenschliche Kraft in der gesamten Gruppe.",
+          "statBonuses": {
+            "wille": 4,
+            "kraft": 1,
+            "maxStamina": 20,
+            "initiative": 3
+          },
+          "passiveEffect": {
+            "name": "Unsterbliche Saga",
+            "effect": "Alle Gruppenmitglieder erhalten +15 % Angriff, +10 % Krit-Chance und regenerieren +6 Ausdauer pro Runde."
+          },
+          "worldResourceBonus": {
+            "name": "Herold des Großen Things",
+            "effect": "+5 Bonus-Ruf bei allen Quest-Abschlüssen und Bauprojekten; -15 % Händlerpreise in allen Städten."
+          },
+          "signatureSkill": {
+            "id": "sig_kriegsherold",
+            "unlockLevel": 10,
+            "name": "Ruf der Alten Könige",
+            "staminaCost": 22,
+            "target": "all_allies",
+            "staminaRestore": 20,
+            "buffEffect": {
+              "attackBonus": 0.35,
+              "critBonus": 0.2,
+              "initiativeBonus": 5,
+              "duration": 3
+            }
+          }
+        },
+        {
+          "id": "spec_kr_totenklagerufer",
+          "name": "Klagrufer der Gefallenen",
+          "theme": "Bricht den Kampfeswillen der Gegner mit schaurigen Knochentrommeln und Fluchgesängen.",
+          "statBonuses": {
+            "wille": 3,
+            "zaehigkeit": 2,
+            "baseArmor": 3,
+            "maxHp": 25
+          },
+          "passiveEffect": {
+            "name": "Schatten der Walstatt",
+            "effect": "Alle Gegner starten den Kampf zermürbt (-15 % Angriff und -2 Rüstung)."
+          },
+          "worldResourceBonus": {
+            "name": "Hüter der Ahnensteine",
+            "effect": "+20 % EP aus allen Kämpfen und Ascherissen; +1 Runensplitter bei Boss-Siegen."
+          },
+          "signatureSkill": {
+            "id": "sig_totenklagerufer",
+            "unlockLevel": 10,
+            "name": "Hymne des Untergangs",
+            "staminaCost": 20,
+            "target": "all_enemies",
+            "damageMult": 1.6,
+            "statusEffect": {
+              "type": "furcht_betaeubt",
+              "chance": 0.65,
+              "attackReduction": 0.25,
+              "duration": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "parentClassId": "kr_wundmeister",
+      "parentClassName": "Wundmeister",
+      "options": [
+        {
+          "id": "spec_kr_kraeuterweiser",
+          "name": "Kräuterweiser der Nordlande",
+          "theme": "Meister der alten Heilessenzen – schließt selbst tödliche Wunden mit seltenen nordischen Tinkturen.",
+          "statBonuses": {
+            "wille": 4,
+            "zaehigkeit": 1,
+            "maxStamina": 20,
+            "maxHp": 25
+          },
+          "passiveEffect": {
+            "name": "Essenz des Lebensbaums",
+            "effect": "+30 % Heilwirkung; jede Heilung gewährt dem Ziel zusätzlich 2 Runden lang Regeneration."
+          },
+          "worldResourceBonus": {
+            "name": "Kornkammer-Verwalter",
+            "effect": "+2 Nahrung im Schutzbund-Zehnt aller befreiten Dörfer; Gruppe ist immun gegen Hunger-Mali auf Stufe 1."
+          },
+          "signatureSkill": {
+            "id": "sig_kraeuterweiser",
+            "unlockLevel": 10,
+            "name": "Großer Heiltrank der Ahnen",
+            "staminaCost": 22,
+            "target": "all_allies",
+            "healMult": 1.75,
+            "staminaRestore": 15,
+            "cleansesAllDebuffs": true
+          }
+        },
+        {
+          "id": "spec_kr_knochenbrecher_feldscher",
+          "name": "Schlachtfeld-Chirurg",
+          "theme": "Verbindet anatomisches Wissen mit gnadenloser Präzision – lähmt Feinde und peitscht Gefährten hoch.",
+          "statBonuses": {
+            "wille": 3,
+            "geschick": 2,
+            "critChance": 0.12,
+            "initiative": 3
+          },
+          "passiveEffect": {
+            "name": "Anatomische Schwachstelle",
+            "effect": "Angriffe des Chirurgen ignorieren 40 % Rüstung und senken die gegnerische Heilung um 75 %."
+          },
+          "worldResourceBonus": {
+            "name": "Feldscher-Logistik",
+            "effect": "Verhindert Verletzungs-Mali nach verlorenen oder knappen Kämpfen; +15 % Silber-Ersparnis bei Händlern."
+          },
+          "signatureSkill": {
+            "id": "sig_knochenbrecher_feldscher",
+            "unlockLevel": 10,
+            "name": "Tödlicher Nervenschnitt",
+            "staminaCost": 20,
+            "damageMult": 1.95,
+            "critBonus": 0.25,
+            "statusEffect": {
+              "type": "schwere_blutung_laehmung",
+              "chance": 0.85,
+              "duration": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "parentClassId": "kr_nachtklinge",
+      "parentClassName": "Nachtklinge",
+      "options": [
+        {
+          "id": "spec_kr_schattenwolf",
+          "name": "Schattenwolf der Krone",
+          "theme": "Ein blitzschneller Duellant der königlichen Garde – tanzt durch gegnerische Reihen und lässt Feinde verbluten.",
+          "statBonuses": {
+            "geschick": 4,
+            "kraft": 1,
+            "critChance": 0.15,
+            "critDamageBonus": 0.35
+          },
+          "passiveEffect": {
+            "name": "Raubtier-Instinkt",
+            "effect": "+30 % Schaden gegen blutende Ziele; kritische Treffer stellen 8 Ausdauer wieder her."
+          },
+          "worldResourceBonus": {
+            "name": "Kundschafter des Königs",
+            "effect": "-1 Holz beim Bau von Wachtürmen und Signalfeuern; +25 % Silber aus Truhen und Beute."
+          },
+          "signatureSkill": {
+            "id": "sig_schattenwolf",
+            "unlockLevel": 10,
+            "name": "Reißzahn-Wirbel",
+            "staminaCost": 22,
+            "hits": 4,
+            "damageMultPerHit": 0.8,
+            "critBonus": 0.2,
+            "statusEffect": {
+              "type": "schwere_blutung",
+              "chance": 0.8,
+              "duration": 3
+            }
+          }
+        },
+        {
+          "id": "spec_kr_nebelwaechter",
+          "name": "Nebelwächter",
+          "theme": "Meister der Täuschung und Konter-Klingen – nahezu unmöglich zu treffen.",
+          "statBonuses": {
+            "geschick": 3,
+            "wille": 2,
+            "dodgeChance": 0.18,
+            "initiative": 4
+          },
+          "passiveEffect": {
+            "name": "Phantom im Schnee",
+            "effect": "Jedes erfolgreiche Ausweichen löst einen kostenlosen Konterangriff (100 % Waffenschaden) aus."
+          },
+          "worldResourceBonus": {
+            "name": "Lautloser Pfadfinder",
+            "effect": "Umgeht alle Wegzölle; ermöglicht sichere Flucht aus gefährlichen Hinterhalten ohne Rufverlust."
+          },
+          "signatureSkill": {
+            "id": "sig_nebelwaechter",
+            "unlockLevel": 10,
+            "name": "Klingensturm aus dem Nebel",
+            "staminaCost": 20,
+            "target": "all_enemies",
+            "damageMult": 1.4,
+            "buffEffect": {
+              "selfDodgeBonus": 0.6,
+              "duration": 2
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -325,7 +325,7 @@
     const location = world.destinations[current]?.name;
     const far = scene.fern;
     el("map-status").textContent = state.combat ? "Im Kampf kannst du die Karte ansehen. Reiseoptionen öffnen sich nach der Begegnung." :
-      node ? "Standort: " + node.name + " · Wähle einen Nachbarort auf der Reisekarte oder unter „D · Aufbruch“." :
+      node ? "Standort: " + node.name + " · Wähle einen Nachbarort auf der Reisekarte oder unter „" + (rules.lage(state) ? "E" : "D") + " · Aufbruch“." :
       location ? "Standort: " + location + (travels.size ? " · Wähle ein Reiseziel, um die Route zu sehen." : " · Folge den Optionen in der Szene.") :
       far ? "Standort: " + far + " · Folge den Optionen in der Szene." :
       "Deine Reise ist beendet.";
@@ -1780,7 +1780,10 @@
       [status, entries.filter(entry => entry.status === status).length]));
     el("questlog-summary").textContent = "Questlog · " + counts.active + " offen";
     el("quest-clock").textContent = "Spielzug " + (state.questClock ?? 0);
-    el("turn-badge").textContent = "Spielzug " + (state.questClock ?? 0);
+    // Patch 2.5.0: Bei den Menschen zählt die Etappe, mit Countdown bis Zehnt und Überfallprüfung.
+    const etappe = rules.lage(state);
+    el("turn-badge").textContent = etappe ? "Etappe " + etappe.etappen + " · Zehnt in " + etappe.naechsterZehnt + " · Überfall in " + etappe.naechsterUeberfall
+      : "Spielzug " + (state.questClock ?? 0);
     const filters = el("quest-filters");
     filters.replaceChildren();
     for (const [id, title] of [["active", "Offen"], ["done", "Erfüllt"], ["failed", "Gescheitert"], ["all", "Alle"]]) {
@@ -2304,7 +2307,31 @@
 
   // ---- Stadt-Hub (Technische Spezifikation, Abschnitt 2): Statusleiste, Krise und Aufhänger, vier Bereiche ----
   const welt = { tab: "aufbruch" };
-  const weltTabs = [["hofstaat", "A · Hofstaat"], ["lager", "B · Rast und Lager"], ["held", "C · Held"], ["aufbruch", "D · Aufbruch"]];
+  const weltTabsAlt = [["hofstaat", "A · Hofstaat"], ["lager", "B · Rast und Lager"], ["held", "C · Held"], ["aufbruch", "D · Aufbruch"]];
+  // Patch 2.5.0: Stadt-Hub der Menschen mit fünf Bereichen und Tasten A bis E.
+  const weltTabsMenschen = () => [["hofstaat", "A · Hofstaat & Aushang"], ["kontor", "B · Kontor, Händler & Schmiede"],
+    ["lager", "C · Rast und Lager (" + (rules.rastKosten(state) ? rules.rastKosten(state) + " Nahrung" : "frei") + ")"],
+    ["held", "D · Held, Gefährten & Relikt"], ["aufbruch", "E · Aufbruch (Reisekarte)"]];
+  const weltTabsJetzt = () => rules.lage(state) ? weltTabsMenschen() : weltTabsAlt;
+
+  // Tasten A bis E für die Bereiche des Stadt-Hubs und M für die Strategiekarte (Patch 2.5.0).
+  document.addEventListener("keydown", event => {
+    if (!state || state.scene !== "weltknoten" || !rules.lage(state) || event.altKey || event.ctrlKey || event.metaKey) return;
+    if (event.target.closest?.("input, textarea, select, dialog[open]") || document.querySelector("dialog[open]")) return;
+    const taste = event.key.toLowerCase();
+    if (taste === "m") {
+      welt.modus = welt.modus === "strategie" ? "abenteuer" : "strategie";
+      renderScene();
+      return;
+    }
+    const index = ["a", "b", "c", "d", "e"].indexOf(taste);
+    const tabs = weltTabsMenschen();
+    if (index < 0 || !tabs[index]) return;
+    welt.modus = "abenteuer";
+    welt.tab = tabs[index][0];
+    renderScene();
+    el("welt-tab-" + welt.tab)?.focus();
+  });
 
   function weltMeter(name, wert, max, schwelle = null) {
     const row = element("div");
@@ -2325,7 +2352,8 @@
     const box = element("div");
     box.className = "welt-meters";
     for (const leiste of rules.weltLeisten(state)) box.append(weltMeter(leiste.name, leiste.wert, 100, leiste.schwelle));
-    box.append(weltMeter(rules.resourceName(state) + " (Vorrat)", state.ressource, rules.vorratMax));
+    // Patch 2.5.0: Bei den Menschen stehen Nahrung und Moral oben in der Seitenleiste, hier nicht mehr.
+    if (!rules.lage(state)) box.append(weltMeter(rules.resourceName(state) + " (Vorrat)", state.ressource, rules.vorratMax));
     return box;
   }
 
@@ -2337,7 +2365,11 @@
     if (wert.welke >= 50) lines.push("Welke " + wert.welke + ": Der Weltenbaum wirft sein Laub.");
     if (wert.untote >= 50) lines.push("Untoten-Bedrohung " + wert.untote + ": Der Kult breitet sich aus.");
     if (wert.orks >= 55) lines.push("Ork-Bedrohung " + wert.orks + ": Raubzüge an den Küsten.");
-    if (state.ressource <= 5) lines.push(rules.resourceName(state) + " fast aufgebraucht: Bei 0 zerfällt deine Fraktion. Hol Ertrag aus deinen Dörfern.");
+    const lage = rules.lage(state);
+    if (lage?.entkraeftet) lines.push("Entkräftet: Jede Etappe ohne Nahrung kostet 15 Moral. Bei Nahrung 0 und Moral 0 zerfällt die Gruppe. Hol Nahrung aus dem Kontor oder kaufe welche.");
+    else if (lage && state.ressource <= 5) lines.push("Nahrung fast aufgebraucht: Ohne Nahrung wird die Gruppe entkräftet und verliert Moral. Hol Nahrung aus dem Kontor.");
+    else if (state.ressource <= 5) lines.push(rules.resourceName(state) + " fast aufgebraucht: Bei 0 zerfällt deine Fraktion. Hol Ertrag aus deinen Dörfern.");
+    if (lage?.geaechtet) lines.push("Geächtet bei deiner eigenen Fraktion: kein Handel im Kontor, kein Zehnt, Torzoll an den Stadttoren.");
     return lines;
   }
 
@@ -2346,6 +2378,22 @@
     const fraktion = klassen.fraktionen[ort.fraktion];
     el("location").textContent = knoten.typNamen[ort.typ] + " · " + fraktion.name;
     el("scene-title").textContent = ort.name;
+    // Patch 2.5.0: Umschalter zwischen Abenteuer-Ansicht und Reichs- und Strategiekarte (Taste M).
+    if (rules.lage(state)) {
+      const modus = element("div");
+      modus.className = "welt-modus";
+      modus.setAttribute("role", "group");
+      modus.setAttribute("aria-label", "Ansicht der Weltreise");
+      for (const [id, label] of [["abenteuer", "Abenteuer-Ansicht"], ["strategie", "Reichs- und Strategiekarte (M)"]]) {
+        const knopf = button(modus, label, () => { welt.modus = id; renderScene(); });
+        knopf.setAttribute("aria-pressed", String((welt.modus ?? "abenteuer") === id));
+      }
+      content.append(modus);
+      if (welt.modus === "strategie") {
+        content.append(weltStrategie());
+        return;
+      }
+    }
 
     // Statusleiste
     const status = element("section");
@@ -2354,14 +2402,32 @@
     const facts = element("dl");
     facts.className = "welt-facts";
     for (const [label, value] of [["Ort", ort.name], ["Typ", knoten.typNamen[ort.typ] + (ort.hatHafen && ort.typ !== "hafenstadt" ? " mit Hafen" : "")],
-      ["Fraktion", fraktion.name + (ort.fraktion === state.faction ? " · eigene" : (state.vertraege ?? []).includes(ort.fraktion) ? " · Vertragspartner" : "")],
+      ["Fraktion", rules.lage(state) && rules.systeme.istMensch(ort.fraktion)
+        ? fraktion.name + " · Ruf " + rules.systeme.ruf(state, ort.fraktion) + " (" + rules.systeme.rufRang(rules.systeme.ruf(state, ort.fraktion)).name + ")"
+        : fraktion.name + (ort.fraktion === state.faction ? " · eigene" : (state.vertraege ?? []).includes(ort.fraktion) ? " · Vertragspartner" : "")],
       ["Zeit", "Herbst 612 n. E. · Runde " + state.runde], ["Silber", String(state.silver)],
+      ...(rules.lage(state) ? [["Dörfer", rules.lage(state).befreit + " befreit · Zehnt in " + rules.lage(state).naechsterZehnt + " Etappen"]] : []),
       ["Marken", state.marks.length ? String(state.marks.length) : "keine"]]) {
       const item = element("div");
       item.append(element("dt", label), element("dd", value));
       facts.append(item);
     }
-    status.append(facts, weltLeistenBlock());
+    status.append(facts);
+    const lageJetzt = rules.lage(state);
+    if (lageJetzt) {
+      // Rohstoffleiste: Silber, Nahrung im Gepäck, dazu Holz, Eisen, Stein und Runensplitter im Kontor der eigenen Fraktion.
+      const strip = element("ul");
+      strip.className = "welt-rohstoffe";
+      strip.setAttribute("aria-label", "Silber und Rohstoffe");
+      for (const [name, wert] of [["Silber", state.silver], ["Nahrung", state.ressource + " (+" + lageJetzt.kontor.nahrung + " im Kontor)"],
+        ["Holz", lageJetzt.kontor.holz], ["Eisen", lageJetzt.kontor.eisen], ["Stein", lageJetzt.kontor.stein], ["Runensplitter", lageJetzt.kontor.runensplitter]]) {
+        const item = element("li");
+        item.append(element("span", name), element("strong", String(wert)));
+        strip.append(item);
+      }
+      status.append(strip);
+    }
+    status.append(weltLeistenBlock());
     if (state.marks.length) {
       const marks = element("details");
       marks.className = "welt-marks";
@@ -2403,9 +2469,11 @@
       if (rules.handlungHier(state)) button(krise, "Zur Handlung zurückkehren", () => update(rules.zurHandlung(state)), { story: true });
     }
     content.append(krise);
+    const tat = weltTat();
+    if (tat) content.append(tat);
     const offen = weltAuftraege();
     if (offen) content.append(offen);
-    const aushang = weltAushang(ort);
+    const aushang = rules.lage(state) ? null : weltAushang(ort);
     if (aushang) content.append(aushang);
 
     // Bereiche A bis D
@@ -2417,8 +2485,11 @@
     panel.className = "welt-panel";
     panel.setAttribute("role", "tabpanel");
     panel.id = "welt-panel";
+    const weltTabs = weltTabsJetzt();
+    if (!weltTabs.some(([id]) => id === welt.tab)) welt.tab = "aufbruch";
     weltTabs.forEach(([id, label], index) => {
       const tab = element("button", label);
+      if (id === "aufbruch" && rules.lage(state)) tab.classList.add("welt-tab-primary");
       tab.type = "button";
       tab.id = "welt-tab-" + id;
       tab.setAttribute("role", "tab");
@@ -2437,7 +2508,7 @@
       tabs.append(tab);
     });
     panel.setAttribute("aria-labelledby", "welt-tab-" + welt.tab);
-    ({ hofstaat: weltHofstaat, lager: weltLager, held: weltHeld, aufbruch: weltAufbruch })[welt.tab](panel, ort);
+    ({ hofstaat: weltHofstaat, kontor: weltKontorTab, lager: weltLager, held: weltHeld, aufbruch: weltAufbruch })[welt.tab](panel, ort);
     content.append(tabs, panel);
   }
 
@@ -2595,7 +2666,175 @@
     return box;
   }
 
+  // Ausgang eines Auftrags der Menschen: gute Tat, Söldner-Weg, schlechte Tat (Ruf-Datei 2.0).
+  function weltTat() {
+    const wahl = rules.taten(state);
+    if (!wahl.length) return null;
+    const box = element("section");
+    box.className = "welt-krise welt-tat";
+    box.append(element("h3", "Wie endest du den Auftrag?"));
+    for (const t of wahl) {
+      const folgen = ["Ruf " + (t.ruf > 0 ? "+" : "") + t.ruf, t.silber ? "+" + t.silber + " Silber" : "",
+        t.nahrung ? "+" + t.nahrung + " Nahrung" : "", t.befreit ? "befreit die Dörfer der Stadt" : ""].filter(Boolean).join(" · ");
+      button(box, t.name + " · " + folgen, () => update(rules.tatWaehlen(state, t.id)), { story: true });
+      box.append(element("p", t.text));
+    }
+    return box;
+  }
+
+  // Kontor der Menschen: gemeinsames Rohstofflager aller Städte einer Fraktion.
+  function weltKontor(panel) {
+    const info = rules.kontorInfo(state);
+    if (!info) return;
+    panel.append(element("h3", "Kontor · " + info.name + " · Rang " + info.rang.name + " (Ruf " + info.ruf + ")"));
+    panel.append(element("p", "Das Kontor teilen alle Städte von " + info.name + ". Preise: Kauf ×" + info.rang.kauf + ", Verkauf ×" + info.rang.verkauf +
+      (info.rang.handel ? "." : ". Geächtet: kein Handel, Abheben bleibt erlaubt.")));
+    const list = element("div");
+    list.className = "trade-list";
+    for (const r of info.rohstoffe) {
+      const zeile = element("div");
+      zeile.className = "actions";
+      list.append(element("p", r.name + ": " + r.menge + " im Kontor"), zeile);
+      button(zeile, "1 kaufen · " + r.kauf + " Silber", () => update(rules.kontorHandel(state, r.id, 1, true)), { disabled: Boolean(r.kaufGrund) });
+      button(zeile, "10 kaufen · " + r.kauf10 + " Silber", () => update(rules.kontorHandel(state, r.id, 10, true)), { disabled: Boolean(r.kauf10Grund) });
+      button(zeile, "1 verkaufen · +" + r.verkauf + " Silber", () => update(rules.kontorHandel(state, r.id, 1, false)), { disabled: Boolean(r.verkaufGrund) });
+    }
+    panel.append(list);
+    const nahrung = element("div");
+    nahrung.className = "actions";
+    nahrung.append(element("p", "Nahrung im Gepäck: " + state.ressource + " / " + rules.vorratMax + "."));
+    button(nahrung, "5 Nahrung aus dem Kontor nehmen" + (info.abhebenGrund ? " · " + info.abhebenGrund : ""),
+      () => update(rules.nahrungTragen(state, 5, false)), { disabled: Boolean(info.abhebenGrund) });
+    button(nahrung, "5 Nahrung ins Kontor legen" + (info.einlagernGrund ? " · " + info.einlagernGrund : ""),
+      () => update(rules.nahrungTragen(state, 5, true)), { disabled: Boolean(info.einlagernGrund) });
+    panel.append(nahrung);
+    panel.append(element("h3", rules.systeme.daten.kriegskasse.titel));
+    panel.append(element("p", Object.entries(info.kasseBedarf).map(([r, n]) => rules.systeme.daten.rohstoffe[r].name + " " + info.kasse[r] + " / " + n).join(" · ") +
+      (info.kasseVoll ? ". Die Armada kann auslaufen." : ". Die gefüllte Kasse bringt die Armada in Akt 5 über das Meer. Jede Spende +2 Ruf je Einheit.")));
+    const kasse = element("div");
+    kasse.className = "actions";
+    for (const sp of info.spenden) {
+      button(kasse, "5 " + rules.systeme.daten.rohstoffe[sp.id].name + " spenden" + (sp.grund ? " · " + sp.grund : ""),
+        () => update(rules.spenden(state, sp.id, 5)), { disabled: Boolean(sp.grund) });
+    }
+    panel.append(kasse);
+  }
+
+  // Ausrüster, Schmiede und Feldhandwerk der Menschen (Ökonomie-Datei, 18. 11. 2026).
+  function weltAusruester(panel) {
+    const markt = rules.ausruester(state);
+    if (!markt) return;
+    const box = element("details");
+    box.className = "trade-list";
+    box.append(element("summary", "Ausrüster · " + state.silver + " Silber" + (markt.handel ? "" : " · geächtet: kein Handel")));
+    const kaufen = element("div");
+    kaufen.className = "actions";
+    for (const w of markt.kaufen) {
+      button(kaufen, w.name + (w.tier ? " (Stufe " + w.tier + ")" : "") + " · " + w.preis + " Silber" + (w.passt ? "" : " · nicht für deine Klasse") +
+        (w.grund ? " · " + w.grund : ""), () => update(rules.ausruesterHandel(state, w.id, true)), { disabled: Boolean(w.grund) });
+    }
+    box.append(kaufen);
+    if (markt.verkaufen.length) {
+      box.append(element("h4", "Verkaufen"));
+      const verkaufen = element("div");
+      verkaufen.className = "actions";
+      for (const w of markt.verkaufen) {
+        button(verkaufen, w.name + " (" + w.anzahl + ") · +" + w.preis + " Silber" + (w.grund ? " · " + w.grund : ""),
+          () => update(rules.ausruesterHandel(state, w.id, false)), { disabled: Boolean(w.grund) });
+      }
+      box.append(verkaufen);
+    }
+    panel.append(box);
+  }
+  function weltSchmiede(panel) {
+    const info = rules.schmiedeInfo(state);
+    if (!info) return;
+    const box = element("details");
+    box.append(element("summary", "Schmiede · " + (info.stufe ? "Aufwerten bis +" + info.stufe : "keine Schmiede in dieser Stadt")));
+    const liste = element("div");
+    liste.className = "actions";
+    for (const t of info.teile) {
+      button(liste, t.name + (t.stufe ? " +" + t.stufe : "") + (t.kosten ? " → +" + t.ziel + " (+" + t.kosten.bonus + " %) · " + t.kosten.silber + " Silber, " +
+        t.kosten.material : "") + (t.grund ? " · " + t.grund : ""), () => update(rules.schmieden(state, t.id)), { disabled: Boolean(t.grund) });
+    }
+    if (!info.teile.length) liste.append(element("p", "Keine Ausrüstung im Rucksack."));
+    box.append(liste);
+    panel.append(box);
+  }
+  function weltHandwerk(panel) {
+    const rezepte = rules.handwerkListe(state);
+    if (!rezepte.length) return;
+    const box = element("details");
+    box.append(element("summary", "Feldhandwerk"));
+    const liste = element("div");
+    liste.className = "actions";
+    for (const r of rezepte) {
+      button(liste, r.name + " · " + r.anzahl + " × " + r.ergebnis + " aus " + r.zutaten + (r.grund ? " · " + r.grund : ""),
+        () => update(rules.handwerk(state, r.id)), { disabled: Boolean(r.grund) });
+    }
+    box.append(liste);
+    panel.append(box);
+  }
+
+  // Reichs- und Strategiekarte: Ruf, Rang und Kontor der drei Menschen-Fraktionen, befreite Dörfer, Kriegskasse.
+  function weltStrategie() {
+    const S = rules.systeme;
+    const box = element("section");
+    box.className = "welt-strategie";
+    const lage = rules.lage(state);
+    box.append(element("h3", "Reich und Strategie"), element("p", "Etappe " + lage.etappen + " · Zehnt in " + lage.naechsterZehnt +
+      " Etappen · Überfallprüfung in " + lage.naechsterUeberfall + " Etappen · Moral " + lage.moral + " (" + lage.moralStufe.name + ")."));
+    const tabelle = element("table");
+    const kopf = element("tr");
+    for (const t of ["Fraktion", "Ruf", "Rang", "Dörfer befreit", "Nahrung", "Holz", "Eisen", "Stein", "Runensplitter"]) kopf.append(element("th", t));
+    tabelle.append(kopf);
+    for (const f of S.MENSCHEN) {
+      const zeile = element("tr");
+      const k = S.kontor({ ...state, kontor: structuredClone(state.kontor ?? {}) }, f);
+      const doerfer = Object.values(S.daten.doerfer).filter(d => d.fraktion === f).length;
+      for (const wert of [klassen.fraktionen[f].name + (f === state.faction ? " (eigene)" : ""), S.ruf(state, f), S.rufRang(S.ruf(state, f)).name,
+        S.befreiteDoerfer(state, f).length + " / " + doerfer, k.nahrung, k.holz, k.eisen, k.stein, k.runensplitter]) zeile.append(element("td", String(wert)));
+      tabelle.append(zeile);
+    }
+    const rahmen = element("div");
+    rahmen.className = "welt-tabelle";
+    rahmen.append(tabelle);
+    box.append(rahmen);
+    const kasse = S.kasse(state);
+    box.append(element("h4", S.daten.kriegskasse.titel), element("p", Object.entries(S.daten.kriegskasse.bedarf)
+      .map(([r, n]) => S.daten.rohstoffe[r].name.replace(/ \(.*\)/, "") + " " + kasse[r] + " / " + n).join(" · ") +
+      (S.kasseVoll(state) ? ". Die Armada kann auslaufen." : ". Spenden öffnen in Akt " + S.daten.kriegskasse.abAkt + ".")));
+    const befreit = state.befreit ?? [];
+    box.append(element("h4", "Befreite Dörfer"), element("p", befreit.length ? befreit.map(id => knoten.get(id).name).join(", ")
+      : "Noch keine. Der erste Auftrag (q01) einer Stadt befreit mit guter Tat oder Söldner-Weg ihre Dörfer."));
+    return box;
+  }
+
+  // Bereich B der Menschen: Kontor, Ausrüster, Händler und Schmiede.
+  function weltKontorTab(panel) {
+    if (!rules.kontorInfo(state)) {
+      panel.append(element("h3", "Kontor, Händler & Schmiede"),
+        element("p", "Kontor, Ausrüster und Schmiede gibt es in den Städten der Menschen. Dörfer haben keins."));
+      return;
+    }
+    weltKontor(panel);
+    weltAusruester(panel);
+    if (rules.handelOffen(state)) {
+      const alt = element("details");
+      alt.append(element("summary", "Händler · Vorräte und Trophäen"), handelBlock());
+      panel.append(alt);
+    }
+    weltSchmiede(panel);
+  }
+
   function weltHofstaat(panel, ort) {
+    if (rules.lage(state)) {
+      const aushang = weltAushang(ort);
+      if (aushang) {
+        aushang.open = true;
+        panel.append(aushang);
+      }
+    }
     panel.append(element("h3", "Hofstaat und Diplomatie"));
     const vertraege = (state.vertraege ?? []).map(id => klassen.fraktionen[id].name);
     panel.append(element("p", "Handelsverträge: " + (vertraege.length ? vertraege.join(", ") : "noch keine") +
@@ -2627,7 +2866,8 @@
       const supply = world.supplies[id];
       const effect = gear?.power ? gear.power + " Grundschaden" : gear?.armor ? gear.armor + " Rüstung" :
         gear?.magic ? "+" + gear.magic + " Glutschaden" : gear?.travel ? "+" + gear.travel + " auf List unterwegs" :
-        supply?.heal ? "+" + supply.heal + " LP" : "+" + supply.ember + " Glut";
+        supply?.heal ? "+" + supply.heal + " LP" : supply?.ember ? "+" + supply.ember + " Glut" :
+        supply?.revive ? "holt Gefallene mit " + supply.revive + " % LP zurück" : supply?.cure ? "heilt " + world.ailments[supply.cure].name : "";
       button(stock, world.items[id] + " · " + effect + " · " + price + " Silber", () => update(rules.trade(state, id, true)),
         { disabled: price > state.silver || state.inventory.length >= rules.itemCap - 20 });
     }
@@ -2644,9 +2884,16 @@
     const rastGrund = rules.rastGrund(state);
     panel.append(element("p", "LP " + state.health + " / " + rules.healthLimit(state) + " · Glut " + state.ember + " / " + rules.emberLimit(state) +
       ". Die Rast stellt die ganze Gruppe wieder her."));
-    button(panel, "Rasten · 1 " + rules.resourceName(state) + (rastGrund ? " · " + rastGrund : ""), () => update(rules.rast(state)),
+    const rastKosten = rules.rastKosten(state);
+    button(panel, "Rasten · " + (rastKosten ? rastKosten + " " + rules.resourceName(state) : "frei") + (rastGrund ? " · " + rastGrund : ""), () => update(rules.rast(state)),
       { disabled: Boolean(rastGrund) });
-    if (ort.typ === "dorf") {
+    if (!rules.lage(state)) weltKontor(panel);
+    if (ort.typ === "dorf" && rules.lage(state)) {
+      const frei = (state.befreit ?? []).includes(ort.id);
+      panel.append(element("h3", "Dorf und Zehnt"), element("p", ort.name + " liefert " + ort.ertrag + " an " + knoten.get(ort.stadt).name + ". " +
+        (frei ? "Das Dorf ist befreit und liefert ab Ruf 20 alle " + rules.systeme.daten.zehnt.etappen + " Etappen seinen Zehnt ins Kontor."
+          : "Befreie es über den ersten Auftrag (q01) von " + knoten.get(ort.stadt).name + " mit guter Tat oder Söldner-Weg.")));
+    } else if (ort.typ === "dorf") {
       panel.append(element("h3", "Ertrag des Dorfes"));
       panel.append(element("p", ort.name + " liefert " + ort.ertrag + " an " + knoten.get(ort.stadt).name + "."));
       const grund = rules.ertragGrund(state);
@@ -2655,7 +2902,8 @@
     } else {
       const doerfer = knoten.doerfer(ort.id).map(id => knoten.get(id));
       panel.append(element("h3", "Dörfer"), element("p", doerfer.map(dorf => dorf.name + " (" + dorf.ertrag + ")").join(", ") +
-        (ort.fraktion === state.faction ? ". Dörfer deiner Fraktion liefern alle " + rules.ertragPause + " Runden +" + rules.ertragMenge + " " +
+        (rules.lage(state) ? ". Befreite Dörfer liefern ab Ruf 20 alle " + rules.systeme.daten.zehnt.etappen + " Etappen ihren Zehnt ins Kontor." :
+        ort.fraktion === state.faction ? ". Dörfer deiner Fraktion liefern alle " + rules.ertragPause + " Runden +" + rules.ertragMenge + " " +
           rules.resourceName(state) + "." : ".")));
     }
     panel.append(element("h3", "Zentrallager und Rucksack"));
@@ -2663,9 +2911,13 @@
     panel.append(element("p", lager ? lager + ". Hier kannst du Gegenstände einlagern und den Rucksack ausbauen."
       : "Kein Zentrallager. Es steht in allen Hauptstädten und in den Städten deiner Fraktion."));
     button(panel, lager ? "Zentrallager und Rucksack öffnen" : "Rucksack öffnen", () => openHub());
-    if (rules.handelOffen(state)) panel.append(handelBlock());
-    panel.append(element("h3", "Schmied und Heiler"));
-    panel.append(element("p", "Handwerk aus Trophäen und Flora folgt mit der Flora-und-Fauna-Ausarbeitung für alle Gebiete."));
+    if (rules.lage(state)) {
+      weltHandwerk(panel);
+    } else {
+      if (rules.handelOffen(state)) panel.append(handelBlock());
+      panel.append(element("h3", "Schmied und Heiler"));
+      panel.append(element("p", "Handwerk aus Trophäen und Flora folgt mit der Flora-und-Fauna-Ausarbeitung für alle Gebiete."));
+    }
   }
 
   function weltHeld(panel) {
@@ -2682,8 +2934,10 @@
 
   function weltAufbruch(panel, ort) {
     panel.append(element("h3", "Aufbruch"));
-    panel.append(element("p", "Jede Reise ist eine Runde: Die Weltleisten ändern sich, und unterwegs würfelt das Land eine Begegnung aus. " +
-      "Jeder Weg hat seine eigene Gefahr für einen Hinterhalt. Die Reisekarte zeigt alle Wege auf einen Blick."));
+    panel.append(element("p", rules.lage(state)
+      ? "Jede Reise-Etappe verbraucht Nahrung (1 im Kernland, 2 im Grenzland/Pass) und kann eine Begegnung auslösen. Alle 6 Etappen wird der Kontor-Zehnt gutgeschrieben."
+      : "Jede Reise ist eine Runde: Die Weltleisten ändern sich, und unterwegs würfelt das Land eine Begegnung aus. " +
+        "Jeder Weg hat seine eigene Gefahr für einen Hinterhalt. Die Reisekarte zeigt alle Wege auf einen Blick."));
     button(panel, "Reisekarte öffnen", openReisekarte);
     const list = element("ul");
     list.className = "welt-ziele";
@@ -2837,14 +3091,29 @@
   // Kopf der Seitenleiste: Balken für Lebenspunkte, Ausdauer, Mana und Glut, darunter Vorrat und Gleichgewicht.
   function renderVitals() {
     const values = rules.kampfwerte(state);
+    const lage = rules.lage(state);
+    // Patch 2.5.0: Mana nur für Pyromant, Kleriker der Flamme, Glutpaladin und Inquisitor, Glut bei den Menschen nur im Orden.
+    const zeigeMana = values.manaMax && (!lage || lage.klasse?.mana);
+    const zeigeGlut = !lage || state.faction === "orden";
     const bars = [
       ["hp", "Lebenspunkte", state.health, rules.healthLimit(state)],
       ["ausdauer", "Ausdauer", values.ausdauer, values.ausdauerMax],
-      ...(values.manaMax ? [["mana", "Mana", values.mana, values.manaMax]] : []),
-      ["glut", "Glut", state.ember, rules.emberLimit(state)],
+      ...(zeigeMana ? [["mana", "Mana", values.mana, values.manaMax]] : []),
+      ...(zeigeGlut ? [["glut", "Glut", state.ember, rules.emberLimit(state)]] : []),
     ];
     const vitals = el("vitals");
-    vitals.replaceChildren(...bars.map(([kind, label, value, max]) => {
+    // Gruppen-HUD über den Heldenbalken: Reise-Nahrung und Gruppen-Moral (0–100) mit Rang.
+    const hud = lage ? [["nahrung", "Reise-Nahrung", state.ressource, rules.vorratMax,
+      state.ressource <= 0 ? "ENTKRÄFTET (−15 Moral/Etappe)" : null],
+      ["moral", "Gruppen-Moral · " + lage.moralStufe.name, lage.moral, 100, null]] : [];
+    const hudBlocks = hud.map(([kind, label, value, max, warnung]) => {
+      const block = element("div");
+      block.className = "vital vital-" + kind + (warnung ? " vital-low" : "");
+      block.style.setProperty("--fill", Math.max(0, Math.min(1, value / max)) * 100 + "%");
+      block.append(element("dt", label), element("dd", warnung ? value + " · " + warnung : value + " / " + max));
+      return block;
+    });
+    vitals.replaceChildren(...hudBlocks, ...bars.map(([kind, label, value, max]) => {
       const block = element("div");
       block.className = "vital vital-" + kind + (kind === "hp" && value <= max * .3 ? " vital-low" : "");
       block.style.setProperty("--fill", (max ? Math.max(0, Math.min(1, value / max)) * 100 : 0) + "%");
@@ -2862,7 +3131,7 @@
     scale.setAttribute("aria-hidden", "true");
     balance.append(element("dt", "Gleichgewicht"), element("dd", state.balance === 0 ? "0 · Im Gleichgewicht" :
       state.balance < 0 ? state.balance + " · Erneuerung" : "+" + state.balance + " · Zerstörung"), scale);
-    vitals.append(stock, balance);
+    vitals.append(...(lage ? [] : [stock]), balance);
   }
 
   function render() {
