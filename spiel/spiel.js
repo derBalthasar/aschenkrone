@@ -11,7 +11,6 @@
   const origin = el("origin");
   const role = el("class");
   const volkWahl = el("volk-wahl");
-  const mapPlaces = el("map-places");
   const appearance = el("appearance");
   const variant = el("variant");
   let state = null;
@@ -244,6 +243,7 @@
   function showHome(message = "") {
     if (el("inventory-hub").open) el("inventory-hub").close();
     if (el("character-sheet").open) el("character-sheet").close();
+    if (el("reisekarte").open) el("reisekarte").close();
     show("home");
     el("continue").hidden = state === null;
     el("home-status").textContent = message;
@@ -276,50 +276,8 @@
     return figure;
   }
 
-  // Karte in drei Stufen (spiel/karte.js): Gebiet, Fraktion, Welt. Die Stufe ist eine Ansichtseinstellung dieses
-  // Browsers und gehört nicht zum Spielstand.
-  const mapLevelKey = "aschenkrone.kartenstufe";
-  let mapLevel = "gebiet";
-  let mapCentered = null;
-  try {
-    const savedLevel = localStorage.getItem(mapLevelKey);
-    if (karte.stufen.includes(savedLevel)) mapLevel = savedLevel;
-  } catch {
-    // Ohne Speicher beginnt die Karte beim Gebiet.
-  }
-  for (const control of document.querySelectorAll("[data-map-level]")) {
-    control.addEventListener("click", () => {
-      mapLevel = control.dataset.mapLevel;
-      mapCentered = null;
-      try {
-        localStorage.setItem(mapLevelKey, mapLevel);
-      } catch {
-        // Die Stufe gilt dann nur in diesem Fenster.
-      }
-      if (state) renderMap();
-    });
-  }
-
-  const svgNS = "http://www.w3.org/2000/svg";
-  const routeLines = world.routes.map(([from, to]) => {
-    const line = document.createElementNS(svgNS, "line");
-    const a = karte.daten.reise[from]?.p;
-    const b = karte.daten.reise[to]?.p;
-    if (a && b) for (const [key, value] of Object.entries({ x1: a[0], y1: a[1], x2: b[0], y2: b[1] })) line.setAttribute(key, value);
-    else line.setAttribute("visibility", "hidden");
-    el("map-routes").append(line);
-    return line;
-  });
-
-  function placeOnMap(node, view, point) {
-    const pos = karte.prozent(view.rect, point);
-    if (!pos) return false;
-    node.style.left = pos[0] + "%";
-    node.style.top = pos[1] + "%";
-    mapPlaces.append(node);
-    return true;
-  }
-
+  // Kartenreiter (Henry, 18. 11. 2026): Die Bildkarte in drei Stufen ist entfallen, die Welt zeigt die Reisekarte als
+  // Pop-up. Hier bleiben Standort, Reiseziele der Handlung und die nächste Etappe.
   function renderMap() {
     const scene = world.scenes[state.scene];
     const current = scene.map;
@@ -330,16 +288,9 @@
     }
     const plan = el("map-plan");
     const destinations = el("map-destinations");
-    for (const line of routeLines) line.classList.remove("route-active");
     plan.replaceChildren();
     const selected = travels.get(target);
     if (selected) {
-      const stops = selected.stops;
-      for (const [index, [from, to]] of world.routes.entries()) {
-        if (stops.some((stop, i) => (stop === from && stops[i + 1] === to) || (stop === to && stops[i + 1] === from))) {
-          routeLines[index].classList.add("route-active");
-        }
-      }
       plan.append(element("p", selected.stops.map(id => world.destinations[id].name).join(" → ")));
       button(plan, "Nächste Etappe: " + world.destinations[selected.stops[1] ?? target].name,
         () => update(rules.choose(state, selected.first)));
@@ -353,145 +304,40 @@
       target = null;
     }
 
-    // Ausschnitt und Kartenbild der gewählten Stufe. In der Weltreise steht der Held auf einem Knoten.
     const node = state.scene === "weltknoten" ? knoten.get(state.knoten) : null;
-    const here = node ? { punkt: node.punkt, name: node.name, fraktion: node.fraktion, reise: false } : karte.lage(scene, world.destinations);
-    el("map-routes").classList.toggle("map-routes-off", Boolean(node));
-    const view = karte.ansicht(mapLevel, here, state.faction);
-    const [vx, vy, vw, vh] = view.rect;
-    const picture = karte.bild(view.rect);
-    const image = el("map-image");
-    if (image.getAttribute("src") !== picture.src) image.src = picture.src;
-    image.style.left = (picture.rect[0] - vx) / vw * 100 + "%";
-    image.style.top = (picture.rect[1] - vy) / vh * 100 + "%";
-    image.style.width = picture.rect[2] / vw * 100 + "%";
-    image.style.height = picture.rect[3] / vh * 100 + "%";
-    const board = el("map-board");
-    board.style.aspectRatio = vw + " / " + vh;
-    board.dataset.level = mapLevel;
-    el("map-routes").setAttribute("viewBox", view.rect.join(" "));
-    for (const control of document.querySelectorAll("[data-map-level]")) {
-      control.setAttribute("aria-pressed", control.dataset.mapLevel === mapLevel);
-    }
-    const factionName = klassen.fraktionen[view.fraktion]?.name;
-    el("map-title").textContent = "Karte · " + (mapLevel === "welt" ? "Odris" : mapLevel === "fraktion" ? factionName ?? "Odris" :
-      here ? "Gebiet um " + here.name : factionName ?? "Odris");
-
-    mapPlaces.replaceChildren();
     destinations.replaceChildren();
-    const selectDestination = id => {
-      target = id;
-      renderMap();
-      plan.querySelector("button")?.focus();
-    };
-    if (mapLevel === "welt" && factionName) {
-      // Auf der Weltkarte zeigt ein Rahmen das Fraktionsgebiet der zweiten Stufe.
-      const area = element("span");
-      area.className = "map-area";
-      const [ax, ay, aw, ah] = karte.daten.fraktionen[view.fraktion].rect;
-      area.style.left = (ax - vx) / vw * 100 + "%";
-      area.style.top = (ay - vy) / vh * 100 + "%";
-      area.style.width = aw / vw * 100 + "%";
-      area.style.height = ah / vh * 100 + "%";
-      mapPlaces.append(area);
-    }
-    if (node && mapLevel !== "welt" && !state.combat) {
-      // Nachbarknoten als Reiseziele: ein Klick reist sofort (eine Runde).
-      for (const weg of rules.reiseZiele(state)) {
-        const marker = element("button", weg.ziel.name);
-        const x = karte.prozent(view.rect, weg.ziel.punkt)?.[0] ?? 50;
-        marker.type = "button";
-        marker.className = "map-marker map-node map-" + weg.sicherheit + " map-side-" + (x > 70 ? "l" : "r") + (weg.ziel.typ === "dorf" ? " map-village" : "");
-        marker.disabled = Boolean(weg.grund);
-        marker.title = knoten.kantenNamen[weg.kantenTyp] + " · " + knoten.sicherheitNamen[weg.sicherheit] + (weg.grund ? " · " + weg.grund : "");
-        marker.setAttribute("aria-label", "Reise nach " + weg.ziel.name + " · " + marker.title);
-        marker.addEventListener("click", () => update(rules.reise(state, weg.zielId)));
-        placeOnMap(marker, view, weg.ziel.punkt);
-      }
-    }
     for (const [id, location] of Object.entries(node ? {} : world.destinations)) {
-      const reachable = travels.has(id);
-      if (reachable) {
-        const choice = element("button", location.name);
-        choice.type = "button";
-        choice.className = "action";
-        choice.dataset.destination = id;
-        choice.setAttribute("aria-pressed", id === target);
-        choice.addEventListener("click", () => selectDestination(id));
-        destinations.append(choice);
-      }
-      const spot = karte.daten.reise[id];
-      if (!spot || mapLevel === "welt" || (!reachable && current !== id && mapLevel !== "gebiet")) continue;
-      const marker = element(reachable ? "button" : "span", location.name);
-      // Am Kartenrand steht das Namensschild zur Kartenmitte hin, damit es nicht abgeschnitten wird.
-      const x = karte.prozent(view.rect, spot.p)?.[0] ?? 50;
-      const side = x < 22 ? "r" : x > 78 ? "l" : spot.seite;
-      marker.className = "map-marker map-side-" + side + (current === id ? " map-current" : "");
-      marker.title = location.note;
-      if (current === id) marker.setAttribute("aria-current", "location");
-      if (reachable) {
-        marker.type = "button";
-        marker.dataset.destination = id;
-        marker.setAttribute("aria-label", location.name + " als Ziel wählen · " + location.note);
-        marker.setAttribute("aria-pressed", id === target);
-        marker.addEventListener("click", () => selectDestination(id));
-      }
-      placeOnMap(marker, view, spot.p);
-    }
-    if (here) {
-      const pin = element("span");
-      pin.className = "map-pin";
-      pin.setAttribute("aria-hidden", "true");
-      placeOnMap(pin, view, here.punkt);
-      // In der Weltreise stehen Nachbarorte dicht am Standort; dort genügt die Nadel, außer auf der Weltkarte.
-      if ((!here.reise && !node) || mapLevel === "welt") {
-        const label = element("span", "Du bist hier · " + here.name);
-        const right = (karte.prozent(view.rect, here.punkt)?.[0] ?? 0) > 62;
-        label.className = "map-marker map-current map-here" + (right ? " map-side-l" : " map-side-r");
-        label.setAttribute("aria-current", "location");
-        placeOnMap(label, view, here.punkt);
-      }
-    }
-    const homeName = startpunkte.fraktionen[state.faction]?.ort;
-    const home = homeName && karte.daten.orte[homeName];
-    if (home && mapLevel !== "gebiet" && (!here || home.p.join() !== here.punkt.join())) {
-      const label = element("span", "Heimat · " + homeName);
-      const right = (karte.prozent(view.rect, home.p)?.[0] ?? 0) > 62;
-      label.className = "map-marker map-home" + (right ? " map-side-l" : " map-side-r");
-      placeOnMap(label, view, home.p);
+      if (!travels.has(id)) continue;
+      const choice = element("button", location.name);
+      choice.type = "button";
+      choice.className = "action";
+      choice.dataset.destination = id;
+      choice.title = location.note;
+      choice.setAttribute("aria-pressed", id === target);
+      choice.addEventListener("click", () => {
+        target = id;
+        renderMap();
+        plan.querySelector("button")?.focus();
+      });
+      destinations.append(choice);
     }
 
     const location = world.destinations[current]?.name;
     const far = scene.fern;
-    const levelText = "Stufe " + (karte.stufen.indexOf(mapLevel) + 1) + " · " + karte.stufenNamen[mapLevel];
-    el("map-caption").textContent = here ? levelText + " · Du bist in " + here.name +
-      (klassen.fraktionen[here.fraktion] ? ", Land der Fraktion " + klassen.fraktionen[here.fraktion].name : "") + "." : levelText + ".";
     el("map-status").textContent = state.combat ? "Im Kampf kannst du die Karte ansehen. Reiseoptionen öffnen sich nach der Begegnung." :
-      node ? "Standort: " + node.name + " · Wähle einen Nachbarort auf der Karte oder unter „D · Aufbruch“." :
+      node ? "Standort: " + node.name + " · Wähle einen Nachbarort auf der Reisekarte oder unter „D · Aufbruch“." :
       location ? "Standort: " + location + (travels.size ? " · Wähle ein Reiseziel, um die Route zu sehen." : " · Folge den Optionen in der Szene.") :
       far ? "Standort: " + far + " · Folge den Optionen in der Szene." :
       "Deine Reise ist beendet.";
-
-    // Auf schmalen Bildschirmen ist die Karte breiter als der Rahmen: den eigenen Standort in die Mitte rücken.
-    const centerKey = state.scene + "|" + (state.knoten ?? "") + "|" + mapLevel;
-    if (here && mapCentered !== centerKey) {
-      mapCentered = centerKey;
-      const scroller = board.parentElement;
-      requestAnimationFrame(() => {
-        const pos = karte.prozent(view.rect, here.punkt);
-        if (pos && scroller.scrollWidth > scroller.clientWidth) {
-          scroller.scrollLeft = pos[0] / 100 * board.clientWidth - scroller.clientWidth / 2;
-        }
-      });
-    }
   }
+
 
   const slotLabels = { weapon: "Rechte Hand", offhand: "Linke Hand", head: "Kopf", neck: "Hals", armor: "Körper",
     legs: "Beine", ring1: "Ring", ring2: "Ring" };
   const kindLabels = { weapon: "Waffe", offhand: "Schild", head: "Kopf", neck: "Hals", armor: "Körper", legs: "Beine",
-    ring: "Ring", supply: "Verbrauchsgut", trophy: "Trophäe und Fund", quest: "Questgegenstand" };
+    ring: "Ring", supply: "Verbrauchsgut", trophy: "Trophäe und Fund", quest: "Questgegenstand", relikt: "Gruppen-Relikt" };
   const groups = [["Waffen und Schilde", ["weapon", "offhand"]], ["Rüstung", ["head", "armor", "legs"]],
-    ["Schmuck", ["neck", "ring"]], ["Verbrauchsgüter", ["supply"]], ["Trophäen und Funde", ["trophy"]],
+    ["Schmuck", ["neck", "ring"]], ["Verbrauchsgüter", ["supply"]], ["Gruppen-Relikte", ["relikt"]], ["Trophäen und Funde", ["trophy"]],
     ["Questgegenstände", ["quest"]]];
   const statLabels = [["damage", "Schaden"], ["pierce", "Durchschlag"], ["armor", "Rüstung"], ["magic", "Glutschaden"],
     ["travel", "List unterwegs"], ["airborne", "gegen Flieger"]];
@@ -798,6 +644,41 @@
     box.append(slots, element("p", "Gürtelgegenstände wirken im Kampf, ohne deine Aktion zu verbrauchen."));
   }
 
+  // Gruppen-Relikt (Henry, 18. 11. 2026): ein aktives Relikt für die ganze Gruppe, getrennt von der Ausrüstung.
+  function renderRelikt() {
+    const box = el("hub-relikt");
+    const stand = rules.reliktStand(state);
+    box.hidden = !stand.aktiv && !stand.rucksack.length;
+    box.replaceChildren();
+    if (box.hidden) return;
+    box.append(element("h4", "Gruppen-Relikt"));
+    const wirkung = (relikt) => {
+      const list = element("ul");
+      for (const w of relikt.wirkungen) {
+        const item = element("li", w.text);
+        if (!w.aktiv) item.className = "hub-relikt-spaeter";
+        list.append(item);
+      }
+      return list;
+    };
+    const aktiv = element("div");
+    aktiv.className = "hub-relikt-aktiv";
+    if (stand.aktiv) {
+      aktiv.append(element("strong", stand.aktiv.name + " · " + stand.aktiv.label), wirkung(stand.aktiv));
+      button(aktiv, "Ablegen", () => hubAction(rules.setRelikt(state, null)), { disabled: Boolean(rules.reliktGrund(state, null)) });
+    } else aktiv.append(element("strong", "Kein Relikt aktiv"));
+    box.append(aktiv);
+    for (const relikt of stand.rucksack) {
+      const row = element("div");
+      row.className = "hub-relikt-wahl";
+      row.append(element("strong", relikt.name + " · " + relikt.label), wirkung(relikt));
+      button(row, relikt.grund ? relikt.grund + " · Wert " + relikt.wert + " Silber" : (stand.aktiv ? "Wechseln" : "Aktivieren"),
+        () => hubAction(rules.setRelikt(state, relikt.id)), { disabled: Boolean(relikt.grund) });
+      box.append(row);
+    }
+    box.append(element("p", "Nur ein Relikt wirkt, für die ganze Gruppe. Wechsel nur außerhalb des Kampfes; das vorige Relikt kehrt in den Rucksack zurück."));
+  }
+
   function renderBagUpgrade() {
     const box = el("hub-bag-upgrade");
     const plan = rules.bagUpgrade(state);
@@ -920,6 +801,7 @@
     renderDoll();
     renderStats();
     renderBelt();
+    renderRelikt();
     renderBagUpgrade();
     const tabs = { bag: "Rucksack · " + rules.slotsUsed(state) + " / " + rules.bagLimit(state),
       storage: "Zentrallager · " + state.storage.length };
@@ -972,6 +854,423 @@
     }
     if (!container.children.length) container.append(element("p", kind ? "Im Rucksack liegt nichts Passendes." :
       hub.tab === "bag" ? "Dein Rucksack ist leer." : "Im Zentrallager liegt nichts."));
+  }
+
+  // ---- Reisekarte als Pop-up: die ganze Weltkarte mit stufenlosem Zoom (Henry, 18. 11. 2026). ----
+  // Mausrad, Ziehen, zwei Finger, Doppelklick und Tasten zoomen und verschieben die Karte. Weit draußen zeigt sie nur
+  // das Kartenbild mit den Städten der Menschen, nah dran Dörfer, Wege und Dorfnamen. Ein Klick auf einen Ort der
+  // Menschen zeigt Weg, Kosten, Gefahr und Gegner, Nachbarorte lassen sich direkt bereisen. Fremde Orte zeigen nur
+  // Typ, Volk und Fraktion.
+  const rk = { ansicht: null, auswahl: null, gezogen: false,
+    zeigen: { strasse: true, pass: true, dorfweg: true, seeweg: true, doerfer: true, namen: true } };
+  const rkFilterNamen = { ...reisekarte.wegArtNamen, doerfer: "Dorfnamen", namen: "Stadtnamen" };
+  const rkVolkNamen = { orks: "Orks", untote: "Untote", elfen: "Elfen", zwerge: "Zwerge", menschen: "Menschen" };
+  // Kartenpixel je Bildschirmpixel: unter dieser Grenze erscheinen Dörfer und Wege, darunter wird nicht weiter gezoomt.
+  const rkNah = 1.8;
+  const rkNaechster = 0.35;
+  // Ortsmarken: Bildschirmpixel je Markeneinheit (nah dran; in der Weltansicht kleiner).
+  const rkMarkenGroesse = 1.8;
+  let rkMarken = [];
+
+  function svgElement(tag, attributes, parent) {
+    const node = document.createElementNS(svgNs, tag);
+    for (const [key, value] of Object.entries(attributes)) node.setAttribute(key, value);
+    parent?.append(node);
+    return node;
+  }
+
+  function rkPercent(value) {
+    return Math.round(value * 100) + " %";
+  }
+
+  function rkWaehlen(id) {
+    rk.auswahl = id;
+    renderReisekarte();
+    el("rk-svg").querySelector('[data-ort="' + id + '"]')?.focus();
+  }
+
+  function renderReisekarte() {
+    if (!state) return;
+    const hier = rules.aktuellerKnoten(state);
+    const ziele = new Map(rules.reiseZiele(state).map(weg => [weg.zielId, weg]));
+    const hierKnoten = hier ? knoten.get(hier) : null;
+    el("rk-place").textContent = "Odris · " + (hierKnoten ? "Du bist in " + hierKnoten.name : "Du bist unterwegs in der Handlung");
+
+    const filter = el("rk-filter");
+    filter.replaceChildren();
+    for (const [key, label] of Object.entries(rkFilterNamen)) {
+      const control = element("button", label);
+      control.type = "button";
+      control.className = "rk-toggle rk-toggle-" + key;
+      control.setAttribute("aria-pressed", rk.zeigen[key]);
+      control.addEventListener("click", () => {
+        rk.zeigen[key] = !rk.zeigen[key];
+        renderReisekarte();
+        filter.querySelector(".rk-toggle-" + key)?.focus();
+      });
+      filter.append(control);
+    }
+
+    const [wx, wy, ww, wh] = reisekarte.welt;
+    const board = el("rk-svg");
+    board.replaceChildren();
+    svgElement("rect", { class: "rk-meer", x: wx, y: wy, width: ww, height: wh }, board);
+    // Hintergrund ist die verbindliche Weltkarte. Städte und ihre Namen sind dort schon eingezeichnet.
+    const land = svgElement("g", { class: "rk-land", "aria-hidden": "true" }, board);
+    for (const bild of reisekarte.bilder) {
+      svgElement("image", { href: bild.src, x: bild.x, y: bild.y, width: bild.breite, height: bild.hoehe, preserveAspectRatio: "none" }, land);
+    }
+
+    const aktivNach = (weg) => hier && (weg.a === hier || weg.b === hier) && ziele.has(weg.a === hier ? weg.b : weg.a);
+    const wegGruppe = svgElement("g", { class: "rk-wege", "aria-hidden": "true" }, board);
+    for (const weg of reisekarte.wege) {
+      const aktiv = aktivNach(weg);
+      if (!rk.zeigen[weg.art] && !aktiv) continue;
+      const [x1, y1] = reisekarte.lage(weg.a);
+      const [x2, y2] = reisekarte.lage(weg.b);
+      const linie = svgElement("line", { x1, y1, x2, y2,
+        class: "rk-weg rk-" + weg.art + " rk-" + weg.sicherheit + (aktiv ? " rk-aktiv" : "") }, wegGruppe);
+      svgElement("title", {}, linie).textContent = weg.kennung;
+    }
+
+    // Dorfnamen wachsen mit der Karte, ihre Lage weicht den gedruckten Namen aus.
+    if (rk.zeigen.doerfer) {
+      const dorfNamen = svgElement("g", { class: "rk-dorfnamen", "aria-hidden": "true" }, board);
+      for (const ort of reisekarte.orte.filter(entry => entry.typ === "dorf")) {
+        const [dx, dy, anker] = reisekarte.beschriftung[ort.id];
+        const name = svgElement("text", { x: ort.x + dx, y: ort.y + dy, "text-anchor": anker, "font-size": reisekarte.dorfSchrift,
+          class: "rk-name-dorf" + (ort.id === hier ? " rk-name-hier" : "") }, dorfNamen);
+        name.textContent = ort.name;
+      }
+    }
+    // Ortsmarken der Menschen und Überseehäfen: feste Größe auf dem Bildschirm, wie Stecknadeln.
+    const orteGruppe = svgElement("g", { class: "rk-orte" }, board);
+    rkMarken = [];
+    for (const ort of [...reisekarte.orte].reverse()) {
+      const weg = ziele.get(ort.id);
+      const wichtig = ort.id === hier || weg || ort.id === rk.auswahl;
+      const klassenListe = ["rk-ort", "rk-typ-" + ort.typ, "rk-volk-" + ort.volk];
+      if (ort.hafen) klassenListe.push("rk-hafen");
+      if (ort.uebersee) klassenListe.push("rk-uebersee");
+      if (wichtig) klassenListe.push("rk-wichtig");
+      if (ort.id === hier) klassenListe.push("rk-hier");
+      if (weg) klassenListe.push(weg.grund ? "rk-gesperrt" : "rk-ziel");
+      if (ort.id === rk.auswahl) klassenListe.push("rk-gewaehlt");
+      const gruppe = svgElement("g", { class: klassenListe.join(" "), role: "button", tabindex: 0, "data-ort": ort.id,
+        "aria-label": ort.name + " · " + knoten.typNamen[ort.typ] + (ort.id === hier ? " · Du bist hier" : weg ? " · erreichbar" : "") }, orteGruppe);
+      gruppe.dataset.x = ort.x;
+      gruppe.dataset.y = ort.y;
+      if (ort.id === hier) svgElement("circle", { r: 11, class: "rk-puls" }, gruppe);
+      if (ort.id === rk.auswahl) svgElement("circle", { r: 9, class: "rk-ring" }, gruppe);
+      if (weg) svgElement("circle", { r: 7.5, class: "rk-zielring" }, gruppe);
+      if (ort.uebersee) svgElement("rect", { x: -4, y: -4, width: 8, height: 8, transform: "rotate(45)", class: "rk-punkt" }, gruppe);
+      else svgElement("circle", { r: ort.typ === "dorf" ? 2.6 : ort.typ === "hauptstadt" ? 5 : 3.8, class: "rk-punkt" }, gruppe);
+      if (ort.typ === "hauptstadt") svgElement("circle", { r: 2, class: "rk-kern" }, gruppe);
+      // Größere Trefferfläche für Finger und Maus.
+      svgElement("circle", { r: ort.typ === "dorf" ? 6 : 9, class: "rk-treffer" }, gruppe);
+      gruppe.addEventListener("click", () => rkWaehlen(ort.id));
+      gruppe.addEventListener("keydown", event => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        rkWaehlen(ort.id);
+      });
+      rkMarken.push(gruppe);
+    }
+    // Gedruckte Namen der ganzen Welt deckungsgleich über Wegen und Marken. Orte im Knotennetz sind anklickbar.
+    const namen = svgElement("g", { class: "rk-gedruckt" + (rk.zeigen.namen ? "" : " rk-gedruckt-leer") }, board);
+    for (const [text, x, y, breite, groesse, haupt, id] of reisekarte.gedruckteNamen) {
+      const name = svgElement("text", { x, y, textLength: breite, lengthAdjust: "spacingAndGlyphs", "font-size": groesse,
+        class: (haupt ? "rk-gedruckt-haupt" : "") + (id ? " rk-klickbar" : "") + (id && id === rk.auswahl ? " rk-gewaehlt-name" : "") }, namen);
+      name.textContent = text;
+      if (id && !reisekarte.hat(id)) {
+        name.setAttribute("role", "button");
+        name.setAttribute("tabindex", "0");
+        name.dataset.ort = id;
+        name.addEventListener("click", () => rkWaehlen(id));
+        name.addEventListener("keydown", event => {
+          if (event.key !== "Enter" && event.key !== " ") return;
+          event.preventDefault();
+          rkWaehlen(id);
+        });
+      }
+    }
+
+    rkAnwenden();
+    renderReisekarteInfo(hier, ziele);
+  }
+
+  // ---- Ansicht: Ausschnitt der Welt in Kartenpixeln. Die Höhe folgt dem Seitenverhältnis des Fensters. ----
+  function rkRahmen() {
+    const box = el("rk-scroll");
+    return [Math.max(1, box.clientWidth), Math.max(1, box.clientHeight)];
+  }
+
+  function rkGanzeWelt() {
+    const [cw, ch] = rkRahmen();
+    const [wx, wy, ww, wh] = reisekarte.welt;
+    return Math.max(ww, wh * cw / ch);
+  }
+
+  function rkAnwenden() {
+    if (!rk.ansicht) return;
+    const [cw, ch] = rkRahmen();
+    const [wx, wy, ww, wh] = reisekarte.welt;
+    const ansicht = rk.ansicht;
+    ansicht.w = Math.min(rkGanzeWelt(), Math.max(cw * rkNaechster, ansicht.w));
+    const h = ansicht.w * ch / cw;
+    // Die Welt bleibt im Bild: kleiner als das Fenster wird sie mittig gehalten.
+    ansicht.x = ansicht.w >= ww ? wx + (ww - ansicht.w) / 2 : Math.min(wx + ww - ansicht.w, Math.max(wx, ansicht.x));
+    ansicht.y = h >= wh ? wy + (wh - h) / 2 : Math.min(wy + wh - h, Math.max(wy, ansicht.y));
+    const board = el("rk-svg");
+    board.setAttribute("viewBox", [ansicht.x, ansicht.y, ansicht.w, h].map(v => Math.round(v * 10) / 10).join(" "));
+    const k = ansicht.w / cw;
+    board.classList.toggle("rk-nah", k <= rkNah);
+    for (const marke of rkMarken) {
+      marke.setAttribute("transform", "translate(" + marke.dataset.x + " " + marke.dataset.y + ") scale(" + (k * (k <= rkNah ? rkMarkenGroesse : 1)).toFixed(4) + ")");
+    }
+    for (const control of document.querySelectorAll("[data-rk-zoom]")) {
+      const rein = control.dataset.rkZoom === "1";
+      control.disabled = rein ? ansicht.w <= cw * rkNaechster + 0.5 : ansicht.w >= rkGanzeWelt() - 0.5;
+    }
+  }
+
+  // Um einen Bildschirmpunkt (Pixel im Fenster) zoomen: Der Kartenpunkt darunter bleibt stehen.
+  function rkZoom(faktor, sx, sy) {
+    const [cw, ch] = rkRahmen();
+    const ansicht = rk.ansicht;
+    sx ??= cw / 2;
+    sy ??= ch / 2;
+    const k = ansicht.w / cw;
+    const px = ansicht.x + sx * k;
+    const py = ansicht.y + sy * k;
+    ansicht.w = Math.min(rkGanzeWelt(), Math.max(cw * rkNaechster, ansicht.w / faktor));
+    const k2 = ansicht.w / cw;
+    ansicht.x = px - sx * k2;
+    ansicht.y = py - sy * k2;
+    rkAnwenden();
+  }
+
+  function rkVerschieben(dx, dy) {
+    const [cw] = rkRahmen();
+    const k = rk.ansicht.w / cw;
+    rk.ansicht.x -= dx * k;
+    rk.ansicht.y -= dy * k;
+    rkAnwenden();
+  }
+
+  // Einen Kartenpunkt mit gegebener Breite des Ausschnitts in die Mitte rücken.
+  function rkZeigen([px, py], breite) {
+    const [cw, ch] = rkRahmen();
+    const h = breite * ch / cw;
+    rk.ansicht = { x: px - breite / 2, y: py - h / 2, w: breite };
+    rkAnwenden();
+  }
+
+  function rkZuMir() {
+    const hier = rules.aktuellerKnoten(state);
+    const punkt = hier && reisekarte.lage(hier);
+    const [cw] = rkRahmen();
+    if (punkt) rkZeigen(punkt, cw * 1.1);
+    else rkZeigenGebiet(reisekarte.welt);
+  }
+
+  function rkZeigenGebiet([x, y, w, h]) {
+    const [cw, ch] = rkRahmen();
+    rkZeigen([x + w / 2, y + h / 2], Math.max(w, h * cw / ch) * 1.04);
+  }
+
+  function renderReisekarteInfo(hier, ziele) {
+    const info = el("rk-info");
+    info.replaceChildren();
+    const reisen = state.scene === "weltknoten" && !state.combat && state.health > 0;
+    const id = rk.auswahl ?? (hier && knoten.alle[hier] ? hier : null);
+    if (!id) {
+      info.append(element("p", "Wähle einen Ort auf der Karte. Mit Mausrad oder zwei Fingern zoomst du, durch Ziehen verschiebst du die Karte."));
+      return;
+    }
+    const ort = knoten.get(id);
+    const volk = klassen.fraktionen[ort.fraktion]?.volk;
+    info.append(element("h3", ort.name));
+    const herkunft = element("dl");
+    herkunft.className = "rk-daten";
+    herkunft.append(element("dt", "Ort"), element("dd", knoten.typNamen[ort.typ] + (ort.hatHafen && ort.typ !== "hafenstadt" ? " mit Hafen" : "")),
+      element("dt", "Volk"), element("dd", klassen.voelker[volk]?.name ?? rkVolkNamen[reisekarte.volkVon[ort.fraktion]] ?? "unbekannt"),
+      element("dt", "Fraktion"), element("dd", klassen.fraktionen[ort.fraktion]?.name ?? ort.fraktion));
+    info.append(herkunft);
+    if (id === hier) info.append(element("p", "Du bist hier."));
+    // Fremde Völker: nur das Grundlegende, ihr Wegenetz entsteht noch.
+    if (!reisekarte.hat(id)) {
+      const hinweis = element("p", "Die Wege dieses Volkes werden noch ausgearbeitet.");
+      hinweis.className = "rk-herkunft";
+      info.append(hinweis);
+      return;
+    }
+
+    const weg = ziele.get(id);
+    if (weg) {
+      const daten = element("dl");
+      daten.className = "rk-daten";
+      const zeile = (label, wert) => daten.append(element("dt", label), element("dd", wert));
+      const kosten = [weg.kostenRessource ? weg.kostenRessource + " " + rules.resourceName(state) : "",
+        weg.kostenGold ? weg.kostenGold + " Silber" : ""].filter(Boolean).join(" + ") || "frei";
+      zeile("Weg", (weg.kennung ? weg.kennung + " · " : "") + knoten.kantenNamen[weg.kantenTyp] + (weg.pass ? " (" + weg.pass + ")" : ""));
+      zeile("Zone", knoten.sicherheitNamen[weg.sicherheit]);
+      zeile("Kosten", kosten + (weg.rabatt ? " (Auftrag: 1 günstiger)" : ""));
+      zeile("Hinterhalt", rkPercent(weg.gefahr));
+      zeile("Gegner", weg.kantenTyp === "seeweg" ? "noch keine Kämpfe auf See" : weg.gegner.join(", ") || "keine");
+      info.append(daten);
+      if (weg.auftrag) {
+        const auftrag = rules.auftraege(state).find(entry => entry.id === weg.auftrag);
+        const hinweis = element("p", "Auftrag unterwegs: " + auftrag.titel + ".");
+        hinweis.className = "welt-aushang-hinweis";
+        info.append(hinweis);
+      }
+      if (weg.letzterVorrat && !weg.grund) {
+        const warn = element("p", "Achtung: Diese Reise braucht deinen letzten Vorrat.");
+        warn.className = "welt-alarm";
+        info.append(warn);
+      }
+      const reise = element("div");
+      reise.className = "actions";
+      button(reise, "Reise nach " + ort.name + (weg.grund ? " · " + weg.grund : ""), () => {
+        rk.auswahl = null;
+        welt.tab = "aufbruch";
+        update(rules.reise(state, id));
+        // Ein Hinterhalt oder eine Szene der Handlung braucht das Hauptfenster.
+        if (state.combat || state.scene !== "weltknoten") el("reisekarte").close();
+        else el("rk-scroll").focus();
+      }, { disabled: !reisen || Boolean(weg.grund), story: true });
+      info.append(reise);
+    } else if (id !== hier) {
+      info.append(element("p", hier && reisekarte.hat(hier) ? "Kein direkter Weg von deinem Standort. Reisen geht nur von Ort zu Ort, jede Etappe einzeln." :
+        "Reisen kannst du von der Weltreise aus."));
+    }
+    if (id === hier && !reisen) {
+      info.append(element("p", state.combat ? "Im Kampf kannst du die Karte nur ansehen." :
+        state.scene === "weltknoten" ? "Ohne Lebenspunkte kannst du nicht reisen." : "Reisen kannst du, sobald du in der Weltreise bist."));
+    }
+
+    const wege = reisekarte.wegeVon(id);
+    if (wege.length) {
+      info.append(element("h4", "Wege von " + ort.name));
+      const liste = element("ul");
+      liste.className = "rk-wegliste";
+      for (const eintrag of wege) {
+        const anderer = eintrag.a === id ? eintrag.b : eintrag.a;
+        const item = element("li");
+        const wahl = element("button", knoten.get(anderer).name);
+        wahl.type = "button";
+        wahl.className = "rk-link" + (ziele.has(anderer) && id === hier ? " rk-link-ziel" : "");
+        wahl.addEventListener("click", () => {
+          rk.auswahl = anderer;
+          renderReisekarte();
+          rkZeigen(reisekarte.lage(anderer), rk.ansicht.w);
+          el("rk-info").querySelector("h3")?.setAttribute("tabindex", "-1");
+          el("rk-info").querySelector("h3")?.focus();
+        });
+        item.append(element("span", eintrag.kennung), wahl);
+        liste.append(item);
+      }
+      info.append(liste);
+    }
+  }
+
+  function openReisekarte() {
+    if (!state) return;
+    if (el("inventory-hub").open) el("inventory-hub").close();
+    if (el("character-sheet").open) el("character-sheet").close();
+    rk.auswahl = null;
+    el("reisekarte").showModal();
+    renderReisekarte();
+    if (!rk.ansicht) rkZuMir();
+    el("rk-close").focus();
+  }
+
+  for (const opener of document.querySelectorAll("[data-reisekarte-open]")) opener.addEventListener("click", openReisekarte);
+  el("rk-close").addEventListener("click", () => el("reisekarte").close());
+  el("reisekarte").addEventListener("click", event => {
+    if (event.target === event.currentTarget) event.currentTarget.close();
+  });
+  for (const control of document.querySelectorAll("[data-rk-zoom]")) {
+    control.addEventListener("click", () => rkZoom(control.dataset.rkZoom === "1" ? 1.6 : 1 / 1.6));
+  }
+  el("rk-zu-mir").addEventListener("click", rkZuMir);
+  el("rk-region").addEventListener("change", event => {
+    const wahl = event.target.value;
+    if (wahl === "welt") rkZeigenGebiet(reisekarte.welt);
+    else if (reisekarte.regionen[wahl]) rkZeigenGebiet(reisekarte.regionen[wahl]);
+    event.target.value = "";
+  });
+
+  // Zoomen und Verschieben mit Maus, Fingern und Tasten.
+  {
+    const box = el("rk-scroll");
+    const zeiger = new Map();
+    let start = null;
+    const punktIm = (event) => {
+      const rect = box.getBoundingClientRect();
+      return [event.clientX - rect.left, event.clientY - rect.top];
+    };
+    box.addEventListener("wheel", event => {
+      if (!rk.ansicht) return;
+      event.preventDefault();
+      const schritt = event.deltaMode === 1 ? 0.05 : event.deltaMode === 2 ? 0.5 : 0.0015;
+      rkZoom(Math.exp(-event.deltaY * schritt), ...punktIm(event));
+    }, { passive: false });
+    box.addEventListener("pointerdown", event => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      zeiger.set(event.pointerId, punktIm(event));
+      start = { weg: 0 };
+      rk.gezogen = false;
+    });
+    window.addEventListener("pointermove", event => {
+      if (!zeiger.has(event.pointerId) || !rk.ansicht) return;
+      const vorher = zeiger.get(event.pointerId);
+      const jetzt = punktIm(event);
+      if (zeiger.size === 1) {
+        start.weg += Math.hypot(jetzt[0] - vorher[0], jetzt[1] - vorher[1]);
+        if (start.weg > 5) rk.gezogen = true;
+        if (rk.gezogen) rkVerschieben(jetzt[0] - vorher[0], jetzt[1] - vorher[1]);
+      } else if (zeiger.size === 2) {
+        // Zwei Finger: Abstand zoomt, die Mitte verschiebt.
+        const [anderer] = [...zeiger.entries()].filter(([id]) => id !== event.pointerId).map(([, p]) => p);
+        const mitteVorher = [(vorher[0] + anderer[0]) / 2, (vorher[1] + anderer[1]) / 2];
+        const mitteJetzt = [(jetzt[0] + anderer[0]) / 2, (jetzt[1] + anderer[1]) / 2];
+        const abstandVorher = Math.hypot(vorher[0] - anderer[0], vorher[1] - anderer[1]);
+        const abstandJetzt = Math.hypot(jetzt[0] - anderer[0], jetzt[1] - anderer[1]);
+        rk.gezogen = true;
+        if (abstandVorher > 0) rkZoom(abstandJetzt / abstandVorher, ...mitteJetzt);
+        rkVerschieben(mitteJetzt[0] - mitteVorher[0], mitteJetzt[1] - mitteVorher[1]);
+      }
+      zeiger.set(event.pointerId, jetzt);
+    });
+    const loslassen = event => zeiger.delete(event.pointerId);
+    window.addEventListener("pointerup", loslassen);
+    window.addEventListener("pointercancel", loslassen);
+    // Nach dem Ziehen löst das Loslassen keinen Klick auf einen Ort aus.
+    box.addEventListener("click", event => {
+      if (!rk.gezogen) return;
+      event.stopPropagation();
+      event.preventDefault();
+      rk.gezogen = false;
+    }, true);
+    box.addEventListener("dblclick", event => {
+      event.preventDefault();
+      rkZoom(2, ...punktIm(event));
+    });
+    box.addEventListener("keydown", event => {
+      if (event.target !== box) return;
+      const [cw, ch] = rkRahmen();
+      const schritte = { ArrowLeft: [cw * 0.15, 0], ArrowRight: [-cw * 0.15, 0], ArrowUp: [0, ch * 0.15], ArrowDown: [0, -ch * 0.15] };
+      if (schritte[event.key]) rkVerschieben(...schritte[event.key]);
+      else if (event.key === "+" || event.key === "=") rkZoom(1.6);
+      else if (event.key === "-") rkZoom(1 / 1.6);
+      else return;
+      event.preventDefault();
+    });
+    window.addEventListener("resize", () => {
+      if (el("reisekarte").open) rkAnwenden();
+    });
   }
 
   for (const opener of document.querySelectorAll("[data-hub-open]")) opener.addEventListener("click", openHub);
@@ -1918,26 +2217,7 @@
           ? "Das Runentor bleibt als Versorgungsweg erhalten."
           : "Das Tor ist eingestürzt. Die Bewohner müssen ihre Vorräte nun über den unteren Steig tragen."));
       }
-      if (state.scene === "supply-post") {
-        const stock = element("div");
-        stock.className = "actions trade-list";
-        stock.append(element("h3", "Kaufen · " + state.silver + " Silber verfügbar"));
-        for (const [id, price] of Object.entries(world.shop)) {
-          const gear = world.gear[id];
-          const supply = world.supplies[id];
-          const effect = gear?.power ? gear.power + " Grundschaden" : gear?.armor ? gear.armor + " Rüstung" :
-            gear?.magic ? "+" + gear.magic + " Glutschaden" : gear?.travel ? "+" + gear.travel + " auf List unterwegs" :
-            supply?.heal ? "+" + supply.heal + " LP" : "+" + supply.ember + " Glut";
-          button(stock, world.items[id] + " · " + effect + " · " + price + " Silber", () => update(rules.trade(state, id, true)),
-            { disabled: price > state.silver || state.inventory.length >= rules.itemCap - 20 });
-        }
-        const trophies = Object.entries(world.salePrices).filter(([id]) => state.inventory.includes(id));
-        if (trophies.length) stock.append(element("h3", "Trophäen verkaufen"));
-        for (const [id, price] of trophies) {
-          button(stock, world.items[id] + " · +" + price + " Silber", () => update(rules.trade(state, id, false)));
-        }
-        content.append(stock);
-      }
+      if (state.scene === "supply-post") content.append(handelBlock());
       if (state.scene === "arrival") {
         content.append(element("h3", "Folgen deiner Reise"));
         const { field, ford, delivery } = rules.ending(state);
@@ -2095,7 +2375,11 @@
     krise.className = "welt-krise";
     krise.append(element("h3", "Krise und Aufhänger"));
     const reihe = startpunkte.fraktionen[state.faction];
-    if (reihe) krise.append(element("p", "Fraktionsreihe „" + reihe.motto + "“ · Akt 1, „" + reihe.akte[0] + "“ · Die Akte werden noch gebaut."));
+    const haupt = weltHauptquest();
+    if (haupt) krise.append(haupt);
+    else if (reihe) krise.append(element("p", "Fraktionsreihe „" + reihe.motto + "“ · Akt 1, „" + reihe.akte[0] + "“ · Die Akte werden noch gebaut."));
+    const plan = weltReihe(state.faction);
+    if (plan) krise.append(plan);
     for (const line of weltKrisen()) {
       const warn = element("p", line);
       warn.className = "welt-alarm";
@@ -2119,6 +2403,10 @@
       if (rules.handlungHier(state)) button(krise, "Zur Handlung zurückkehren", () => update(rules.zurHandlung(state)), { story: true });
     }
     content.append(krise);
+    const offen = weltAuftraege();
+    if (offen) content.append(offen);
+    const aushang = weltAushang(ort);
+    if (aushang) content.append(aushang);
 
     // Bereiche A bis D
     const tabs = element("div");
@@ -2153,6 +2441,160 @@
     content.append(tabs, panel);
   }
 
+  // Fraktionsreihe als Plan (Gemini-Aufbau, spiel/nebenquests.js). Nur lesbar, die Akte sind noch nicht spielbar.
+  function weltReihe(fraktion) {
+    const reihe = typeof nebenquests !== "undefined" ? nebenquests.reihe(fraktion) : null;
+    if (!reihe) return null;
+    const box = element("details");
+    box.className = "welt-aushang welt-reihe";
+    box.append(element("summary", "Hauptquest · Kapitel " + reihe.kapitel + " · " + reihe.akte.length + " Akte"));
+    box.append(element("p", "Prolog „" + reihe.prolog.titel + "“: " + reihe.prolog.text));
+    const liste = element("ul");
+    for (const akt of reihe.akte) {
+      const item = element("li");
+      const kopf = element("p");
+      kopf.append(element("strong", "Akt " + akt.nr + " · " + akt.titel), " · Stufe " + akt.stufen +
+        (akt.freieReihenfolge ? " · freie Reihenfolge (empfohlen als " + akt.empfohlen + "., mit " + akt.schwester + ")" : ""));
+      item.append(kopf, element("p", akt.ort + (akt.volksquest ? " · enthält " + akt.volksquest : "")));
+      if (akt.vermerk) {
+        const vermerk = element("p", akt.vermerk);
+        vermerk.className = "welt-aushang-hinweis";
+        item.append(vermerk);
+      }
+      const schritte = element("ol");
+      for (const schritt of akt.schritte) {
+        const zeile = element("li");
+        zeile.append(element("strong", schritt.titel), " (" + schritt.ort + "): " + schritt.text);
+        if (schritt.vermerk) {
+          const vermerk = element("p", schritt.vermerk);
+          vermerk.className = "welt-aushang-hinweis";
+          zeile.append(vermerk);
+        }
+        schritte.append(zeile);
+      }
+      item.append(schritte);
+      for (const option of akt.wahl) item.append(element("p", "Wahl: " + option.label + " → " + option.folge));
+      liste.append(item);
+    }
+    box.append(liste);
+    box.append(element("p", "Fraktions-Spezialisierung (" + reihe.spezialisierung.ausloeser + ", " + reihe.spezialisierung.zusaetzlich + "): " +
+      reihe.spezialisierung.optionen.map(o => o.name + " – " + o.bonus).join(" · ")));
+    box.append(element("p", "Begleiter: " + reihe.begleiter.map(b => b.name + " (" + b.rolle + ", " +
+      (klassen.fraktionen[fraktion]?.klassen[b.klasse]?.name ?? b.klasse) + ", " + knoten.get(b.ort).name +
+      ", Akt " + b.akt + ")").join(", ")));
+    const stand = element("p", "Plan der Hauptquest. " + (rules.hauptquest(state) ? "Akt 1 ist spielbar, ab Akt 2 folgen die Akte noch." : "Die Akte werden noch gebaut."));
+    stand.className = "welt-aushang-stand";
+    box.append(stand);
+    return box;
+  }
+
+  // Hauptquest Akt 1 (Kronreich und Orden): aktueller Schritt, Ausführen am richtigen Ort, Wahl am Ende des Akts.
+  function weltHauptquest() {
+    const haupt = rules.hauptquest(state);
+    if (!haupt) return null;
+    const box = element("div");
+    box.className = "welt-hauptquest";
+    box.append(element("h4", "Hauptquest · Akt " + haupt.akt + ", „" + haupt.titel + "“ · Stufe " + haupt.stufen));
+    if (haupt.fertig) {
+      const wahl = nebenquests.reihe(state.faction).akte[0].wahl.find(option => option.id === haupt.wahl);
+      box.append(element("p", "Abgeschlossen" + (wahl ? ": " + wahl.label + "." : ".") + " Akt 2 wird noch gebaut."));
+      return box;
+    }
+    const schritt = haupt.schritt;
+    const kopf = element("p");
+    kopf.append(element("strong", "Schritt " + schritt.nr + " von " + schritt.von + " · " + schritt.titel), " · " + knoten.get(schritt.ort).name);
+    box.append(kopf, element("p", schritt.text));
+    if (schritt.wahl) {
+      if (state.knoten === schritt.ort) box.append(element("p", "Entscheide, wie Akt " + haupt.akt + " endet:"));
+      for (const option of schritt.wahlen) {
+        const grund = rules.hauptGrund(state, option.id);
+        box.append(element("p", option.label + " → " + option.folge));
+        button(box, option.label + (grund ? " · " + grund : ""), () => update(rules.hauptWeiter(state, option.id)),
+          { disabled: Boolean(grund), story: true });
+      }
+    } else {
+      button(box, (schritt.gegner ? "Kämpfen · " : "Weiter · ") + schritt.titel + (haupt.grund ? " · " + haupt.grund : ""),
+        () => update(rules.hauptWeiter(state)), { disabled: Boolean(haupt.grund), story: true });
+    }
+    return box;
+  }
+
+  const lohnText = (auftrag, index) => {
+    const [haupt, oder] = auftrag.lohn.split(/\s*\(oder\s*/);
+    return index ? oder.replace(/\)$/, "") : haupt;
+  };
+  const auftragOrt = (auftrag) => auftrag.spiel.weg ? "unterwegs auf " + auftrag.spiel.weg + " " + nebenquests.wegName(auftrag.spiel.weg)
+    : "in " + knoten.get(auftrag.ort).name;
+
+  // Angenommene Aufträge an allen Orten, mit Ausführen-Knopf am richtigen Ort.
+  function weltAuftraege() {
+    const offen = rules.auftraege(state, "aktiv");
+    const erledigt = rules.auftraege(state, "erledigt");
+    if (!offen.length && !erledigt.length) return null;
+    const box = element("details");
+    box.className = "welt-aushang welt-auftraege";
+    box.open = offen.length > 0;
+    box.append(element("summary", "Deine Aufträge · " + offen.length + " offen · " + erledigt.length + " erledigt"));
+    const liste = element("ul");
+    for (const auftrag of offen) {
+      const item = element("li");
+      const kopf = element("p");
+      kopf.append(element("strong", auftrag.titel), " · " + auftragOrt(auftrag));
+      item.append(kopf, element("p", auftrag.text), element("p", "Lohn: " + lohnText(auftrag, auftrag.wahl)));
+      if (auftrag.spiel.weg) item.append(element("p", "Reise über diesen Weg, dann stellen sich dir die Gegner."));
+      else button(item, (auftrag.spiel.gegner ? "Auftrag ausführen · Kampf" : "Auftrag ausführen") +
+        (auftrag.ausfuehren ? " · " + auftrag.ausfuehren : ""), () => update(rules.auftragAusfuehren(state, auftrag.id)),
+        { disabled: Boolean(auftrag.ausfuehren), story: true });
+      liste.append(item);
+    }
+    if (!offen.length) liste.append(element("li", "Keine offenen Aufträge."));
+    box.append(liste);
+    if (erledigt.length) box.append(element("p", "Erledigt: " + erledigt.map(auftrag => auftrag.titel).join(", ") + "."));
+    return box;
+  }
+
+  // Aushang: Nebenquests des Ortes (Gemini-Ausarbeitung, spiel/nebenquests.js). Kronreich- und Orden-Helden nehmen sie an.
+  function weltAushang(ort) {
+    const eintrag = typeof nebenquests !== "undefined" ? nebenquests.fuerOrt(ort.id) : null;
+    if (!eintrag?.auftraege.length) return null;
+    const spielbar = Object.fromEntries(rules.aushang(state).map(auftrag => [auftrag.id, auftrag]));
+    const box = element("details");
+    box.className = "welt-aushang";
+    const stufen = nebenquests.stufenFuer(ort.id, state.faction);
+    box.append(element("summary", "Aushang in " + ort.name + " · " + eintrag.auftraege.length + " Aufträge" + (stufen ? " · Stufe " + stufen : "")));
+    const stand = element("p", eintrag.stand + (eintrag.weg ? " Dorfweg " + eintrag.weg + ": " + nebenquests.wegName(eintrag.weg) + "." : ""));
+    stand.className = "welt-aushang-stand";
+    box.append(stand);
+    const liste = element("ul");
+    for (const auftrag of eintrag.auftraege) {
+      const item = element("li");
+      const kopf = element("p");
+      kopf.append(element("strong", auftrag.titel), " · " + auftrag.art);
+      item.append(kopf, element("p", auftrag.text), element("p", "Lohn: " + auftrag.lohn));
+      const wege = nebenquests.wegeImText(auftrag.text + " " + auftrag.lohn);
+      if (wege.length) item.append(element("p", "Wege: " + wege.map(k => k + " " + nebenquests.wegName(k)).join(", ")));
+      if (auftrag.hinweis) {
+        const hinweis = element("p", auftrag.hinweis);
+        hinweis.className = "welt-aushang-hinweis";
+        item.append(hinweis);
+      }
+      const spiel = spielbar[auftrag.id];
+      if (spiel?.status) {
+        const stand = element("p", spiel.status === "erledigt" ? "✓ Erledigt" : "Angenommen · " + auftragOrt(spiel));
+        stand.className = "welt-auftrag-stand";
+        item.append(stand);
+      } else if (spiel && !spiel.grund) {
+        item.append(element("p", (spiel.spiel.gegner ? "Kampf auf Stufe " + (nebenquests.stufenFuer(ort.id, state.faction) ?? "") + " · " : "Ohne Kampf · ") +
+          auftragOrt(spiel) + " · " + rules.auftragEp + " EP"));
+        spiel.spiel.lohn.forEach((_, index) => button(item, "Annehmen" + (spiel.spiel.lohn.length > 1 ? " · " + lohnText(spiel, index) : ""),
+          () => update(rules.auftragAnnehmen(state, auftrag.id, index))));
+      }
+      liste.append(item);
+    }
+    box.append(liste);
+    return box;
+  }
+
   function weltHofstaat(panel, ort) {
     panel.append(element("h3", "Hofstaat und Diplomatie"));
     const vertraege = (state.vertraege ?? []).map(id => klassen.fraktionen[id].name);
@@ -2172,6 +2614,29 @@
     if (!renderCandidates(panel)) {
       panel.append(element("p", "Hier wartet niemand auf Anwerbung. Söldner warten in Kornwik, Heidvang, Eiswacht und Glutberg."));
     }
+  }
+
+  // Händler: Zeugkammer von Eiswacht und Städte mit Zentrallager auf der Weltebene (rules.handelOffen).
+  function handelBlock() {
+    const stock = element("div");
+    stock.className = "actions trade-list";
+    stock.append(element("h3", "Kaufen · " + state.silver + " Silber verfügbar"));
+    for (const id of Object.keys(world.shop)) {
+      const price = rules.preis(state, id, true);
+      const gear = world.gear[id];
+      const supply = world.supplies[id];
+      const effect = gear?.power ? gear.power + " Grundschaden" : gear?.armor ? gear.armor + " Rüstung" :
+        gear?.magic ? "+" + gear.magic + " Glutschaden" : gear?.travel ? "+" + gear.travel + " auf List unterwegs" :
+        supply?.heal ? "+" + supply.heal + " LP" : "+" + supply.ember + " Glut";
+      button(stock, world.items[id] + " · " + effect + " · " + price + " Silber", () => update(rules.trade(state, id, true)),
+        { disabled: price > state.silver || state.inventory.length >= rules.itemCap - 20 });
+    }
+    const trophies = Object.keys(world.salePrices).filter(id => state.inventory.includes(id)).map(id => [id, rules.preis(state, id, false)]);
+    if (trophies.length) stock.append(element("h3", "Trophäen verkaufen"));
+    for (const [id, price] of trophies) {
+      button(stock, world.items[id] + " · +" + price + " Silber", () => update(rules.trade(state, id, false)));
+    }
+    return stock;
   }
 
   function weltLager(panel, ort) {
@@ -2198,6 +2663,7 @@
     panel.append(element("p", lager ? lager + ". Hier kannst du Gegenstände einlagern und den Rucksack ausbauen."
       : "Kein Zentrallager. Es steht in allen Hauptstädten und in den Städten deiner Fraktion."));
     button(panel, lager ? "Zentrallager und Rucksack öffnen" : "Rucksack öffnen", () => openHub());
+    if (rules.handelOffen(state)) panel.append(handelBlock());
     panel.append(element("h3", "Schmied und Heiler"));
     panel.append(element("p", "Handwerk aus Trophäen und Flora folgt mit der Flora-und-Fauna-Ausarbeitung für alle Gebiete."));
   }
@@ -2217,7 +2683,8 @@
   function weltAufbruch(panel, ort) {
     panel.append(element("h3", "Aufbruch"));
     panel.append(element("p", "Jede Reise ist eine Runde: Die Weltleisten ändern sich, und unterwegs würfelt das Land eine Begegnung aus. " +
-      "Kernland ist zu 70 % ruhig, Grenzland, Pässe und Seewege nur zu 40 %."));
+      "Jeder Weg hat seine eigene Gefahr für einen Hinterhalt. Die Reisekarte zeigt alle Wege auf einen Blick."));
+    button(panel, "Reisekarte öffnen", openReisekarte);
     const list = element("ul");
     list.className = "welt-ziele";
     const ziele = rules.reiseZiele(state).sort((a, b) => (a.ziel.typ === "dorf") - (b.ziel.typ === "dorf") || a.ziel.name.localeCompare(b.ziel.name, "de"));
@@ -2228,11 +2695,18 @@
       head.className = "welt-ziel-head";
       head.append(element("strong", weg.ziel.name), element("span", knoten.typNamen[weg.ziel.typ] + " · " + klassen.fraktionen[weg.ziel.fraktion].name));
       const kosten = [weg.kostenRessource ? weg.kostenRessource + " " + rules.resourceName(state) : "", weg.kostenGold ? weg.kostenGold + " Silber" : ""].filter(Boolean).join(" + ");
-      const risiko = weg.sicherheit === "kernland" ? "Risiko gering" : "Risiko hoch";
+      const risiko = "Hinterhalt " + rkPercent(weg.gefahr) + (weg.gegner.length ? " (" + weg.gegner.join(", ") + ")" : "");
       const info = element("p", knoten.kantenNamen[weg.kantenTyp] + (weg.pass ? " (" + weg.pass + ")" : "") + " · " +
         knoten.sicherheitNamen[weg.sicherheit] + " · " + risiko + " · " + kosten +
-        (weg.probe ? " · Probe auf Willenskraft oder Intelligenz, Glut +" + weg.glut : ""));
+        (weg.probe ? " · Probe auf Willenskraft oder Intelligenz, Glut +" + weg.glut : "") +
+        (weg.rabatt ? " · 1 Vorrat günstiger dank Auftrag" : ""));
       item.append(head, info);
+      if (weg.auftrag) {
+        const auftrag = rules.auftraege(state).find(entry => entry.id === weg.auftrag);
+        const hinweis = element("p", "Auftrag unterwegs: " + auftrag.titel + ". Auf diesem Weg stellen sich dir die Gegner.");
+        hinweis.className = "welt-aushang-hinweis";
+        item.append(hinweis);
+      }
       if (weg.letzterVorrat && !weg.grund) {
         const warn = element("p", "Achtung: Diese Reise braucht deinen letzten Vorrat. Bei 0 ist das Spiel verloren.");
         warn.className = "welt-alarm";
@@ -2279,6 +2753,9 @@
         } else if (status === "ready") {
           button(candidate, companion.name + " mitnehmen", () => update(rules.recruit(state, id)),
             { disabled: state.party.length >= rules.partyLimit });
+        } else if (status === "auftrag") {
+          candidate.append(element("p", "Erst nach dem Auftrag „" + nebenquests.fuerOrt(companion.knoten).auftraege
+            .find(auftrag => auftrag.id === companion.auftrag).titel + "“ am Aushang von " + knoten.get(companion.knoten).name + "."));
         } else if (status === "promise") {
           candidate.append(element("p", world.recruitmentQuests[id].text + " Frist: " + world.recruitmentQuests[id].turns + " Spielzüge ab Annahme."));
           button(candidate, "Auftrag annehmen · " + world.recruitmentQuests[id].title, () => update(rules.promise(state, id)));
@@ -2438,6 +2915,7 @@
     renderScene();
     renderMap();
     if (el("character-sheet").open) renderSheet();
+    if (el("reisekarte").open) renderReisekarte();
   }
 
   for (const [id, data] of Object.entries(klassen.voelker)) volk.add(new Option(data.name, id));

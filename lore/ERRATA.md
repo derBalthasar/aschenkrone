@@ -38,7 +38,7 @@ Alle Stufenangaben aus dem früheren 100-Stufen-Entwurf werden auf die Erfahrung
 | Ghor-Mahr, Ork-Lande und Tiefer Stollen | 11–15 | Akt 3–4 |
 | Ordensland (Eispass, Glutberg) und Eryndor | 15–20 | Akt 5 bis Weltquest |
 
-Alphatiere ohne eigene Werte (zum Beispiel Skarn, Mutter Tiefe, Kharrak, Der Weiße Hirsch) nutzen die Formel für Anführer aus Teil IV (S. 146): LP = 30 × Gebietsstufe, Schaden = 4 + Gebietsstufe, 2 Aktionen pro Runde. Im Spiel liefert das `kampf.alphaWerte(gebietsstufe, helden)`.
+Alphatiere ohne eigene Werte (zum Beispiel Skarn, Die Schwarze Krake, Kharrak, Der Weiße Hirsch) nutzen die Formel für Anführer aus Teil IV (S. 146): LP = 30 × Gebietsstufe, Schaden = 4 + Gebietsstufe, 2 Aktionen pro Runde. Im Spiel liefert das `kampf.alphaWerte(gebietsstufe, helden)`.
 
 ## 5. Teil II (S. 30, 70, 101) · Kult der Bleichen Ewigkeit
 

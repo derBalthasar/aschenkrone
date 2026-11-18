@@ -186,8 +186,9 @@ const rules = (() => {
       storage: [],
       xp: 0, silver: 5, training: {}, stufenpunkte: 0, ressource: vorratStart, rewards: [],
       weltLeisten: { ...leistenStart }, runde: 0, knoten: null, handlung: null, vertraege: [], ertraege: {}, niederlage: null,
+      weltAuftraege: {}, hauptquest: null,
       party: [], companionEquipment: {}, partyVitals: {}, heroStatus: {}, companionXp: {},
-      rucksack: 0, guertel: Array(beltSize).fill(null),
+      rucksack: 0, guertel: Array(beltSize).fill(null), relikt: null,
       relationships: {}, factionRuf: {}, companionQuests: {}, crafted: [], questClock: 0, questLog: {},
       marks: [], journal: [], combat: null,
     };
@@ -325,6 +326,10 @@ const rules = (() => {
     state.umschulung ??= false;
     state.rausch ??= false;
     state.storage ??= [];
+    state.relikt ??= null;
+    for (const liste of [state.inventory, state.storage]) if (Array.isArray(liste)) {
+      liste.forEach((id, index) => { if (own(alteRelikte, id)) liste[index] = alteRelikte[id]; });
+    }
     state.rucksack ??= 0;
     state.companionXp ??= {};
     state.guertel = Array.from({ length: beltSize }, (_, index) => {
@@ -349,6 +354,8 @@ const rules = (() => {
     state.vertraege ??= [];
     state.ertraege ??= {};
     state.niederlage ??= null;
+    state.weltAuftraege ??= {};
+    state.hauptquest ??= null;
     create(state.name, state.faction, state.appearance, state.variant, state.role, state.build);
     const combat = state.combat;
     const validList = (value, check, limit) => Array.isArray(value) && value.length <= limit && value.every(check);
@@ -373,7 +380,14 @@ const rules = (() => {
         !validList(state.vertraege, id => own(K.fraktionen, id) && id !== state.faction, 14) ||
         new Set(state.vertraege).size !== state.vertraege.length ||
         !isRecord(state.ertraege) || !Object.entries(state.ertraege).every(([id, runde]) => N.get(id)?.typ === "dorf" && intBetween(runde, 0, state.runde)) ||
-        (state.niederlage !== null && !own(niederlagen, state.niederlage)) || ((state.scene === "weltende") !== (state.niederlage !== null)) ||
+        (state.niederlage !== null && !own(niederlagen, state.niederlage)) ||
+        !validRecord(state.weltAuftraege, auftragIndex, entry => isRecord(entry) && ["aktiv", "erledigt"].includes(entry.status) &&
+          intBetween(entry.wahl, 0, 1)) ||
+        !Object.entries(state.weltAuftraege).every(([id, entry]) => entry.wahl < auftragIndex[id].spiel.lohn.length) ||
+        (state.hauptquest !== null && !(hauptPlan[state.faction] && isRecord(state.hauptquest) &&
+          intBetween(state.hauptquest.schritt, 0, hauptPlan[state.faction].length) &&
+          (state.hauptquest.wahl === null || own(wahlFolgen, state.hauptquest.wahl)) &&
+          (state.hauptquest.schritt < hauptPlan[state.faction].length || state.hauptquest.wahl !== null))) || ((state.scene === "weltende") !== (state.niederlage !== null)) ||
         !validList(state.rewards, (id) => typeof id === "string" && id.length <= 50, 100) ||
         !validList(state.party, (id) => own(world.companions, id), 5) ||
         new Set(state.party).size !== state.party.length ||
@@ -409,6 +423,7 @@ const rules = (() => {
         !Object.keys(state.companionEquipment).every(id => state.party.includes(id)) ||
         Object.keys(world.gear).some(id => assigned(state, id) > state.inventory.filter(item => item === id).length) ||
         !validList(state.marks, (id) => typeof id === "string" && id.length <= 40, 100) ||
+        (state.relikt !== null && !(own(relikte, state.relikt) && reliktErlaubt(state.faction, state.relikt))) ||
         !validList(state.journal, (entry) => typeof entry === "string" && entry.length <= 300, 16) ||
         (state.health === 0) !== (state.scene === "defeat") ||
         (combat !== null && !validCombat(state, combat))) {
@@ -419,7 +434,7 @@ const rules = (() => {
       for (const id of waiting) if (state.companionEquipment) delete state.companionEquipment[id];
       if (state.combat) {
         // Die Gegnerreihe schrumpft auf die kleinere Gruppe, verlorene LP bleiben verloren.
-        const fresh = lineup(state.combat.id, state.party.length);
+        const fresh = lineup(state.combat.id, state.party.length, state.combat.gegnerStufe ?? null);
         state.combat.feinde = state.combat.feinde.slice(0, fresh.length).map((foe, index) =>
           ({ ...foe, max: fresh[index].max, lp: Math.min(foe.lp, fresh[index].max) }));
         // Ein entfallender Gegnerplatz darf einen laufenden Kampf nicht ohne Ziel lassen.
@@ -519,7 +534,9 @@ const rules = (() => {
     if (state.combat || !state.health) return [];
     return Object.entries(world.companions).filter(([id, companion]) =>
       companion.klasse !== state.role && !state.party.includes(id) &&
-      (companion.soeldner ? mercenaryHere(state, companion) : companion.scenes.includes(state.scene)));
+      (companion.soeldner ? mercenaryHere(state, companion)
+        : companion.auftrag ? state.scene === "weltknoten" && state.knoten === companion.knoten && companion.fraktion === state.faction
+        : companion.scenes.includes(state.scene)));
   }
 
   // Errata 9: Volksgrenzen. Untote nehmen keine Lebenden auf und umgekehrt, Orks und Zwerge reisen nie zusammen.
@@ -553,6 +570,10 @@ const rules = (() => {
     if (world.companions[id].soeldner) {
       if (!compatible(state, id)) return "incompatible";
       return state.companionQuests?.[id]?.status === "done" ? "ready" : "hire";
+    }
+    // Begleiter aus Aufträgen am Aushang: bereit, sobald ihr Auftrag erledigt ist.
+    if (world.companions[id].auftrag) {
+      return state.weltAuftraege?.[world.companions[id].auftrag]?.status === "erledigt" ? "ready" : "auftrag";
     }
     const bond = relationship(state, id);
     if (attitude(state, id) !== "open") return attitude(state, id);
@@ -844,11 +865,14 @@ const rules = (() => {
     }
   }
 
+  // Händler: Zeugkammer von Eiswacht und jede Stadt mit Zentrallager auf der Weltebene.
+  const handelOffen = (state) => Boolean(!state.combat && state.health > 0 &&
+    (state.scene === "supply-post" || (state.scene === "weltknoten" && storageSite(state))));
   function trade(previous, id, buying) {
-    if (previous.scene !== "supply-post" || previous.combat || !previous.health) return previous;
+    if (!handelOffen(previous)) return previous;
     const prices = buying ? world.shop : world.salePrices;
     if (!own(prices, id)) return previous;
-    const price = prices[id];
+    const price = preis(previous, id, buying);
     const index = previous.inventory.indexOf(id);
     if (!buying && assigned(previous, id) >= previous.inventory.filter(item => item === id).length) return previous;
     if (buying ? previous.silver < price || previous.inventory.length >= itemCap - 20 : index === -1) return previous;
@@ -998,6 +1022,7 @@ const rules = (() => {
     if (slot) return slot;
     if (own(world.supplies, id)) return "supply";
     if (questItems.has(id)) return "quest";
+    if (own(relikte, id)) return "relikt";
     return "trophy";
   }
 
@@ -1351,6 +1376,15 @@ const rules = (() => {
       arrive(state, "defeat");
       return state;
     }
+    if (choice.welt) {
+      // Kronreich und Orden beginnen Akt 1 in ihrer Hauptstadt. Die Geschichte um Kornwik wartet dort, bis der Held hinreist.
+      arrive(state, choice.to);
+      state.handlung = { szene: choice.to, knoten: "kornwik" };
+      state.knoten = choice.welt;
+      state.scene = "weltknoten";
+      state.hauptquest ??= { schritt: 0, wahl: null };
+      return state;
+    }
     if (choice.fight) {
       startFight(state, choice.fight);
       if (!state.health) return state;
@@ -1381,7 +1415,7 @@ const rules = (() => {
       // Optionale Probe auf List oder Fernkampf. Misslingt sie, flieht das Tier ohne Folgen.
       const key = skillValue(state, "fernkampf") > skillValue(state, "list") ? "fernkampf" : "list";
       const dice = 1 + Math.floor(travelDice() * 20);
-      const bonus = skillValue(state, key);
+      const bonus = skillValue(state, key) + reliktWert(state, "partyPerception");
       const passed = dice + bonus >= 12;
       note(state, "Unterwegs kreuzt ein Rothirsch den Weg. " + K.fertigkeiten[key].name + " " + dice + " + " + bonus + " gegen 12. " +
         (passed ? "Du sammelst am Wegrand Galgenwurz, während das Tier äst." : "Das Tier flieht ins Unterholz."));
@@ -1400,7 +1434,7 @@ const rules = (() => {
   function canEvade(state) {
     const combat = state.combat;
     return Boolean(combat?.hinterhalt && combat.round === 0 &&
-      (skillValue(state, "list") >= 3 || ["spaeher", "schurke"].includes(state.role)));
+      (skillValue(state, "list") + reliktWert(state, "partyPerception") >= 3 || ["spaeher", "schurke"].includes(state.role)));
   }
 
   function markDeed(state, mark) {
@@ -1523,6 +1557,8 @@ const rules = (() => {
     return state;
   }
 
+  // Nach Abschluss von Akt 5 (Quest-Stufe 5) steht die Welt offen.
+  const uebersee = 5;
   // Seewege brauchen einen Hafen am Abfahrtsort, der dir gehört oder einem Vertragspartner.
   function schiffBereit(state, ort) {
     return ort.hatHafen && (ort.fraktion === state.faction || (state.vertraege ?? []).includes(ort.fraktion));
@@ -1538,6 +1574,12 @@ const rules = (() => {
         return ort.hatHafen ? "kein Schiff: Handelsvertrag mit " + K.fraktionen[ort.fraktion].name + " nötig" : "kein Hafen";
       }
       if (state.silver < weg.kostenGold) return "zu wenig Silber";
+      // Henry, 18. 11. 2026 (Wegenetz der Menschen): Akt 5 öffnet das nächste Kapitel und endet mit der Möglichkeit,
+      // die Welt zu bereisen. Freie Übersee-Fahrten zu fremden Völkern gibt es erst danach.
+      const ziel = N.get(zielId);
+      if (people(state.faction) === "menschen" && people(ziel.fraktion) !== "menschen" && (state.questStufe ?? 0) < uebersee) {
+        return "Übersee erst nach Akt 5";
+      }
     }
     if (weg.pass === "Zollpass" && leiste(state, "erzfieber") >= 50) return "Zollpass gesperrt (Erzfieber ab 50)";
     return null;
@@ -1545,17 +1587,42 @@ const rules = (() => {
 
   function reiseZiele(state) {
     if (state.scene !== "weltknoten") return [];
-    return N.get(state.knoten).verbindungen.map((weg) => ({ ...weg, ziel: N.get(weg.zielId), grund: reiseGrund(state, weg.zielId),
-      letzterVorrat: weg.kostenRessource >= (state.ressource ?? 0) }));
+    return N.get(state.knoten).verbindungen.map((weg) => {
+      const kosten = wegKosten(state, state.knoten, weg);
+      return { ...weg, kostenRessource: kosten, rabatt: kosten < weg.kostenRessource, ziel: N.get(weg.zielId),
+        grund: reiseGrund(state, weg.zielId), letzterVorrat: kosten >= (state.ressource ?? 0),
+        auftrag: wegAuftrag(state, state.knoten, weg.zielId), ...wegInfo(state.knoten, weg) };
+    });
   }
 
   // Reisebegegnungen auf Kanten des Knotennetzes. Werte gibt es bisher nur für die Tiere der Menschenlande.
   const jaegerNachFraktion = { kronreich: ["jagd-galgenkraehe", "jagd-grauwolf"], orden: ["jagd-grauwolf"], haefen: ["jagd-galgenkraehe"] };
-  function knotenBegegnung(state, weg, ziel) {
-    const table = world.encounterTables[weg.sicherheit === "kernland" ? "kernland" : "grenzland"];
+  // Wegenetz der Menschen (Henry, 18. 11. 2026): Jeder Weg hat seine eigene Gefahr (Anteil der Jäger-Begegnungen)
+  // und seine Gegner. Scheue Tiere bleiben bei 20 %, der Rest der Reise ist ruhig.
+  const wegDaten = (von, zu) => NQ?.daten.wegenetz?.wege[wegKennung(von, zu)] ?? null;
+  function begegnungsTabelle(weg, daten) {
+    if (!daten) return world.encounterTables[weg.sicherheit === "kernland" ? "kernland" : "grenzland"];
+    const jaeger = Math.round(daten.gefahr * 100);
+    return [[100 - jaeger - 20, "ruhig"], [20, "scheu"], [jaeger, "jaeger"]];
+  }
+  // Kennung, Hinterhalt-Gefahr und Gegner eines Weges für Aufbruch und Reisekarte.
+  function wegInfo(von, weg) {
+    const daten = wegDaten(von, weg.zielId);
+    const gefahr = daten ? daten.gefahr : begegnungsTabelle(weg, null).find(([, art]) => art === "jaeger")[0] / 100;
+    const gegner = weg.kantenTyp === "seeweg" ? [] : daten?.gegner.length ? daten.gegner : jaegerNachFraktion[N.get(weg.zielId).fraktion] ?? [];
+    return { kennung: wegKennung(von, weg.zielId), gefahr, gegner: gegner.map(id => world.fights[id].name) };
+  }
+  function knotenBegegnung(state, weg, ziel, von = null) {
+    const daten = von ? wegDaten(von, ziel.id) : null;
+    const table = begegnungsTabelle(weg, daten);
     const roll = Math.floor(travelDice() * 100);
     let summe = 0;
-    const kind = table.find(([weight]) => roll < (summe += weight))?.[1] ?? "ruhig";
+    let kind = table.find(([weight]) => roll < (summe += weight))?.[1] ?? "ruhig";
+    // Runenkompass: Auf Seewegen bleibt ein Teil der Gefahren aus.
+    if (weg.kantenTyp === "seeweg" && kind !== "ruhig" && travelDice() < reliktWert(state, "seaDangerReduction")) {
+      note(state, "Der " + relikte[state.relikt].name + " weist euch einen sicheren Kurs.");
+      kind = "ruhig";
+    }
     const pick = (list) => list[Math.floor(travelDice() * list.length) % list.length];
     if (kind === "ruhig") {
       note(state, "Unterwegs: " + pick(weg.sicherheit === "grenzland" ? [...world.quietTexts, ...world.rumorTexts] : world.quietTexts));
@@ -1564,14 +1631,14 @@ const rules = (() => {
     if (kind === "scheu") {
       const key = skillValue(state, "fernkampf") > skillValue(state, "list") ? "fernkampf" : "list";
       const dice = 1 + Math.floor(travelDice() * 20);
-      const bonus = skillValue(state, key);
+      const bonus = skillValue(state, key) + reliktWert(state, "partyPerception");
       const passed = dice + bonus >= 12;
       note(state, "Unterwegs kreuzt ein scheues Tier den Weg. " + K.fertigkeiten[key].name + " " + dice + " + " + bonus + " gegen 12. " +
         (passed ? "Du sammelst am Wegrand Galgenwurz, während es äst." : "Das Tier flieht ins Unterholz."));
       if (passed) receive(state, ["galgenwurz"]);
       return;
     }
-    const pool = weg.kantenTyp === "seeweg" ? null : jaegerNachFraktion[ziel.fraktion];
+    const pool = weg.kantenTyp === "seeweg" ? null : daten?.gegner.length ? daten.gegner : jaegerNachFraktion[ziel.fraktion];
     if (!pool) {
       note(state, weg.kantenTyp === "seeweg"
         ? "Unterwegs: Fremde Segel folgen euch bis zum Abend. Dann dreht das Schiff ab."
@@ -1580,7 +1647,8 @@ const rules = (() => {
     }
     const fight = travelDice() < 0.1 ? pick(world.encounterPools.alpha) : pick(pool);
     note(state, "Hinterhalt unterwegs: " + world.fights[fight].name + "!");
-    startFight(state, fight);
+    // Einzelgegner aus dem Wegenetz (Eishauer, Klippenwyrm) kämpfen auf Gebietsstufe wie im Auftrag.
+    startFight(state, fight, true, fight.startsWith("auftrag-") ? gebietsStufe(state, ziel.id) : null);
     if (state.combat) Object.assign(state.combat, { weiter: "weltknoten", hinterhalt: true });
     else if (!state.health) arrive(state, "defeat");
   }
@@ -1590,7 +1658,8 @@ const rules = (() => {
     const state = structuredClone(previous);
     const weg = N.verbindung(state.knoten, zielId);
     const ziel = N.get(zielId);
-    state.ressource -= weg.kostenRessource;
+    const von = state.knoten;
+    state.ressource -= wegKosten(state, von, weg);
     state.silver -= weg.kostenGold;
     if (weg.kostenGold) note(state, "Überfahrt nach " + ziel.name + " · " + weg.kostenGold + " Silber.");
     if (weg.probe) {
@@ -1610,7 +1679,13 @@ const rules = (() => {
     weltRunde(state);
     if (pruefeNiederlage(state)) return state;
     note(state, "Ankunft in " + ziel.name + " (" + N.typNamen[ziel.typ] + ", " + K.fraktionen[ziel.fraktion].name + ").");
-    knotenBegegnung(state, weg, ziel);
+    const unterwegs = wegAuftrag(state, von, zielId);
+    if (unterwegs) {
+      const auftrag = auftragIndex[unterwegs];
+      auftragKampfStarten(state, auftrag.spiel.gegner, unterwegs, auftrag.ort, "Unterwegs auf " + auftrag.spiel.weg + " · " + auftrag.titel);
+      return state;
+    }
+    knotenBegegnung(state, weg, ziel, von);
     return state;
   }
   const reise = (...args) => timedAction(args[0], reiseStep(...args));
@@ -1689,6 +1764,409 @@ const rules = (() => {
       note(state, "Der Vertrag mit einem Ork-Clan senkt die Ork-Bedrohung um 5.");
     }
     return state;
+  }
+
+  // ---- Aufträge am Aushang und Hauptquest Akt 1 (Kronreich und Orden, Gemini-Ausarbeitung, Henry 18. 11. 2026) ----
+  // Annehmen am Aushang des Auftragsorts, ausführen am Ort oder unterwegs auf dem genannten Weg, Abgabe sofort nach
+  // Erfolg. Gegner kämpfen auf der Gebietsstufe (nebenquests.stufenFuer, auf die Heldenstufe begrenzt), die Zahl der
+  // Gegner im Text ist erzählerisch. Jeder Auftrag gibt 50 EP, Akt 1 gibt 300 EP.
+  const NQ = typeof nebenquests !== "undefined" ? nebenquests : null;
+  const auftragEp = 50;
+  const auftragIndex = {};
+  if (NQ) for (const fraktion of ["kronreich", "orden", "haefen"]) {
+    for (const [ort, eintrag] of Object.entries(NQ.daten[fraktion]?.orte ?? {})) {
+      for (const auftrag of eintrag.auftraege) auftragIndex[auftrag.id] = { ...auftrag, ort, fraktion };
+    }
+  }
+  // Weg-Kennung (S01, D25 …) zu beiden Endpunkten, damit Reisen Wegaufträge und Wegrabatte finden.
+  const wegNachEnden = {};
+  for (const [kennung, [a, b]] of Object.entries(NQ?.daten.wegKennungen ?? {})) {
+    wegNachEnden[a + "|" + b] = kennung;
+    wegNachEnden[b + "|" + a] = kennung;
+  }
+  const wegKennung = (von, zu) => wegNachEnden[von + "|" + zu] ?? null;
+
+  // Trophäen aus Belohnungen sind verkäufliche Gegenstände. Ausrüstungswerte folgen später (Henry, Punkt 2).
+  const trophaeenPreis = 10;
+  for (const [id, name] of Object.entries(NQ?.daten.trophaeen ?? {})) {
+    world.items[id] ??= name;
+    world.salePrices[id] ??= trophaeenPreis;
+  }
+
+  // Gruppen-Relikte (Henry, 18. 11. 2026, quellen/henry/relikte.json): Höchstens ein Relikt ist aktiv und stärkt die
+  // ganze Gruppe. Es liegt getrennt von der Ausrüstung, wechselt nur außerhalb des Kampfes, und das vorige Relikt
+  // kehrt in den Rucksack zurück. Welche Art (Rune, Glut) eine Fraktion nutzen darf, legt factionPermissions fest;
+  // alle anderen verkaufen das Relikt.
+  const reliktSystem = NQ?.daten.relikte?.system ?? { factionPermissions: {} };
+  const relikte = Object.fromEntries((NQ?.daten.relikte?.gegenstaende ?? []).map(relikt => [relikt.id, relikt]));
+  for (const relikt of Object.values(relikte)) {
+    world.items[relikt.id] = relikt.name;
+    world.salePrices[relikt.id] = relikt.sellValue;
+  }
+  // Spielstände von heute Vormittag kannten die Runengegenstände noch als Trophäen.
+  const alteRelikte = { "beute-runenkompass": "relic_runenkompass", "beute-runenwaage": "relic_runenwaage",
+    "beute-runen-amulett": "relic_runen_amulett", "beute-runen-fokus": "relic_runen_fokus", "beute-glutlaterne": "relic_glutlaterne",
+    "beute-glutstein-amulett": "relic_glutstein_amulett" };
+  // Gegner, die mit Feuer oder Kälte angreifen (für Feuer- und Kälteschutz der Relikte).
+  const gegnerElement = { irrglut: "feuer", glutkaefer: "feuer", "jagd-irrglut": "feuer", "nacht-tiefgraeber": "feuer",
+    "auftrag-glutkaefer": "feuer", "auftrag-glutwurm": "feuer", "auftrag-irrglut": "feuer",
+    frostbaer: "kaelte", "auftrag-frostbaer": "kaelte", "auftrag-eishauer": "kaelte", "auftrag-schneeschleicher": "kaelte",
+    "auftrag-skarn": "kaelte" };
+  const reliktErlaubt = (faction, id) => (reliktSystem.factionPermissions[faction] ?? []).includes(relikte[id]?.relicType);
+  const reliktWert = (state, key) => (state.relikt && relikte[state.relikt]?.partyBuff[key]) || 0;
+  // Wirkungen, für die es im Spiel noch keine Regel gibt, bleiben vermerkt und greifen später.
+  const reliktWirkungen = {
+    seaDangerReduction: (v) => ["Gefahr auf Seewegen −" + Math.round(v * 100) + " %", true],
+    partyPerception: (v) => ["Wahrnehmung +" + v + " (Proben unterwegs, Hinterhalte erkennen)", true],
+    sellPriceBonus: (v) => ["Verkaufspreise +" + Math.round(v * 100) + " %", true],
+    buyPriceDiscount: (v) => ["Einkaufspreise −" + Math.round(v * 100) + " %", true],
+    partyResistance: (v) => ["Rüstung der ganzen Gruppe +" + v, true],
+    partyMorale: (v) => ["Moral +" + v + " (wirkt, sobald es Moral gibt)", false],
+    partyMagicPower: (v) => ["Glut- und Zauberschaden der Gruppe +" + v, true],
+    damageVsUndead: (v) => ["Schaden gegen Untote +" + Math.round(v * 100) + " %", true],
+    fireDamage: (v) => ["Feuerschaden der Gruppe +" + v, true],
+    nightAmbushImmunity: () => ["Schutz vor nächtlichen Hinterhalten (wirkt, sobald es Tag und Nacht gibt)", false],
+    fireResistance: (v) => ["Feuerangriffe −" + v + " Schaden", true],
+    coldDamageReduction: (v) => ["Kälteangriffe −" + Math.round(v * 100) + " % Schaden", true],
+  };
+  const reliktTexte = (id) => Object.entries(relikte[id].partyBuff).filter(([key]) => key !== "label")
+    .map(([key, value]) => reliktWirkungen[key]?.(value) ?? [key + " " + value, false]);
+
+  function reliktGrund(state, id) {
+    if (state.combat) return "nicht im Kampf";
+    if (!state.health) return "nur lebend";
+    if (id === null) return state.relikt ? null : "kein Relikt aktiv";
+    if (!own(relikte, id)) return "kein Relikt";
+    if (state.relikt === id) return "schon aktiv";
+    if (!state.inventory.includes(id)) return "nicht im Rucksack";
+    if (!reliktErlaubt(state.faction, id)) return relikte[id].relicType === "glut" ? "Glutrelikt: für deine Fraktion verboten" : "für deine Fraktion nicht nutzbar";
+    return null;
+  }
+
+  function setRelikt(previous, id) {
+    if (reliktGrund(previous, id)) return previous;
+    const state = structuredClone(previous);
+    const vorher = state.relikt;
+    if (id) state.inventory.splice(state.inventory.indexOf(id), 1);
+    state.relikt = id;
+    if (vorher) receive(state, [vorher]);
+    note(state, id ? relikte[id].name + " ist jetzt das Relikt der Gruppe: " + relikte[id].partyBuff.label + "." +
+      (vorher ? " " + relikte[vorher].name + " kehrt in den Rucksack zurück." : "")
+      : relikte[vorher].name + " kehrt in den Rucksack zurück. Die Gruppe trägt kein Relikt.");
+    return state;
+  }
+
+  function reliktStand(state) {
+    const eintrag = (id) => ({ id, name: relikte[id].name, art: relikte[id].relicType, label: relikte[id].partyBuff.label,
+      wirkungen: reliktTexte(id).map(([text, aktiv]) => ({ text, aktiv })), wert: relikte[id].sellValue,
+      grund: reliktGrund(state, id) });
+    return { aktiv: state.relikt ? eintrag(state.relikt) : null,
+      rucksack: [...new Set(state.inventory.filter(id => own(relikte, id)))].map(eintrag) };
+  }
+
+  // Preise beim Händler, mit der Runenwaage als aktivem Relikt.
+  function preis(state, id, buying) {
+    const grund = (buying ? world.shop : world.salePrices)[id];
+    if (grund === undefined) return null;
+    return buying ? Math.max(1, Math.round(grund * (1 - reliktWert(state, "buyPriceDiscount"))))
+      : Math.round(grund * (1 + reliktWert(state, "sellPriceBonus")));
+  }
+
+  // Gegner der Aufträge. Wo es den Gegner schon gibt, gelten seine Werte, sein Bild und sein Zusatzangriff.
+  const auftragKampf = (typ) => "auftrag-" + typ;
+  const gleicherGegner = { grauwoelfe: "grauwolf", galgenkraehen: "galgenkraehe", glutkaefer: "glutkaefer", keiler: "keiler",
+    flussschnapper: "schnapper", netzweberin: "netzweberin", irrglut: "irrglut", moorschlinger: "moorschlinger",
+    diealte: "moorschlinger", graufang: "grauwolf", frostbaer: "frostbaer", deserteure: "deserteure" };
+  const aehnlicherGegner = { wegelagerer: "deserteure", schmuggler: "deserteure", spione: "deserteure", kultisten: "deserteure",
+    kulthauptmann: "deserteure", orkvortrupp: "nacht-kronreich", urgash: "nacht-kronreich", aschenkraehen: "galgenkraehe",
+    skarn: "frostbaer", aschenmammut: "keiler", letztermammut: "keiler", orkpiraten: "nacht-kronreich" };
+  const menschenGegner = new Set(["kultisten", "schmuggler", "spione", "deserteure", "wegelagerer", "orkvortrupp", "kulthauptmann", "urgash",
+    "orkpiraten"]);
+  // Kapitän Urgash führt nur die Vorhut der Rostsegel. Er kämpft als Elite, damit Akt 1 auch allein fair bleibt
+  // (Kampfdokument: ein einzelner Held schafft 1 Elite, ein Anführer braucht eine Gruppe).
+  const auftragGegner = { ...(NQ?.daten.gegnerTypen ?? {}),
+    urgash: { name: "Kapitän Urgash", rang: "elite" } };
+  for (const [typ, gegner] of Object.entries(auftragGegner)) {
+    const id = auftragKampf(typ);
+    const gleich = gleicherGegner[typ];
+    const vorlage = world.creatures[gleich ?? aehnlicherGegner[typ]];
+    world.creatures[id] = { name: gegner.name, stats: [...(vorlage?.stats ?? [24, 7, 2, menschenGegner.has(typ) ? 5 : 6])],
+      ...(gleich && vorlage.image ? { image: vorlage.image } : {}) };
+    if (gegner.leader) world.enemyGroups[id] = { leader: gegner.leader, ally: gegner.ally };
+    const special = (gleich && world.fights[gleich]?.special) ?? (menschenGegner.has(typ)
+      ? { name: "Wuchtschlag", warning: (gegner.leader ?? gegner.name) + " holt zu einem schweren Schlag aus.", damage: 1 }
+      : { name: "Ansprung", warning: (gegner.leader ?? gegner.name) + " duckt sich zum Sprung.", damage: 1, bleeds: true });
+    world.fights[id] = { gegner: { rang: gegner.rang, stufe: 1, ...(gegner.anzahl ? { anzahl: gegner.anzahl } : {}) },
+      name: gegner.name, loot: [], random: true, special: { ...special }, alpha: Boolean(gegner.alpha),
+      victoryText: "Der Kampf ist gewonnen." };
+  }
+
+  // Begleiter aus den Begleiter-Aufträgen (Henry, Punkt 4): Grundwerte ihrer Klasse wie bei den bestehenden Gefährten.
+  const klassenWerte = { waechter: { health: 32, guard: 11 }, spaeher: { health: 28, damage: 10, airborne: 4 },
+    krieger: { health: 36, damage: 12 }, magier: { health: 24, damage: 13, fire: true }, heiler: { health: 26, heal: 12, cleanse: true },
+    schurke: { health: 26, guard: 8, damage: 4 } };
+  const begleiterTexte = {
+    kronhall_q10: ["sigrid", "Sigrid trägt noch das Wappen der Kronwache, obwohl man sie verstoßen hat. Seit ihr Name reingewaschen ist, will sie an deiner Seite für die Krone stehen."],
+    rosshag_q10: ["wulfgar", "Wulfgar führt den weißen Wildhengst, den ihr gemeinsam gezähmt habt. Er kennt jeden Pfad der Westmark."],
+    ulfsborg_q10: ["fenris", "Fenris spannt schweigend seinen Bogen. Der Plünderer, der seine Familie tötete, liegt im Wolfstal. Jetzt will er weiterziehen."],
+    aschenkloster_q10: ["halvar", "Bruder Halvar hat das Ordensbanner zurück. Seine Wunden sind verbunden, und auf seinem Schild glühen die Runen."],
+    brandstein_q10: ["gunhild", "Gunhild klopft den Schwefelstaub aus ihrer Robe. Seit der Runenkammer schuldet sie dir ihr Leben."],
+    perlvik_q10: ["karen", "Karen Salzklinge wischt das Salz von ihrer Harpune. Seit ihr den Hafen gemeinsam verteidigt habt, will sie mit dir auf See."],
+    nebelvik_q10: ["soren", "Sören Nebeltritt taucht aus dem Hafenrauch auf, als hätte er schon immer neben dir gestanden. Er kennt jede Schmugglerbucht der Küste."],
+    salzwacht_q10: ["halvor", "Zollhauptmann Halvor Eisentau hängt den Enterhaken an den Gürtel. Wer Salzwacht hält, sagt er, der hält auch eine Planke."],
+    nordwacht_q10: ["malte", "Malte hat den Wachturm gehalten, bis du kamst. Die Signalhörner bläst er nicht mehr allein."],
+  };
+  const begleiterNachAuftrag = {};
+  if (NQ) for (const fraktion of ["kronreich", "orden", "haefen"]) for (const begleiter of NQ.reihe(fraktion)?.begleiter ?? []) {
+    const [id, introduction] = begleiterTexte[begleiter.auftrag] ?? [];
+    if (!id || !auftragIndex[begleiter.auftrag]) continue;
+    begleiterNachAuftrag[begleiter.auftrag] = id;
+    world.companions[id] = { klasse: begleiter.klasse, name: begleiter.name, volk: "menschen", scenes: [], ...klassenWerte[begleiter.klasse],
+      auftrag: begleiter.auftrag, knoten: begleiter.ort, fraktion,
+      place: N.get(begleiter.ort).name + " · nach dem Auftrag „" + auftragIndex[begleiter.auftrag].titel + "“",
+      introduction, ability: begleiter.faehigkeit };
+  }
+
+  // Hauptquest Akt 1. Die Texte kommen aus der Fraktionsreihe, die Orte und Gegner legt der Plan fest.
+  const hauptPlan = {
+    kronreich: [
+      { schritt: 0, ort: "kronhall" },
+      { schritt: 1, ort: "hagenfels", gegner: "deserteure" },
+      { schritt: 2, ort: "westvik", wahl: true },
+    ],
+    orden: [
+      { schritt: 0, ort: "glutberg" },
+      { schritt: 1, ort: "lichtheim", gegner: "kultisten", titel: "Wachs aus Lichtheim",
+        text: "Im Bienental bei Lichtheim haben Kultisten das geweihte Wachs verdorben. Sie lauern noch zwischen den Stöcken." },
+      { schritt: 1, ort: "brandstein", gegner: "runenfresser", titel: "Schwefel aus Brandstein",
+        text: "In der Schwefelgrube bei Brandstein frisst ein Runenfresser die geweihten Steine. Ohne Schwefel bleiben die Runenbecken kalt." },
+      { schritt: 2, ort: "glutberg", wahl: true },
+    ],
+    // Freie Häfen: Start in Zollholm nach der Flucht aus Perlvik. Schritt 2 führt über M31 nach Möwenstad und M30 nach Silberholm,
+    // Schritt 3 über M40 zurück nach Perlvik (Gemini, 18. 11. 2026). Jede Überfahrt kostet 15 Silber.
+    haefen: [
+      { schritt: 0, ort: "zollholm", gegner: "schmuggler" },
+      { schritt: 1, ort: "moewenstad", gegner: "spione", titel: "Kuriere in Möwenstad",
+        text: "Über den Seeweg M31 bist du nach Möwenstad gesegelt. Im Hafen warten Kuriere mit verschlüsselten Briefen auf ein Schiff nach Norden. Fang sie ab, bevor sie ablegen." },
+      { schritt: 1, ort: "silberholm", titel: "Die Briefe der Stillen Feder",
+        text: "In Silberholm wartet eine Nachricht der Stillen Feder. Wer sie schreibt, bleibt im Dunkeln. Sie entschlüsselt die Briefe: Kult-Reeder schmuggeln Knochen aus dem Norden, und einer sitzt im Hafenthing von Perlvik." },
+      { schritt: 2, ort: "perlvik", wahl: true },
+    ],
+  };
+  // Folgen der Wahl am Ende von Akt 1 (Gemini). Freischaltungen und spätere Folgen werden als Marke gespeichert.
+  const wahlFolgen = {
+    kron_act1_fight: { gegner: "urgash", leisten: { orks: -5 } },
+    kron_act1_truce: { silber: 40 },
+    orden_act1_mercy: { vorrat: 10 },
+    orden_act1_wrath: { leisten: { untote: -5 } },
+    haefen_act1_guild: { vorrat: 10 },
+    haefen_act1_shadow: { silberLohn: 80 },
+  };
+  const hauptAkt = (fraktion) => NQ?.reihe(fraktion)?.akte[0] ?? null;
+  const hauptStand = (state) => state.hauptquest ?? { schritt: 0, wahl: null };
+  function hauptInfo(fraktion, index) {
+    const plan = hauptPlan[fraktion]?.[index];
+    const akt = hauptAkt(fraktion);
+    if (!plan || !akt) return null;
+    const quelle = akt.schritte[plan.schritt];
+    return { ...plan, titel: plan.titel ?? quelle.titel, text: plan.text ?? quelle.text, nr: index + 1, von: hauptPlan[fraktion].length,
+      wahlen: plan.wahl ? akt.wahl : [] };
+  }
+
+  // Gebietsstufe für Auftragsgegner: der Bereich des Aushangs, auf die Heldenstufe begrenzt.
+  function gebietsStufe(state, ortId) {
+    const held = level(state);
+    const text = NQ?.stufenFuer(ortId, state.faction);
+    if (!text) return held;
+    const bereiche = text.split(" oder ").map(teil => teil.split("-").map(Number));
+    const [min, max] = bereiche.find(([, hoch]) => held <= hoch) ?? bereiche[bereiche.length - 1];
+    return Math.max(min, Math.min(max, held));
+  }
+
+  function auftragKampfStarten(state, typ, auftragId, ortId, titel) {
+    const id = auftragKampf(typ);
+    const stufe = gebietsStufe(state, ortId);
+    note(state, titel + ": " + world.fights[id].name + " stellen sich dir · Stufe " + stufe + ".");
+    startFight(state, id, true, stufe);
+    if (state.combat) Object.assign(state.combat, { weiter: "weltknoten", auftrag: auftragId, gegnerStufe: stufe });
+    else if (!state.health) arrive(state, "defeat");
+  }
+
+  const imHub = (state) => state.scene === "weltknoten" && !state.combat && state.health > 0;
+  const auftragsLohn = (state, id) => auftragIndex[id].spiel.lohn[state.weltAuftraege?.[id]?.wahl ?? 0];
+
+  function auftragGrund(state, id, wahl = 0) {
+    const auftrag = auftragIndex[id];
+    if (!auftrag) return "unbekannter Auftrag";
+    if (!imHub(state)) return "nur in der Weltreise";
+    if (state.knoten !== auftrag.ort) return "Aushang in " + N.get(auftrag.ort).name;
+    if (!NQ.stufenFuer(auftrag.ort, state.faction)) return "nur für Helden des eigenen Volkes";
+    const eintrag = state.weltAuftraege?.[id];
+    if (eintrag) return eintrag.status === "erledigt" ? "erledigt" : "angenommen";
+    if (!intBetween(wahl, 0, auftrag.spiel.lohn.length - 1)) return "unbekannte Belohnung";
+    return null;
+  }
+
+  function auftragAnnehmen(previous, id, wahl = 0) {
+    if (auftragGrund(previous, id, wahl)) return previous;
+    const state = structuredClone(previous);
+    const auftrag = auftragIndex[id];
+    (state.weltAuftraege ??= {})[id] = { status: "aktiv", wahl };
+    note(state, "Auftrag angenommen: " + auftrag.titel + ". " + (auftrag.spiel.weg
+      ? "Reise über den Weg " + auftrag.spiel.weg + " (" + NQ.wegName(auftrag.spiel.weg) + "), um ihn zu erledigen."
+      : "Erledige ihn hier in " + N.get(auftrag.ort).name + "."));
+    return state;
+  }
+
+  function ausfuehrenGrund(state, id) {
+    const auftrag = auftragIndex[id];
+    if (!auftrag || state.weltAuftraege?.[id]?.status !== "aktiv") return "nicht angenommen";
+    if (!imHub(state)) return "nur in der Weltreise";
+    if (auftrag.spiel.weg) return "unterwegs auf " + auftrag.spiel.weg;
+    if (state.knoten !== auftrag.ort) return "in " + N.get(auftrag.ort).name;
+    const lohn = auftragsLohn(state, id);
+    if (lohn.vorrat < 0 && state.ressource + lohn.vorrat < 1) return "zu wenig " + resourceName(state);
+    return null;
+  }
+
+  function auftragAusfuehren(previous, id) {
+    if (ausfuehrenGrund(previous, id)) return previous;
+    const state = structuredClone(previous);
+    const auftrag = auftragIndex[id];
+    if (auftrag.spiel.gegner) auftragKampfStarten(state, auftrag.spiel.gegner, id, auftrag.ort, auftrag.titel);
+    else {
+      note(state, auftrag.titel + ": " + auftrag.text);
+      auftragAbschliessen(state, id);
+    }
+    return state;
+  }
+
+  function auftragAbschliessen(state, id) {
+    const auftrag = auftragIndex[id];
+    const lohn = auftragsLohn(state, id);
+    state.weltAuftraege[id].status = "erledigt";
+    note(state, "Auftrag erfüllt: " + auftrag.titel + ".");
+    const folgen = [];
+    if (lohn.vorrat) {
+      state.ressource = Math.max(1, Math.min(vorratMax, state.ressource + lohn.vorrat));
+      folgen.push((lohn.vorrat > 0 ? "+" : "") + lohn.vorrat + " " + resourceName(state));
+    }
+    for (const [leisteId, wert] of Object.entries(lohn.leisten)) {
+      setzeLeiste(state, leisteId, leiste(state, leisteId) + wert);
+      folgen.push(leistenNamen[leisteId] + " " + (wert > 0 ? "+" : "") + wert);
+    }
+    if (lohn.vermerke.length) folgen.push("vermerkt: " + lohn.vermerke.join(", "));
+    if (folgen.length) note(state, folgen.join(" · ") + ".");
+    grant(state, "auftrag-" + id, auftragEp, lohn.silber, lohn.gegenstaende, false);
+    const begleiter = begleiterNachAuftrag[id];
+    if (begleiter) {
+      const companion = world.companions[begleiter];
+      note(state, companion.klasse === state.role
+        ? companion.name + " dankt dir. Mit dir zieht schon jemand dieser Klasse, deshalb bleibt " + companion.name + " in " + N.get(companion.knoten).name + "."
+        : companion.name + " wartet in " + N.get(companion.knoten).name + " auf dich. Im Hofstaat kannst du " + companion.name + " in die Gruppe aufnehmen.");
+    }
+  }
+
+  // Wegaufträge: Wer über den Weg reist, trifft auf die Gegner. Ein Auftrag je Reise, vor der Zufallsbegegnung.
+  function wegAuftrag(state, von, zu) {
+    const kennung = wegKennung(von, zu);
+    if (!kennung) return null;
+    return Object.entries(state.weltAuftraege ?? {}).find(([id, eintrag]) => eintrag.status === "aktiv" &&
+      auftragIndex[id].spiel.weg === kennung)?.[0] ?? null;
+  }
+  // Erledigte Aufträge mit Wegrabatt senken die Reisekosten dieses Weges um 1 Vorrat.
+  function wegKosten(state, von, weg) {
+    const kennung = wegKennung(von, weg.zielId);
+    const rabatt = kennung && Object.keys(state.weltAuftraege ?? {}).some(id => state.weltAuftraege[id].status === "erledigt" &&
+      auftragsLohn(state, id).wegRabatt === kennung);
+    return Math.max(0, weg.kostenRessource - (rabatt ? 1 : 0));
+  }
+
+  function aushang(state) {
+    if (state.scene !== "weltknoten" || !NQ) return [];
+    return (NQ.fuerOrt(state.knoten)?.auftraege ?? []).map(auftrag => ({ ...auftragIndex[auftrag.id],
+      status: state.weltAuftraege?.[auftrag.id]?.status ?? null, wahl: state.weltAuftraege?.[auftrag.id]?.wahl ?? null,
+      grund: auftragGrund(state, auftrag.id), ausfuehren: ausfuehrenGrund(state, auftrag.id),
+      begleiter: begleiterNachAuftrag[auftrag.id] ?? null }));
+  }
+  function auftraege(state, status = "aktiv") {
+    return Object.entries(state.weltAuftraege ?? {}).filter(([, eintrag]) => eintrag.status === status)
+      .map(([id, eintrag]) => ({ ...auftragIndex[id], wahl: eintrag.wahl, status, ausfuehren: ausfuehrenGrund(state, id) }));
+  }
+
+  function hauptquest(state) {
+    if (!hauptPlan[state.faction] || !hauptAkt(state.faction)) return null;
+    const stand = hauptStand(state);
+    const akt = hauptAkt(state.faction);
+    const fertig = stand.schritt >= hauptPlan[state.faction].length;
+    return { akt: akt.nr, titel: akt.titel, stufen: akt.stufen, fertig, wahl: stand.wahl,
+      schritt: fertig ? null : hauptInfo(state.faction, stand.schritt), grund: fertig ? "abgeschlossen" : hauptGrund(state) };
+  }
+
+  function hauptGrund(state, wahlId = null) {
+    const plan = hauptPlan[state.faction];
+    if (!plan || !hauptAkt(state.faction)) return "keine Hauptquest";
+    if (!imHub(state)) return "nur in der Weltreise";
+    const stand = hauptStand(state);
+    if (stand.schritt >= plan.length) return "abgeschlossen";
+    const schritt = plan[stand.schritt];
+    if (state.knoten !== schritt.ort) return "weiter in " + N.get(schritt.ort).name;
+    if (!schritt.wahl) return wahlId ? "keine Wahl" : null;
+    if (!hauptAkt(state.faction).wahl.some(option => option.id === wahlId) || !own(wahlFolgen, wahlId)) return "Wahl fehlt";
+    if (wahlFolgen[wahlId].silber && state.silver < wahlFolgen[wahlId].silber) return "zu wenig Silber";
+    return null;
+  }
+
+  function hauptWeiter(previous, wahlId = null) {
+    if (hauptGrund(previous, wahlId)) return previous;
+    const state = structuredClone(previous);
+    const stand = state.hauptquest ??= { schritt: 0, wahl: null };
+    const info = hauptInfo(state.faction, stand.schritt);
+    note(state, "Akt " + hauptAkt(state.faction).nr + " · " + info.titel + ": " + info.text);
+    if (info.gegner) {
+      auftragKampfStarten(state, info.gegner, "haupt", info.ort, info.titel);
+      return state;
+    }
+    if (info.wahl) {
+      stand.wahl = wahlId;
+      if (wahlFolgen[wahlId].gegner) auftragKampfStarten(state, wahlFolgen[wahlId].gegner, "haupt", info.ort, info.titel);
+      else aktAbschliessen(state);
+      return state;
+    }
+    hauptVoran(state);
+    return state;
+  }
+
+  function hauptVoran(state) {
+    const stand = state.hauptquest;
+    stand.schritt++;
+    const next = hauptInfo(state.faction, stand.schritt);
+    if (next) note(state, "Nächster Schritt: " + next.titel + " in " + N.get(next.ort).name + ".");
+  }
+
+  function aktAbschliessen(state) {
+    const stand = state.hauptquest;
+    const folge = wahlFolgen[stand.wahl];
+    const option = hauptAkt(state.faction).wahl.find(entry => entry.id === stand.wahl);
+    if (folge.silber) state.silver -= folge.silber;
+    if (folge.silberLohn) state.silver += folge.silberLohn;
+    if (folge.vorrat) state.ressource = Math.min(vorratMax, state.ressource + folge.vorrat);
+    for (const [leisteId, wert] of Object.entries(folge.leisten ?? {})) setzeLeiste(state, leisteId, leiste(state, leisteId) + wert);
+    note(state, option.label + ": " + option.folge);
+    if (!state.marks.includes(stand.wahl)) state.marks.push(stand.wahl);
+    stand.schritt = hauptPlan[state.faction].length;
+    state.questStufe = Math.max(state.questStufe, 1);
+    note(state, "Akt " + hauptAkt(state.faction).nr + ", „" + hauptAkt(state.faction).titel + "“, ist abgeschlossen. Akt 2 wird noch gebaut.");
+    grant(state, "akt1-" + state.faction, kampf.ep.questakt);
+  }
+
+  // Sieg in einem Auftrags- oder Hauptquestkampf.
+  function auftragSieg(state, auftrag) {
+    if (auftrag === "haupt") {
+      const stand = state.hauptquest;
+      if (hauptPlan[state.faction]?.[stand.schritt]?.wahl) aktAbschliessen(state);
+      else hauptVoran(state);
+    } else if (state.weltAuftraege?.[auftrag]?.status === "aktiv") auftragAbschliessen(state, auftrag);
   }
 
   // Charakter-Entwurf: Stufenpunkte, Spezialisierung und Meisterklasse in einem Schritt festschreiben.
@@ -1795,9 +2273,9 @@ const rules = (() => {
 
   // Gegnerstufe und Rang einer Begegnung. Gruppen erhalten je Gefährte einen Mitläufer mehr,
   // Einzelgegner 25 % mehr LP je Gefährte.
-  function lineup(id, size) {
+  function lineup(id, size, stufe = null) {
     const fight = world.fights[id];
-    const spec = fight.gegner;
+    const spec = stufe ? { ...fight.gegner, stufe } : fight.gegner;
     const group = world.enemyGroups[id];
     const creature = world.creatures[id];
     const geschick = 8 + (creature.stats[3] ?? 5);
@@ -1811,11 +2289,11 @@ const rules = (() => {
     });
   }
 
-  function startFight(state, id, opening = true) {
+  function startFight(state, id, opening = true, stufe = null) {
     const max = kraft(state);
     const combat = {
       id, round: 0, stunned: false, bleeding: 0, supportUsed: [],
-      feinde: lineup(id, state.party.length), diener: [],
+      feinde: lineup(id, state.party.length, stufe), diener: [],
       held: { ausdauer: max.ausdauer, mana: max.mana, schild: 0, schildRunden: 0, unsichtbar: 0, naechster: 0,
         staerkung: null, hot: null, todesschutz: null, abklingen: {}, genutzt: [], mine: false, bekehren: 0 },
     };
@@ -1918,7 +2396,7 @@ const rules = (() => {
     } else if (action === "ember" && cast(state, 2)) {
       round.usedFire = true;
       const role = kit(state);
-      const damage = role.attack.power + damageValue(state, role.attack.skill) + (result.emberBonus ?? 0) + gearBonus(state, "magic") + rage;
+      const damage = role.attack.power + damageValue(state, role.attack.skill) + (result.emberBonus ?? 0) + gearBonus(state, "magic") + reliktWert(state, "partyMagicPower") + rage;
       dealDamage(state, selected.id, damage, { fire: true, round });
       note(state, role.attack.name + " verursacht " + damage + " Schaden.");
     } else if (action === "restore" && cast(state, -2)) {
@@ -1981,6 +2459,9 @@ const rules = (() => {
   function dealDamage(state, id, amount, { fire = false, round, actor = "hero" } = {}) {
     const foe = state.combat.feinde[id];
     if (!foe || foe.lp <= 0 || amount <= 0) return 0;
+    // Relikte der Gruppe: Feuerschaden und Schaden gegen Untote.
+    if (fire) amount += reliktWert(state, "fireDamage");
+    if (foe.tags.includes("untot")) amount = Math.round(amount * (1 + reliktWert(state, "damageVsUndead")));
     const value = Math.min(foe.lp, amount + (foe.status.verwundbar?.wert ?? 0));
     foe.lp -= value;
     if (fire && round) round.usedFire = true;
@@ -2042,7 +2523,7 @@ const rules = (() => {
     const factor = (ability.spezialisiert ? 1 + kampf.spezVerstaerkung : 1) * (boosted ? 1 + kampf.ressourceVerstaerkung : 1);
     const invisibleBefore = held.unsichtbar > 0;
     const skill = combatSkill(state, ability.zahlung);
-    const bonus = skillValue(state, skill) + (ability.zahlung === "M" ? gearBonus(state, "magic") : 0);
+    const bonus = skillValue(state, skill) + (ability.zahlung === "M" ? gearBonus(state, "magic") + reliktWert(state, "partyMagicPower") : 0);
     const living = turn.feinde.map((foe, id) => ({ foe, id })).filter(({ foe }) => foe.lp > 0);
     const order = [...living.filter(({ id }) => id === selectedId), ...living.filter(({ id }) => id !== selectedId)].map(({ id }) => id);
     const count = r.ziele === "alle" ? order.length : r.ziele ?? 1;
@@ -2236,7 +2717,8 @@ const rules = (() => {
         if (member.fire) round.usedFire = true;
         const healing = healAlly(state, patient.id, member.heal ?? 0, id, round.events);
         if (member.cleanse) turn.bleeding = 0;
-        const damage = (member.damage ? member.damage + (weaponGear?.power ?? 0) + (weaponGear?.magic ?? 0) : 0) +
+        const damage = (member.damage ? member.damage + (weaponGear?.power ?? 0) + (weaponGear?.magic ?? 0) +
+          (member.fire ? reliktWert(state, "partyMagicPower") : 0) : 0) +
           (turn.id === "felsgreif" ? (member.airborne ?? 0) : 0);
         if (damage) dealDamage(state, goal(), damage + extra, { fire: Boolean(member.fire), round, actor: id });
         else if (!healing) round.events.push({ kind: "cover", actor: id });
@@ -2297,13 +2779,14 @@ const rules = (() => {
     if (people(state.faction) === "orks") state.rausch = true;
     if (result.unlock) markDeed(state, result.unlock);
     state.ressource = Math.min(vorratMax, (state.ressource ?? 0) + 1);
-    note(state, (result.victoryText ?? "Die Begegnung ist gewonnen.") + " Du nimmst " +
-      result.loot.map((id) => world.items[id]).join(" und ") + " mit. +1 " + resourceName(state) + ".");
+    note(state, (result.victoryText ?? "Die Begegnung ist gewonnen.") + (result.loot.length ? " Du nimmst " +
+      result.loot.map((id) => world.items[id]).join(" und ") + " mit." : "") + " +1 " + resourceName(state) + ".");
     // 50 EP für die gewonnene Schlacht und 10 EP je Stufe jedes besiegten Gegners.
     const xp = kampf.ep.schlacht + foes.reduce((sum, foe) => sum + kampf.ep.gegnerJeStufe * foe.stufe, 0);
     // Zufallskämpfe können sich wiederholen. Ihre EP zählen jedes Mal.
     grant(state, "kampf-" + fightId, xp, world.battleRewards[fightId]?.[1] ?? 0, result.loot, !result.random);
     arrive(state, turn.weiter ?? result.to);
+    if (turn.auftrag) auftragSieg(state, turn.auftrag);
     return true;
   }
 
@@ -2356,6 +2839,9 @@ const rules = (() => {
         for (let action = 0; action < foe.aktionen; action++) {
           let damage = foe.schaden - (status.langsam ? 1 : 0) - (status.schwach?.wert ?? 0) +
             (index === 0 && action === 0 ? special?.damage ?? 0 : 0);
+          // Relikte der Gruppe: Schutz vor Feuer- und Kälteangriffen.
+          if (gegnerElement[turn.id] === "feuer") damage -= reliktWert(state, "fireResistance");
+          if (gegnerElement[turn.id] === "kaelte") damage = Math.round(damage * (1 - reliktWert(state, "coldDamageReduction")));
           damage = Math.max(0, damage);
           // Köder und Wälle ziehen die Angriffe auf sich, Unsichtbare werden nicht angegriffen.
           const decoy = turn.diener.find((summon) => summon.koeder && summon.lp > 0);
@@ -2368,7 +2854,7 @@ const rules = (() => {
           if (!active.length) { sparedByStealth = true; continue; }
           const victim = active[victimCursor++ % active.length];
           const heroTarget = victim.id === "hero";
-          const armor = heroTarget ? gearBonus(state, "armor") : memberGearBonus(state, victim.id, "armor");
+          const armor = (heroTarget ? gearBonus(state, "armor") : memberGearBonus(state, victim.id, "armor")) + reliktWert(state, "partyResistance");
           const reduction = Math.floor(((heroTarget ? protection(state) : 2) + armor) / 2);
           const defense = heroTarget && round.guarding ? Math.max(6, round.ward) : round.ward;
           const guarding = defense > 0;
@@ -2455,6 +2941,9 @@ const rules = (() => {
     const fight = world.fights[combat?.id];
     const ambush = fight?.random && own(world.scenes, combat.weiter) && typeof (combat.hinterhalt ?? false) === "boolean";
     if (!fight || (!ambush && world.scenes[state.scene].creature !== combat.id)) return false;
+    if (combat.auftrag !== undefined && !(combat.auftrag === "haupt" ? state.hauptquest
+      : state.weltAuftraege?.[combat.auftrag]?.status === "aktiv")) return false;
+    if (combat.gegnerStufe !== undefined && !intBetween(combat.gegnerStufe, 1, 20)) return false;
     const held = combat.held;
     const max = kraft(state);
     const status = (value) => isRecord(value);
@@ -2599,7 +3088,7 @@ const rules = (() => {
   }
 
   return { awardXp, abilities, abilityState: (state, id) => state.combat ? abilityState(state, id).reason : "nur im Kampf", kampfwerte, kraft,
-    level, resourceName, combatSkill, create, read, choices, unequip, equipmentSlots, slotKinds, targetSlot, gearStats, equipPreview, gearBonus, bagSlots, category, slotsUsed, fits, storageSite, storageOpen, canStore, canRetrieve,
+    level, resourceName, combatSkill, create, read, setRelikt, reliktGrund, reliktStand, preis, choices, unequip, equipmentSlots, slotKinds, targetSlot, gearStats, equipPreview, gearBonus, bagSlots, category, slotsUsed, fits, storageSite, storageOpen, canStore, canRetrieve,
     store, retrieve, isQuestItem: id => questItems.has(id), bagLimit, bagUpgrade, upgradeBag, belt, setBelt, quickUse, beltSize,
     stackLimit, itemCap, hire, hireCost, compatible, memberLevel, setTravelDice, canEvade, travelEncounter, choose, route, retrain, specialize, ascend, weapon, equip, use, canUse, strike,
     attributes, baseAttributes, defaultBuild, suggestSkills, buildProblem, skillLimits, skillPoints, cap, modifier, originOf, profile,
@@ -2609,6 +3098,7 @@ const rules = (() => {
     healthLimit, emberLimit, heroAttributes, ending, moorConsequences, effects,
     weltLeisten, leistenNamen, leistenStart, gegenkraefte, niederlagen, vorratMax, vorratStart, seewegSilber, vorratAnwerbung,
     vertragKosten, ertragMenge, ertragPause, weltRunde, aktuellerKnoten, weltOffen, betreteWelt, handlungHier, zurHandlung,
-    reiseGrund, reiseZiele, reise, rastGrund, rast, ertragGrund, ertragEinholen, vertragGrund, vertragSchliessen, entwurf,
+    reiseGrund, reiseZiele, reise, rastGrund, handelOffen,
+    auftragGrund, auftragAnnehmen, ausfuehrenGrund, auftragAusfuehren, aushang, auftraege, hauptquest, hauptGrund, hauptWeiter, auftragEp, rast, ertragGrund, ertragEinholen, vertragGrund, vertragSchliessen, entwurf,
     levelThresholds: Array.from({ length: kampf.maxStufe }, (_, index) => kampf.epFuer(index + 1)) };
 })();

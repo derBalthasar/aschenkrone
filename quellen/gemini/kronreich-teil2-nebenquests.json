@@ -1,0 +1,286 @@
+{
+  "faction": "Kronreich",
+  "cities": [
+    {
+      "city": "Kronhall",
+      "type": "Hauptstadt",
+      "levelRange": "1-6",
+      "sideQuests": [
+        { "id": "kronhall_q01", "title": "Die leeren Kornspeicher", "category": "Fraktion", "description": "Ein königlicher Verwalter hortet Mehl aus Mühlbach für den Schwarzmarkt.", "reward": "+10 Korn, 20 Silber (oder 55 Silber, -5 Korn)" },
+        { "id": "kronhall_q02", "title": "Das verbotene Gebet", "category": "Kaltfrieden (Orden)", "description": "Ein Wanderpriester des Ordens wirkt ein Glutgebet für den kranken König. Schützt du ihn oder lieferst du ihn aus?", "reward": "Ordens-Ruf, Segen-Amulett (oder 30 Silber, +3 Korn)" },
+        { "id": "kronhall_q03", "title": "Die Schuldscheine von Perlvik", "category": "Kaltfrieden (Häfen)", "description": "Gesandte der Freien Häfen drohen, Kornlieferungen zu pfänden. Decke gefälschte Siegel auf.", "reward": "45 Silber, Lore zur Kronschuld" },
+        { "id": "kronhall_q04", "title": "Flüstern in der Totengasse", "category": "Kult-Spur", "description": "Fünf Kultisten der Bleichen Ewigkeit stehlen Leichen aus dem Armenhaus. Hinweis auf die 'Vollendeten im hohen Norden'.", "reward": "Untoten-Bedrohung -3, 35 Silber" },
+        { "id": "kronhall_q05", "title": "Der gefangene Rostsegel-Steuermann", "category": "Weltkonflikt (Orks)", "description": "Ein Ork der Staubreiter im Kerker verrät, dass ihre Brunnen im Südwesten seit dem Ausbruch des Mutterbergs versiegt sind.", "reward": "Ork-Bedrohung -2, Welt-Lore" },
+        { "id": "kronhall_q06", "title": "Das gestrandete Elfen-Boot", "category": "Weltkonflikt (Elfen)", "description": "Am Flussufer treibt ein weißes Boot mit schwarzen Blüten. Ein sterbender Bote warnt vor der Fäulnis im Inneren Meer.", "reward": "Welt-Lore, Gegenmittel (Wert 15 Silber)" },
+        { "id": "kronhall_q07", "title": "Aschefieber im Siechenhaus", "category": "Nacht des Erwachens", "description": "Besorge Galgenwurz und Krähenbeere aus den Hügeln gegen den Ascheregen-Husten.", "reward": "2x Heilmittel (Wert je 12 Silber), 25 Silber" },
+        { "id": "kronhall_q08", "title": "Deserteure am Süd-Tor", "category": "Bestiarium", "description": "Entlaufene Soldaten Jarl Ragnvalds überfallen Bauern auf D01.", "reward": "40 Silber, Langschwert der Kronwache" },
+        { "id": "kronhall_q09", "title": "Die Mauern der Zwerge", "category": "Weltkonflikt (Zwerge)", "description": "Untersuche Risse in den alten Zwergenmauern Kronhalls nach dem Beben und finde eine Runenwarnung aus der Tiefe.", "reward": "Welt-Lore, 30 Silber, Zwergen-Rundschild" },
+        { "id": "kronhall_q10", "title": "Die eiserne Schuld", "category": "Begleiter (1/3)", "description": "Reinige im Duell den Namen der verstoßenen Schildmaid Sigrid Eisenschild gegen einen intriganten Kult-Hauptmann.", "reward": "Begleiterin: Sigrid Eisenschild (1/3)" }
+      ],
+      "villages": [
+        { "village": "Weizenhof", "road": "D03", "yield": "Korn", "quests": [
+          { "id": "weizenhof_q01", "title": "Asche auf den Halmen", "description": "Bringe die Ernte vor dem Ascheregen ein und vertreibe Eisenborstenkeiler.", "reward": "+7 Korn, 15 Silber" },
+          { "id": "weizenhof_q02", "title": "Der stumme Knecht", "description": "Ein Knecht vergräbt heimlich Totenstaub am Feldrand.", "reward": "Untoten-Bedrohung -2, 20 Silber" }
+        ] },
+        { "village": "Königsau", "road": "D01", "yield": "Korn", "quests": [
+          { "id": "koenigsau_q01", "title": "Grenzstreit am Bach", "description": "Schlichte einen Wasserstreit zwischen zwei Kornhöfen nach der Dürre.", "reward": "+5 Korn, 15 Silber" }
+        ] },
+        { "village": "Mühlbach", "road": "D02", "yield": "Mehl", "quests": [
+          { "id": "muehlbach_q01", "title": "Das blockierte Mühlrad", "description": "Besiege einen Flussschnapper im Wehr; in seinem Magen liegt ein Siegelring der Freien Häfen.", "reward": "+6 Korn, 25 Silber, Intrigen-Spur" }
+        ] }
+      ]
+    },
+    {
+      "city": "Eikmark",
+      "type": "Stadt",
+      "levelRange": "2-6",
+      "sideQuests": [
+        { "id": "eikmark_q01", "title": "Die Palisade am Gebirgsrand", "category": "Fraktion", "description": "Sichere Holzlieferungen aus Eichenhain für die Ostwehr gegen Brandstein und Grenzmarkt.", "reward": "+6 Korn, 25 Silber" },
+        { "id": "eikmark_q02", "title": "Schmuggel auf S01", "category": "Kaltfrieden (Orden)", "description": "Ein Karren voller Schwefel aus Brandstein wurde an der Grenze abgefangen.", "reward": "35 Silber, Kaltfrieden-Lore" },
+        { "id": "eikmark_q03", "title": "Der Spion von Grenzmarkt", "category": "Kaltfrieden (Häfen)", "description": "Ein Händler aus Grenzmarkt zeichnet heimlich die Truppenstärken Eikmarks auf.", "reward": "30 Silber, Spionage-Briefe" },
+        { "id": "eikmark_q04", "title": "Kohle für die Falschen", "category": "Kult-Spur", "description": "Sechs Kultisten der Bleichen Ewigkeit kaufen Holzkohle aus Köhlerby für Totenfeuer in einer alten Mine.", "reward": "Untoten-Bedrohung -3, 35 Silber" },
+        { "id": "eikmark_q05", "title": "Die Zwerge unter dem Gebirge", "category": "Weltkonflikt (Zwerge)", "description": "Ein erschöpfter Zwergen-Schürfer berichtet von 'Schatten aus der Glut' im Südosten, weshalb die Zwerge ihre Pässe schließen.", "reward": "Welt-Lore, 40 Silber" },
+        { "id": "eikmark_q06", "title": "Der letzte Grenzkrieg", "category": "Weltkonflikt (Menschen)", "description": "Ein Veteran sucht das Grab seines Bruders an der Grenze zu Brandstein und erzählt vom Auslöser des zweiten Grenzkriegs.", "reward": "Welt-Lore, Runen-Dolch" },
+        { "id": "eikmark_q07", "title": "Glutkäfer im Meiler", "category": "Nacht des Erwachens", "description": "In den Kohlenmeilern sind nach dem Beben Glutkäfer geschlüpft.", "reward": "30 Silber, Glutpanzer-Wams" },
+        { "id": "eikmark_q08", "title": "Grauwölfe im Eichenwald", "category": "Bestiarium", "description": "Ein Rudel Grauwölfe blockiert die Straße S04 nach Kronhall.", "reward": "35 Silber, Wolfspelzmantel" },
+        { "id": "eikmark_q09", "title": "Schmuggelzoll", "category": "Intrige", "description": "Der Burgvogt verlangt illegale Zölle auf S02.", "reward": "50 Silber (oder +8 Korn)" },
+        { "id": "eikmark_q10", "title": "Die brennende Grenzmarke", "category": "Gewichtig", "description": "Lösche einen brennenden Grenzstein auf S01 gemeinsam mit einer Ordenspatrouille.", "reward": "Weg S01 kostet 1 Vorrat weniger" }
+      ],
+      "villages": [
+        { "village": "Eichenhain", "road": "D04", "yield": "Holz", "quests": [
+          { "id": "eichenhain_q01", "title": "Die Netzweberin im Hochwald", "description": "Befreie die Holzfäller von einer riesigen Netzweberin.", "reward": "30 Silber, Spinnenseiden-Umhang" },
+          { "id": "eichenhain_q02", "title": "Verbotene Schnitzereien", "description": "Zerstöre heidnische Toten-Totems im tiefen Wald.", "reward": "Untoten-Bedrohung -2" }
+        ] },
+        { "village": "Köhlerby", "road": "D05", "yield": "Kohle", "quests": [
+          { "id": "koehlerby_q01", "title": "Schwarzer Husten", "description": "Besorge Aschenmohn als Heilmittel für die erkrankten Köhler.", "reward": "20 Silber, +5 Korn" }
+        ] }
+      ]
+    },
+    {
+      "city": "Hagenfels",
+      "type": "Stadt",
+      "levelRange": "2-6",
+      "sideQuests": [
+        { "id": "hagenfels_q01", "title": "Ragnvalds Musterung", "category": "Fraktion", "description": "Mustere Kriegspferde aus Burgwiese – ein Test deiner Treue zu Kronhall oder Jarl Ragnvald.", "reward": "+7 Korn, 30 Silber" },
+        { "id": "hagenfels_q02", "title": "Eisen für den falschen Herren", "category": "Kaltfrieden", "description": "Erzkarren aus Eisenbach sollen heimlich nach Skerheim verkauft werden.", "reward": "40 Silber, Eisenschild" },
+        { "id": "hagenfels_q03", "title": "Der Flüsterer im Bergfried", "category": "Kult-Spur", "description": "Ein Berater Ragnvalds gehört zum Kult der Bleichen Ewigkeit und drängt den Jarl zum Verrat an der Krone.", "reward": "Untoten-Bedrohung -3, Kult-Beweise" },
+        { "id": "hagenfels_q04", "title": "Die trockene Südsteppe", "category": "Weltkonflikt (Orks)", "description": "Ein Späher berichtet, wie die Dürre nach dem Ausbruch des Mutterbergs die Orks nach Norden treibt.", "reward": "Welt-Lore, 30 Silber" },
+        { "id": "hagenfels_q05", "title": "Söldner ohne Sold", "category": "Bestiarium", "description": "Entlassene Söldner Ragnvalds plündern Reisende auf S06.", "reward": "50 Silber, Breitschwert" },
+        { "id": "hagenfels_q06", "title": "Die verschwundene Zuchtstute", "category": "Dorf-Verbindung", "description": "Verfolge Diebe, die Ragnvalds wertvollstes Schlachtross in die Südsteppe entführt haben.", "reward": "35 Silber, Reitstiefel" },
+        { "id": "hagenfels_q07", "title": "Glutadern im Stollen", "category": "Nacht des Erwachens", "description": "Im Erzbergwerk öffnet sich eine glühende Spalte mit Glutkäfern.", "reward": "45 Silber, Glutstahl-Klinge" },
+        { "id": "hagenfels_q08", "title": "Das Erbe des Alten Reiches", "category": "Lore", "description": "Entziffere eine Karte in Ragnvalds Archiv, die die alte Aufteilung des Inneren Meeres unter den fünf Völkern zeigt.", "reward": "Welt-Lore, 25 Silber" },
+        { "id": "hagenfels_q09", "title": "Schmuggel über Sandvik", "category": "Intrige", "description": "Fange Waffenkisten mit dem Wappen von Hagenfels auf S08 nach Sandvik ab.", "reward": "35 Silber" },
+        { "id": "hagenfels_q10", "title": "Ragnvalds geheime Truppen", "category": "Gewichtig", "description": "Entdecke Ragnvalds verborgenes Heerlager in den Hügeln und melde es Astrid.", "reward": "Verstärkung durch die Kronwache in Akt 4" }
+      ],
+      "villages": [
+        { "village": "Burgwiese", "road": "D06", "yield": "Pferde", "quests": [
+          { "id": "burgwiese_q01", "title": "Wölfe an der Koppel", "description": "Verteidige die Fohlen gegen ein Rudel Grauwölfe.", "reward": "25 Silber, +5 Korn" }
+        ] },
+        { "village": "Eisenbach", "road": "D07", "yield": "Erz", "quests": [
+          { "id": "eisenbach_q01", "title": "Der verschüttete Stollen", "description": "Rette drei Bergleute nach einem Nachbeben.", "reward": "30 Silber, Eisenhelm" },
+          { "id": "eisenbach_q02", "title": "Kult-Runen im Fels", "description": "Zerstöre Zeichen der Bleichen Ewigkeit im tiefen Stollen.", "reward": "Untoten-Bedrohung -2" }
+        ] }
+      ]
+    },
+    {
+      "city": "Haraldstad",
+      "type": "Stadt",
+      "levelRange": "2-6",
+      "sideQuests": [
+        { "id": "haraldstad_q01", "title": "Die große Viehzählung", "category": "Fraktion", "description": "Schütze Rinderherden aus Rinderby vor Viehdieben auf S11.", "reward": "+8 Korn, 25 Silber" },
+        { "id": "haraldstad_q02", "title": "Zollstreit an der Südstraße", "category": "Kaltfrieden (Häfen)", "description": "Händler aus Skerheim verweigern den Kornzoll.", "reward": "35 Silber" },
+        { "id": "haraldstad_q03", "title": "Der falsche Steuervogt", "category": "Intrige", "description": "Stelle einen Betrüger mit gefälschten Siegeln aus Grenzmarkt in Ackerholm.", "reward": "40 Silber, Siegelring" },
+        { "id": "haraldstad_q04", "title": "Knochen unter dem Kornfeld", "category": "Kult-Spur", "description": "Sieben Kultisten vergraben untote Reliquien auf den Feldern, um die Ernte zu verderben.", "reward": "Untoten-Bedrohung -3, 30 Silber" },
+        { "id": "haraldstad_q05", "title": "Warum die Häfen kein Korn haben", "category": "Weltkonflikt (Häfen/Orks)", "description": "Ein Kaufmann aus Skerheim erklärt, dass Rostsegel-Piraten ihre Fischgründe zerstören.", "reward": "Welt-Lore, 25 Silber" },
+        { "id": "haraldstad_q06", "title": "Eisenborstenkeiler auf der Straße", "category": "Bestiarium", "description": "Erlege einen riesigen Keiler auf D08.", "reward": "30 Silber, Keilerhauer-Talisman" },
+        { "id": "haraldstad_q07", "title": "Ascheregen auf den Weiden", "category": "Nacht des Erwachens", "description": "Besorge Krähenbeeren als Gegengift für erkranktes Vieh in Rinderby.", "reward": "20 Silber, Gegenmittel" },
+        { "id": "haraldstad_q08", "title": "Verlorene Patrouille auf S10", "category": "Kaltfrieden", "description": "Suche eine vermisste Kronreich-Patrouille im Grenzland zu Grenzmarkt.", "reward": "45 Silber, Kettenhemd" },
+        { "id": "haraldstad_q09", "title": "Der fahrende Sänger", "category": "Kult-Hinweis", "description": "Ein blinder Lautenspieler singt vom 'Bleichen Skalden im Eis' und verschwindet spurlos.", "reward": "Kult-Lore, 20 Silber" },
+        { "id": "haraldstad_q10", "title": "Der Kornschwur von Haraldstad", "category": "Gewichtig", "description": "Sichere die Handelsstraße S11 nach Skerheim dauerhaft.", "reward": "Verhandlungsbonus bei den Freien Häfen in Akt 2/3" }
+      ],
+      "villages": [
+        { "village": "Ackerholm", "road": "D08", "yield": "Korn", "quests": [
+          { "id": "ackerholm_q01", "title": "Die brennende Scheune", "description": "Lösche ein von Spionen gelegtes Feuer.", "reward": "+7 Korn, 20 Silber" }
+        ] },
+        { "village": "Rinderby", "road": "D09", "yield": "Vieh", "quests": [
+          { "id": "rinderby_q01", "title": "Der gestohlene Zuchtstier", "description": "Verfolge Viehdiebe Richtung S11.", "reward": "30 Silber, Lederstiefel" }
+        ] }
+      ]
+    },
+    {
+      "city": "Heidvang",
+      "type": "Stadt",
+      "levelRange": "1-6",
+      "sideQuests": [
+        { "id": "heidvang_q01", "title": "Der Fährmann von Heidvang", "category": "Fraktion", "description": "Besorge Bauholz und Seile für das Fährhaus nach den Überschwemmungen.", "reward": "+5 Korn, 20 Silber" },
+        { "id": "heidvang_q02", "title": "Zoll am Eispass-Fuß", "category": "Kaltfrieden (Orden)", "description": "Ordenswachen von P01 kontrollieren Reisende schon auf Kronreich-Boden nach verbotener Magie.", "reward": "30 Silber, Kaltfrieden-Lore" },
+        { "id": "heidvang_q03", "title": "Schmuggel im Schilf", "category": "Kaltfrieden (Häfen)", "description": "Fange Schmuggler ab, die Totenstaub über den Fluss bringen.", "reward": "Untoten-Bedrohung -2, 35 Silber" },
+        { "id": "heidvang_q04", "title": "Das Moor bei Eiswacht", "category": "Bestiarium", "description": "Vertreibe Irrglühte und Moorschlinger, die Torfstecher südlich von P01 bedrohen.", "reward": "45 Silber, Moorlicht-Amulett" },
+        { "id": "heidvang_q05", "title": "Das Lied vom Galgen", "category": "Kult-Spur", "description": "Fünf vermummte Kultisten versuchen nachts am Galgen von Heidvang, Gehängte zu beschwören.", "reward": "Untoten-Bedrohung -3, 30 Silber" },
+        { "id": "heidvang_q06", "title": "Die Elfen im alten Lied", "category": "Weltkonflikt (Elfen)", "description": "Ein alter Fährmann erklärt, warum die Elfen im Osten ihre Küsten abschotten, seit ihr Baum blutet.", "reward": "Welt-Lore, 20 Silber" },
+        { "id": "heidvang_q07", "title": "Galgenkrähen-Plage", "category": "Bestiarium", "description": "Zerschlage einen Schwarm Galgenkrähen, der Kornwagen auf S13 angreift.", "reward": "25 Silber, Krähenfeder-Mantel" },
+        { "id": "heidvang_q08", "title": "Heilhonig für die Verwundeten", "category": "Dorf-Verbindung", "description": "Bringe Heda im Fährhaus besonderen Waldhonig aus Heidby.", "reward": "20 Silber, 2x Heilmittel" },
+        { "id": "heidvang_q09", "title": "Verirrte Pilger nach Eiswacht", "category": "Nacht des Erwachens", "description": "Begleite verirrte Pilger durch den Ascheregen sicher bis zum Fuß des Passes P01.", "reward": "35 Silber, Pilgerstab" },
+        { "id": "heidvang_q10", "title": "Alphatier: Die Alte vom Moor", "category": "Alphatier-Jagd", "description": "Stelle den uralten Moorschlinger tief im Moor bei Eiswacht.", "reward": "60 Silber, Trophäe der Alten" }
+      ],
+      "villages": [
+        { "village": "Heidby", "road": "D10", "yield": "Honig", "quests": [
+          { "id": "heidby_q01", "title": "Bären am Bienenstock", "description": "Vertreibe hungrige Tiere aus dem Eichenwald.", "reward": "20 Silber, Heilhonig" }
+        ] },
+        { "village": "Schafhag", "road": "D11", "yield": "Wolle", "quests": [
+          { "id": "schafhag_q01", "title": "Räuber im Schafpferch", "description": "Stelle Deserteure, die Winterwolle für den Eispass stehlen.", "reward": "25 Silber, Wollumhang" }
+        ] }
+      ]
+    },
+    {
+      "city": "Kornwik",
+      "type": "Stadt",
+      "levelRange": "1-6",
+      "sideQuests": [
+        { "id": "kornwik_q01", "title": "Wiederaufbau nach dem Ascheregen", "category": "Fraktion", "description": "Hilf den Bauern, die verbrannten Höfe neu zu decken.", "reward": "+8 Korn, 20 Silber" },
+        { "id": "kornwik_q02", "title": "Das alte Gräberfeld", "category": "Kult-Spur", "description": "Sechs Kultisten der Bleichen Ewigkeit graben auf dem Gräberfeld nach alten Königsgebeinen.", "reward": "Untoten-Bedrohung -3, 35 Silber" },
+        { "id": "kornwik_q03", "title": "Bier für die Grenzwache", "category": "Dorf-Verbindung", "description": "Rette einen überfallenen Bierkarren aus Hopfendal auf S16.", "reward": "30 Silber, +5 Korn" },
+        { "id": "kornwik_q04", "title": "Warum die Untoten erwachen", "category": "Weltkonflikt (Untote)", "description": "Ein Gelehrter entziffert eine Steinplatte: 'Wenn der Berg im Süden brennt, erwacht der Durst im hohen Norden.'", "reward": "Welt-Lore, 25 Silber" },
+        { "id": "kornwik_q05", "title": "Eisenborstenkeiler im Rübenfeld", "category": "Bestiarium", "description": "Erlege ein aggressives Keilerpaar bei Garbenfeld.", "reward": "30 Silber, Jagdspeer" },
+        { "id": "kornwik_q06", "title": "Händler aus dem Orden", "category": "Kaltfrieden", "description": "Ein Händler aus Eiswacht bietet verbotene Runentalismane an.", "reward": "35 Silber (oder Runentalisman)" },
+        { "id": "kornwik_q07", "title": "Das gestohlene Saatgut", "category": "Nacht des Erwachens", "description": "Hole unverdorbenes Saatgut von Dieben zurück.", "reward": "+6 Korn, 25 Silber" },
+        { "id": "kornwik_q08", "title": "Grauwölfe an den Eichenhecken", "category": "Bestiarium", "description": "Schütze die Schafherden vor Grauwölfen.", "reward": "30 Silber, Wolfszahn-Kette" },
+        { "id": "kornwik_q09", "title": "Der vermisste Bote aus Kronhall", "category": "Intrige", "description": "Rette einen verwundeten königlichen Boten auf S16 mit geheimen Briefen Astrids.", "reward": "40 Silber, Kron-Lore" },
+        { "id": "kornwik_q10", "title": "Alphatier: Graufang", "category": "Alphatier-Jagd", "description": "Jage Graufang, den weißen Leitwolf der Nordwälder.", "reward": "65 Silber, Pelz von Graufang" }
+      ],
+      "villages": [
+        { "village": "Garbenfeld", "road": "D12", "yield": "Korn", "quests": [
+          { "id": "garbenfeld_q01", "title": "Asche im Brunnenwasser", "description": "Reinige den Dorfbrunnen mit Hilfe von Bryn.", "reward": "+6 Korn, 15 Silber" }
+        ] },
+        { "village": "Hopfendal", "road": "D13", "yield": "Bier", "quests": [
+          { "id": "hopfendal_q01", "title": "Die vergorene Ernte", "description": "Ein Kultist hat Totenstaub in die Bierfässer gemischt, um die Wache zu vergiften.", "reward": "Untoten-Bedrohung -2, 25 Silber" }
+        ] }
+      ]
+    },
+    {
+      "city": "Rosshag",
+      "type": "Stadt",
+      "levelRange": "2-6",
+      "sideQuests": [
+        { "id": "rosshag_q01", "title": "Kriegsrosse für Kronhall", "category": "Fraktion", "description": "Eskortiere eine Herde Streitrosse sicher über S18 nach Kronhall.", "reward": "+8 Korn, 35 Silber" },
+        { "id": "rosshag_q02", "title": "Pferdediebe der Rostsegel", "category": "Weltkonflikt (Orks)", "description": "Kundschafter der Staubreiter stehlen Pferde, weil ihre eigenen Tiere in der Steppe verhungern.", "reward": "Ork-Bedrohung -2, 40 Silber, Welt-Lore" },
+        { "id": "rosshag_q03", "title": "Verbotenes Zaumzeug", "category": "Kaltfrieden (Orden)", "description": "Ein Sattler verarbeitet heimlich Runenleder aus dem Ordensland.", "reward": "30 Silber, Runensattel" },
+        { "id": "rosshag_q04", "title": "Die dunkle Koppel", "category": "Kult-Spur", "description": "Fünf Kultisten opfern nachts schwarze Hengste für die Bleiche Ewigkeit.", "reward": "Untoten-Bedrohung -3, 35 Silber" },
+        { "id": "rosshag_q05", "title": "Das Rennen von Rosshag", "category": "Kultur", "description": "Gewinne das traditionelle Geländerennen vor den Toren der Stadt.", "reward": "45 Silber, Sporen des Meisters" },
+        { "id": "rosshag_q06", "title": "Leder für die Flotte", "category": "Kaltfrieden (Häfen)", "description": "Ein Aufkäufer aus Perlvik bietet 60 Silber für das Leder aus Sattelby.", "reward": "60 Silber (oder +10 Korn)" },
+        { "id": "rosshag_q07", "title": "Ascheregen auf der Weide", "category": "Nacht des Erwachens", "description": "Besorge Galgenwurz gegen Huf-Fäule durch Vulkanasche.", "reward": "25 Silber, Gegenmittel" },
+        { "id": "rosshag_q08", "title": "Wegelagerer auf S21", "category": "Bestiarium", "description": "Vertreibe Banditen zwischen Rosshag und Steinwacht.", "reward": "35 Silber, Lederpanzer" },
+        { "id": "rosshag_q09", "title": "Der Deserteur von Hagenfels", "category": "Intrige", "description": "Ein geflohener Knappe verrät Details über Ragnvalds Umsturzpläne.", "reward": "30 Silber, Kron-Lore" },
+        { "id": "rosshag_q10", "title": "Der Eid der Reiter", "category": "Begleiter (2/3)", "description": "Zähme gemeinsam mit dem Späher Wulfgar Rossbrecher den weißen Wildhengst in den Hügeln.", "reward": "Begleiter: Wulfgar Rossbrecher (2/3)" }
+      ],
+      "villages": [
+        { "village": "Hengstweide", "road": "D14", "yield": "Pferde", "quests": [
+          { "id": "hengstweide_q01", "title": "Wölfe im Nebel", "description": "Schütze die Stuten vor Grauwölfen.", "reward": "25 Silber, +5 Korn" }
+        ] },
+        { "village": "Sattelby", "road": "D15", "yield": "Leder", "quests": [
+          { "id": "sattelby_q01", "title": "Die gestohlenen Häute", "description": "Verfolge Lederdiebe in die Hügel.", "reward": "25 Silber, Verstärkte Armschienen" }
+        ] }
+      ]
+    },
+    {
+      "city": "Sandvik",
+      "type": "Hafenstadt",
+      "levelRange": "3-6",
+      "sideQuests": [
+        { "id": "sandvik_q01", "title": "Die Muschelbänke von Sandvik", "category": "Fraktion", "description": "Schütze Fischer aus Muschelby vor fremden Segeln.", "reward": "+6 Korn, 25 Silber" },
+        { "id": "sandvik_q02", "title": "Schmuggel nach Zhar-Kesh", "category": "Weltkonflikt (Orks)", "description": "Unterbinde den illegalen Eisenhandel über M05 an die Staubreiter-Orks.", "reward": "Ork-Bedrohung -3, 45 Silber" },
+        { "id": "sandvik_q03", "title": "Warum die Orks segeln", "category": "Weltkonflikt (Orks)", "description": "Ein gestrandeter Ork-Fischer aus Rostbucht (M02) erklärt, dass der Durst sie zu Piraten machte.", "reward": "Welt-Lore, 20 Silber" },
+        { "id": "sandvik_q04", "title": "Der schwarze Sarkophag am Kai", "category": "Kult-Spur", "description": "Besiege acht Kultisten, die versiegelte Kisten mit Totenstaub von einem Nordschiff (M01) abholen wollen.", "reward": "Untoten-Bedrohung -4, 40 Silber" },
+        { "id": "sandvik_q05", "title": "Zollstreit mit Skerheim", "category": "Kaltfrieden (Häfen)", "description": "Treibe verweigerte Hafengebühren von Kapitänen aus Skerheim (M03) ein.", "reward": "35 Silber, Seekarte" },
+        { "id": "sandvik_q06", "title": "Das Pilgerschiff nach Glutvik", "category": "Kaltfrieden (Orden)", "description": "Entlarve einen Kapitän, der Ordenspilger auf dem langen Seeweg M01 ausrauben will.", "reward": "45 Silber, Ordens-Segen" },
+        { "id": "sandvik_q07", "title": "Riffhaie in der Bucht", "category": "Bestiarium", "description": "Jage aggressive Riffhaie vor den Dünen.", "reward": "40 Silber, Haizahn-Dolch" },
+        { "id": "sandvik_q08", "title": "Salzsturm und Asche", "category": "Nacht des Erwachens", "description": "Hilf beim Reinigen der ascheverklebten Handelssegel.", "reward": "25 Silber, +5 Korn" },
+        { "id": "sandvik_q09", "title": "Die Perle der Wellenmutter", "category": "Lore", "description": "Birg eine schwarze Perle aus einem Wrack vor der Südküste.", "reward": "50 Silber, Perlen-Amulett" },
+        { "id": "sandvik_q10", "title": "Leuchtfeuer für die Südküste", "category": "Gewichtig", "description": "Errichte einen neuen Wachturm an den Dünen.", "reward": "Geringere Ork-Überfallgefahr auf M04 und M02" }
+      ],
+      "villages": [
+        { "village": "Muschelby", "road": "D17", "yield": "Fisch", "quests": [
+          { "id": "muschelby_q01", "title": "Wrackkrabben am Strand", "description": "Räume den Strand von riesigen Wrackkrabben.", "reward": "25 Silber, +5 Korn" }
+        ] },
+        { "village": "Dünenhof", "road": "D16", "yield": "Schafe", "quests": [
+          { "id": "duenenhof_q01", "title": "Treibsand und Schmuggler", "description": "Zerstöre vergrabene Knochen-Talismane von Kultisten in den Dünen.", "reward": "Untoten-Bedrohung -2, 30 Silber" }
+        ] }
+      ]
+    },
+    {
+      "city": "Steinwacht",
+      "type": "Stadt",
+      "levelRange": "3-6",
+      "sideQuests": [
+        { "id": "steinwacht_q01", "title": "Steine für die Wehrmauer", "category": "Fraktion", "description": "Sichere den Steinbruch von Felsby nach Erdbebenrissen.", "reward": "+7 Korn, 30 Silber" },
+        { "id": "steinwacht_q02", "title": "Die Wacht an der Westmark", "category": "Fraktion", "description": "Organisiere Nahrung und Unterkunft für Flüchtlinge aus Westvik.", "reward": "+6 Korn, 25 Silber" },
+        { "id": "steinwacht_q03", "title": "Der Riss im Steinbruch", "category": "Nacht des Erwachens", "description": "Vertreibe Glutkäfer aus einer neu aufgebrochenen Erdspalte.", "reward": "40 Silber, Steinbrecher-Streitkolben" },
+        { "id": "steinwacht_q04", "title": "Zwerge im alten Stollen", "category": "Weltkonflikt (Zwerge)", "description": "Entziffere eine Zwergeninschrift im tiefen Steinbruch über den alten Bergpakt.", "reward": "Welt-Lore, 30 Silber" },
+        { "id": "steinwacht_q05", "title": "Kult in den Katakomben", "category": "Kult-Spur", "description": "Zerschlage eine Zelle von sieben Kultisten in den verlassenen Stollen.", "reward": "Untoten-Bedrohung -3, 35 Silber" },
+        { "id": "steinwacht_q06", "title": "Deserteure aus Westvik", "category": "Bestiarium", "description": "Stelle plündernde Deserteure bei Grenzhof.", "reward": "45 Silber, Kettenpanzer" },
+        { "id": "steinwacht_q07", "title": "Schmuggel von Ordens-Reliquien", "category": "Kaltfrieden (Orden)", "description": "Beschlagnahme gestohlene Runensteine aus dem Norden.", "reward": "30 Silber" },
+        { "id": "steinwacht_q08", "title": "Netzweberin im Steinbruch", "category": "Bestiarium", "description": "Erlege eine Riesenspinne in den Schächten von Felsby.", "reward": "35 Silber, Gegengift" },
+        { "id": "steinwacht_q09", "title": "Die alte Grenzchronik", "category": "Lore", "description": "Finde Aufzeichnungen über den ersten Grenzkrieg gegen die Freien Häfen.", "reward": "30 Silber, Kaltfrieden-Lore" },
+        { "id": "steinwacht_q10", "title": "Das Bollwerk der Westmark", "category": "Gewichtig", "description": "Verstärke die Garnison von Steinwacht mit Stein und Korn.", "reward": "Steinwacht hält in Akt 2 jedem Angriff der Rostsegel stand" }
+      ],
+      "villages": [
+        { "village": "Felsby", "road": "D18", "yield": "Stein", "quests": [
+          { "id": "felsby_q01", "title": "Der eingestürzte Schacht", "description": "Rette verschüttete Steinmetze.", "reward": "25 Silber, Eisenspitzhacke" }
+        ] },
+        { "village": "Grenzhof", "road": "D19", "yield": "Korn", "quests": [
+          { "id": "grenzhof_q01", "title": "Späher der Rostsegel", "description": "Vertreibe einen orkischen Vortrupp aus den Kornfeldern.", "reward": "Ork-Bedrohung -2, +6 Korn, 20 Silber" }
+        ] }
+      ]
+    },
+    {
+      "city": "Ulfsborg",
+      "type": "Stadt",
+      "levelRange": "2-6",
+      "sideQuests": [
+        { "id": "ulfsborg_q01", "title": "Winterfelle für die Krone", "category": "Fraktion", "description": "Eskortiere Fellwagen aus Wolfstal sicher über S19 nach Kronhall.", "reward": "+6 Korn, 25 Silber" },
+        { "id": "ulfsborg_q02", "title": "Holz für den Brückenbau", "category": "Fraktion", "description": "Schlichte einen Holzstreit auf S09 zwischen Birkenby und Hagenfels.", "reward": "30 Silber, +5 Korn" },
+        { "id": "ulfsborg_q03", "title": "Der Zirkel im Birkenwald", "category": "Kult-Spur", "description": "Zerschlage einen Kultzirkel von neun Mitgliedern im Wald zwischen Ulfsborg und Eikmark.", "reward": "Untoten-Bedrohung -3, 40 Silber" },
+        { "id": "ulfsborg_q04", "title": "Spione aus den Häfen", "category": "Kaltfrieden (Häfen)", "description": "Fange Agenten aus Perlvik ab, die heimlich Pelze und Bauholz aufkaufen.", "reward": "35 Silber, Intrigen-Lore" },
+        { "id": "ulfsborg_q05", "title": "Das Wolfsrudel von Wolfstal", "category": "Bestiarium", "description": "Verteidige die Jägerhütten gegen ein großes Rudel Grauwölfe.", "reward": "45 Silber, Wolfsfell-Rüstung" },
+        { "id": "ulfsborg_q06", "title": "Warum die Elfen die Wälder hüten", "category": "Weltkonflikt (Elfen)", "description": "Untersuche einen versteinerten Grenzbaum mit Elfenrunen und erfahre vom alten Waldpakt.", "reward": "Welt-Lore, 25 Silber" },
+        { "id": "ulfsborg_q07", "title": "Ascheregen im Birkenhain", "category": "Nacht des Erwachens", "description": "Vertreibe Eisenborstenkeiler, die durch den Ascheregen in die Dörfer fliehen.", "reward": "30 Silber, Keilerleder-Wams" },
+        { "id": "ulfsborg_q08", "title": "Der verschwundene Steuereintreiber", "category": "Intrige", "description": "Rette einen Beamten Kanzler Ulf Graus vor Wegelagerern.", "reward": "50 Silber" },
+        { "id": "ulfsborg_q09", "title": "Krähenbeeren-Ernte", "category": "Handwerk", "description": "Sammle seltene Krähenbeeren für den Apothekarius.", "reward": "20 Silber, 2x Heiltrank" },
+        { "id": "ulfsborg_q10", "title": "Der Jäger von Wolfstal", "category": "Begleiter (3/3)", "description": "Hilf dem einsamen Bogenschützen Fenris Ulfsson, den Kult-Plünderer zu stellen, der seine Familie tötete.", "reward": "Begleiter: Fenris Ulfsson (3/3 - Gruppe voll)" }
+      ],
+      "villages": [
+        { "village": "Wolfstal", "road": "D21", "yield": "Felle", "quests": [
+          { "id": "wolfstal_q01", "title": "Die Falle im Schnee", "description": "Befreie einen Jäger aus einer Falle und wehre Wölfe ab.", "reward": "25 Silber, Jagdbogen" }
+        ] },
+        { "village": "Birkenby", "road": "D20", "yield": "Holz", "quests": [
+          { "id": "birkenby_q01", "title": "Der verfluchte Baum", "description": "Entferne genagelte Totenschädel von Kultisten an einer alten Birke.", "reward": "Untoten-Bedrohung -2, 20 Silber" }
+        ] }
+      ]
+    },
+    {
+      "city": "Westvik",
+      "type": "Hafenstadt",
+      "levelRange": "2-6",
+      "sideQuests": [
+        { "id": "westvik_q01", "title": "Asche und Rauch über Westvik", "category": "Fraktion", "description": "Hilf beim Wiederaufbau der Hafenwehr nach dem Überfall im Prolog.", "reward": "+7 Korn, 30 Silber" },
+        { "id": "westvik_q02", "title": "Vermisste Fischer von Netzby", "category": "Fraktion", "description": "Rette vermisste Fischer von einer Klippe vor der Westküste.", "reward": "35 Silber, +5 Korn" },
+        { "id": "westvik_q03", "title": "Salz für die Vorräte", "category": "Dorf-Verbindung", "description": "Schütze Salzkarren aus Tangstrand auf dem Weg nach Kronhall.", "reward": "+6 Korn, 25 Silber" },
+        { "id": "westvik_q04", "title": "Der Überläufer aus Zhar-Kesh", "category": "Weltkonflikt (Orks)", "description": "Ein verstoßener Ork-Schamane (M09) warnt: Solange der Mutterberg brennt, stürmen die Clans eure Küsten aus Not.", "reward": "Ork-Bedrohung -3, Welt-Lore" },
+        { "id": "westvik_q05", "title": "Verräter in den eigenen Reihen", "category": "Kult-Spur", "description": "Hebe eine Zelle von sechs Kultisten im Leuchtturm aus, die im Prolog die Stadttore für die Orks öffneten.", "reward": "Untoten-Bedrohung -3, 40 Silber" },
+        { "id": "westvik_q06", "title": "Handel mit den Grünen Bannern", "category": "Weltkonflikt (Orks)", "description": "Ein Händler der Grünen Banner aus Zarguth (M08) bietet friedlichen Viehhandel an – ganz anders als die Staubreiter.", "reward": "Welt-Lore, 50 Silber" },
+        { "id": "westvik_q07", "title": "Schmuggel nach Perlvik", "category": "Kaltfrieden (Häfen)", "description": "Stelle einen Kapitän der Freien Häfen, der in Westvik überteuertes Korn verkauft.", "reward": "35 Silber" },
+        { "id": "westvik_q08", "title": "Wrackkrabben in den Ruinen", "category": "Bestiarium", "description": "Räume die niedergebrannten Lagerhäuser von Wrackkrabben.", "reward": "30 Silber, Krabbenpanzer-Schild" },
+        { "id": "westvik_q09", "title": "Die Glocke von Westvik", "category": "Lore", "description": "Birg die versunkene Stadtglocke aus dem Hafenbecken.", "reward": "40 Silber, Moral-Bonus" },
+        { "id": "westvik_q10", "title": "Die Kette über die Bucht", "category": "Gewichtig", "description": "Schmiede eine schwere Hafenkette zwischen den Molen von Westvik.", "reward": "Rostsegel können Westvik in Akt 2 nicht mehr unbemerkt überfallen" }
+      ],
+      "villages": [
+        { "village": "Netzby", "road": "D22", "yield": "Fisch", "quests": [
+          { "id": "netzby_q01", "title": "Zerrissene Netze", "description": "Besorge Tauwerk und vertreibe Riffhaie aus der Bucht.", "reward": "25 Silber, +5 Korn" }
+        ] },
+        { "village": "Tangstrand", "road": "D23", "yield": "Salz", "quests": [
+          { "id": "tangstrand_q01", "title": "Vergrabenes Piratengold", "description": "Birg eine vergrabene Truhe der Rostsegel in den Salinen.", "reward": "45 Silber" }
+        ] }
+      ]
+    }
+  ]
+}

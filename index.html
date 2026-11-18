@@ -15,9 +15,13 @@
   <script defer src="spiel/welt.js"></script>
   <script defer src="spiel/knoten-daten.js"></script>
   <script defer src="spiel/knoten.js"></script>
+  <script defer src="spiel/nebenquests-daten.js"></script>
+  <script defer src="spiel/nebenquests.js"></script>
   <script defer src="spiel/regeln.js"></script>
   <script defer src="spiel/karte-daten.js"></script>
   <script defer src="spiel/karte.js"></script>
+  <script defer src="spiel/reisekarte-daten.js"></script>
+  <script defer src="spiel/reisekarte.js"></script>
   <script defer src="spiel/prolog.js"></script>
   <script defer src="spiel/spiel.js"></script>
   <script defer src="spiel/oberflaeche.js"></script>
@@ -127,6 +131,7 @@
         <a href="#character-panel">Charakter</a>
         <button type="button" class="hub-open" data-sheet-open>Charakterfenster</button>
         <button type="button" class="hub-open" data-hub-open>Inventar</button>
+        <button type="button" class="hub-open" data-reisekarte-open>Reisekarte</button>
       </nav>
       <section class="paper encounter">
         <p class="overline" id="location"></p>
@@ -162,24 +167,12 @@
             <button type="button" role="tab" id="side-tab-gefaehrten" aria-controls="side-gefaehrten" aria-selected="false" tabindex="-1" data-side-tab="gefaehrten"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6 M16 11a2.5 2.5 0 1 0 0-5 M17 14c2.5.5 4 2.6 4 5.5"/></svg><span class="side-tab-label">Gefährten</span></button>
           </div>
           <div id="side-karte" class="side-panel" role="tabpanel" aria-labelledby="side-tab-karte">
+            <button type="button" class="action primary hub-launch rk-launch" data-reisekarte-open><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z M9 4v14 M15 6v14"/></svg><span>Reisekarte öffnen</span></button>
             <details id="travel-map" class="travel-map" open>
               <summary id="map-title">Karte</summary>
               <p id="map-status" class="map-status"></p>
               <div id="map-destinations" class="actions map-destinations" role="group" aria-label="Erreichbare Reiseziele"></div>
               <div id="map-plan" class="actions map-plan"></div>
-              <div class="map-zoom" role="group" aria-label="Kartenstufe">
-                <button type="button" data-map-level="gebiet" aria-pressed="true">1 · Gebiet</button>
-                <button type="button" data-map-level="fraktion" aria-pressed="false">2 · Fraktion</button>
-                <button type="button" data-map-level="welt" aria-pressed="false">3 · Welt</button>
-              </div>
-              <div class="map-scroll" role="region" aria-labelledby="map-title" tabindex="0">
-                <div id="map-board" class="map-board">
-                  <img id="map-image" class="map-image" alt="" decoding="async">
-                  <svg id="map-routes" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
-                  <div id="map-places"></div>
-                </div>
-              </div>
-              <p id="map-caption" class="map-caption"></p>
             </details>
           </div>
           <div id="side-beutel" class="side-panel" role="tabpanel" aria-labelledby="side-tab-beutel">
@@ -238,6 +231,7 @@
           <button type="button" id="hub-unequip-all" class="action hub-unequip-all">Alles ablegen</button>
           <p id="hub-silver" class="hub-silver"></p>
           <div id="hub-belt" class="hub-belt" aria-label="Gürtel"></div>
+          <div id="hub-relikt" class="hub-relikt" aria-label="Gruppen-Relikt" hidden></div>
         </div>
       </div>
     </section>
@@ -274,6 +268,36 @@
       <button type="button" role="tab" id="sheet-tab-effekte" aria-controls="sheet-panel" data-sheet-tab="effekte">Effekte</button>
     </div>
     <div id="sheet-panel" class="sheet-panel" role="tabpanel" tabindex="0"></div>
+  </dialog>
+  <dialog id="reisekarte" class="inventory-hub reisekarte" aria-labelledby="rk-title">
+    <div class="hub-head">
+      <div><p class="overline" id="rk-place"></p><h2 id="rk-title">Reisekarte</h2></div>
+      <button type="button" id="rk-close" class="action">Schließen</button>
+    </div>
+    <div class="rk-tools">
+      <div id="rk-filter" class="rk-filter" role="group" aria-label="Auf der Karte zeigen"></div>
+      <div class="map-zoom rk-zoom" role="group" aria-label="Kartenansicht">
+        <button type="button" data-rk-zoom="-1" aria-label="Herauszoomen">−</button>
+        <button type="button" data-rk-zoom="1" aria-label="Hineinzoomen">+</button>
+        <button type="button" id="rk-zu-mir">Zu mir</button>
+        <select id="rk-region" aria-label="Gebiet zeigen">
+          <option value="">Gebiet …</option>
+          <option value="welt">Ganze Welt</option>
+          <option value="menschen">Menschen</option>
+          <option value="untote">Untote</option>
+          <option value="elfen">Elfen</option>
+          <option value="orks">Orks</option>
+          <option value="zwerge">Zwerge</option>
+        </select>
+      </div>
+    </div>
+    <div class="rk-body">
+      <div id="rk-scroll" class="rk-scroll" role="region" aria-label="Weltkarte: Mausrad oder zwei Finger zoomen, Ziehen oder Pfeiltasten verschieben" tabindex="0">
+        <svg id="rk-svg" class="rk-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <aside id="rk-info" class="rk-info" aria-live="polite"></aside>
+    </div>
+    <p class="rk-legend"><span class="rk-key rk-key-kernland">Kernland</span><span class="rk-key rk-key-grenzland">Grenzland</span><span class="rk-key rk-key-pass">Pass</span><span class="rk-key rk-key-dorfweg">Dorfweg</span><span class="rk-key rk-key-seeweg">Seeweg</span><span class="rk-key rk-key-ziel">erreichbar</span></p>
   </dialog>
 </body>
 </html>

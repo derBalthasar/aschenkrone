@@ -1,0 +1,65 @@
+{
+  "quelle": "Henry, 18. 11. 2026 (Antwort auf die Frage nach den Runengegenständen)",
+  "partyRelicSystem": {
+    "enabled": true,
+    "maxActiveRelics": 1,
+    "scope": "entire_party",
+    "separateFromCharacterEquipment": true,
+    "switchRule": "Jederzeit außerhalb des Kampfes wechselbar; vorheriges Relikt kehrt in den Rucksack zurück.",
+    "factionPermissions": {
+      "kronreich": ["rune"],
+      "haefen": ["rune"],
+      "orden": ["rune", "glut"]
+    }
+  },
+  "relicItems": [
+    {
+      "id": "relic_runenkompass",
+      "name": "Runenkompass",
+      "sourceQuest": "ankerfjord_q04",
+      "relicType": "rune",
+      "partyBuff": { "label": "Seefahrer-Weisung", "seaDangerReduction": 0.15, "partyPerception": 1 },
+      "sellValue": 40
+    },
+    {
+      "id": "relic_runenwaage",
+      "name": "Runenwaage",
+      "sourceQuest": "silberholm_q04",
+      "relicType": "rune",
+      "partyBuff": { "label": "Gerechtes Gewicht", "sellPriceBonus": 0.15, "buyPriceDiscount": 0.05 },
+      "sellValue": 50
+    },
+    {
+      "id": "relic_runen_amulett",
+      "name": "Runen-Amulett",
+      "sourceQuest": "grenzmarkt_q04",
+      "relicType": "rune",
+      "partyBuff": { "label": "Schild der Alten Runen", "partyResistance": 2, "partyMorale": 1 },
+      "sellValue": 45
+    },
+    {
+      "id": "relic_runen_fokus",
+      "name": "Runen-Fokus",
+      "sourceQuest": "aschenkloster_q07",
+      "relicType": "rune",
+      "partyBuff": { "label": "Brennende Runenkraft", "partyMagicPower": 2, "damageVsUndead": 0.15 },
+      "sellValue": 45
+    },
+    {
+      "id": "relic_glutlaterne",
+      "name": "Glutlaterne",
+      "sourceQuest": "nebelvik_q04",
+      "relicType": "glut",
+      "partyBuff": { "label": "Licht der Ewigen Glut", "fireDamage": 2, "nightAmbushImmunity": true },
+      "sellValue": 55
+    },
+    {
+      "id": "relic_glutstein_amulett",
+      "name": "Glutstein-Amulett",
+      "sourceQuest": "glutberg_q08",
+      "relicType": "glut",
+      "partyBuff": { "label": "Herz des Glutbergs", "fireResistance": 4, "coldDamageReduction": 0.25 },
+      "sellValue": 50
+    }
+  ]
+}

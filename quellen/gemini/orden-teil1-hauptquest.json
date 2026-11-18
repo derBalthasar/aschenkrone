@@ -1,0 +1,92 @@
+{
+  "meta": {
+    "faction": "Orden der Flamme",
+    "factionId": "orden",
+    "motto": "Solange die Flamme brennt, ruht der Tod",
+    "resourceType": "Glaube",
+    "currency": "Silber",
+    "magicAllowed": true,
+    "maxCompanions": 3
+  },
+  "companions": [
+    { "id": "comp_orden_bjarne", "name": "Bruder Bjarne Eisenrun", "role": "Runen-Paladin / Tank", "class": "waechter",
+      "recruitLocation": "Aschenkloster", "recruitAct": 1, "questId": "aschenkloster_q10", "ability": "Schild der Ewigen Glut" },
+    { "id": "comp_orden_solveig", "name": "Runenpriesterin Solveig Gluthand", "role": "Feuerpriesterin / Magie", "class": "magier",
+      "recruitLocation": "Brandstein", "recruitAct": 2, "questId": "brandstein_q10", "ability": "Schwefelrune & Feuerstoß" },
+    { "id": "comp_orden_malte", "name": "Späher Malte Sturmauge", "role": "Bergschütze / Fernkampf", "class": "spaeher",
+      "recruitLocation": "Nordwacht", "recruitAct": 3, "questId": "nordwacht_q10", "ability": "Wachfeuer-Salve gegen Untote" }
+  ],
+  "mainQuestline": {
+    "chapter": 1,
+    "prolog": { "title": "Die Nacht der kalten Feuer", "status": "implemented" },
+    "acts": [
+      {
+        "act": "1", "id": "orden_act1", "title": "Die flackernde Flamme", "levelRange": "1-5",
+        "region": "Ordensland (Glutberg, Aschenkloster, Lichtheim, Brandstein)",
+        "steps": [
+          { "step": 1, "location": "Glutberg", "title": "Halle der Ewigen Flamme", "description": "Hochmeisterin Ragna Glutherz und Erzpriester Thorvald melden, dass die seit 270 Jahren brennende Ewige Flamme erlischt. Thorvald rät dazu, die alten Runenbecken mit geweihtem Wachs und Schwefel neu zu entfachen." },
+          { "step": 2, "location": "Lichtheim / Brandstein", "title": "Wachs und Schwefel", "description": "Über S36 reist du nach Lichtheim (Bienental, D37) und über S28 weiter nach Brandstein (Schwefelgrube, D30). Kultisten haben die Lieferungen sabotiert und Runenfresser angelockt." },
+          { "step": 3, "location": "Glutberg", "title": "Verräter im Feuer", "description": "Rückkehr zum Glutberg. Seherin Freydis entlarvt mit deiner Hilfe einen niederen Akolythen, der das heilige Öl verwässert hat – doch die wahren Drahtzieher bleiben im Schatten." }
+        ],
+        "keyChoice": [
+          { "id": "orden_act1_mercy", "label": "Die Flamme mit den Gebeten der Überlebenden nähren", "effect": "+10 Glaube; schaltet Schutz- und Heilrunen für die Gruppe frei." },
+          { "id": "orden_act1_wrath", "label": "Die Flamme mit Stahl und Asche der Gefallenen nähren", "effect": "Untoten-Bedrohung -5; schaltet offensive Glutwaffen-Runen frei." }
+        ]
+      },
+      {
+        "act": "2/3", "id": "orden_branch_kronreich", "title": "Korn über den Eispass", "freeOrder": true, "recommendedOrder": 2,
+        "sisterFaction": "Kronreich", "levelRange": "6-10 als erster Zweig, 11-15 als zweiter",
+        "mainLocations": ["Eiswacht", "Kronhall", "Eikmark"],
+        "steps": [
+          { "step": 1, "location": "Eiswacht", "title": "Die Wacht am Eispass", "description": "Marschall Ser Bjarne vom Eispass meldet leere Kornspeicher. Ohne Korn aus dem Kronreich droht dem Ordensland der Hunger." },
+          { "step": 2, "location": "Kronhall", "title": "Kaltfrieden am Krankenbett", "description": "Über Pass P02 erreichst du Kronhall. Du verhandelst mit Kronprinzessin Astrid und Kanzler Ulf Grau über Kornlieferungen, während Jarl Ragnvald misstrauisch auf deine Runen blickt." },
+          { "step": 3, "location": "Eikmark / Brandstein", "title": "Der Korntreck über die Grenze", "description": "Du sicherst den Korntreck über S04 nach Eikmark und weiter über Grenzstraße S01 nach Brandstein." }
+        ],
+        "keyChoice": [
+          { "id": "orden_kron_covenant", "label": "Heiliger Bund & Beistand für König Harald IV.", "effect": "Dauerhafte Kornlieferungen (+10 Glaube); schwere Kronreich-Ritter unterstützen den Orden." },
+          { "id": "orden_kron_seize", "label": "Grenzstädte unter Kriegsrecht des Ordens stellen", "effect": "Sofortiger Vorrats- und Silbergewinn (+60 Silber), aber Misstrauen bei Astrid und Ragnvald." }
+        ]
+      },
+      {
+        "act": "2/3", "id": "orden_branch_haefen", "title": "Schiffe für den Kreuzzug", "freeOrder": true, "recommendedOrder": 3,
+        "sisterFaction": "Freie Häfen", "levelRange": "6-10 als erster Zweig, 11-15 als zweiter",
+        "mainLocations": ["Flammenhof", "Tranvik", "Bernsvik", "Perlvik"],
+        "steps": [
+          { "step": 1, "location": "Flammenhof / Tranvik", "title": "Der Weg an die Ostküste", "description": "Über Grenzstraße S34 reist du von Flammenhof nach Tranvik, um Schiffe für den Orden anzuwerben." },
+          { "step": 2, "location": "Bernsvik", "title": "Knochenfracht aus Draugrsund", "description": "Über S52 erreichst du Bernsvik. Du deckst auf, dass korrupte Kaufleute über Seeweg M23 heimlich Reliquien aus Draugrsund schmuggeln." },
+          { "step": 3, "location": "Perlvik", "title": "Gold und Glaube", "description": "Über Seeweg M25 reist du nach Perlvik und schließt mit Thingsprecherin Solveig Valsdottir und Meister Orrin Kupferbart den Flottenvertrag." }
+        ],
+        "keyChoice": [
+          { "id": "orden_haefen_tithe", "label": "Tempelsilber zahlen & Handelsrouten segnen (80 Silber)", "effect": "Schnelle Kriegsschiffe und erfahrene Seeleute der Freien Häfen schließen sich an." },
+          { "id": "orden_haefen_inquisition", "label": "Kult-Reeder enteignen & Werften beschlagnahmen", "effect": "Kostenlose Schiffe, aber Unruhe in den Häfen und Sabotagegefahr." }
+        ]
+      },
+      {
+        "act": "4", "id": "orden_act4", "title": "Verräter im Feuer & Das Alte Reich", "levelRange": "16-18",
+        "includesFolkQuest": "Volksquest: Das Alte Reich",
+        "steps": [
+          { "step": 1, "location": "Glutberg", "title": "Entlarvung des Bleichen Skalden", "description": "Seherin Freydis findet in den tiefen Gewölben des Glutbergs verbotene Totenrunen. Der wahre Anführer des Kults der Bleichen Ewigkeit wird entlarvt: Erzpriester Thorvald selbst. Über hundert Jahre hält ihn die Totenmagie des Nordens am Leben; als Preis dafür schwächt er die Ewige Flamme, damit die Untoten im Norden erstarken. Du stellst Thorvald in der Halle der Ewigen Flamme als Endgegner (Untoten-Bedrohung -15)." },
+          { "step": 2, "location": "Kronhall", "title": "Das Große Thing", "description": "Nach Thorvalds Fall vereinen Hochmeisterin Ragna Glutherz, Kronprinzessin Astrid und Thingsprecherin Solveig Valsdottir die drei Menschenfraktionen; der Held steigt zum Bannerjarl auf." },
+          { "step": 3, "location": "Nordwacht / Glutvik", "title": "Der Kreuzzug rüstet", "description": "Die Flotte sammelt sich an den Nordhäfen, und die Wachfeuer brennen wieder hell." }
+        ]
+      },
+      {
+        "act": "5", "id": "orden_act5", "title": "Über das Nordmeer", "levelRange": "19-20",
+        "destinationChoice": ["Elfen", "Orks", "Zwerge", "Untote (extrem schwer)"],
+        "steps": [
+          { "step": 1, "location": "Nordwacht / Glutvik", "title": "Auslaufen der Kreuzzugsflotte", "description": "Mit dem Segen der neu entfachten Ewigen Flamme sticht die Menschenarmada in See." },
+          { "step": 2, "location": "Inneres Meer / Nordmeer", "title": "Feuer auf den Wellen", "description": "Abwehr eines Angriffs untoter Kriegsschiffe auf hoher See mithilfe geweihter Glutrunen." },
+          { "step": 3, "location": "Fremde Küste (frei wählbarer Kontinent)", "title": "Der Brückenkopf", "description": "Landung an der gewählten Küste (Elfen im Osten, Orks im Südwesten, Zwerge im Südosten als Bündnis oder Unterwerfung – oder der extrem schwere Weg direkt gegen die Untoten im hohen Norden). Ende Kapitel 1." }
+        ]
+      }
+    ],
+    "specialization": {
+      "trigger": "Nach Abschluss beider Schwester-Zweige",
+      "additionalToClass": true,
+      "options": [
+        { "id": "spec_sonnenklingen", "name": "Sonnenklingen", "bonus": "Maximale Glutmagie im Nahkampf, verheerender Feuerschaden gegen Untote." },
+        { "id": "spec_waechter_der_asche", "name": "Wächter der Asche", "bonus": "Unerschütterliche Runen-Rüstungen, Gruppenheilung und -25% Glaubenskosten auf Reisen." }
+      ]
+    }
+  }
+}

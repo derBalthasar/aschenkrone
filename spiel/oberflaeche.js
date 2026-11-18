@@ -26,7 +26,6 @@
     if (name === "karte") {
       travelMap.open = true;
       mapTab.classList.remove("side-tab-news");
-      requestAnimationFrame(fitMapLabels);
     }
     if (remember) {
       try {
@@ -75,19 +74,4 @@
     const news = destinations.children.length > 0 && panel.dataset.sideTab !== "karte" && !mapHasOwnColumn();
     mapTab.classList.toggle("side-tab-news", news);
   }).observe(destinations, { childList: true });
-
-  // Ortsbeschriftungen, die über den Kartenrand ragen würden, auf die andere Seite des Punktes legen.
-  const board = document.getElementById("map-board");
-  const places = document.getElementById("map-places");
-  function fitMapLabels() {
-    const area = board.getBoundingClientRect();
-    if (!area.width) return;
-    for (const marker of places.querySelectorAll(".map-marker")) {
-      const box = marker.getBoundingClientRect();
-      if (box.right > area.right - 2 && marker.classList.contains("map-side-r")) marker.classList.replace("map-side-r", "map-side-l");
-      else if (box.left < area.left + 2 && marker.classList.contains("map-side-l")) marker.classList.replace("map-side-l", "map-side-r");
-    }
-  }
-  new MutationObserver(fitMapLabels).observe(places, { childList: true });
-  window.addEventListener("resize", () => requestAnimationFrame(fitMapLabels));
 })();

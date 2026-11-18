@@ -63,11 +63,13 @@ Der Held stammt aus Westvik, einem Hafendorf der Westmark, und dient in der Land
 
 **Fraktionsreihe**
 
-1. Akt 1, Der Thron wankt: Der Held wird Bote zwischen Prinzessin Astrid und Jarl Ragnvald. Ein Kultist am Krankenbett des Königs wird entlarvt oder entkommt.
-2. Akt 2, Feuer an der Westmark: Rückkehr nach Westvik. Die Rostsegel vertreiben oder mit Kapitän Urgash einen Frieden aushandeln. Der Tribut aus dem Prolog wird hier aufgedeckt oder bleibt geheim.
-3. Akt 3, Die abtrünnigen Häfen: Auf dem Reichsthing oder vor Perlvik die Häfen zurückgewinnen. Spezialisierung wählen.
-4. Akt 4, Der Schwur am Glutberg: Mit Korn über den Eispass zum Orden. Der Held erlebt, wie schwach die Ewige Flamme seit der Nacht brennt.
-5. Akt 5, Das Alte Reich ersteht neu: Treffen der drei Fraktionen auf dem großen Thing in Kronhall. Leitet die Volksquest ein.
+Seit 18. 11. 2026 nach Geminis Aufbau (Entscheidung Henry, Einzelheiten in [quests/KRONREICH.md](quests/KRONREICH.md)):
+
+1. Akt 1, Der Thron wankt (Stufe 1–5): Der Held wird Reichsbote Astrids, am Krankenbett fällt ein stummer Heiler auf. Jarl Ragnvald in Hagenfels fordert einen Beweis der Stärke. Am Ende „Feuer an der Westmark“: Die Rostsegel zurückschlagen oder Waffenstillstand mit Kapitän Urgash.
+2. Akt 2/3, Die abtrünnigen Häfen (freie Reihenfolge; erster Zweig Stufe 6–10, zweiter 11–15): Verhandlung mit Solveig Valsdottir, Schmuggel im Nebel, Vertrag von Perlvik. Reichsthing oder Erpressung des Gildenrats.
+3. Akt 2/3, Der Schwur am Glutberg (freie Reihenfolge; erster Zweig Stufe 6–10, zweiter 11–15): Korntreck über den Eispass, das bedrängte Aschenkloster, Bund mit Ragna Glutherz und Thorvald. Danach zusätzlich zur Klassen-Spezialisierung „Eiserne Krone“ oder „Banner der Glut“.
+4. Akt 4, Das Alte Reich ersteht neu (Stufe 16–18, enthält die Volksquest): Der stumme Heiler ist Grabwächter. Seine Spur entlarvt den Bleichen Skalden: Erzpriester Thorvald. Danach das Große Thing, der Held wird Bannerjarl, und die Armada wird gerüstet.
+5. Akt 5, Über das Innere Meer (Stufe 19–20): Kriegsrat in Perlvik mit freier Wahl des Ziels, dann läuft die Flotte aus dem Starthafen der Route aus, wehrt Totenschiffe ab und errichtet einen Brückenkopf auf einem frei wählbaren Kontinent (Elfen, Orks oder Zwerge als Verbündete oder Unterworfene; die Untoten im Norden als extrem schwerer Weg). Ende von Kapitel 1.
 
 ### Freie Häfen (mittel): „Jedes Meer ist ein Weg“
 
@@ -81,11 +83,15 @@ Der Held ist Seesoldat oder Agent der Stillen Feder in Perlvik.
 
 **Fraktionsreihe**
 
-1. Akt 1, Die Zollinseln: Handelsrouten sichern, Piraten vertreiben. Die Leiche des Kultisten aus dem Brand ist nicht mehr auffindbar, und die Gilde sucht einen Seesoldaten der Bundesflotte, der seit Wochen vermisst wird.
-2. Akt 2, Gold und Eisen: Verhandlungen mit Meister Orrin Kupferbart und der Königsbank, Schwarzpulver aus Essenfels.
-3. Akt 3, Der Handel mit den Grünen Bannern: Fahrt zum Grünmarkt, erster Frieden mit einem Ork-Clan. Spezialisierung wählen.
-4. Akt 4, Die Kronschuld: Das Kronreich durch Kredite an den Verhandlungstisch zwingen oder Kronhall fallen lassen.
-5. Akt 5, Die Flotte gen Norden: Die Flotte liegt vor dem Glutberg. Treffen der drei Fraktionen. Leitet die Volksquest ein.
+Seit 18. 11. 2026 nach Geminis Aufbau, wie beim Kronreich und beim Orden (Einzelheiten und Henrys Änderungen in [quests/HAEFEN.md](quests/HAEFEN.md)):
+
+1. Akt 1, Die Zollinseln (Stufe 1–5): Von Zollholm aus die Seewege sichern. Die Spur der verschwundenen Leiche und des vermissten Seesoldaten führt zu Schmugglern, Kuriere in Möwenstad tragen verschlüsselte Briefe, und eine Nachricht der Stillen Feder in Silberholm warnt vor Kult-Reedern. Am Hafenthing in Perlvik den korrupten Reeder überführen. Den Bund der ehrlichen Kapitäne stärken oder die Schmugglerrouten heimlich übernehmen.
+2. Akt 2/3, Die Kronschuld (freie Reihenfolge; erster Zweig Stufe 6–10, zweiter 11–15): Korn gegen Schuldscheine in Grenzmarkt und Haraldstad, Verhandlung mit Astrid in Kronhall, Kornwagen an die Küste.
+3. Akt 2/3, Gold und Eisen (freie Reihenfolge): Über Wachtfeuer und Lichtheim nach Brandstein, Schwefel für die Schiffskanonen, Pakt am Glutberg. Danach zusätzlich zur Klassen-Spezialisierung „Schwarzpulver-Armada“ oder „Goldene Gilde“.
+4. Akt 4, Das Alte Reich & Der Bleiche Skalde (Stufe 16–18, enthält die Volksquest): Erzpriester Thorvald wird als Bleicher Skalde entlarvt. Das Große Thing, der Held wird Bannerjarl.
+5. Akt 5, Über das Innere Meer (Stufe 19–20, bei Gemini „Die Flotte gen Norden“): Kriegsrat in Perlvik mit freier Wahl des Ziels, dann Abfahrt aus dem Starthafen der Route. Ende von Kapitel 1.
+
+Die frühere Aktfolge (Akt 3 „Der Handel mit den Grünen Bannern“) entfällt. Die Kreuzung mit den Grünen Bannern (deren Akt 2 „Der Grünmarkt“) hat damit auf Seiten der Häfen keinen Akt mehr; das wird mit den Ork-Quests geklärt.
 
 ### Orden der Flamme (schwer): „Solange die Flamme brennt“
 
@@ -99,11 +105,15 @@ Der Held ist Novize im Aschenkloster und hat gerade seine Gelübde abgelegt.
 
 **Fraktionsreihe**
 
-1. Akt 1, Die flackernde Flamme: Herausfinden, warum die Flamme schwindet, und sie neu entfachen.
-2. Akt 2, Verräter im Feuer: Mit Freydis den Kult im Orden aufspüren. Die Spur führt zum Bleichen Skalden.
-3. Akt 3, Der Kreuzzug ruft: Kronreich und Häfen um Korn und Schiffe bitten oder sie zwingen. Spezialisierung wählen.
-4. Akt 4, Die Elfen am Weltenbaum: Gesandtschaft zur Wurzelhalle. Kaelith Eisdorn und die Dornenklingen empfangen den Helden als Waffenbruder.
-5. Akt 5, Über das Nordmeer: Der Kreuzzug sammelt sich am Glutberg. Treffen der drei Fraktionen. Leitet die Volksquest ein.
+Seit 18. 11. 2026 nach Geminis Aufbau, wie beim Kronreich (Einzelheiten und Henrys Änderungen in [quests/ORDEN.md](quests/ORDEN.md)):
+
+1. Akt 1, Die flackernde Flamme (Stufe 1–5): Die Ewige Flamme erlischt. Wachs aus Lichtheim und Schwefel aus Brandstein holen, Freydis entlarvt einen Akolythen, der das heilige Öl verwässert. Die Flamme mit Gebeten oder mit Stahl und Asche nähren.
+2. Akt 2/3, Korn über den Eispass (freie Reihenfolge; erster Zweig Stufe 6–10, zweiter 11–15): Leere Kornspeicher in Eiswacht, Verhandlung in Kronhall mit Astrid und Ulf Grau, Korntreck über P02 zurück nach Eiswacht. Heiliger Bund mit Harald IV. oder Kriegsrecht über die Grenzstädte.
+3. Akt 2/3, Schiffe für den Kreuzzug (freie Reihenfolge; erster Zweig Stufe 6–10, zweiter 11–15): Über Tranvik nach Bernsvik, Knochenfracht aus Draugrsund, Flottenvertrag in Perlvik. Tempelsilber zahlen oder Kult-Reeder enteignen. Danach zusätzlich zur Klassen-Spezialisierung „Sonnenklingen“ oder „Wächter der Asche“.
+4. Akt 4, Verräter im Feuer & Das Alte Reich (Stufe 16–18, enthält die Volksquest): Freydis findet Totenrunen im Glutberg. Erzpriester Thorvald ist der Bleiche Skalde und wird in der Halle der Ewigen Flamme gestellt. Danach das Große Thing, der Held wird Bannerjarl.
+5. Akt 5, Über das Innere Meer (Stufe 19–20): Kriegsrat in Nordwacht oder auf dem Glutberg mit freier Wahl des Ziels, dann Abfahrt aus dem Starthafen der Route. Die Flotte wehrt untote Schiffe ab und landet am gewählten Kontinent. Ende von Kapitel 1.
+
+Die frühere Aktfolge (Akt 4 „Die Elfen am Weltenbaum“) entfällt. Die Kreuzung mit den Dornenklingen (deren Akt 3 „Klinge und Flamme“) hat damit auf Seiten des Ordens keinen Akt mehr; das wird mit den Elfen-Quests geklärt.
 
 ### Volksquest Menschen: „Das Alte Reich“
 

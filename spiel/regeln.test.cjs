@@ -8,7 +8,7 @@ const vm = require("node:vm");
 const root = path.join(__dirname, "..");
 const context = vm.createContext({ structuredClone });
 
-for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/faehigkeiten.js", "spiel/kampf.js", "spiel/startpunkte.js", "spiel/welt.js", "spiel/knoten-daten.js", "spiel/knoten.js", "spiel/regeln.js"]) {
+for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/faehigkeiten.js", "spiel/kampf.js", "spiel/startpunkte.js", "spiel/welt.js", "spiel/knoten-daten.js", "spiel/knoten.js", "spiel/nebenquests-daten.js", "spiel/nebenquests.js", "spiel/regeln.js"]) {
   vm.runInContext(fs.readFileSync(path.join(root, file), "utf8"), context, { filename: file });
 }
 
@@ -216,7 +216,16 @@ for (const faction of factionIds) {
   assert.equal(rules.level(fled), 3, faction + ": Stufe nach dem Prolog");
   assert.ok(rules.storageOpen(fled), faction + " braucht ein Zentrallager an der Zuflucht");
   for (const entry of fled.journal) if (entry.length > 300) longJournal.push(faction + ": " + entry);
-  const sent = rules.choose(fled, "reise");
+  let sent = rules.choose(fled, "reise");
+  // Die Menschen beginnen Akt 1 im Weltknoten (Kronhall, Glutberg, Zollholm). Kornwik wartet als Handlung, bis der Held dorthin reist.
+  const hauptstadt = { kronreich: "kronhall", orden: "glutberg", haefen: "zollholm" }[faction];
+  if (hauptstadt) {
+    assert.equal(sent.scene, "weltknoten");
+    assert.equal(sent.knoten, hauptstadt);
+    assert.deepEqual(plain(sent.handlung), { szene: "ankunft", knoten: "kornwik" });
+    assert.deepEqual(plain(reload(sent).hauptquest), { schritt: 0, wahl: null });
+    sent = rules.zurHandlung({ ...sent, knoten: "kornwik" });
+  }
   assert.equal(sent.scene, "ankunft");
   assert.equal(rules.storageSite(sent), "Zentrallager · Kornwik");
   assert.deepEqual(ids(reload(sent)), ["prepare", "move"]);
@@ -924,7 +933,7 @@ console.log('Gruppenausrüstung, Besitz, Kampfboni und Spielstandmigration gepr�
 
 // Aufnahme erst nach angenommenem und abgegebenem Auftrag; kein mehrfacher Rufgewinn.
 const questStart = { ...rules.create("Tala", "kronreich", "frau", 1, "magier"), scene: "watch-yard", silver: 30 };
-for (const id of Object.keys(world.companions).filter(id => id !== questStart.role && !world.companions[id].soeldner)) {
+for (const id of Object.keys(world.companions).filter(id => id !== questStart.role && !world.companions[id].soeldner && !world.companions[id].auftrag)) {
   const applicant = { ...rules.create("Tala", "kronreich", "frau", 1, world.companions[id].klasse === "waechter" ? "heiler" : "waechter"), scene: "watch-yard", silver: 30 };
   const accepted = rules.promise(applicant, id);
   assert.equal(rules.recruit(accepted, id), accepted, id + ': Auftrag noch nicht abgegeben');
@@ -1409,7 +1418,12 @@ console.log("Reisebegegnungen (ruhig, scheu, Jäger, Alphatier, Ausweichen) gepr
   assert.throws(() => rules.read(JSON.stringify({ ...hub, scene: "weltende" })), /beschädigt/);
 
   // Seewege: eigener Hafen oder Handelsvertrag, 15 Silber je Überfahrt.
-  const westvik = { ...hub, knoten: "westvik", silver: 40 };
+  // Übersee zu fremden Völkern erst nach Akt 5 (Wegenetz der Menschen, Quest-Stufe 5).
+  const westvikFrueh = { ...hub, knoten: "westvik", silver: 40, questStufe: 4 };
+  const seeFrueh = rules.reiseZiele(westvikFrueh).find(weg => weg.kantenTyp === "seeweg");
+  assert.equal(seeFrueh.grund, "Übersee erst nach Akt 5");
+  assert.equal(rules.reise(westvikFrueh, seeFrueh.zielId), westvikFrueh);
+  const westvik = { ...hub, knoten: "westvik", silver: 40, questStufe: 5 };
   const see = rules.reiseZiele(westvik).find(weg => weg.kantenTyp === "seeweg");
   assert.equal(see.grund, null);
   const sailed = rules.reise(westvik, see.zielId);
@@ -1430,6 +1444,29 @@ console.log("Reisebegegnungen (ruhig, scheu, Jäger, Alphatier, Ausweichen) gepr
   assert.equal(rules.vertragGrund({ ...dwarf, scene: "weltknoten", knoten: "aschenthron" }), "Orks und Zwerge verhandeln nicht miteinander");
   assert.equal(rules.vertragSchliessen({ ...hub, knoten: "ambossheim" }).weltLeisten.erzfieber, 40);
   assert.equal(rules.vertragSchliessen({ ...hub, knoten: "kragmar" }).weltLeisten.orks, 35);
+
+  // Wegenetz der Menschen: P03 Eispass hat 25 % Jäger, Grauwölfe oder den Klippenwyrm auf Gebietsstufe.
+  {
+    const folge = (values) => { let index = 0; rules.setTravelDice(() => values[Math.min(index++, values.length - 1)]); };
+    const amPass = { ...hub, knoten: "eiswacht", health: rules.healthLimit(hub) };
+    // Aufbruch und Reisekarte zeigen Kennung, Gefahr und Gegner des Weges.
+    const passWeg = rules.reiseZiele(amPass).find(weg => weg.zielId === "brandstein");
+    assert.equal(passWeg.kennung, "P03");
+    assert.equal(passWeg.gefahr, 0.25);
+    same(passWeg.gegner, ["jagd-grauwolf", "auftrag-klippenwyrm"].map(id => world.fights[id].name));
+    const seeWeg = rules.reiseZiele({ ...hub, knoten: "westvik" }).find(weg => weg.kantenTyp === "seeweg");
+    assert.match(seeWeg.kennung, /^M\d\d$/);
+    same(seeWeg.gegner, [], "Auf See gibt es noch keine Kämpfe");
+    folge([0.74]);
+    assert.equal(rules.reise(amPass, "brandstein").combat, null, "74 liegt noch unter 55 ruhig + 20 scheu");
+    folge([0.75, 0.5, 0.9, 0]);
+    const wyrm = rules.reise(amPass, "brandstein");
+    assert.equal(wyrm.combat.id, "auftrag-klippenwyrm");
+    assert.equal(wyrm.combat.weiter, "weltknoten");
+    folge([0.75, 0.5, 0, 0]);
+    assert.equal(rules.reise(amPass, "brandstein").combat.id, "jagd-grauwolf");
+    rules.setTravelDice(() => 0);
+  }
 
   // Pässe: Der Zollpass schließt ab Erzfieber 50.
   const zoll = knoten.get("zollburg").verbindungen.find(weg => weg.pass === "Zollpass");
@@ -1472,7 +1509,8 @@ console.log("Reisebegegnungen (ruhig, scheu, Jäger, Alphatier, Ausweichen) gepr
   assert.equal(rules.hire({ ...hub, ressource: 15 }, "steppenreiter", "vorrat").party.length, 0);
 
   // Hinterhalt auf einer Grenzlandkante im Kronreich: Kampf, danach zurück in den Hub.
-  rules.setTravelDice(() => 0.5);
+  // P01 Heidvang–Eiswacht: 40 ruhig, 20 scheu, 40 Jäger; 70 ist ein Jäger, der dritte Wert wählt den Grauwolf.
+  { let index = 0; const werte = [0.7, 0.5, 0]; rules.setTravelDice(() => werte[Math.min(index++, werte.length - 1)]); }
   const ambush = rules.reise({ ...toHeidvang, xp: 300, health: 60 }, "eiswacht");
   rules.setTravelDice(() => 0);
   assert.equal(ambush.combat.id, "jagd-grauwolf");
@@ -1505,3 +1543,238 @@ console.log("Weltebene (Knotennetz, Weltleisten, Vorrat, Seewege, Pässe, Stolle
   assert.equal(rules.entwurf(ready, { spez: { variante: "a", grundwert: "will", fertigkeit: "mut" } }), ready, "Spezialisierung erst ab Quest-Stufe 3");
 }
 console.log("Charakter-Entwurf geprüft.");
+
+// Aufträge am Aushang und Hauptquest Akt 1 für Kronreich und Orden (Henry, 18. 11. 2026).
+{
+  const imOrt = (faction, ort, extra = {}) => ({ ...rules.create("Tala", faction, "frau", 1, "krieger"), scene: "weltknoten", knoten: ort,
+    xp: 300, ...extra });
+  const midRoll = () => 0.5;
+  // Feste Würfelfolge, damit die Kämpfe wie im Spiel streuen und der Test trotzdem wiederholbar bleibt.
+  let saat = 7;
+  const wurf = () => ((saat = (saat * 1103515245 + 12345) % 2147483648) / 2147483648);
+  // Spielt jede Runde die Aktion, die den Gegnern am meisten und dem Helden am wenigsten schadet.
+  const gegnerLp = (state) => state.combat ? state.combat.feinde.reduce((sum, feind) => sum + feind.lp, 0) : 0;
+  const sieg = (state) => {
+    let current = state;
+    for (let round = 0; current.combat && round < 60; round++) {
+      const aktionen = [...rules.abilities(current).filter(f => f.frei && !rules.abilityState(current, f.id)).map(f => f.id), "spear"];
+      const wert = (next) => next === current ? -Infinity : (next.combat ? 0 : 1000) + gegnerLp(current) - gegnerLp(next) -
+        1.2 * (current.health - next.health) - (next.health ? 0 : 5000);
+      const beste = aktionen.reduce((best, id) => wert(rules.strike(current, id, midRoll)) > wert(rules.strike(current, best, midRoll)) ? id : best, "spear");
+      current = rules.strike(current, beste, wurf);
+    }
+    assert.equal(current.combat, null, "Der Auftragskampf muss zu gewinnen sein");
+    assert.ok(current.health > 0);
+    return current;
+  };
+  // Annehmen mit Wahl der Belohnung, Abgabe ohne Kampf, Spielstand.
+  let held = imOrt("kronreich", "kronhall");
+  held = { ...held, health: rules.healthLimit(held) };
+  const liste = rules.aushang(held);
+  assert.equal(liste.length, 10);
+  assert.ok(liste.every(auftrag => auftrag.grund === null));
+  assert.equal(rules.auftragAnnehmen(held, "kronhall_q01", 2), held, "nur angebotene Belohnungen");
+  assert.equal(rules.auftragAnnehmen(held, "glutberg_q01"), held, "nur am Aushang des Ortes");
+  let s = reload(rules.auftragAnnehmen(held, "kronhall_q01", 1));
+  assert.deepEqual(plain(s.weltAuftraege), { kronhall_q01: { status: "aktiv", wahl: 1 } });
+  assert.equal(rules.auftragAnnehmen(s, "kronhall_q01", 0), s, "kein zweites Annehmen");
+  assert.equal(rules.ausfuehrenGrund({ ...s, knoten: "kornwik" }, "kronhall_q01"), "in Kronhall");
+  s = reload(rules.auftragAusfuehren(s, "kronhall_q01"));
+  assert.equal(s.weltAuftraege.kronhall_q01.status, "erledigt");
+  assert.equal(s.silver, held.silver + 55);
+  assert.equal(s.ressource, held.ressource - 5);
+  assert.equal(s.xp, held.xp + rules.auftragEp);
+  assert.equal(rules.auftragAusfuehren(s, "kronhall_q01"), s, "kein zweiter Lohn");
+  assert.equal(rules.auftraege(s, "erledigt").length, 1);
+
+  // Kampfauftrag am Ort: Gegner auf Gebietsstufe, gespeicherter Kampf, Abgabe nach dem Sieg.
+  s = rules.auftragAusfuehren(rules.auftragAnnehmen(held, "kronhall_q04"), "kronhall_q04");
+  assert.equal(s.combat.id, "auftrag-kultisten");
+  assert.equal(s.combat.auftrag, "kronhall_q04");
+  assert.equal(s.combat.gegnerStufe, rules.level(held), "Gebietsstufe 1–6 folgt der Heldenstufe");
+  assert.ok(s.combat.feinde.every(feind => feind.stufe === rules.level(held)));
+  assert.equal(s.combat.feinde.length, 3);
+  assert.equal(reload(s).combat.auftrag, "kronhall_q04");
+  assert.throws(() => reload({ ...s, combat: { ...s.combat, auftrag: "kronhall_q05" } }), /beschädigt/);
+  const untote = s.weltLeisten.untote;
+  s = sieg(s);
+  assert.equal(s.scene, "weltknoten");
+  assert.equal(s.weltAuftraege.kronhall_q04.status, "erledigt");
+  assert.equal(s.weltLeisten.untote, untote - 3);
+  assert.ok(!s.journal.some(eintrag => eintrag.includes("Du nimmst  mit")));
+
+  // Gebietsstufe: Orden-Held im Kronreich kämpft auf der Stufe seines Schwester-Zweigs (mindestens 6).
+  const gast = imOrt("orden", "kronhall", { xp: 0 });
+  const gastKampf = rules.auftragAusfuehren(rules.auftragAnnehmen({ ...gast, health: rules.healthLimit(gast) }, "kronhall_q04"), "kronhall_q04");
+  assert.equal(gastKampf.combat.gegnerStufe, 6);
+  assert.equal(rules.auftragGrund(imOrt("hof", "kronhall"), "kronhall_q01"), "nur für Helden des eigenen Volkes");
+
+  // Wegauftrag: Die Reise über D25 löst den Kampf aus, danach ist der Auftrag erledigt.
+  let pilger = imOrt("orden", "glutberg", { xp: 300 });
+  pilger = rules.auftragAnnehmen({ ...pilger, health: rules.healthLimit(pilger) }, "glutberg_q01");
+  assert.equal(rules.ausfuehrenGrund(pilger, "glutberg_q01"), "unterwegs auf D25");
+  assert.equal(rules.reiseZiele(pilger).find(weg => weg.zielId === "kerzenhof").auftrag, "glutberg_q01");
+  let unterwegs = rules.reise(pilger, "kerzenhof");
+  assert.equal(unterwegs.knoten, "kerzenhof");
+  assert.equal(unterwegs.combat.id, "auftrag-grauwoelfe");
+  assert.equal(unterwegs.combat.hinterhalt, undefined, "Auftragskämpfe lassen sich nicht umgehen");
+  unterwegs = sieg(reload(unterwegs));
+  assert.equal(unterwegs.weltAuftraege.glutberg_q01.status, "erledigt");
+  assert.equal(unterwegs.ressource, pilger.ressource - 1 + 1 + 8, "Reise −1, Sieg +1, Lohn +8 Glaube");
+  assert.equal(rules.reise(unterwegs, "glutberg").combat, null, "erledigte Wegaufträge lösen nichts mehr aus");
+
+  // Wegrabatt: Nach „Die brennende Grenzmarke“ kostet S01 einen Vorrat weniger.
+  let grenze = imOrt("kronreich", "eikmark");
+  const vorher = rules.reiseZiele(grenze).find(weg => weg.zielId === "brandstein").kostenRessource;
+  grenze = rules.auftragAusfuehren(rules.auftragAnnehmen(grenze, "eikmark_q10"), "eikmark_q10");
+  const nachher = rules.reiseZiele(grenze).find(weg => weg.zielId === "brandstein");
+  assert.equal(nachher.kostenRessource, vorher - 1);
+  assert.equal(nachher.rabatt, true);
+  assert.equal(rules.reise(grenze, "brandstein").ressource, grenze.ressource - (vorher - 1));
+
+  // Trophäen sind verkäuflich, auch beim Händler einer Stadt mit Zentrallager.
+  assert.equal(world.items["beute-pelz-von-graufang"], "Pelz von Graufang");
+  const haendler = { ...imOrt("kronreich", "kronhall"), inventory: [...held.inventory, "beute-pelz-von-graufang"] };
+  assert.equal(rules.handelOffen(haendler), true);
+  assert.equal(rules.trade(haendler, "beute-pelz-von-graufang", false).silver, haendler.silver + world.salePrices["beute-pelz-von-graufang"]);
+  assert.equal(rules.handelOffen({ ...haendler, knoten: "weizenhof" }), false, "kein Händler im Dorf");
+
+  // Begleiter-Auftrag: Sigrid schließt sich nach dem Duell in Kronhall an.
+  let duell = rules.auftragAusfuehren(rules.auftragAnnehmen(held, "kronhall_q10"), "kronhall_q10");
+  assert.equal(duell.combat.id, "auftrag-kulthauptmann");
+  assert.equal(rules.candidates(held).some(([id]) => id === "sigrid"), true);
+  assert.equal(rules.recruitment(held, "sigrid"), "auftrag");
+  assert.equal(rules.recruit(held, "sigrid"), held);
+  duell = sieg(duell);
+  assert.equal(rules.recruitment(duell, "sigrid"), "ready");
+  duell = reload(rules.recruit(duell, "sigrid"));
+  assert.deepEqual(plain(duell.party), ["sigrid"]);
+  assert.equal(rules.memberVitals(duell, "sigrid").health, rules.memberHealthLimit("sigrid", duell));
+  assert.equal(world.companions.sigrid.klasse, "waechter");
+  assert.equal(rules.candidates({ ...duell, knoten: "glutberg" }).some(([id]) => id === "halvar"), false, "Orden-Begleiter nur für Orden");
+  for (const id of ["sigrid", "wulfgar", "fenris", "halvar", "gunhild", "malte"]) assert.ok(world.companions[id], id);
+
+  // Hauptquest Kronreich: Kronhall → Hagenfels (Deserteure) → Westvik (Wahl).
+  let akt = { ...held, hauptquest: { schritt: 0, wahl: null } };
+  assert.equal(rules.hauptquest(akt).schritt.titel, "Der Schwur am Krankenbett");
+  akt = reload(rules.hauptWeiter(akt));
+  assert.equal(akt.hauptquest.schritt, 1);
+  assert.equal(rules.hauptGrund(akt), "weiter in Hagenfels");
+  akt = rules.hauptWeiter({ ...akt, knoten: "hagenfels" });
+  assert.equal(akt.combat.id, "auftrag-deserteure");
+  assert.equal(akt.combat.auftrag, "haupt");
+  akt = sieg(reload(akt));
+  assert.equal(akt.hauptquest.schritt, 2);
+  const westvik = { ...akt, knoten: "westvik", silver: 50, health: rules.healthLimit(akt) };
+  assert.equal(rules.hauptGrund(westvik), "Wahl fehlt");
+  assert.equal(rules.hauptGrund({ ...westvik, silver: 39 }, "kron_act1_truce"), "zu wenig Silber");
+  const frieden = reload(rules.hauptWeiter(westvik, "kron_act1_truce"));
+  assert.equal(frieden.silver, 10);
+  assert.equal(frieden.hauptquest.schritt, 3);
+  assert.equal(frieden.questStufe, 1);
+  assert.ok(frieden.marks.includes("kron_act1_truce"));
+  assert.ok(frieden.rewards.includes("akt1-kronreich"));
+  assert.equal(frieden.xp, westvik.xp + 300);
+  assert.equal(rules.hauptquest(frieden).fertig, true);
+  assert.equal(rules.hauptWeiter(frieden), frieden);
+  let kampf = rules.hauptWeiter(westvik, "kron_act1_fight");
+  assert.equal(kampf.combat.feinde[0].name, "Kapitän Urgash");
+  assert.equal(kampf.combat.feinde[0].rang, "elite");
+  const orks = kampf.weltLeisten.orks;
+  kampf = sieg(kampf);
+  assert.equal(kampf.hauptquest.schritt, 3);
+  assert.equal(kampf.weltLeisten.orks, orks - 5);
+  assert.ok(kampf.marks.includes("kron_act1_fight"));
+
+  // Hauptquest Orden: Glutberg → Lichtheim → Brandstein → Glutberg (Wahl).
+  let orden = imOrt("orden", "glutberg");
+  orden = { ...orden, health: rules.healthLimit(orden), hauptquest: { schritt: 0, wahl: null } };
+  orden = rules.hauptWeiter(orden);
+  orden = sieg(rules.hauptWeiter({ ...orden, knoten: "lichtheim" }));
+  assert.equal(orden.hauptquest.schritt, 2);
+  const brand = rules.hauptWeiter({ ...orden, knoten: "brandstein" });
+  assert.equal(brand.combat.id, "auftrag-runenfresser");
+  orden = sieg(brand);
+  orden = { ...orden, knoten: "glutberg" };
+  const vorrat = orden.ressource;
+  const gnade = rules.hauptWeiter(orden, "orden_act1_mercy");
+  assert.equal(gnade.ressource, vorrat + 10);
+  assert.equal(gnade.hauptquest.wahl, "orden_act1_mercy");
+  assert.equal(rules.hauptWeiter(orden, "kron_act1_truce"), orden, "nur die Wahl der eigenen Fraktion");
+  assert.equal(rules.hauptquest(imOrt("hof", "kronhall")), null);
+
+  // Hauptquest Freie Häfen: Zollholm → Möwenstad → Silberholm → Perlvik (Wahl), Aushang und Begleiter.
+  let haefen = imOrt("haefen", "zollholm");
+  haefen = { ...haefen, health: rules.healthLimit(haefen), hauptquest: { schritt: 0, wahl: null } };
+  assert.equal(rules.hauptquest(haefen).titel, "Die Zollinseln");
+  assert.equal(rules.aushang(haefen).length, 10);
+  const versteck = rules.hauptWeiter(haefen);
+  assert.equal(versteck.combat.id, "auftrag-schmuggler");
+  haefen = sieg(versteck);
+  assert.equal(haefen.hauptquest.schritt, 1);
+  assert.equal(rules.hauptGrund(haefen), "weiter in Möwenstad");
+  const kuriere = rules.hauptWeiter({ ...haefen, knoten: "moewenstad", health: rules.healthLimit(haefen) });
+  assert.equal(kuriere.combat.id, "auftrag-spione");
+  haefen = rules.hauptWeiter({ ...sieg(kuriere), knoten: "silberholm" });
+  assert.equal(haefen.hauptquest.schritt, 3);
+  haefen = { ...haefen, knoten: "perlvik" };
+  const silber = haefen.silver;
+  const schatten = reload(rules.hauptWeiter(haefen, "haefen_act1_shadow"));
+  assert.equal(schatten.silver, silber + 80, "Wahl im Schatten bringt 80 Silber");
+  assert.ok(schatten.marks.includes("haefen_act1_shadow"));
+  const gilde = rules.hauptWeiter(haefen, "haefen_act1_guild");
+  assert.ok(gilde.ressource > haefen.ressource || gilde.ressource === rules.vorratMax, "Wahl der Gilde bringt Gold");
+  assert.equal(rules.hauptWeiter(haefen, "orden_act1_mercy"), haefen, "nur die Wahl der eigenen Fraktion");
+  // Begleiterin Karen Salzklinge nach perlvik_q10; Gold ist der Vorrat der Häfen.
+  let karen = rules.auftragAnnehmen(haefen, "perlvik_q10");
+  assert.equal(karen.weltAuftraege.perlvik_q10.status, "aktiv");
+  const zoll = rules.auftragAnnehmen(imOrt("haefen", "zollholm"), "zollholm_q01");
+  assert.match(zoll.journal.at(-1), /M31/);
+  assert.equal(rules.auftragGrund(imOrt("kronreich", "perlvik"), "perlvik_q01"), null, "Schwesterfraktionen nehmen Häfen-Aufträge an");
+
+  {
+    // Gruppen-Relikte (Henry, 18. 11. 2026): eins aktiv, Wechsel außerhalb des Kampfes, Rechte je Fraktion.
+    const basis = imOrt("haefen", "perlvik");
+    let haendlerin = { ...basis, inventory: [...basis.inventory, "relic_runenwaage", "relic_runenkompass", "relic_glutlaterne", "beute-seekarte"] };
+    assert.equal(rules.reliktGrund(haendlerin, "relic_glutlaterne"), "Glutrelikt: für deine Fraktion verboten");
+    assert.equal(rules.setRelikt(haendlerin, "relic_glutlaterne"), haendlerin);
+    const vorher = rules.preis(haendlerin, "beute-seekarte", false);
+    haendlerin = rules.setRelikt(haendlerin, "relic_runenwaage");
+    assert.equal(haendlerin.relikt, "relic_runenwaage");
+    assert.ok(!haendlerin.inventory.includes("relic_runenwaage"));
+    assert.equal(rules.preis(haendlerin, "beute-seekarte", false), Math.round(vorher * 1.15));
+    assert.equal(rules.preis(haendlerin, "relic_glutlaterne", false), Math.round(55 * 1.15));
+    const verkauft = rules.trade(haendlerin, "relic_glutlaterne", false);
+    assert.equal(verkauft.silver, haendlerin.silver + Math.round(55 * 1.15));
+    haendlerin = rules.setRelikt(haendlerin, "relic_runenkompass");
+    assert.equal(haendlerin.relikt, "relic_runenkompass");
+    assert.ok(haendlerin.inventory.includes("relic_runenwaage"), "das vorige Relikt kehrt in den Rucksack zurück");
+    assert.equal(reload(haendlerin).relikt, "relic_runenkompass");
+    assert.equal(rules.reliktStand(haendlerin).aktiv.label, "Seefahrer-Weisung");
+    const abgelegt = rules.setRelikt(haendlerin, null);
+    assert.equal(abgelegt.relikt, null);
+    assert.ok(abgelegt.inventory.includes("relic_runenkompass"));
+    assert.throws(() => reload({ ...haendlerin, relikt: "relic_glutlaterne" }), /beschädigt/);
+    // Der Orden darf Glutrelikte tragen; im Kampf wird nicht gewechselt.
+    const ordenBasis = imOrt("orden", "glutberg");
+    let flamme = { ...ordenBasis, inventory: [...ordenBasis.inventory, "relic_glutstein_amulett"] };
+    flamme = { ...flamme, health: rules.healthLimit(flamme) };
+    assert.equal(rules.reliktGrund(flamme, "relic_glutstein_amulett"), null);
+    const amulett = rules.setRelikt(flamme, "relic_glutstein_amulett");
+    assert.equal(rules.reliktGrund({ ...amulett, combat: {} }, null), "nicht im Kampf");
+    // Ältere Spielstände: Runengegenstände als Trophäe werden zum Relikt.
+    assert.deepEqual(reload({ ...held, inventory: [...held.inventory, "beute-runenkompass"] }).inventory.at(-1), "relic_runenkompass");
+  }
+
+  // Beschädigte Einträge werden abgelehnt.
+  assert.throws(() => reload({ ...held, weltAuftraege: { erfunden_q01: { status: "aktiv", wahl: 0 } } }), /beschädigt/);
+  assert.throws(() => reload({ ...held, weltAuftraege: { kronhall_q04: { status: "aktiv", wahl: 1 } } }), /beschädigt/);
+  assert.throws(() => reload({ ...held, hauptquest: { schritt: 9, wahl: null } }), /beschädigt/);
+  assert.throws(() => reload({ ...imOrt("hof", "kronhall"), hauptquest: { schritt: 0, wahl: null } }), /beschädigt/);
+  // Ältere Spielstände ohne die neuen Felder laden weiter.
+  const alt = plain(held);
+  delete alt.weltAuftraege;
+  delete alt.hauptquest;
+  assert.deepEqual(plain(reload(alt).weltAuftraege), {});
+}
+console.log("Aufträge am Aushang, Wegaufträge, Wegrabatt, Trophäen, Begleiter und Akt 1 (Kronreich, Orden) geprüft.");

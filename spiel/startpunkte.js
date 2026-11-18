@@ -54,7 +54,8 @@ const startpunkte = (() => {
         place: "Kronhall · Burgtor", title: "Morgengrauen über Kronhall",
         text: "Am Tor von Kronhall erfährst du, dass König Harald IV. im Morgengrauen zusammengebrochen ist. In den Gassen flüstert man, ein Fremder habe ihm vom ewigen Leben erzählt. Im Süden steigt Rauch über der Westmark auf, und vom Eispass treibt graue Asche über das Land.",
       },
-      akte: ["Der Thron wankt", "Feuer an der Westmark", "Die abtrünnigen Häfen", "Der Schwur am Glutberg", "Das Alte Reich ersteht neu"],
+      // Akt 2 und 3 in freier Reihenfolge (Gemini-Aufbau, Entscheidung Henry 18. 11. 2026, lore/quests/KRONREICH.md).
+      akte: ["Der Thron wankt", "Die abtrünnigen Häfen", "Der Schwur am Glutberg", "Das Alte Reich ersteht neu", "Über das Innere Meer"],
     },
     haefen: {
       ort: "Perlvik", volk: "menschen", prolog: "Fracht aus dem Norden", motto: "Jedes Meer ist ein Weg",
@@ -93,7 +94,8 @@ const startpunkte = (() => {
         place: "Zollholm · Zollinseln", title: "Morgengrauen auf den Zollinseln",
         text: "Im ersten Licht siehst du Perlvik über dem Wasser rauchen. Die Elfenhändler bedanken sich leise. Die Gilde wird wissen wollen, wer das Gildenhaus angezündet hat und wohin die Schriften gebracht wurden.",
       },
-      akte: ["Die Zollinseln", "Gold und Eisen", "Der Handel mit den Grünen Bannern", "Die Kronschuld", "Die Flotte gen Norden"],
+      // Akt 2 und 3 in freier Reihenfolge (Gemini-Aufbau, Henry 18. 11. 2026, lore/quests/HAEFEN.md).
+      akte: ["Die Zollinseln", "Die Kronschuld", "Gold und Eisen", "Das Alte Reich & Der Bleiche Skalde", "Über das Innere Meer"],
     },
     orden: {
       ort: "Aschenkloster", volk: "menschen", prolog: "Die Nacht der kalten Feuer", motto: "Solange die Flamme brennt",
@@ -132,7 +134,7 @@ const startpunkte = (() => {
         place: "Glutberg · Halle der Ewigen Flamme", title: "Die Flamme flackert",
         text: "Die Ewige Flamme ist fast erloschen. Nur ein kleiner blauer Rest brennt noch auf dem Altar. Die Ritter stehen stumm davor. Niemand weiß, wie lange sie noch hält.",
       },
-      akte: ["Die flackernde Flamme", "Verräter im Feuer", "Der Kreuzzug ruft", "Die Elfen am Weltenbaum", "Über das Nordmeer"],
+      akte: ["Die flackernde Flamme", "Korn über den Eispass", "Schiffe für den Kreuzzug", "Verräter im Feuer & Das Alte Reich", "Über das Innere Meer"],
     },
     // ---------------------------------------------------------------- Elfen
     dornenklingen: {
@@ -639,6 +641,19 @@ const startpunkte = (() => {
   };
 
   const scenes = { ankunft };
+  // Kronreich und Orden spielen Akt 1 und die Aufträge am Aushang (Henry, 18. 11. 2026). Ihr Prolog endet in der eigenen
+  // Hauptstadt auf der Weltebene. Die Geschichte um Kornwik bleibt erreichbar, wenn der Held dorthin reist.
+  const weltStart = {
+    kronreich: { knoten: "kronhall", label: "In Kronhall bleiben und Akt 1 beginnen",
+      text: "Kronprinzessin Astrid lässt nach dir rufen. Aushang und Hauptquest findest du im Stadtfenster von Kronhall. Die Geschichte um Kornwik wartet, bis du dorthin reist.",
+      message: "Du gehst durch das Burgtor von Kronhall. Kronprinzessin Astrid erwartet dich am Krankenbett ihres Vaters." },
+    orden: { knoten: "glutberg", label: "Auf dem Glutberg bleiben und Akt 1 beginnen",
+      text: "Hochmeisterin Ragna Glutherz ruft die Ritter zusammen. Aushang und Hauptquest findest du im Stadtfenster von Glutberg. Die Geschichte um Kornwik wartet, bis du dorthin reist.",
+      message: "Du bleibst in der Halle der Ewigen Flamme. Hochmeisterin Ragna Glutherz und Erzpriester Thorvald erwarten dich am Altar." },
+    haefen: { knoten: "zollholm", label: "In Zollholm bleiben und Akt 1 beginnen",
+      text: "Von Zollholm aus sicherst du die Seewege, bis Perlvik dich zurückruft. Aushang und Hauptquest findest du im Stadtfenster von Zollholm. Die Geschichte um Kornwik wartet, bis du dorthin reist.",
+      message: "Du gehst im Hafen von Zollholm an Land. Der Zollmeister weiß schon vom Brand in Perlvik." },
+  };
   const storageSites = {};
   const prologe = {};
   const creatures = {};
@@ -692,12 +707,16 @@ const startpunkte = (() => {
         ? { id: "flucht", label: attack.label, fight: "nacht-" + id + "-angriff", to: ids.morgen }
         : { id: "flucht", label: attack.label, message: attack.message, to: ids.morgen }],
     };
+    const start = weltStart[id];
     scenes[ids.morgen] = {
       place: f.morgen.place, title: f.morgen.title, objective: "Prolog abgeschlossen. Als Nächstes: Akt 1, „" + f.akte[0] + "“.",
-      text: f.morgen.text + " Die Fraktionsreihe „" + f.motto + "“ beginnt mit Akt 1, „" + f.akte[0] + "“. Bis dahin führt dich der Weg ins Kronreich, wo am Eispass die Asche fällt.",
+      text: f.morgen.text + " Die Fraktionsreihe „" + f.motto + "“ beginnt mit Akt 1, „" + f.akte[0] + "“. " + (start
+        ? start.text : "Bis dahin führt dich der Weg ins Kronreich, wo am Eispass die Asche fällt."),
       fern: fernOrt(f.morgen.place), lager: ids.morgen,
-      choices: [{ id: "reise", label: "Ins Kronreich reisen", to: "ankunft",
-        message: "Du machst dich auf den Weg ins Kronreich. Nach Tagen erreichst du das Ackerland bei Kornwik." }],
+      choices: [start
+        ? { id: "reise", label: start.label, to: "ankunft", welt: start.knoten, message: start.message }
+        : { id: "reise", label: "Ins Kronreich reisen", to: "ankunft",
+          message: "Du machst dich auf den Weg ins Kronreich. Nach Tagen erreichst du das Ackerland bei Kornwik." }],
     };
     storageSites[ids.heim] = "Zentrallager · " + fernOrt(f.heim.place);
     storageSites[ids.morgen] = "Zentrallager · " + fernOrt(f.morgen.place);
