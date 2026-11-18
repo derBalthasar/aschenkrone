@@ -1557,8 +1557,8 @@ const rules = (() => {
     return state;
   }
 
-  // Akt 5 beginnt, wenn Akt 1 bis 4 abgeschlossen sind (Quest-Stufe 4).
-  const uebersee = 4;
+  // Nach Abschluss von Akt 5 (Quest-Stufe 5) steht die Welt offen.
+  const uebersee = 5;
   // Seewege brauchen einen Hafen am Abfahrtsort, der dir gehört oder einem Vertragspartner.
   function schiffBereit(state, ort) {
     return ort.hatHafen && (ort.fraktion === state.faction || (state.vertraege ?? []).includes(ort.fraktion));
@@ -1574,10 +1574,11 @@ const rules = (() => {
         return ort.hatHafen ? "kein Schiff: Handelsvertrag mit " + K.fraktionen[ort.fraktion].name + " nötig" : "kein Hafen";
       }
       if (state.silver < weg.kostenGold) return "zu wenig Silber";
-      // Henry, 18. 11. 2026 (Wegenetz der Menschen): Übersee-Routen zu fremden Völkern öffnen sich erst in Akt 5.
+      // Henry, 18. 11. 2026 (Wegenetz der Menschen): Akt 5 öffnet das nächste Kapitel und endet mit der Möglichkeit,
+      // die Welt zu bereisen. Freie Übersee-Fahrten zu fremden Völkern gibt es erst danach.
       const ziel = N.get(zielId);
       if (people(state.faction) === "menschen" && people(ziel.fraktion) !== "menschen" && (state.questStufe ?? 0) < uebersee) {
-        return "Übersee erst in Akt 5";
+        return "Übersee erst nach Akt 5";
       }
     }
     if (weg.pass === "Zollpass" && leiste(state, "erzfieber") >= 50) return "Zollpass gesperrt (Erzfieber ab 50)";

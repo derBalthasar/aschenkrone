@@ -1418,12 +1418,12 @@ console.log("Reisebegegnungen (ruhig, scheu, Jäger, Alphatier, Ausweichen) gepr
   assert.throws(() => rules.read(JSON.stringify({ ...hub, scene: "weltende" })), /beschädigt/);
 
   // Seewege: eigener Hafen oder Handelsvertrag, 15 Silber je Überfahrt.
-  // Übersee zu fremden Völkern erst in Akt 5 (Wegenetz der Menschen, Quest-Stufe 4).
-  const westvikFrueh = { ...hub, knoten: "westvik", silver: 40, questStufe: 3 };
+  // Übersee zu fremden Völkern erst nach Akt 5 (Wegenetz der Menschen, Quest-Stufe 5).
+  const westvikFrueh = { ...hub, knoten: "westvik", silver: 40, questStufe: 4 };
   const seeFrueh = rules.reiseZiele(westvikFrueh).find(weg => weg.kantenTyp === "seeweg");
-  assert.equal(seeFrueh.grund, "Übersee erst in Akt 5");
+  assert.equal(seeFrueh.grund, "Übersee erst nach Akt 5");
   assert.equal(rules.reise(westvikFrueh, seeFrueh.zielId), westvikFrueh);
-  const westvik = { ...hub, knoten: "westvik", silver: 40, questStufe: 4 };
+  const westvik = { ...hub, knoten: "westvik", silver: 40, questStufe: 5 };
   const see = rules.reiseZiele(westvik).find(weg => weg.kantenTyp === "seeweg");
   assert.equal(see.grund, null);
   const sailed = rules.reise(westvik, see.zielId);
