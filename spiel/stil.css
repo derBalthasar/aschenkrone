@@ -877,7 +877,7 @@ h1, h2 { font-family: var(--font-title); letter-spacing: .01em; }
 .rk-body { flex: 1 1 auto !important; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(15rem, 19rem); }
 .rk-scroll { overflow: auto; overscroll-behavior: contain; background: #16202a; }
 .rk-scroll:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-.rk-svg { display: block; min-width: 100%; height: auto; aspect-ratio: 760 / 740; }
+.rk-svg { display: block; min-width: 100%; height: auto; }
 .rk-info { overflow: auto; padding: .8rem 1rem; border-left: 1px solid var(--line); background: #1d1813; font-size: .92rem; }
 .rk-info h3 { margin: 0 0 .2rem; font-family: var(--font-title); color: #f3d9a4; }
 .rk-info h4 { margin: 1rem 0 .3rem; font-size: .8rem; letter-spacing: .09em; text-transform: uppercase; color: var(--accent); }
@@ -908,12 +908,7 @@ h1, h2 { font-family: var(--font-title); letter-spacing: .01em; }
 /* SVG der Reisekarte */
 .rk-meer { fill: #1a2833; }
 .rk-meer, .rk-land, .rk-wege { pointer-events: none; }
-.rk-landband { stroke: #3a3226; stroke-width: 22; stroke-linecap: round; }
-.rk-landfleck { fill: #3a3226; }
-.rk-landfleck.rk-volk-orks { fill: #34391f; }
-.rk-landfleck.rk-volk-untote { fill: #33313d; }
-.rk-landfleck.rk-volk-elfen { fill: #233a28; }
-.rk-landfleck.rk-volk-zwerge { fill: #41352b; }
+.rk-schleier { fill: #0d0a08; opacity: .28; }
 .rk-weg { fill: none; stroke-linecap: round; }
 .rk-strasse.rk-kernland { stroke: #c9b07a; stroke-width: 1.6; }
 .rk-strasse.rk-grenzland { stroke: #f0a443; stroke-width: 1.6; stroke-dasharray: 5 3; }
@@ -926,6 +921,7 @@ h1, h2 { font-family: var(--font-title); letter-spacing: .01em; }
 .rk-ort:focus { outline: none; }
 .rk-ort:focus-visible .rk-treffer { stroke: #fff3dc; stroke-width: 1.5; }
 .rk-treffer { fill: transparent; }
+.rk-puls, .rk-ring, .rk-zielring { pointer-events: none; }
 .rk-punkt { fill: #d9c9a8; stroke: #1a130d; stroke-width: 1.2; }
 .rk-volk-menschen .rk-punkt { fill: #e6dcc6; }
 .rk-ort.rk-hafen .rk-punkt { stroke: #5fa3c9; stroke-width: 1.6; }

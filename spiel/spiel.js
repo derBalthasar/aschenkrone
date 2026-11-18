@@ -1016,8 +1016,8 @@
   // eine Etappe nach der anderen, wie unter „Aufbruch“.
   const rkZoomStufen = [1, 1.5, 2, 3];
   // Dorfnamen erst auf Wunsch, sonst wird das Kernland unlesbar. Auf dem Handy startet die Karte vergrößert.
-  const rk = { zoom: null, auswahl: null, zeigen: { strasse: true, pass: true, dorfweg: true, seeweg: true, doerfer: false } };
-  const rkFilterNamen = { ...reisekarte.wegArtNamen, doerfer: "Dorfnamen" };
+  const rk = { zoom: null, auswahl: null, zeigen: { strasse: true, pass: true, dorfweg: true, seeweg: true, doerfer: false, namen: false } };
+  const rkFilterNamen = { ...reisekarte.wegArtNamen, doerfer: "Dorfnamen", namen: "Stadtnamen" };
   const rkVolkNamen = { orks: "Orks", untote: "Untote", elfen: "Elfen", zwerge: "Zwerge", menschen: "Menschen" };
 
   function svgElement(tag, attributes, parent) {
@@ -1067,18 +1067,14 @@
     // Schrift und Punkte wachsen beim Vergrößern nur halb so stark mit, so rücken die Namen auseinander.
     board.style.setProperty("--rk-z", Math.sqrt(rkZoomStufen[rk.zoom]));
     board.replaceChildren();
+    board.style.aspectRatio = W + " / " + H;
     svgElement("rect", { class: "rk-meer", x: 0, y: 0, width: W, height: H }, board);
-    // Land: breite Bänder entlang der Landwege und Flecken um jeden Ort. Seewege bleiben offen.
+    // Hintergrund ist die verbindliche Weltkarte. Städte und ihre Namen sind dort schon eingezeichnet.
     const land = svgElement("g", { class: "rk-land", "aria-hidden": "true" }, board);
-    for (const weg of reisekarte.landwege) {
-      const [x1, y1] = reisekarte.lage(weg.a);
-      const [x2, y2] = reisekarte.lage(weg.b);
-      svgElement("line", { x1, y1, x2, y2, class: "rk-landband" }, land);
+    for (const bild of reisekarte.bilder) {
+      svgElement("image", { href: bild.src, x: bild.x, y: bild.y, width: bild.breite, height: bild.hoehe, preserveAspectRatio: "none" }, land);
     }
-    for (const ort of reisekarte.orte) {
-      svgElement("circle", { cx: ort.x, cy: ort.y, r: ort.typ === "dorf" ? 10 : ort.uebersee ? 15 : 17,
-        class: "rk-landfleck rk-volk-" + ort.volk }, land);
-    }
+    svgElement("rect", { class: "rk-schleier", x: 0, y: 0, width: W, height: H }, land);
 
     const aktivNach = (weg) => hier && (weg.a === hier || weg.b === hier) && ziele.has(weg.a === hier ? weg.b : weg.a);
     const wegGruppe = svgElement("g", { class: "rk-wege", "aria-hidden": "true" }, board);
@@ -1109,11 +1105,12 @@
       if (ort.id === rk.auswahl) svgElement("circle", { r: 9, class: "rk-ring" }, gruppe);
       if (weg) svgElement("circle", { r: 7.5, class: "rk-zielring" }, gruppe);
       if (ort.uebersee) svgElement("rect", { x: -4, y: -4, width: 8, height: 8, transform: "rotate(45)", class: "rk-punkt" }, gruppe);
-      else svgElement("circle", { r: ort.typ === "dorf" ? 2.6 : ort.typ === "hauptstadt" ? 6 : 4.5, class: "rk-punkt" }, gruppe);
+      else svgElement("circle", { r: ort.typ === "dorf" ? 2.2 : ort.typ === "hauptstadt" ? 5 : 3.6, class: "rk-punkt" }, gruppe);
       if (ort.typ === "hauptstadt") svgElement("circle", { r: 2.2, class: "rk-kern" }, gruppe);
       // Größere Trefferfläche für Finger und Maus.
-      svgElement("circle", { r: ort.typ === "dorf" ? 7 : 10, class: "rk-treffer" }, gruppe);
-      if (ort.typ !== "dorf" || rk.zeigen.doerfer || wichtig) {
+      svgElement("circle", { r: ort.typ === "dorf" ? 5 : 8, class: "rk-treffer" }, gruppe);
+      // Städte tragen ihren Namen schon auf der Weltkarte, Dörfer nicht.
+      if (ort.typ === "dorf" ? rk.zeigen.doerfer || wichtig : rk.zeigen.namen) {
         const links = ort.x > W - 80;
         const name = svgElement("text", { x: links ? -8 : 8, y: ort.typ === "dorf" ? 2.5 : 3.5, "text-anchor": links ? "end" : "start",
           class: "rk-name" + (ort.typ === "dorf" ? " rk-name-dorf" : "") }, gruppe);
@@ -1226,7 +1223,7 @@
     if (el("inventory-hub").open) el("inventory-hub").close();
     if (el("character-sheet").open) el("character-sheet").close();
     rk.auswahl = null;
-    rk.zoom ??= window.matchMedia("(max-width: 42rem)").matches ? 2 : 1;
+    rk.zoom ??= window.matchMedia("(max-width: 42rem)").matches ? 3 : 1;
     renderReisekarte();
     el("reisekarte").showModal();
     rkZentrieren();
