@@ -160,7 +160,8 @@ assert.deepEqual(Object.keys(nacht.prologe).sort(), [...factionIds].sort());
 const winFight = (state) => {
   let current = state;
   for (let round = 0; current.combat && round < 40; round++) {
-    current = rules.strike(current, current.ember >= 1 && current.balance < 2 ? "ember" : "spear", highRoll);
+    // Patch 2.5.3: Kronreich und Freie Häfen haben keine Glutgabe.
+    current = rules.strike(current, rules.glutgabe(current) && current.ember >= 1 && current.balance < 2 ? "ember" : "spear", highRoll);
   }
   assert.equal(current.combat, null, "Der Prologkampf muss zu gewinnen sein");
   return current;
@@ -1957,3 +1958,25 @@ console.log("Aufträge am Aushang, Wegaufträge, Wegrabatt, Trophäen, Begleiter
   assert.equal(rules.siedlungInfo(imOrt("tiefes-koenigreich", "kronhall")), null);
 }
 console.log("Siedlung, Bau, Garnison, Endgame, Stufe 30, Meister-Talente und Ahnen geprüft.");
+
+// Patch 2.5.3: Kriegskasse ohne Akt 5, Resonanz-Ersatzwerte, Glutgabe nur für den Orden der Flamme.
+{
+  const imOrt = (faction, ort, extra = {}) => ({ ...rules.create("Tala", faction, "frau", 1, "krieger"), scene: "weltknoten", knoten: ort,
+    xp: 300, ...extra });
+  assert.equal(rules.kasseVollText(), "Armada-Kriegskasse gefüllt – Überfahrt nach Akt 5 folgt im nächsten Kapitel-Update.");
+  assert.equal(rules.glutgabe(imOrt("kronreich", "kronhall")), false);
+  assert.equal(rules.glutgabe(imOrt("haefen", "zollholm")), false);
+  assert.equal(rules.glutgabe(imOrt("orden", "glutberg")), true);
+  assert.equal(rules.glutgabe(imOrt("tiefes-koenigreich", "kronhall")), true, "andere Völker unverändert");
+  // Glutgabe im Kampf wird für das Kronreich abgewiesen.
+  rules.setTravelDice(() => 0);
+  const kampf = rules.endgameStarten({ ...imOrt("kronreich", "kronhall", { questStufe: 1, ember: 3 }), health: 40 }, "patrouille");
+  assert.ok(kampf.combat);
+  assert.equal(rules.strike(kampf, "ember", highRoll), kampf);
+  // Resonanz greift erst mit angelegtem Runen- oder Glutgegenstand.
+  const runen = Object.values(rules.systeme.daten.gegenstaende).find((g) => g.magicTag === "RUNEN_ITEM" && g.slot === "RING");
+  const held = imOrt("kronreich", "kronhall");
+  assert.equal(rules.resonanz(held), false);
+  if (runen) assert.equal(rules.resonanz({ ...held, equipment: { ...held.equipment, ring1: runen.id } }), true);
+}
+console.log("Patch 2.5.3 geprüft.");

@@ -2167,9 +2167,10 @@
       }
       actions.append(boost);
       const abilities = world.classes[rules.profile(state.faction, state.role)];
+      // Patch 2.5.3: Kronreich und Freie Häfen haben keine Glutgabe.
       for (const [id, label, shift] of [
-        ["ember", "Glutgabe · " + abilities.attack.name, 2],
-        ["restore", "Glutgabe · " + abilities.restore.name, -2], ["guard", "Deckung und Sammlung", 0], ["flee", "Fliehen", 0],
+        ...(rules.glutgabe(state) ? [["ember", "Glutgabe · " + abilities.attack.name, 2], ["restore", "Glutgabe · " + abilities.restore.name, -2]] : []),
+        ["guard", "Deckung und Sammlung", 0], ["flee", "Fliehen", 0],
       ]) {
         const risk = shift && Math.abs(state.balance + shift) >= 4;
         const cost = shift ? " · 1 Glut" : "";
@@ -2711,7 +2712,7 @@
     panel.append(nahrung);
     panel.append(element("h3", rules.systeme.daten.kriegskasse.titel));
     panel.append(element("p", Object.entries(info.kasseBedarf).map(([r, n]) => rules.systeme.daten.rohstoffe[r].name + " " + info.kasse[r] + " / " + n).join(" · ") +
-      (info.kasseVoll ? ". Die Armada kann auslaufen." : ". Die gefüllte Kasse bringt die Armada in Akt 5 über das Meer. Jede Spende +2 Ruf je Einheit.")));
+      (info.kasseVoll ? ". " + rules.kasseVollText() : ". Die gefüllte Kasse bringt die Armada in Akt 5 über das Meer. Jede Spende +2 Ruf je Einheit.")));
     const kasse = element("div");
     kasse.className = "actions";
     for (const sp of info.spenden) {
@@ -2804,7 +2805,7 @@
     const kasse = S.kasse(state);
     box.append(element("h4", S.daten.kriegskasse.titel), element("p", Object.entries(S.daten.kriegskasse.bedarf)
       .map(([r, n]) => S.daten.rohstoffe[r].name.replace(/ \(.*\)/, "") + " " + kasse[r] + " / " + n).join(" · ") +
-      (S.kasseVoll(state) ? ". Die Armada kann auslaufen." : ". Spenden öffnen in Akt " + S.daten.kriegskasse.abAkt + ".")));
+      (S.kasseVoll(state) ? ". " + rules.kasseVollText() : ". Spenden öffnen in Akt " + S.daten.kriegskasse.abAkt + ".")));
     const befreit = state.befreit ?? [];
     box.append(element("h4", "Befreite Dörfer"), element("p", befreit.length ? befreit.map(id => knoten.get(id).name).join(", ")
       : "Noch keine. Der erste Auftrag (q01) einer Stadt befreit mit guter Tat oder Söldner-Weg ihre Dörfer."));

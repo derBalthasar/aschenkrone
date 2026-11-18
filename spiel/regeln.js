@@ -2015,6 +2015,7 @@ const rules = (() => {
   const sysSlots = { RECHTE_HAND: "weapon", LINKE_HAND: "offhand", KOPF: "head", HALS: "neck", KOERPER: "armor", BEINE: "legs", RING: "ring" };
   const sysSeltenheit = { 2: "Ungewöhnlich", 3: "Selten", 4: "Episch" };
   const sysWert = (wert, teiler) => Math.round((wert ?? 0) / teiler);
+  const resonanzTag = (g) => ["RUNEN_ITEM", "GLUT_ITEM"].includes(g.magicTag);
   for (const g of Object.values(SY.daten.gegenstaende)) {
     world.items[g.id] = g.name;
     if (sysSeltenheit[g.tier] && g.slot) world.rarity[g.id] = sysSeltenheit[g.tier];
@@ -2025,12 +2026,12 @@ const rules = (() => {
       const fokus = /FOKUS/.test(g.equipCategory);
       world.gear[g.id] = { slot, stat: fokus ? "mind" : fern || g.equipCategory === "DOLCH_KLINGE" ? "agility" : "strength",
         ...(g.equipCategory === "DOLCH_KLINGE" ? { skill: "nahkampf" } : {}),
-        power: SY.skaliert(w.attack), pierce: sysWert(w.armorPen, 10),
+        power: SY.skaliert(w.attack), pierce: sysWert(w.armorPen, 10), ...(resonanzTag(g) ? { resonanz: true } : {}),
         ...(w.armorPen ? { durchdringung: w.armorPen / 100 } : {}), ...(w.critChance ? { krit: w.critChance } : {}),
         magic: sysWert(w.fireDamage, 5) + sysWert(w.willpower, 3),
         ...(/ZWEIHAND|BOGEN|GEWEHR|STAB/.test(g.equipCategory) ? { twoHanded: true } : {}) };
     } else if (slot) {
-      world.gear[g.id] = { slot, armor: w.armor ? SY.skaliert(w.armor) : 0,
+      world.gear[g.id] = { slot, armor: w.armor ? SY.skaliert(w.armor) : 0, ...(resonanzTag(g) ? { resonanz: true } : {}),
         magic: sysWert(w.fireDamage, 5) + sysWert(w.willpower, 3) + sysWert(w.healingBonus, 15) };
     }
     const heilung = /Stellt im Kampf (\d+) LP/.exec(g.effect ?? "");
@@ -2331,9 +2332,11 @@ const rules = (() => {
     if (!SY.spenden(state, state.knoten, rohstoff, menge)) return false;
     note(state, menge + " " + SY.daten.rohstoffe[rohstoff].name + " für die " + SY.daten.kriegskasse.titel + " · Ruf bei " +
       K.fraktionen[fraktion].name + " +" + SY.daten.rufAusloeser.donate_to_kontor.ruf * menge + "." +
-      (SY.kasseVoll(state) ? " Die Kriegskasse ist gefüllt: Die Armada kann auslaufen." : ""));
+      (SY.kasseVoll(state) ? " " + kasseVollText() : ""));
     return true;
   });
+  // Patch 2.5.3: Solange Akt 5 nicht gebaut ist, öffnet die volle Kasse die Überfahrt noch nicht.
+  const kasseVollText = () => SY.daten.kriegskasse.akt5Gebaut ? "Die Kriegskasse ist gefüllt: Die Armada kann auslaufen." : SY.daten.kriegskasse.vollText;
   // ---- Siedlung der Menschen (Bau-Datei, Patch 1.6.0, 2.1.0): Ausbau, Gebäude, Straßen, Garnison, Wiederaufbau ----
   function siedlungInfo(state) {
     if (!menschen(state) || state.scene !== "weltknoten") return null;
@@ -2482,6 +2485,10 @@ const rules = (() => {
 
   // ---- Ausrüster, Handwerk und Schmiede der Menschen (Ökonomie-Datei, Patch 2.1.0 Punkt 5) ----
   const menschenKlasse = (state) => menschen(state) ? SY.klasseVon(state.faction, state.role) : null;
+  // Patch 2.5.3: Resonanz-Boni greifen, sobald mindestens ein Runen- oder Glutgegenstand angelegt ist.
+  const resonanz = (state) => equipmentSlots.some((slot) => world.gear[state.equipment?.[slot]]?.resonanz);
+  // Patch 2.5.3: Glutgabe im Kampf unter den Menschen nur für den Orden der Flamme (Glut-Leiste).
+  const glutgabe = (state) => !menschen(state) || state.faction === "orden";
   // Waffen- und Rüstungsrechte der Klasse, Glut- und Runengegenstände je Fraktion.
   function ausruestungGrund(state, id) {
     const klasse = menschenKlasse(state);
@@ -2887,7 +2894,7 @@ const rules = (() => {
       return state;
     }
     if ((action === "torch" && !world.fights[fight.id].regeneration) ||
-        (["ember", "restore"].includes(action) && previous.ember < 1)) return previous;
+        (["ember", "restore"].includes(action) && (previous.ember < 1 || !glutgabe(previous)))) return previous;
     let ability = null;
     if (isAbility) {
       const check = abilityState(previous, abilityId);
@@ -3008,7 +3015,8 @@ const rules = (() => {
     // und Rüstung der Systemgegner als prozentuale Minderung mit Konstante 14, gesenkt durch Durchschlag.
     if (actor === "hero" && menschen(state)) {
       // Meister-Talent Klinge & Wucht +8 % je Rang, Zorn der Alten Könige +5 % je Rang.
-      const plus = 0.08 * SY.talentRang(state, "MT_KLINGENSTURM") + 0.05 * (state.ahnen?.perk_ancestral_might ?? 0);
+      const plus = 0.08 * SY.talentRang(state, "MT_KLINGENSTURM") + 0.05 * (state.ahnen?.perk_ancestral_might ?? 0) +
+        (resonanz(state) ? 0.06 * SY.talentRang(state, "MT_RUNENRESONANZ") + 0.04 * (state.ahnen?.perk_relic_resonance ?? 0) : 0);
       if (plus) amount = Math.round(amount * (1 + plus));
       const gear = world.gear[weapon(state)] ?? {};
       if (gear.krit) {
@@ -3048,6 +3056,8 @@ const rules = (() => {
   }
 
   function healHero(state, amount, events, actor = "hero") {
+    // Patch 2.5.3: Runen- & Glutresonanz +10 % Heilung je Rang beim Tragen von Runen- oder Glutausrüstung.
+    if (menschen(state) && resonanz(state)) amount = Math.round(amount * (1 + 0.1 * SY.talentRang(state, "MT_RUNENRESONANZ")));
     const healing = Math.max(0, Math.min(amount, healthLimit(state) - state.health));
     state.health += healing;
     if (healing) events.push({ kind: "heal", actor, value: healing });
@@ -3425,7 +3435,9 @@ const rules = (() => {
             // Patch 2.2.0/2.5.1: Rüstung mindert prozentual (Konstante 14); Klassenrüstung zählt beim Helden mit.
             const klassenRuestung = heroTarget ? (SY.daten.menschenKlassen[state.faction]?.[state.role]?.ruestung ?? 0) +
               SY.skaliert(4) * SY.talentRang(state, "MT_EISENWALL") : 2;
-            hit = damage > 0 ? Math.max(guarding ? 0 : 1, SY.schaden(damage, klassenRuestung + armor) - defense) : 0;
+            // Patch 2.5.3: Runen-Resonanz der Ahnen +4 % Rüstung je Rang beim Tragen von Runen- oder Glutausrüstung.
+            const gesamt = (klassenRuestung + armor) * (heroTarget && resonanz(state) ? 1 + 0.04 * (state.ahnen?.perk_relic_resonance ?? 0) : 1);
+            hit = damage > 0 ? Math.max(guarding ? 0 : 1, SY.schaden(damage, gesamt) - defense) : 0;
           } else {
             const reduction = Math.floor(((heroTarget ? protection(state) : 2) + armor) / 2);
             hit = Math.max(guarding ? 0 : 1, damage - reduction - defense);
@@ -3491,7 +3503,12 @@ const rules = (() => {
     const held = turn.held;
     const max = kraft(state);
     held.ausdauer = Math.min(max.ausdauer, held.ausdauer + 2);
-    held.mana = Math.min(max.mana, held.mana + (menschen(state) ? SY.daten.kampf.mana.jeZug : 2));
+    if (menschen(state)) {
+      // Patch 2.5.3: Runen- & Glutresonanz +10 % Manaregeneration je Rang; Bruchteile sammeln sich über die Züge.
+      const regen = SY.daten.kampf.mana.jeZug * (1 + (resonanz(state) ? 0.1 * SY.talentRang(state, "MT_RUNENRESONANZ") : 0)) + (held.manaRest ?? 0);
+      held.manaRest = Math.round((regen - Math.floor(regen)) * 100) / 100;
+      held.mana = Math.min(max.mana, held.mana + Math.floor(regen));
+    } else held.mana = Math.min(max.mana, held.mana + 2);
     for (const id of Object.keys(held.abklingen)) {
       if (--held.abklingen[id] <= 0) delete held.abklingen[id];
     }
@@ -3675,7 +3692,7 @@ const rules = (() => {
     weltLeisten, leistenNamen, leistenStart, gegenkraefte, niederlagen, vorratMax, vorratStart, seewegSilber, vorratAnwerbung,
     vertragKosten, ertragMenge, ertragPause, weltRunde, aktuellerKnoten, weltOffen, betreteWelt, handlungHier, zurHandlung,
     reiseGrund, reiseZiele, reise, rastGrund, rastKosten, handelOffen,
-    spezBereit, spezHinweis, meisterBereit, taten, tatWaehlen, ausruester, ausruesterHandel, ausruestungGrund, handwerkListe, handwerk, schmiedeInfo, schmieden, kontorInfo, kontorHandel, nahrungTragen, spenden, lage, systeme: SY,
+    spezBereit, spezHinweis, meisterBereit, taten, tatWaehlen, ausruester, ausruesterHandel, ausruestungGrund, handwerkListe, handwerk, schmiedeInfo, schmieden, kontorInfo, kontorHandel, nahrungTragen, spenden, lage, systeme: SY, glutgabe, resonanz, kasseVollText,
     siedlungInfo, siedlungAusbauen, gebaeudeBauen, strasseBauen, garnisonRekrutieren, ortReparieren, wiederaufbau,
     endgameListe, endgameStarten, aufstiegInfo, talentLernen, ahnenLernen,
     auftragGrund, auftragAnnehmen, ausfuehrenGrund, auftragAusfuehren, aushang, auftraege, hauptquest, hauptGrund, hauptWeiter, auftragEp, rast, ertragGrund, ertragEinholen, vertragGrund, vertragSchliessen, entwurf,

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "2.5.3",
+  "module": "feature_flags_and_resonance_fallback_patch",
+  "act5FeatureGate": {
+    "act5Implemented": false,
+    "warChestFillable": true,
+    "onWarChestComplete": {
+      "unlockPassage": false,
+      "uiStatusLabel": "Armada-Kriegskasse gefüllt – Überfahrt nach Akt 5 folgt im nächsten Kapitel-Update."
+    }
+  },
+  "resonanceBonusesTemporaryFallback": {
+    "reason": "Solange das separate Runen- & Relikt-Sockelsystem noch nicht abgebildet ist, greifen direkte Kampfwerte, sobald mindestens ein RUNEN_ITEM oder GLUT_ITEM angelegt ist.",
+    "MT_RUNENRESONANZ": {
+      "activeMode": "FALLBACK_DIRECT_STATS",
+      "effectPerRank": "+10 % Heilungs- & Manaregeneration sowie +6 % Schaden beim Tragen von RUNEN_ITEM oder GLUT_ITEM Ausrüstung."
+    },
+    "PRESTIGE_RUNEN_RESONANZ": {
+      "activeMode": "FALLBACK_DIRECT_STATS",
+      "effectPerRank": "+4 % Gesamtschaden und +4 % Rüstung beim Tragen von RUNEN_ITEM oder GLUT_ITEM Ausrüstung."
+    }
+  },
+  "combatGlutgabeVisibility": {
+    "restrictToOrdenDerFlamme": true,
+    "visibleForFactions": ["ORDEN_DER_FLAMME"],
+    "hiddenForFactions": ["KRONREICH", "FREIE_HAEFEN"],
+    "notes": "Glutgabe-Knöpfe im Kampf erscheinen exklusiv für den Orden der Flamme (nutzen die Glut-Leiste). Für die magielosen Fraktionen Kronreich und Freie Häfen sind sie ausgeblendet."
+  }
+}
