@@ -94,8 +94,11 @@ const akte = ml.acts.map((a) => ({
   id: a.id,
   nr: typeof a.act === "number" ? String(a.act) : "2/3",
   titel: a.title,
-  stufen: a.levelRange,
-  ...(a.freeOrder ? { freieReihenfolge: true, empfohlen: a.recommendedOrder, schwester: a.sisterFaction } : {}),
+  // Henry, 18. 11. 2026: Die Stufen der Schwester-Zweige richten sich nach der gespielten Reihenfolge,
+  // nicht nach dem Zweig. Der erste Zweig ist Stufe 6–10, der zweite 11–15 (Geminis Werte bleiben als Empfehlung).
+  stufen: a.freeOrder ? "6-10 als erster Zweig, 11-15 als zweiter" : a.levelRange,
+  ...(a.freeOrder ? { freieReihenfolge: true, empfohlen: a.recommendedOrder, schwester: a.sisterFaction,
+    stufenGemini: a.levelRange } : {}),
   ort: (a.id === "hum_kronreich_act5" ? "Haupthafen -> Seewege -> frei wählbarer Kontinent" : a.region) ?? a.mainLocations.join(", "),
   ...(a.focus ? { fokus: a.focus } : {}),
   ...(a.includesFolkQuest ? { volksquest: a.includesFolkQuest } : {}),
@@ -109,6 +112,7 @@ const reihe = {
   kapitel: ml.chapter,
   prolog: { titel: ml.prolog.title, text: ml.prolog.summary },
   akte,
+  zweigStufen: ["6-10", "11-15"],
   // Henry, 18. 11. 2026: Die Fraktions-Spezialisierung kommt zur Spezialisierung der Klasse hinzu.
   spezialisierung: { ausloeser: spez.trigger, zusaetzlich: "zusätzlich zur Spezialisierung der Klasse", optionen: spez.options.map((o) => ({ id: o.id, name: o.name, bonus: o.bonus })) },
   begleiter: teil1.companions.map((c) => ({ id: c.id, name: c.name, rolle: c.role, klasse: begleiterKlassen[c.id], ort: knoten.nachName[c.recruitLocation],

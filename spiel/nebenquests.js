@@ -14,6 +14,11 @@ const nebenquests = (() => {
   };
 
   const reihe = (fraktion) => D[fraktion]?.reihe ?? null;
+  // Stufenbereich eines Schwester-Zweigs nach Reihenfolge: bisher abgeschlossene Zweige 0 → erster, sonst zweiter.
+  const zweigStufen = (fraktion, abgeschlosseneZweige) => {
+    const stufen = reihe(fraktion)?.zweigStufen;
+    return stufen ? stufen[Math.min(Math.max(0, abgeschlosseneZweige | 0), stufen.length - 1)] : null;
+  };
 
   // „S16“ → „Kornwik – Kronhall“, unbekannte Kennungen bleiben leer.
   const wegName = (kennung) => {
@@ -22,6 +27,6 @@ const nebenquests = (() => {
   };
   const wegeImText = (text) => [...new Set(String(text).match(/\b[SPMD]\d\d\b/g) ?? [])].filter((k) => D.wegKennungen[k]);
 
-  return { daten: D, fuerOrt, reihe, wegName, wegeImText };
+  return { daten: D, fuerOrt, reihe, zweigStufen, wegName, wegeImText };
 })();
 if (typeof module !== "undefined") module.exports = nebenquests;

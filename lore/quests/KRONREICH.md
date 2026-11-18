@@ -5,7 +5,7 @@ Stand: 18. 11. 2026. Grundlage ist die Ausarbeitung von Gemini (Quelltext unver�
 **Entscheidungen Henry (18. 11. 2026):**
 1. Die Fraktionsreihe folgt **Geminis Aufbau**: Akt 1, dann Akt 2 und 3 als Schwester-Zweige in freier Reihenfolge, dann Akt 4 mit der Volksquest und Akt 5 „Über das Innere Meer“. Damit ersetzt sie die Aktfolge aus dem Weltbuch (`lore/quellen/menschen.html`) und `lore/NACHT-DES-ERWACHENS.md`. Logikfehler bei anderen Fraktionen und Völkern werden später behoben.
 2. Die Spezialisierung folgt Gemini: Nach beiden Schwester-Zweigen wählt der Held „Eiserne Krone“ oder „Banner der Glut“.
-3. Die Stufen folgen Gemini, bis Stufe 20 (eigene Tabelle `kampf.questStufenFraktion.kronreich`).
+3. Die Stufen folgen Gemini, bis Stufe 20 (eigene Tabelle `kampf.questStufenFraktion.kronreich`). Ausnahme bei den Schwester-Zweigen: **Der zuerst gespielte Zweig hat Stufe 6–10, der zweite 11–15**, egal ob Häfen oder Glutberg zuerst kommen (`nebenquests.zweigStufen`).
 4. Der Bleiche Skalde wird in Akt 4 entdeckt, damit die Bedrohung durch die Untoten erklärt ist. **Der Skalde ist Erzpriester Thorvald vom Glutberg.**
 5. Geheim bleibt nur die Identität der Stillen Feder.
 6. Die Fraktions-Spezialisierung kommt **zusätzlich** zur Spezialisierung der Klasse.
@@ -34,7 +34,7 @@ Entscheidung:
 - **A:** Die Rostsegel blutig zurückschlagen und Ragnvald warnen. Ork-Bedrohung −5. Ragnvald stellt Truppen, misstraut aber dem Hof in Kronhall.
 - **B:** Waffenstillstand mit Urgash (40 Silber) und den Hof schützen. Ruhe an der Westküste. Astrid behält die volle Kontrolle, der Kultist bleibt länger unentdeckt.
 
-### Akt 2/3 „Die abtrünnigen Häfen“ (Stufe 6–10, empfohlen als 2., mit den Freien Häfen)
+### Akt 2/3 „Die abtrünnigen Häfen“ (Stufe 6–10 als erster Zweig, 11–15 als zweiter; empfohlen als 2., mit den Freien Häfen)
 Orte: Grenzmarkt, Perlvik, Zollholm, Salzwacht.
 1. **Der verschlossene Hafen** (Grenzmarkt, Perlvik): Verhandlung mit Thingsprecherin Solveig Valsdottir und dem Gildenrat über Schiffe und Nachschub, trotz der Kronschuld.
 2. **Schmuggel im Nebel** (Nebelvik, Zollholm): Der Held hebt eine Schmugglerbucht aus und stellt Aethari-Schriften und nördlichen Totenstaub sicher.
@@ -44,7 +44,7 @@ Entscheidung:
 - **A:** Reichsthing und Handelsprivilegien (80 Silber). Handelsflotte und Gold-Boni, friedlicher Bund.
 - **B:** Den Gildenrat mit den Schmuggelbeweisen erpressen und die Werften besetzen. Sofort Kriegsschiffe in Salzwacht, aber Unruhe in den Häfen.
 
-### Akt 2/3 „Der Schwur am Glutberg“ (Stufe 11–15, empfohlen als 3., mit dem Orden der Flamme)
+### Akt 2/3 „Der Schwur am Glutberg“ (Stufe 6–10 als erster Zweig, 11–15 als zweiter; empfohlen als 3., mit dem Orden der Flamme)
 Orte: Eiswacht, Aschenkloster, Glutberg.
 1. **Der Zug über den Eispass** (Eiswacht, Pass P02): Eskorte eines Korntrecks (kostet 20 Korn) über den Eispass zu Ser Bjarne vom Eispass.
 2. **Die flackernde Wacht** (Aschenkloster): Der Held befreit ein Ordenskloster, das vom Kult der Bleichen Ewigkeit und von Draugr bedrängt wird, und begegnet Seherin Freydis.
@@ -77,10 +77,6 @@ Die Gruppengrenze im Spiel liegt bei 3 Gefährten plus Held (`rules.partyLimit`)
 | Sigrid Eisenschild | Schildmaid / Tank | Wächter (Burgvogt) | Kronhall, Akt 1 | kronhall_q10 „Die eiserne Schuld“ | Unbrechbarer Schildwall |
 | Wulfgar Rossbrecher | Kavallerist / Späher | Späher (Steppenreiter) | Rosshag, Akt 2 | rosshag_q10 „Der Eid der Reiter“ | Sturmangriff der Steppe |
 | Fenris Ulfsson | Meister-Bogenschütze | Krieger (Huskarl) | Ulfsborg, Akt 3 | ulfsborg_q10 „Der Jäger von Wolfstal“ | Blattschuss aus dem Hinterhalt |
-
-## Offene Frage an Henry
-
-**Freie Reihenfolge und feste Stufen:** Die Häfen sind für Stufe 6–10 gedacht, der Glutberg für 11–15. Wer nach Akt 1 (etwa Stufe 5) zuerst zum Glutberg geht, trifft dort auf Gegner, die für Stufe 11–15 gebaut sind. Vorschlag: Der erste Schwester-Zweig ist immer Stufe 6–10 und der zweite immer 11–15, egal welcher zuerst gespielt wird. Die Gegner passen sich also der Reihenfolge an.
 
 ## Folgen für andere Fraktionen (später beheben)
 

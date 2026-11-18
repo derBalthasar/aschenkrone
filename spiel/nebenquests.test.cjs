@@ -74,6 +74,9 @@ test("Fraktionsreihe Kronreich folgt Geminis Aufbau", () => {
     "Das Alte Reich ersteht neu", "Über das Innere Meer"]);
   assert.equal(reihe.prolog.titel, "Feuer über Westvik");
   assert.equal(reihe.spezialisierung.optionen.length, 2);
+  assert.equal(nebenquests.zweigStufen("kronreich", 0), "6-10");
+  assert.equal(nebenquests.zweigStufen("kronreich", 1), "11-15");
+  for (const zweig of reihe.akte.filter((akt) => akt.freieReihenfolge)) assert.match(zweig.stufen, /erster Zweig/);
   const klassen = reihe.begleiter.map((begleiter) => begleiter.klasse);
   assert.equal(new Set(klassen).size, klassen.length, "Begleiter brauchen verschiedene Klassen");
   const klassenDatei = fs.readFileSync(path.join(root, "spiel/klassen.js"), "utf8");

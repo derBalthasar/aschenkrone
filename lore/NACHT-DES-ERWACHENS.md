@@ -66,8 +66,8 @@ Der Held stammt aus Westvik, einem Hafendorf der Westmark, und dient in der Land
 Seit 18. 11. 2026 nach Geminis Aufbau (Entscheidung Henry, Einzelheiten in [quests/KRONREICH.md](quests/KRONREICH.md)):
 
 1. Akt 1, Der Thron wankt (Stufe 1–5): Der Held wird Reichsbote Astrids, am Krankenbett fällt ein stummer Heiler auf. Jarl Ragnvald in Hagenfels fordert einen Beweis der Stärke. Am Ende „Feuer an der Westmark“: Die Rostsegel zurückschlagen oder Waffenstillstand mit Kapitän Urgash.
-2. Akt 2/3, Die abtrünnigen Häfen (Stufe 6–10, freie Reihenfolge): Verhandlung mit Solveig Valsdottir, Schmuggel im Nebel, Vertrag von Perlvik. Reichsthing oder Erpressung des Gildenrats.
-3. Akt 2/3, Der Schwur am Glutberg (Stufe 11–15, freie Reihenfolge): Korntreck über den Eispass, das bedrängte Aschenkloster, Bund mit Ragna Glutherz und Thorvald. Danach zusätzlich zur Klassen-Spezialisierung „Eiserne Krone“ oder „Banner der Glut“.
+2. Akt 2/3, Die abtrünnigen Häfen (freie Reihenfolge; erster Zweig Stufe 6–10, zweiter 11–15): Verhandlung mit Solveig Valsdottir, Schmuggel im Nebel, Vertrag von Perlvik. Reichsthing oder Erpressung des Gildenrats.
+3. Akt 2/3, Der Schwur am Glutberg (freie Reihenfolge; erster Zweig Stufe 6–10, zweiter 11–15): Korntreck über den Eispass, das bedrängte Aschenkloster, Bund mit Ragna Glutherz und Thorvald. Danach zusätzlich zur Klassen-Spezialisierung „Eiserne Krone“ oder „Banner der Glut“.
 4. Akt 4, Das Alte Reich ersteht neu (Stufe 16–18, enthält die Volksquest): Der stumme Heiler ist Grabwächter. Seine Spur entlarvt den Bleichen Skalden: Erzpriester Thorvald. Danach das Große Thing, der Held wird Bannerjarl, und die Armada wird gerüstet.
 5. Akt 5, Über das Innere Meer (Stufe 19–20): Die Reichsflotte läuft aus, wehrt Totenschiffe ab und errichtet einen Brückenkopf auf einem frei wählbaren Kontinent (Elfen, Orks oder Zwerge als Verbündete oder Unterworfene; die Untoten im Norden als extrem schwerer Weg). Ende von Kapitel 1.
 

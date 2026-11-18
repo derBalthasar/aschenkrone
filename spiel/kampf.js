@@ -328,8 +328,8 @@ const kampf = (() => {
   ];
   // Eigene Stufen je Fraktion, wo die Fraktionsreihe davon abweicht (Kronreich nach Gemini, Entscheidung Henry 18. 11. 2026).
   const questStufenFraktion = {
-    kronreich: [["Prolog", "1–3", "1–2"], ["Akt 1 Der Thron wankt", "1–5", "1–5"], ["Akt 2/3 Die abtrünnigen Häfen", "6–10", "6–10"],
-      ["Akt 2/3 Der Schwur am Glutberg", "11–15", "11–15"], ["Akt 4 Das Alte Reich ersteht neu (mit Volksquest)", "16–18", "16–18"],
+    kronreich: [["Prolog", "1–3", "1–2"], ["Akt 1 Der Thron wankt", "1–5", "1–5"], ["Akt 2/3 erster Zweig (Häfen oder Glutberg)", "6–10", "6–10"],
+      ["Akt 2/3 zweiter Zweig (der andere)", "11–15", "11–15"], ["Akt 4 Das Alte Reich ersteht neu (mit Volksquest)", "16–18", "16–18"],
       ["Akt 5 Über das Innere Meer", "19–20", "19–20"]],
   };
 
