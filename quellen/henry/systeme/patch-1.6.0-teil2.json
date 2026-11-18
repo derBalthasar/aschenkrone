@@ -1,0 +1,87 @@
+{
+  "schemaVersion": "1.6.0",
+  "module": "buildings_garrison_and_number_patch_part_2",
+  "settlementTiers": [
+    { "tier": 0, "name": "Unbefestigte Siedlung / Ruinenwacht", "unlockPhase": 1, "requiredRep": -100, "upgradeCost": { "silver": 0, "wood": 0, "stone": 0, "iron": 0 }, "baseDefense": 10, "buildingSlots": 1, "effects": "Basis-Rastplatz und einfacher Markt; keine Garnison." },
+    { "tier": 1, "name": "Befestigte Marktstadt", "unlockPhase": 3, "requiredAct": 2, "requiredRep": 40, "upgradeCost": { "silver": 150, "wood": 15, "stone": 10, "iron": 5 }, "baseDefense": 30, "buildingSlots": 2, "effects": "+15 % Kontor-Silberertrag; schaltet Stadtschmiede & Spähergilde frei." },
+    { "tier": 2, "name": "Wehrhafte Bollwerksstadt", "unlockPhase": 3, "requiredAct": 2, "requiredRep": 45, "upgradeCost": { "silver": 350, "wood": 25, "stone": 25, "iron": 15 }, "baseDefense": 55, "buildingSlots": 4, "effects": "+25 Silber pro Handelsroute; schaltet Meisterschmiede, Kriegswerft, Glut-Esse & Runenschmiede frei." },
+    { "tier": 3, "name": "Hochzitadelle des Bannerjarls", "unlockPhase": 4, "requiredAct": 4, "requiredRep": 60, "upgradeCost": { "silver": 750, "wood": 40, "stone": 45, "iron": 30 }, "baseDefense": 85, "buildingSlots": 6, "effects": "Immun gegen normale Überfälle; +50 % Zehnt-Ertrag; schaltet Armada-Werft frei." }
+  ],
+  "buildingsCatalog": [
+    { "id": "BLD_DORFPALISADE", "name": "Dorfpalisade & Wachturm", "locationType": "DORF", "unlockPhase": 2, "requiredRep": 20, "cost": { "silver": 60, "wood": 10, "stone": 4, "iron": 0 }, "defenseBonus": 15, "effect": "Schützt befreite Dörfer vor Plünderung und sichert den Schutzbund-Zehnt (+5/+6 Ressourcen alle 6 Etappen)." },
+    { "id": "BLD_SIGNALFEUER", "name": "Höhen-Signalfeuer", "locationType": "DORF_ODER_GRENZSTRASSE", "unlockPhase": 2, "requiredRep": 20, "cost": { "silver": 45, "wood": 6, "stone": 6, "iron": 0 }, "defenseBonus": 10, "effect": "Senkt das Hinterhaltsrisiko in angrenzenden Kanten um 15 % und warnt 1 Etappe früher vor Überfällen." },
+    { "id": "BLD_GRENZSTRASSE_STEIN", "name": "Gepflasterte Reichs-Grenzstraße", "locationType": "KANTE_GRENZLAND", "unlockPhase": 2, "requiredRep": 20, "cost": { "silver": 80, "wood": 0, "stone": 12, "iron": 0 }, "defenseBonus": 0, "effect": "Senkt den Nahrungsverbrauch auf dieser Grenzland-Kante dauerhaft von 2 auf 1 Nahrung." },
+    { "id": "BLD_DORFSCHMIEDE", "name": "Dorfschmiede", "locationType": "DORF_ODER_STADT_T0", "unlockPhase": 1, "requiredRep": -24, "cost": { "silver": 40, "wood": 5, "stone": 5, "iron": 2 }, "defenseBonus": 5, "effect": "Erlaubt das Einschmelzen von 3x Bruchmetall zu 1x Roheisenbarren." },
+    { "id": "BLD_STADTSCHMIEDE", "name": "Stadtschmiede", "locationType": "STADT_T1", "unlockPhase": 3, "requiredRep": 40, "cost": { "silver": 120, "wood": 10, "stone": 10, "iron": 8 }, "defenseBonus": 10, "effect": "Schaltet Ausrüstungs-Upgrades (+1 und +2) sowie Tier-2-Schmiederezepte frei." },
+    { "id": "BLD_SPAEHERGILDE", "name": "Späher- & Waldläufergilde", "locationType": "STADT_T1", "unlockPhase": 3, "requiredRep": 40, "cost": { "silver": 130, "wood": 12, "stone": 6, "iron": 4 }, "defenseBonus": 12, "effect": "Deckt Miniboss-Positionen auf der Karte auf; +15 % Beute-Materialien bei Wildtieren." },
+    { "id": "BLD_SAEGEWERK_SCHMELZE", "name": "Sägewerk & Eisenschmelze", "locationType": "STADT_T1", "unlockPhase": 3, "requiredRep": 40, "cost": { "silver": 160, "wood": 15, "stone": 12, "iron": 10 }, "defenseBonus": 5, "effect": "Liefert alle 6 Reise-Etappen automatisch +4 Holz und +3 Eisen ins Stadtkontor." },
+    { "id": "BLD_MEISTERSCHMIEDE", "name": "Meisterschmiede des Reiches", "locationType": "STADT_T2", "unlockPhase": 3, "requiredRep": 45, "cost": { "silver": 280, "wood": 15, "stone": 20, "iron": 20 }, "defenseBonus": 15, "effect": "Schaltet Upgrade +3 sowie alle weltlichen Tier-3-Meisterwaffen und Plattenrüstungen frei." },
+    { "id": "BLD_RUNENSCHMIEDE", "name": "Ahnen-Runenschmiede", "locationType": "STADT_T2", "unlockPhase": 3, "requiredRep": 50, "cost": { "silver": 360, "wood": 10, "stone": 25, "iron": 20 }, "defenseBonus": 15, "effect": "Schaltet Meisterwerk +4 und alle Tier-4-Runenwaffen/-rüstungen gegen Runensplitter frei." },
+    { "id": "BLD_GLUT_ESSE", "name": "Geweihte Glut-Esse", "locationType": "STADT_T2_ORDEN_DER_FLAMME", "unlockPhase": 3, "requiredRep": 45, "cost": { "silver": 320, "wood": 10, "stone": 25, "iron": 15 }, "defenseBonus": 15, "effect": "Exklusiv im Gebiet des Ordens: Schaltet Tier-4-Glutwaffen und Gebetsreliquien frei." },
+    { "id": "BLD_KRIEGSWERFT", "name": "Große Kriegswerft & Stückgießerei", "locationType": "HAFENSTADT_T2", "unlockPhase": 3, "requiredRep": 45, "cost": { "silver": 340, "wood": 25, "stone": 15, "iron": 20 }, "defenseBonus": 20, "effect": "Schaltet Hafen-Musketen, Pistolen und den Bau der Armada-Kriegsschiffe (Akt 4->5) frei." },
+    { "id": "BLD_GARNISON_KASERNE", "name": "Wachkaserne & Waffenkammer", "locationType": "STADT_T1_ODER_T2", "unlockPhase": 3, "requiredRep": 40, "cost": { "silver": 140, "wood": 10, "stone": 15, "iron": 12 }, "defenseBonus": 25, "effect": "Erhöht den Verteidigungswert der Stadt gegen Überfälle dauerhaft um +25." }
+  ],
+  "garrisonAndRaidMechanics": {
+    "checkIntervalEdges": 8,
+    "raidChanceOnCheck": 0.45,
+    "defenseCalculation": {
+      "formula": "totalDefense = settlementBaseDefense + sum(buildingDefenseBonuses) + (garrisonTroops * 5)",
+      "garrisonRecruitCostPerUnit": { "silver": 25, "food": 2, "iron": 1, "defenseValue": 5 }
+    },
+    "raidStrengthByAct": {
+      "ACT_1": { "min": 15, "max": 30 },
+      "ACT_2": { "min": 30, "max": 50 },
+      "ACT_3": { "min": 45, "max": 70 },
+      "ACT_4_AND_ENDGAME": { "min": 65, "max": 95 }
+    },
+    "resolutionRules": {
+      "ifDefenseGreaterOrEqual": "Überfall abgewehrt! Garnison erbeutet 20–45 Silber und 1–2x Bruchmetall.",
+      "ifDefenseLowerBy1To15": "Siedlung beschädigt: Zehnt pausiert für 6 Etappen, bis 20 Silber & 3 Holz zur Reparatur gezahlt werden.",
+      "ifDefenseLowerByMoreThan15": "Siedlung geplündert: Zehnt deaktiviert, Ruf sinkt um -5, 1 Gebäude beschädigt (muss neu befreit/repariert werden)."
+    }
+  },
+  "numberListsAndRangesPatch": {
+    "endgameActivitiesSilverAndRewards": {
+      "GRENZPATROUILLE": { "silverMin": 35, "silverMax": 65, "xp": 180 },
+      "KARAWANEN_ESKORTE": { "silverMin": 75, "silverMax": 120, "xp": 320 },
+      "SEE_KAPERFAHRT": { "silverMin": 90, "silverMax": 150, "xp": 380 },
+      "ARENA_WAFFENGANG": { "silverMin": 60, "silverMax": 140, "xp": 280 },
+      "ASCHERISS_DUNGEON": { "silverMin": 120, "silverMax": 220, "xp": 550, "guaranteedRunensplitterMin": 1, "guaranteedRunensplitterMax": 3 }
+    },
+    "enemySilverAndTierLookup": [
+      { "enemyId": "ENM_OF_SALAMANDER", "silverMin": 6, "silverMax": 14, "tierMin": 1, "tierMax": 1 },
+      { "enemyId": "ENM_OF_GLUTKRAEHE", "silverMin": 5, "silverMax": 12, "tierMin": 1, "tierMax": 1 },
+      { "enemyId": "ENM_OF_KETZER_ZELOT", "silverMin": 18, "silverMax": 34, "tierMin": 1, "tierMax": 2 },
+      { "enemyId": "ENM_OF_ASCHEPILGER", "silverMin": 16, "silverMax": 30, "tierMin": 1, "tierMax": 2 },
+      { "enemyId": "ENM_OF_SCHLACKENLAEUFER", "silverMin": 20, "silverMax": 38, "tierMin": 1, "tierMax": 2 },
+      { "enemyId": "ENM_OF_MAGMA_HYAENE", "silverMin": 15, "silverMax": 28, "tierMin": 1, "tierMax": 2 },
+      { "enemyId": "ENM_OF_VERBRANNTER_EIDBRECHER", "silverMin": 38, "silverMax": 68, "tierMin": 2, "tierMax": 3 },
+      { "enemyId": "ENM_OF_GLUTBERG_AKOLYTH", "silverMin": 42, "silverMax": 75, "tierMin": 2, "tierMax": 3 },
+      { "enemyId": "MB_OF_INQUISITOR_VANE", "silverMin": 85, "silverMax": 135, "tierMin": 2, "tierMax": 3 },
+      { "enemyId": "MB_OF_ASCHENDRACKE", "silverMin": 110, "silverMax": 175, "tierMin": 3, "tierMax": 4 },
+      { "enemyId": "MB_OF_ABT_MALAKOR", "silverMin": 90, "silverMax": 145, "tierMin": 2, "tierMax": 3 },
+      { "enemyId": "ENM_KR_GRAUFELL_JAEGER", "silverMin": 5, "silverMax": 12, "tierMin": 1, "tierMax": 1 },
+      { "enemyId": "ENM_KR_MOOR_WILDERER", "silverMin": 8, "silverMax": 16, "tierMin": 1, "tierMax": 1 },
+      { "enemyId": "ENM_KR_GRENZLAND_RITTER", "silverMin": 20, "silverMax": 36, "tierMin": 1, "tierMax": 2 },
+      { "enemyId": "ENM_KR_EISENKEILER", "silverMin": 14, "silverMax": 26, "tierMin": 1, "tierMax": 2 },
+      { "enemyId": "ENM_KR_HUEGELGRAB_WIEDERGAENGER", "silverMin": 18, "silverMax": 35, "tierMin": 1, "tierMax": 2 },
+      { "enemyId": "ENM_KR_BLUTSKALDE", "silverMin": 22, "silverMax": 40, "tierMin": 1, "tierMax": 2 },
+      { "enemyId": "ENM_KR_GEBIRGSTROLL", "silverMin": 36, "silverMax": 64, "tierMin": 2, "tierMax": 3 },
+      { "enemyId": "ENM_KR_AHNEN_SCHARFRICHTER", "silverMin": 44, "silverMax": 78, "tierMin": 2, "tierMax": 3 },
+      { "enemyId": "MB_KR_URSA_GRAUHAAR", "silverMin": 80, "silverMax": 130, "tierMin": 2, "tierMax": 3 },
+      { "enemyId": "MB_KR_WULFGAR_EIDLOS", "silverMin": 105, "silverMax": 165, "tierMin": 3, "tierMax": 4 },
+      { "enemyId": "MB_KR_JARL_HRODGAR", "silverMin": 115, "silverMax": 180, "tierMin": 3, "tierMax": 4 },
+      { "enemyId": "ENM_FH_TIEFSEE_KRABBLER", "silverMin": 6, "silverMax": 13, "tierMin": 1, "tierMax": 1 },
+      { "enemyId": "ENM_FH_HAFEN_HALUNKE", "silverMin": 8, "silverMax": 16, "tierMin": 1, "tierMax": 1 },
+      { "enemyId": "ENM_FH_MEUTERER_KORSAR", "silverMin": 20, "silverMax": 38, "tierMin": 1, "tierMax": 2 },
+      { "enemyId": "ENM_FH_SCHLICK_VIPER", "silverMin": 14, "silverMax": 26, "tierMin": 1, "tierMax": 2 },
+      { "enemyId": "ENM_FH_SCHMUGGLER_SCHUETZE", "silverMin": 22, "silverMax": 40, "tierMin": 1, "tierMax": 2 },
+      { "enemyId": "ENM_FH_NEBEL_ALCHEMIST", "silverMin": 24, "silverMax": 42, "tierMin": 1, "tierMax": 2 },
+      { "enemyId": "ENM_FH_ERTRUNKENER_SEEMANN", "silverMin": 36, "silverMax": 65, "tierMin": 2, "tierMax": 3 },
+      { "enemyId": "ENM_FH_WRACK_KOLOSS", "silverMin": 45, "silverMax": 80, "tierMin": 2, "tierMax": 3 },
+      { "enemyId": "MB_FH_KAPITAEN_DRAVEN", "silverMin": 90, "silverMax": 140, "tierMin": 2, "tierMax": 3 },
+      { "enemyId": "MB_FH_SCHLICK_LEVIATHAN", "silverMin": 115, "silverMax": 180, "tierMin": 3, "tierMax": 4 },
+      { "enemyId": "MB_FH_MADAME_SCHWARZPULVER", "silverMin": 95, "silverMax": 150, "tierMin": 2, "tierMax": 3 }
+    ]
+  }
+}

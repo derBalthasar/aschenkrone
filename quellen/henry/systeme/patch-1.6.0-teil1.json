@@ -1,0 +1,77 @@
+{
+  "schemaVersion": "1.6.0",
+  "module": "core_rules_patch_loot_morale_talents_part_1",
+  "progressionMilestonesFix": {
+    "classSkillUnlockLevels": [1, 3, 6, 10],
+    "classSpecializationUnlockLevel": 10,
+    "factionSpecializationRule": { "unlockCondition": "COMPLETE_BOTH_SISTER_BRANCHES_ACT_2_AND_3", "additionalToClass": true },
+    "masterTalentUnlockLevels": [22, 24, 26, 28, 30],
+    "prestigeUnlockLevel": 30,
+    "prestigeXpPerRank": 5000
+  },
+  "familyMaterialPools": {
+    "WILDTIERE": [
+      { "itemId": "MAT_WOLFSFELL", "weight": 45, "min": 1, "max": 2 },
+      { "itemId": "MAT_BAERENPELZ", "weight": 25, "min": 1, "max": 1 },
+      { "itemId": "MAT_BESTIENSEHNE", "weight": 30, "min": 1, "max": 2 }
+    ],
+    "GESETZLOSE": [
+      { "itemId": "MAT_BRUCHMETALL", "weight": 45, "min": 1, "max": 3 },
+      { "itemId": "VAL_AHNENMUENZEN", "weight": 25, "min": 1, "max": 1 },
+      { "itemId": "POT_HEILUNG_1", "weight": 20, "min": 1, "max": 1 },
+      { "itemId": "POT_FOKUS_1", "weight": 10, "min": 1, "max": 1 }
+    ],
+    "UNTOTE": [
+      { "itemId": "MAT_KNOCHENPLATTE", "weight": 50, "min": 1, "max": 2 },
+      { "itemId": "VAL_RUNENTAFEL", "weight": 35, "min": 1, "max": 1 },
+      { "itemId": "VAL_JARL_SIEGEL", "weight": 15, "min": 1, "max": 1 }
+    ],
+    "KULTISTEN": [
+      { "itemId": "MAT_ASCHBERNSTEIN", "weight": 35, "min": 1, "max": 2 },
+      { "itemId": "MAT_HARZ", "weight": 35, "min": 1, "max": 2 },
+      { "itemId": "MAT_KRAEUTER", "weight": 30, "min": 1, "max": 2 }
+    ],
+    "ASCHERISS_BOSS": [
+      { "itemId": "RES_RUNENSPLITTER", "weight": 55, "min": 1, "max": 3 },
+      { "itemId": "VAL_JARL_SIEGEL", "weight": 25, "min": 1, "max": 1 },
+      { "itemId": "MAT_ASCHBERNSTEIN", "weight": 20, "min": 1, "max": 2 }
+    ]
+  },
+  "partyMoraleSystem": {
+    "minMorale": 0, "maxMorale": 100, "startingMorale": 60,
+    "moraleStates": [
+      { "id": "MORALE_GEBROCHEN", "label": "Gebrochen", "min": 0, "max": 19, "combatModifiers": { "damagePercent": -20, "critChance": -10, "armorPercent": -15 }, "travelModifiers": { "ambushRiskBonus": 0.15 } },
+      { "id": "MORALE_ANGESCHLAGEN", "label": "Angeschlagen", "min": 20, "max": 39, "combatModifiers": { "damagePercent": -10, "critChance": -5, "armorPercent": 0 }, "travelModifiers": { "ambushRiskBonus": 0.05 } },
+      { "id": "MORALE_GEFESIGT", "label": "Gefestigt", "min": 40, "max": 69, "combatModifiers": { "damagePercent": 0, "critChance": 0, "armorPercent": 0 }, "travelModifiers": { "ambushRiskBonus": 0.0 } },
+      { "id": "MORALE_ENTSCHLOSSEN", "label": "Entschlossen", "min": 70, "max": 89, "combatModifiers": { "damagePercent": 10, "critChance": 5, "armorPercent": 5 }, "travelModifiers": { "ambushRiskBonus": -0.05 } },
+      { "id": "MORALE_UNERSCHUETTERLICH", "label": "Unerschütterlich", "min": 90, "max": 100, "combatModifiers": { "damagePercent": 15, "critChance": 8, "armorPercent": 10 }, "travelModifiers": { "ambushRiskBonus": -0.1 } }
+    ],
+    "moraleTriggers": [
+      { "event": "TRAVEL_WITH_ZERO_FOOD_ENTKRAEFTET", "delta": -15, "notes": "Pro Etappe ohne Nahrung" },
+      { "event": "CAMP_REST_WITH_FOOD", "delta": 12, "notes": "Rast mit 3 Nahrung" },
+      { "event": "COMBAT_VICTORY_STANDARD", "delta": 4 },
+      { "event": "COMBAT_VICTORY_MINIBOSS_OR_BOSS", "delta": 12 },
+      { "event": "PARTY_MEMBER_DOWNED", "delta": -10 },
+      { "event": "QUEST_GOOD_DEED", "delta": 6 },
+      { "event": "QUEST_EVIL_DEED", "delta": -8, "notes": "Ausnahme: Geächtet-Run" }
+    ],
+    "itemAndSkillBonuses": {
+      "OFF_SKALDENHORN_T2": "+10 Moral-Basiswert & +2 Moral nach jedem Sieg",
+      "OFF_AHNENHARFE_T4": "+20 Moral-Basiswert & halbiert Moralverlust durch Hunger",
+      "RELIC_HORN_ALTES_REICH": "Verhindert, dass die Moral im Kampf unter 40 fällt"
+    }
+  },
+  "masterTalentSystem": {
+    "unlockLevels": [22, 24, 26, 28, 30],
+    "pointsPerMilestone": 1,
+    "totalPointsAtMaxLevel": 5,
+    "maxRankPerTalent": 3,
+    "talentTree": [
+      { "id": "MT_KLINGENSTURM", "name": "Meister der Klinge & Wucht", "category": "OFFENSIVE", "effectPerRank": "+8 % physischer & Elementar-Schaden, +3 % Kritische Trefferchance" },
+      { "id": "MT_EISENWALL", "name": "Unbrechbarer Schildwall", "category": "DEFENSIVE", "effectPerRank": "+10 % maximale Lebenspunkte, +4 Rüstung, +5 % Block- & Ausweichchance" },
+      { "id": "MT_RUNENRESONANZ", "name": "Runen- & Glutresonanz", "category": "MAGIE_UND_ARTEFAKTE", "effectPerRank": "+15 % Wirkung von Runen- und Glut-Ausrüstung sowie +10 % Heilungs- & Fokus-Regeneration" },
+      { "id": "MT_SCHLACHTFUEHRER", "name": "Veteran von Odris", "category": "GRUPPE_UND_MORAL", "effectPerRank": "+5 Gruppen-Moral-Basiswert, +10 % erhaltene Erfahrung (EP) und +5 % Initiativ-Geschwindigkeit" },
+      { "id": "MT_GRENZLAEUFER", "name": "Meister der Wildnis", "category": "REISE_UND_BEUTE", "effectPerRank": "+10 % Beute-Silber, +15 % Chance auf doppelte Rohstoff-Drops und -15 % Hinterhaltsrisiko" }
+    ]
+  }
+}

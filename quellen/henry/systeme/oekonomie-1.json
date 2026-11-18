@@ -1,0 +1,760 @@
+{
+  "schemaVersion": "1.1.0",
+  "module": "economy_crafting_and_smithing_part_1",
+  "currency": "Silber",
+  "reputationPriceModifiers": [
+    {
+      "rankId": "GEAECHTET",
+      "label": "Geächtet",
+      "minRep": -100,
+      "maxRep": -25,
+      "buyMultiplier": 1.35,
+      "sellMultiplier": 0.65,
+      "smithingCostMultiplier": 1.35,
+      "kontorAccess": false
+    },
+    {
+      "rankId": "FREMDER",
+      "label": "Fremder",
+      "minRep": -24,
+      "maxRep": 19,
+      "buyMultiplier": 1.0,
+      "sellMultiplier": 1.0,
+      "smithingCostMultiplier": 1.0,
+      "kontorAccess": true
+    },
+    {
+      "rankId": "SCHUTZHERR",
+      "label": "Schutzherr",
+      "minRep": 20,
+      "maxRep": 59,
+      "buyMultiplier": 0.9,
+      "sellMultiplier": 1.1,
+      "smithingCostMultiplier": 0.9,
+      "kontorAccess": true
+    },
+    {
+      "rankId": "BANNERJARL",
+      "label": "Bannerjarl",
+      "minRep": 60,
+      "maxRep": 100,
+      "buyMultiplier": 0.8,
+      "sellMultiplier": 1.25,
+      "smithingCostMultiplier": 0.8,
+      "kontorAccess": true
+    }
+  ],
+  "factionTradeRules": {
+    "ORDEN_DER_FLAMME": {
+      "canEquipGlutItems": true,
+      "canEquipRunenItems": true,
+      "discountCategories": [
+        "GLUT_ITEM",
+        "RUNEN_ITEM",
+        "GEBET_RELIQUIE",
+        "HEILTRANK"
+      ],
+      "discountMultiplier": 0.9,
+      "glutItemSellMultiplier": 1.0
+    },
+    "KRONREICH": {
+      "canEquipGlutItems": false,
+      "canEquipRunenItems": true,
+      "discountCategories": [
+        "NAHRUNG",
+        "EISEN",
+        "SCHWERE_RUESTUNG",
+        "SCHILD"
+      ],
+      "discountMultiplier": 0.9,
+      "glutItemSellMultiplier": 0.65
+    },
+    "FREIE_HAEFEN": {
+      "canEquipGlutItems": false,
+      "canEquipRunenItems": true,
+      "discountCategories": [
+        "ALCHEMIE",
+        "FERNKAMPF",
+        "LEICHTE_RUESTUNG",
+        "SCHWARZPULVER"
+      ],
+      "discountMultiplier": 0.9,
+      "glutItemSellMultiplier": 0.85
+    }
+  },
+  "classEquipmentPermissions": {
+    "GLUTPALADIN": {
+      "armorTypes": [
+        "SCHWER"
+      ],
+      "weaponTypes": [
+        "EINHAND",
+        "ZWEIHAND",
+        "SCHILD",
+        "FOKUS_RELIQUIE"
+      ]
+    },
+    "EIDWAECHTER": {
+      "armorTypes": [
+        "SCHWER"
+      ],
+      "weaponTypes": [
+        "EINHAND",
+        "ZWEIHAND",
+        "SCHILD"
+      ]
+    },
+    "INQUISITOR": {
+      "armorTypes": [
+        "LEICHT",
+        "STOFF"
+      ],
+      "weaponTypes": [
+        "EINHAND",
+        "FERNKAMPF_BOGEN",
+        "FOKUS_RELIQUIE"
+      ]
+    },
+    "PYROMANT": {
+      "armorTypes": [
+        "STOFF"
+      ],
+      "weaponTypes": [
+        "FOKUS_STAB",
+        "FOKUS_RELIQUIE"
+      ]
+    },
+    "KLERIKER_DER_FLAMME": {
+      "armorTypes": [
+        "STOFF",
+        "LEICHT"
+      ],
+      "weaponTypes": [
+        "EINHAND",
+        "FOKUS_STAB",
+        "FOKUS_RELIQUIE"
+      ]
+    },
+    "SCHATTEN_VOLLSTRECKER": {
+      "armorTypes": [
+        "LEICHT"
+      ],
+      "weaponTypes": [
+        "DOLCH_KLINGE",
+        "EINHAND"
+      ]
+    },
+    "BLUTRITTER": {
+      "armorTypes": [
+        "SCHWER"
+      ],
+      "weaponTypes": [
+        "EINHAND",
+        "ZWEIHAND"
+      ]
+    },
+    "EISERNER_BASTIONAER": {
+      "armorTypes": [
+        "SCHWER"
+      ],
+      "weaponTypes": [
+        "EINHAND",
+        "SCHILD"
+      ]
+    },
+    "DAEMMERUNGSJAEGER": {
+      "armorTypes": [
+        "LEICHT"
+      ],
+      "weaponTypes": [
+        "FERNKAMPF_BOGEN",
+        "DOLCH_KLINGE"
+      ]
+    },
+    "RUNENSKALDE": {
+      "armorTypes": [
+        "LEICHT"
+      ],
+      "weaponTypes": [
+        "EINHAND",
+        "INSTRUMENT_NEBENHAND"
+      ]
+    },
+    "WUNDMEISTER": {
+      "armorTypes": [
+        "LEICHT",
+        "STOFF"
+      ],
+      "weaponTypes": [
+        "DOLCH_KLINGE",
+        "CHIRURG_NEBENHAND"
+      ]
+    },
+    "NACHTKLINGE": {
+      "armorTypes": [
+        "LEICHT"
+      ],
+      "weaponTypes": [
+        "DOLCH_KLINGE",
+        "FERNKAMPF_BOGEN"
+      ]
+    },
+    "STURMKORSAR": {
+      "armorTypes": [
+        "LEICHT"
+      ],
+      "weaponTypes": [
+        "EINHAND",
+        "DOLCH_KLINGE",
+        "SCHWARZPULVER_PISTOLE"
+      ]
+    },
+    "TIEFENWAECHTER": {
+      "armorTypes": [
+        "SCHWER"
+      ],
+      "weaponTypes": [
+        "EINHAND",
+        "ZWEIHAND",
+        "SCHILD"
+      ]
+    },
+    "SCHWARZSCHUETZE": {
+      "armorTypes": [
+        "LEICHT"
+      ],
+      "weaponTypes": [
+        "SCHWARZPULVER_GEWEHR",
+        "SCHWARZPULVER_PISTOLE",
+        "DOLCH_KLINGE"
+      ]
+    },
+    "PULVER_ALCHEMIST": {
+      "armorTypes": [
+        "STOFF",
+        "LEICHT"
+      ],
+      "weaponTypes": [
+        "SCHWARZPULVER_PISTOLE",
+        "CHIRURG_NEBENHAND"
+      ]
+    },
+    "SEUCHENMEDIKUS": {
+      "armorTypes": [
+        "STOFF",
+        "LEICHT"
+      ],
+      "weaponTypes": [
+        "DOLCH_KLINGE",
+        "CHIRURG_NEBENHAND"
+      ]
+    },
+    "SCHATTENFREIBEUTER": {
+      "armorTypes": [
+        "LEICHT"
+      ],
+      "weaponTypes": [
+        "DOLCH_KLINGE",
+        "SCHWARZPULVER_PISTOLE"
+      ]
+    }
+  },
+  "kontorResources": [
+    {
+      "id": "RES_NAHRUNG",
+      "name": "Pökelfleisch & Hartbrot (Nahrung)",
+      "source": [
+        "KAUF",
+        "ZEHNT",
+        "FELD_HANDWERK"
+      ],
+      "baseBuyPrice": 4,
+      "baseSellPrice": 2,
+      "bulkBundleSize": 10,
+      "bulkBuyPrice": 36
+    },
+    {
+      "id": "RES_HOLZ",
+      "name": "Asch-Bauholz",
+      "source": [
+        "KAUF",
+        "ZEHNT",
+        "GEBAEUDE"
+      ],
+      "baseBuyPrice": 6,
+      "baseSellPrice": 3,
+      "bulkBundleSize": 10,
+      "bulkBuyPrice": 54
+    },
+    {
+      "id": "RES_EISEN",
+      "name": "Roheisenbarren",
+      "source": [
+        "KAUF",
+        "ZEHNT",
+        "SCHMIEDE_SCHMELZE"
+      ],
+      "baseBuyPrice": 10,
+      "baseSellPrice": 5,
+      "bulkBundleSize": 10,
+      "bulkBuyPrice": 90
+    },
+    {
+      "id": "RES_STEIN",
+      "name": "Behauener Bruchstein",
+      "source": [
+        "KAUF",
+        "ZEHNT"
+      ],
+      "baseBuyPrice": 8,
+      "baseSellPrice": 4,
+      "bulkBundleSize": 10,
+      "bulkBuyPrice": 72
+    },
+    {
+      "id": "RES_RUNENSPLITTER",
+      "name": "Ascheriss-Runensplitter",
+      "source": [
+        "LOOT_ASCHERISS",
+        "KAUF_SELTEN"
+      ],
+      "baseBuyPrice": 65,
+      "baseSellPrice": 30,
+      "bulkBundleSize": 5,
+      "bulkBuyPrice": 300
+    }
+  ],
+  "lootAndMaterials": [
+    {
+      "id": "MAT_WOLFSFELL",
+      "name": "Wolfsfell",
+      "category": "JAGDBEUTE",
+      "source": [
+        "LOOT"
+      ],
+      "baseBuyPrice": null,
+      "baseSellPrice": 8,
+      "usage": "Rüstungs-Upgrade (+1/+2) oder Trockenfleisch-Herstellung"
+    },
+    {
+      "id": "MAT_BAERENPELZ",
+      "name": "Dicker Bärenpelz",
+      "category": "JAGDBEUTE",
+      "source": [
+        "LOOT"
+      ],
+      "baseBuyPrice": null,
+      "baseSellPrice": 16,
+      "usage": "Schwere Rüstungs-Upgrades (+2/+3) oder Verkauf"
+    },
+    {
+      "id": "MAT_BESTIENSEHNE",
+      "name": "Zähe Bestien-Sehne",
+      "category": "JAGDBEUTE",
+      "source": [
+        "LOOT"
+      ],
+      "baseBuyPrice": null,
+      "baseSellPrice": 12,
+      "usage": "Bogen-, Schild- und Meister-Upgrades (+3)"
+    },
+    {
+      "id": "MAT_KNOCHENPLATTE",
+      "name": "Gehärtete Knochenplatte",
+      "category": "MONSTERBEUTE",
+      "source": [
+        "LOOT"
+      ],
+      "baseBuyPrice": null,
+      "baseSellPrice": 15,
+      "usage": "Meisterschmiede-Rezepte (Tier 3/4)"
+    },
+    {
+      "id": "MAT_BRUCHMETALL",
+      "name": "Altes Bruchmetall",
+      "category": "SCHROTT",
+      "source": [
+        "LOOT"
+      ],
+      "baseBuyPrice": null,
+      "baseSellPrice": 3,
+      "usage": "3 Stück ergeben in der Dorfschmiede 1 Roheisenbarren"
+    },
+    {
+      "id": "MAT_KRAEUTER",
+      "name": "Heilkräuter-Bündel (Blutmoos & Bitterwurz)",
+      "category": "SAMMELGUT",
+      "source": [
+        "LOOT",
+        "REISE_EREIGNIS"
+      ],
+      "baseBuyPrice": null,
+      "baseSellPrice": 6,
+      "usage": "Zutat für Heiltränke und Gegengifte im Feld-Handwerk"
+    },
+    {
+      "id": "MAT_HARZ",
+      "name": "Schwarzes Harz",
+      "category": "SAMMELGUT",
+      "source": [
+        "LOOT",
+        "REISE_EREIGNIS"
+      ],
+      "baseBuyPrice": null,
+      "baseSellPrice": 9,
+      "usage": "Zutat für Salben, Fackeln und Schwarzpulver-Mischungen"
+    },
+    {
+      "id": "MAT_ASCHBERNSTEIN",
+      "name": "Glühender Asch-Bernstein",
+      "category": "SELTENE_BEUTE",
+      "source": [
+        "LOOT_ASCHERISS",
+        "LOOT"
+      ],
+      "baseBuyPrice": null,
+      "baseSellPrice": 28,
+      "usage": "Zutat für Splitterbomben, Kriegswerft-Waffen und Glut-Items"
+    },
+    {
+      "id": "VAL_AHNENMUENZEN",
+      "name": "Beutel mit Ahnen-Münzen",
+      "category": "SCHATZ",
+      "source": [
+        "LOOT"
+      ],
+      "baseBuyPrice": null,
+      "baseSellPrice": 25,
+      "bonusRepOnTurnIn": 0
+    },
+    {
+      "id": "VAL_RUNENTAFEL",
+      "name": "Zerbrochene Runentafel",
+      "category": "SCHATZ",
+      "source": [
+        "LOOT"
+      ],
+      "baseBuyPrice": null,
+      "baseSellPrice": 40,
+      "bonusRepOnTurnIn": 3
+    },
+    {
+      "id": "VAL_JARL_SIEGEL",
+      "name": "Siegelring eines gefallenen Jarls",
+      "category": "SCHATZ",
+      "source": [
+        "LOOT_ASCHERISS"
+      ],
+      "baseBuyPrice": null,
+      "baseSellPrice": 85,
+      "bonusRepOnTurnIn": 5
+    }
+  ],
+  "consumables": [
+    {
+      "id": "POT_HEILUNG_1",
+      "name": "Bitterwurz-Sud (Kleiner Heiltrank)",
+      "category": "HEILTRANK",
+      "tier": 1,
+      "source": [
+        "KAUF",
+        "LOOT"
+      ],
+      "baseBuyPrice": 18,
+      "baseSellPrice": 9,
+      "effect": "Stellt im Kampf 35 LP wieder her."
+    },
+    {
+      "id": "POT_HEILUNG_2",
+      "name": "Blutmoos-Elixier (Mittlerer Heiltrank)",
+      "category": "HEILTRANK",
+      "tier": 2,
+      "source": [
+        "KAUF",
+        "FELD_HANDWERK"
+      ],
+      "baseBuyPrice": 45,
+      "baseSellPrice": 22,
+      "effect": "Stellt im Kampf 85 LP wieder her und entfernt Blutung."
+    },
+    {
+      "id": "POT_HEILUNG_3",
+      "name": "Ahnenfeuer-Essenz (Großer Heiltrank)",
+      "category": "HEILTRANK",
+      "tier": 3,
+      "source": [
+        "KAUF"
+      ],
+      "baseBuyPrice": 110,
+      "baseSellPrice": 55,
+      "effect": "Stellt im Kampf 180 LP wieder her und heilt alle körperlichen Gebrechen."
+    },
+    {
+      "id": "POT_FOKUS_1",
+      "name": "Aschenwein-Phiole (Kleiner Fokus-Trank)",
+      "category": "ALCHEMIE",
+      "tier": 1,
+      "source": [
+        "KAUF",
+        "LOOT"
+      ],
+      "baseBuyPrice": 22,
+      "baseSellPrice": 11,
+      "effect": "Stellt 25 Ausdauer bzw. Glut-/Gebetsfokus wieder her."
+    },
+    {
+      "id": "POT_FOKUS_2",
+      "name": "Runentau-Destillat (Großer Fokus-Trank)",
+      "category": "ALCHEMIE",
+      "tier": 2,
+      "source": [
+        "KAUF"
+      ],
+      "baseBuyPrice": 55,
+      "baseSellPrice": 27,
+      "effect": "Stellt 60 Ausdauer bzw. Glut-/Gebetsfokus wieder her und gewährt +2 Wille (3 Züge)."
+    },
+    {
+      "id": "CON_GEGENGIFT",
+      "name": "Schlangengallen-Tinktur",
+      "category": "ALCHEMIE",
+      "tier": 1,
+      "source": [
+        "KAUF",
+        "FELD_HANDWERK"
+      ],
+      "baseBuyPrice": 16,
+      "baseSellPrice": 8,
+      "effect": "Entfernt Gift und Seuche sofort."
+    },
+    {
+      "id": "CON_BRANDSALBE",
+      "name": "Kaltasche-Salbe",
+      "category": "ALCHEMIE",
+      "tier": 1,
+      "source": [
+        "KAUF",
+        "FELD_HANDWERK"
+      ],
+      "baseBuyPrice": 16,
+      "baseSellPrice": 8,
+      "effect": "Entfernt Verbrennung und gewährt 25 % Feuerresistenz für einen Kampf."
+    },
+    {
+      "id": "CON_SPLITTERBOMBE",
+      "name": "Hafen-Splitterbombe",
+      "category": "SCHWARZPULVER",
+      "tier": 2,
+      "source": [
+        "KAUF",
+        "FELD_HANDWERK"
+      ],
+      "baseBuyPrice": 26,
+      "baseSellPrice": 13,
+      "effect": "Verursacht 35 Flächenschaden an allen Gegnern."
+    },
+    {
+      "id": "CON_WETZSTEIN",
+      "name": "Öl-Wetzstein & Flickzeug",
+      "category": "REISEBEDARF",
+      "tier": 1,
+      "source": [
+        "KAUF",
+        "FELD_HANDWERK"
+      ],
+      "baseBuyPrice": 15,
+      "baseSellPrice": 7,
+      "effect": "Gewährt +15 % Waffenschaden und +2 Rüstung für den nächsten Kampf."
+    }
+  ],
+  "fieldCraftingRecipes": [
+    {
+      "id": "CRAFT_FIELD_HEILUNG_2",
+      "name": "Blutmoos-Elixier brauen",
+      "requiredClasses": [
+        "WUNDMEISTER",
+        "KLERIKER_DER_FLAMME",
+        "SEUCHENMEDIKUS"
+      ],
+      "ingredients": [
+        {
+          "id": "MAT_KRAEUTER",
+          "count": 2
+        },
+        {
+          "id": "POT_FOKUS_1",
+          "count": 1
+        }
+      ],
+      "outputItemId": "POT_HEILUNG_2",
+      "outputCount": 1
+    },
+    {
+      "id": "CRAFT_FIELD_GEGENGIFT",
+      "name": "Gegengift & Brandsalbe anrühren",
+      "requiredClasses": [
+        "SEUCHENMEDIKUS",
+        "WUNDMEISTER"
+      ],
+      "ingredients": [
+        {
+          "id": "MAT_KRAEUTER",
+          "count": 1
+        },
+        {
+          "id": "MAT_HARZ",
+          "count": 1
+        }
+      ],
+      "outputItemId": "CON_GEGENGIFT",
+      "outputCount": 1
+    },
+    {
+      "id": "CRAFT_FIELD_BOMBE",
+      "name": "Splitterbombe stopfen",
+      "requiredClasses": [
+        "PULVER_ALCHEMIST",
+        "SCHWARZSCHUETZE"
+      ],
+      "ingredients": [
+        {
+          "id": "MAT_ASCHBERNSTEIN",
+          "count": 1
+        },
+        {
+          "id": "MAT_BRUCHMETALL",
+          "count": 1
+        }
+      ],
+      "outputItemId": "CON_SPLITTERBOMBE",
+      "outputCount": 1
+    },
+    {
+      "id": "CRAFT_FIELD_NAHRUNG",
+      "name": "Wild zerlegen & Trockenfleisch pökeln",
+      "requiredClasses": [
+        "DAEMMERUNGSJAEGER",
+        "SCHWARZSCHUETZE",
+        "STURMKORSAR"
+      ],
+      "ingredients": [
+        {
+          "id": "MAT_WOLFSFELL",
+          "count": 1
+        }
+      ],
+      "outputItemId": "RES_NAHRUNG",
+      "outputCount": 3
+    },
+    {
+      "id": "CRAFT_FIELD_WETZSTEIN",
+      "name": "Feldreparatur & Klingen-Schliff",
+      "requiredClasses": [
+        "EISERNER_BASTIONAER",
+        "TIEFENWAECHTER",
+        "EIDWAECHTER"
+      ],
+      "ingredients": [
+        {
+          "id": "MAT_BRUCHMETALL",
+          "count": 1
+        },
+        {
+          "id": "MAT_BESTIENSEHNE",
+          "count": 1
+        }
+      ],
+      "outputItemId": "CON_WETZSTEIN",
+      "outputCount": 1
+    }
+  ],
+  "smithingSystem": {
+    "smeltScrapRecipe": {
+      "buildingRequired": "DORFSCHMIEDE",
+      "input": {
+        "id": "MAT_BRUCHMETALL",
+        "count": 3
+      },
+      "output": {
+        "id": "RES_EISEN",
+        "count": 1
+      },
+      "silverCost": 5
+    },
+    "upgradeLevels": [
+      {
+        "upgradeLevel": 1,
+        "label": "+1 Geschliffen / Verstärkt",
+        "buildingRequired": "STADTSCHMIEDE",
+        "statBonusPercent": 15,
+        "baseSilverCost": 45,
+        "materials": [
+          {
+            "id": "RES_EISEN",
+            "count": 2
+          },
+          {
+            "id": "MAT_WOLFSFELL",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "upgradeLevel": 2,
+        "label": "+2 Gehärtet",
+        "buildingRequired": "STADTSCHMIEDE",
+        "statBonusPercent": 30,
+        "baseSilverCost": 110,
+        "materials": [
+          {
+            "id": "RES_EISEN",
+            "count": 4
+          },
+          {
+            "id": "MAT_BAERENPELZ",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "upgradeLevel": 3,
+        "label": "+3 Meistergeschmiedet",
+        "buildingRequired": "MEISTERSCHMIEDE",
+        "statBonusPercent": 50,
+        "baseSilverCost": 240,
+        "materials": [
+          {
+            "id": "RES_EISEN",
+            "count": 6
+          },
+          {
+            "id": "MAT_BESTIENSEHNE",
+            "count": 2
+          },
+          {
+            "id": "MAT_KNOCHENPLATTE",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "upgradeLevel": 4,
+        "label": "+4 Runen-Meisterwerk",
+        "buildingRequired": "RUNENSCHMIEDE",
+        "statBonusPercent": 75,
+        "addsRuneTrait": true,
+        "baseSilverCost": 480,
+        "materials": [
+          {
+            "id": "RES_EISEN",
+            "count": 8
+          },
+          {
+            "id": "RES_RUNENSPLITTER",
+            "count": 3
+          }
+        ]
+      }
+    ]
+  }
+}

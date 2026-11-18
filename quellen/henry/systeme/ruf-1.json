@@ -1,0 +1,430 @@
+{
+  "part": "1 of 2 (Reputation System, 3-Way Quest Morality, Event-Based Economy & Villages D01-D34)",
+  "version": "2.0.0",
+  "project": "Aschenkrone - Welt Odris",
+  "mode": "event_and_step_based_no_turns",
+  "reputationSystem": {
+    "scale": {
+      "min": -100,
+      "max": 100,
+      "start": 0
+    },
+    "scope": "per_faction",
+    "ranks": [
+      {
+        "id": "geaechtet",
+        "name": "Geächtet",
+        "min": -100,
+        "max": -25,
+        "effects": {
+          "protectorateTitheActive": false,
+          "cityGateTollSilber": 10,
+          "merchantPriceMultiplier": 1.3,
+          "freeCityRest": false,
+          "blacksmithEisenDiscount": 0,
+          "bountyHunterAmbushChance": 0.2
+        }
+      },
+      {
+        "id": "fremder",
+        "name": "Fremder",
+        "min": -24,
+        "max": 19,
+        "effects": {
+          "protectorateTitheActive": false,
+          "cityGateTollSilber": 0,
+          "merchantPriceMultiplier": 1.0,
+          "freeCityRest": false,
+          "blacksmithEisenDiscount": 0,
+          "bountyHunterAmbushChance": 0.0
+        }
+      },
+      {
+        "id": "schutzherr",
+        "name": "Schutzherr",
+        "min": 20,
+        "max": 59,
+        "effects": {
+          "protectorateTitheActive": true,
+          "titheBonus": 0,
+          "cityGateTollSilber": 0,
+          "merchantPriceMultiplier": 0.9,
+          "freeCityRest": false,
+          "blacksmithEisenDiscount": 0,
+          "bountyHunterAmbushChance": 0.0
+        }
+      },
+      {
+        "id": "bannerjarl",
+        "name": "Bannerjarl",
+        "min": 60,
+        "max": 100,
+        "effects": {
+          "protectorateTitheActive": true,
+          "titheBonus": 1,
+          "cityGateTollSilber": 0,
+          "merchantPriceMultiplier": 0.8,
+          "freeCityRest": true,
+          "blacksmithEisenDiscount": 1,
+          "bountyHunterAmbushChance": 0.0
+        }
+      }
+    ],
+    "nonQuestTriggers": [
+      {
+        "id": "secure_border_road",
+        "label": "Grenzstraße mit Stein befestigen (-4 Stein)",
+        "reputationDelta": 10
+      },
+      {
+        "id": "build_signal_fire",
+        "label": "Signalfeuer auf Weg errichten (-5 Holz)",
+        "reputationDelta": 10
+      },
+      {
+        "id": "complete_reconstruction",
+        "label": "Stadt-Wiederaufbau abschließen",
+        "reputationDelta": 20
+      },
+      {
+        "id": "donate_to_kontor",
+        "label": "Ressource in Fraktions-Kontor / Kriegskasse spenden (pro Einheit)",
+        "reputationDelta": 2
+      },
+      {
+        "id": "extort_village",
+        "label": "Dorf in der Not gewaltsam plündern (+4 Nahrung sofort)",
+        "reputationDelta": -25
+      },
+      {
+        "id": "ignore_distress_call",
+        "label": "Hilferuf eines Schutzbund-Dorfes beim Weiterreisen ignorieren",
+        "reputationDelta": -20
+      },
+      {
+        "id": "flee_defense_combat",
+        "label": "Aus einem Verteidigungskampf fliehen",
+        "reputationDelta": -10
+      }
+    ]
+  },
+  "questMoralityLayer": {
+    "description": "Universelle 3-Wege-Entscheidung am Ende jeder Neben- und Dorfquest, sofern keine handgeschriebene Spezial-Entscheidung vorliegt.",
+    "choices": [
+      {
+        "id": "good_deed",
+        "alignment": "Gute Tat (Ehrenhaft)",
+        "prompt": "Den Schwachen beistehen und auf zusätzlichen Lohn verzichten.",
+        "reputationDelta": 12,
+        "silberMultiplier": 1.0,
+        "instantBonusResources": 0,
+        "unlocksVillageProtectorate": true
+      },
+      {
+        "id": "pragmatic_deed",
+        "alignment": "Söldner-Weg (Pragmatisch)",
+        "prompt": "Den vereinbarten Lohn einstreichen und weiterziehen.",
+        "reputationDelta": 3,
+        "silberMultiplier": 1.15,
+        "instantBonusResources": 0,
+        "unlocksVillageProtectorate": true
+      },
+      {
+        "id": "bad_deed",
+        "alignment": "Schlechte Tat (Skrupellos)",
+        "prompt": "Die Notlage ausnutzen, Vorräte an sich reißen oder Schweigegeld erpressen.",
+        "reputationDelta": -18,
+        "silberMultiplier": 1.75,
+        "instantBonusResources": 3,
+        "unlocksVillageProtectorate": false
+      }
+    ]
+  },
+  "eventBasedEconomy": {
+    "travelStepTrigger": {
+      "stepsPerKontorShipment": 6,
+      "rule": "Jede Reiseetappe entlang einer Kante (S, P, M, D) erhöht den Reisezähler um +1. Nach 6 Etappen liegt der Zehnt aller befreiten Schutzbund-Dörfer (bei Rang >= Schutzherr) im nächsten Fraktions-Kontor abholbereit."
+    },
+    "ashRainEffect": {
+      "unliberatedVillageYield": 0,
+      "liberatedVillageYield": 5,
+      "kronreichFoodBonus": 1,
+      "bannerjarlRankBonus": 1,
+      "note": "Ohne Befreiung und Schutzbund liefert ein Dorf nichts automatisch; der Spieler muss es vor Ort aufsuchen oder erpressen."
+    }
+  },
+  "villages": [
+    {
+      "edgeId": "D01",
+      "village": "Königsau",
+      "city": "Kronhall",
+      "faction": "Kronreich",
+      "resource": "nahrung",
+      "baseYield": 6
+    },
+    {
+      "edgeId": "D02",
+      "village": "Mühlbach",
+      "city": "Kronhall",
+      "faction": "Kronreich",
+      "resource": "nahrung",
+      "baseYield": 6
+    },
+    {
+      "edgeId": "D03",
+      "village": "Weizenhof",
+      "city": "Kronhall",
+      "faction": "Kronreich",
+      "resource": "nahrung",
+      "baseYield": 6
+    },
+    {
+      "edgeId": "D04",
+      "village": "Eichenhain",
+      "city": "Eikmark",
+      "faction": "Kronreich",
+      "resource": "holz",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D05",
+      "village": "Köhlerby",
+      "city": "Eikmark",
+      "faction": "Kronreich",
+      "resource": "holz",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D06",
+      "village": "Burgwiese",
+      "city": "Hagenfels",
+      "faction": "Kronreich",
+      "resource": "stein",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D07",
+      "village": "Eisenbach",
+      "city": "Hagenfels",
+      "faction": "Kronreich",
+      "resource": "eisen",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D08",
+      "village": "Ackerholm",
+      "city": "Haraldstad",
+      "faction": "Kronreich",
+      "resource": "nahrung",
+      "baseYield": 6
+    },
+    {
+      "edgeId": "D09",
+      "village": "Rinderby",
+      "city": "Haraldstad",
+      "faction": "Kronreich",
+      "resource": "nahrung",
+      "baseYield": 6
+    },
+    {
+      "edgeId": "D10",
+      "village": "Heidby",
+      "city": "Heidvang",
+      "faction": "Kronreich",
+      "resource": "nahrung",
+      "baseYield": 6
+    },
+    {
+      "edgeId": "D11",
+      "village": "Schafhag",
+      "city": "Heidvang",
+      "faction": "Kronreich",
+      "resource": "nahrung",
+      "baseYield": 6
+    },
+    {
+      "edgeId": "D12",
+      "village": "Garbenfeld",
+      "city": "Kornwik",
+      "faction": "Kronreich",
+      "resource": "nahrung",
+      "baseYield": 6
+    },
+    {
+      "edgeId": "D13",
+      "village": "Hopfendal",
+      "city": "Kornwik",
+      "faction": "Kronreich",
+      "resource": "nahrung",
+      "baseYield": 6
+    },
+    {
+      "edgeId": "D14",
+      "village": "Hengstweide",
+      "city": "Rosshag",
+      "faction": "Kronreich",
+      "resource": "nahrung",
+      "baseYield": 6
+    },
+    {
+      "edgeId": "D15",
+      "village": "Sattelby",
+      "city": "Rosshag",
+      "faction": "Kronreich",
+      "resource": "holz",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D16",
+      "village": "Dünenhof",
+      "city": "Sandvik",
+      "faction": "Kronreich",
+      "resource": "stein",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D17",
+      "village": "Muschelby",
+      "city": "Sandvik",
+      "faction": "Kronreich",
+      "resource": "nahrung",
+      "baseYield": 6
+    },
+    {
+      "edgeId": "D18",
+      "village": "Felsby",
+      "city": "Steinwacht",
+      "faction": "Kronreich",
+      "resource": "stein",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D19",
+      "village": "Grenzhof",
+      "city": "Steinwacht",
+      "faction": "Kronreich",
+      "resource": "eisen",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D20",
+      "village": "Birkenby",
+      "city": "Ulfsborg",
+      "faction": "Kronreich",
+      "resource": "holz",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D21",
+      "village": "Wolfstal",
+      "city": "Ulfsborg",
+      "faction": "Kronreich",
+      "resource": "holz",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D22",
+      "village": "Netzby",
+      "city": "Westvik",
+      "faction": "Kronreich",
+      "resource": "holz",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D23",
+      "village": "Tangstrand",
+      "city": "Westvik",
+      "faction": "Kronreich",
+      "resource": "nahrung",
+      "baseYield": 6
+    },
+    {
+      "edgeId": "D24",
+      "village": "Bergweide",
+      "city": "Glutberg",
+      "faction": "Orden der Flamme",
+      "resource": "nahrung",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D25",
+      "village": "Kerzenhof",
+      "city": "Glutberg",
+      "faction": "Orden der Flamme",
+      "resource": "holz",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D26",
+      "village": "Pilgerrast",
+      "city": "Glutberg",
+      "faction": "Orden der Flamme",
+      "resource": "stein",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D27",
+      "village": "Hochtalhof",
+      "city": "Aschenkloster",
+      "faction": "Orden der Flamme",
+      "resource": "stein",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D28",
+      "village": "Klostergarten",
+      "city": "Aschenkloster",
+      "faction": "Orden der Flamme",
+      "resource": "nahrung",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D29",
+      "village": "Feuerhof",
+      "city": "Brandstein",
+      "faction": "Orden der Flamme",
+      "resource": "eisen",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D30",
+      "village": "Schwefelgrube",
+      "city": "Brandstein",
+      "faction": "Orden der Flamme",
+      "resource": "eisen",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D31",
+      "village": "Firnby",
+      "city": "Eiswacht",
+      "faction": "Orden der Flamme",
+      "resource": "stein",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D32",
+      "village": "Passhütte",
+      "city": "Eiswacht",
+      "faction": "Orden der Flamme",
+      "resource": "holz",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D33",
+      "village": "Opferhain",
+      "city": "Flammenhof",
+      "faction": "Orden der Flamme",
+      "resource": "holz",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D34",
+      "village": "Ziegenalm",
+      "city": "Flammenhof",
+      "faction": "Orden der Flamme",
+      "resource": "nahrung",
+      "baseYield": 5
+    }
+  ]
+}

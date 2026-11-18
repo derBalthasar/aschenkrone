@@ -1,0 +1,181 @@
+{
+  "version": "1.0.0",
+  "project": "Aschenkrone - Welt Odris",
+  "system": "repeatable_endgame_farming",
+  "mode": "event_and_step_based_no_turns",
+  "repeatableActivities": [
+    {
+      "id": "act_border_patrols",
+      "name": "Grenzpatrouillen & Kopfgeld-Tafeln",
+      "locations": [
+        "Kronhall",
+        "Glutberg",
+        "Perlvik",
+        "Steinwacht",
+        "Eiswacht",
+        "Wachtfeuer",
+        "Grenzmarkt",
+        "Skerheim",
+        "Tranvik"
+      ],
+      "repeatable": true,
+      "cooldownTravelSteps": 0,
+      "mechanic": "Generiert ein konkretes Ziel auf einer angrenzenden Straße (S) oder einem Pass (P). Beim Betreten der Zielkante wird ein skalierter Kampf ausgelöst.",
+      "rewards": {
+        "xpFormula": "playerLevel * 45",
+        "silberRange": null,
+        "resourceDrop": {
+          "chance": 0.75,
+          "amount": 2,
+          "pool": [
+            "eisen",
+            "holz",
+            "nahrung"
+          ]
+        },
+        "reputationDelta": 3
+      }
+    },
+    {
+      "id": "act_ash_rifts",
+      "name": "Ascherisse & Verfluchte Stollen (Mini-Dungeons)",
+      "repeatable": true,
+      "cooldownTravelSteps": 4,
+      "sites": [
+        {
+          "id": "rift_brandstein",
+          "name": "Die Schwefelspalte",
+          "city": "Brandstein",
+          "enemyTheme": "Glut-Kreaturen & Kultisten",
+          "lootFocus": "Glut-Beute & Runensplitter"
+        },
+        {
+          "id": "rift_eiswacht",
+          "name": "Die Heulende Eisgruft",
+          "city": "Eiswacht",
+          "enemyTheme": "Eishauer & Klippenwyrm",
+          "lootFocus": "Schwere Rüstungen & Runen"
+        },
+        {
+          "id": "rift_nebelvik",
+          "name": "Die Versunkene Wrackbucht",
+          "city": "Nebelvik",
+          "enemyTheme": "Ertrunkene & Schmuggler",
+          "lootFocus": "Waffen, Silber & Gruppen-Relikte"
+        },
+        {
+          "id": "rift_aschenkloster",
+          "name": "Der Verbrannte Aschenhain",
+          "city": "Aschenkloster",
+          "enemyTheme": "Untote Vorhut",
+          "lootFocus": "Seltene Relikte & Runensplitter"
+        }
+      ],
+      "mechanic": "3 aufeinanderfolgende Kampf- und Gefahrenwellen ohne Rückzugs-Reset. Nach Abschluss schließt sich der Riss für 4 Reise-Etappen.",
+      "rewards": {
+        "xpFormula": "playerLevel * 90",
+        "silberRange": null,
+        "guaranteedDrop": "runensplitter_1_to_2",
+        "rareEquipmentChance": 0.45,
+        "groupRelicChance": 0.15
+      }
+    },
+    {
+      "id": "act_caravan_and_privateer",
+      "name": "Karawanen-Eskorten & See-Kaperfahrten",
+      "repeatable": true,
+      "cooldownTravelSteps": 2,
+      "modes": [
+        {
+          "subId": "land_escort",
+          "requirement": "Stadt mit Tier 2 (Reichsfeste)",
+          "mechanic": "Begleite einen Handelszug über 2 direkt verbundene Straßen-Etappen mit 1–2 garantierten Hinterhalten.",
+          "rewards": {
+            "xpFormula": "playerLevel * 55",
+            "silber": 60,
+            "playerChoiceResource": {
+              "amount": 3,
+              "options": [
+                "nahrung",
+                "holz",
+                "eisen",
+                "stein"
+              ]
+            }
+          }
+        },
+        {
+          "subId": "sea_privateer",
+          "requirement": "Hafenstadt mit Kriegswerft (bld_war_shipyard)",
+          "costSilber": 5,
+          "mechanic": "Kreuzfahrt auf den Seewegen (M01–M57) gegen Piraten und Untoten-Galeeren.",
+          "rewards": {
+            "xpFormula": "playerLevel * 65",
+            "silberRange": null,
+            "resourceDrop": {
+              "amount": 3,
+              "pool": [
+                "holz",
+                "eisen",
+                "nahrung"
+              ]
+            },
+            "rareEquipmentChance": 0.3
+          }
+        }
+      ]
+    },
+    {
+      "id": "act_pit_tournaments",
+      "name": "Waffengänge & Feuerproben",
+      "locations": [
+        {
+          "city": "Kronhall",
+          "name": "Der Schildwall-Ring"
+        },
+        {
+          "city": "Glutberg",
+          "name": "Die Feuerprobe des Ordens"
+        },
+        {
+          "city": "Perlvik",
+          "name": "Die Salzwasser-Grube"
+        }
+      ],
+      "repeatable": true,
+      "cooldownTravelSteps": 3,
+      "mechanic": "Turnierkampf über 3 Runden gegen erfahrene Krieger der Fraktion (nicht-tödlich, keine Nahrungskosten).",
+      "rewards": {
+        "xpFormula": "playerLevel * 50",
+        "silber": 75,
+        "reputationDelta": 5
+      }
+    }
+  ],
+  "endgameCrafting": {
+    "name": "Runenschmiede & Meisterwerk-Veredelung",
+    "requiredBuilding": "bld_master_forge",
+    "upgrades": [
+      {
+        "id": "craft_masterwork_gear",
+        "name": "Ausrüstung auf Meisterwerk (+4) schmieden",
+        "cost": {
+          "eisen": 4,
+          "runensplitter": 2,
+          "silber": 120
+        },
+        "effect": "Hebt einen der 8 Grundausrüstungs-Slots auf die höchste Stufe."
+      },
+      {
+        "id": "craft_group_relic",
+        "name": "Gruppen-Relikt aus Runensplittern fassen",
+        "cost": {
+          "runensplitter": 5,
+          "eisen": 3,
+          "silber": 200
+        },
+        "effect": "Erschafft ein neues taktisches Gruppen-Relikt für den gemeinsamen Relikt-Platz."
+      }
+    ]
+  }
+}

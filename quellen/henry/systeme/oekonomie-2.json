@@ -1,0 +1,951 @@
+{
+  "schemaVersion": "1.1.0",
+  "module": "equipment_and_relics_catalog_part_2",
+  "equipmentCatalog": [
+    {
+      "id": "WPN_EISENSCHWERT_T1",
+      "name": "Nordisches Eisenschwert",
+      "slot": "RECHTE_HAND",
+      "equipCategory": "EINHAND",
+      "magicTag": "NORMAL",
+      "tier": 1,
+      "source": [
+        "KAUF",
+        "LOOT"
+      ],
+      "baseBuyPrice": 45,
+      "baseSellPrice": 22,
+      "stats": {
+        "attack": 8,
+        "critChance": 3
+      }
+    },
+    {
+      "id": "WPN_JAGDBOGEN_T1",
+      "name": "Eschenholz-Jagdbogen",
+      "slot": "RECHTE_HAND",
+      "equipCategory": "FERNKAMPF_BOGEN",
+      "magicTag": "NORMAL",
+      "tier": 1,
+      "source": [
+        "KAUF",
+        "LOOT"
+      ],
+      "baseBuyPrice": 48,
+      "baseSellPrice": 24,
+      "stats": {
+        "attack": 7,
+        "critChance": 6
+      }
+    },
+    {
+      "id": "WPN_EICHENSTAB_T1",
+      "name": "Verkohlter Eichenstab",
+      "slot": "RECHTE_HAND",
+      "equipCategory": "FOKUS_STAB",
+      "magicTag": "GLUT_ITEM",
+      "tier": 1,
+      "source": [
+        "KAUF",
+        "LOOT"
+      ],
+      "baseBuyPrice": 50,
+      "baseSellPrice": 25,
+      "stats": {
+        "attack": 6,
+        "willpower": 2
+      }
+    },
+    {
+      "id": "WPN_ZWEIHAENDER_T2",
+      "name": "Kriegshammer der Mark",
+      "slot": "RECHTE_HAND",
+      "equipCategory": "ZWEIHAND",
+      "magicTag": "NORMAL",
+      "tier": 2,
+      "source": [
+        "KAUF",
+        "CRAFT_STADT"
+      ],
+      "baseBuyPrice": 125,
+      "baseSellPrice": 62,
+      "craftRecipe": {
+        "building": "STADTSCHMIEDE",
+        "silver": 70,
+        "materials": [
+          {
+            "id": "RES_EISEN",
+            "count": 4
+          },
+          {
+            "id": "RES_HOLZ",
+            "count": 2
+          }
+        ]
+      },
+      "stats": {
+        "attack": 17,
+        "armorPen": 15
+      }
+    },
+    {
+      "id": "WPN_RUNENKLINGE_T2",
+      "name": "Ahnenrunen-Langschwert",
+      "slot": "RECHTE_HAND",
+      "equipCategory": "EINHAND",
+      "magicTag": "RUNEN_ITEM",
+      "tier": 2,
+      "source": [
+        "LOOT",
+        "CRAFT_STADT"
+      ],
+      "baseBuyPrice": 150,
+      "baseSellPrice": 75,
+      "craftRecipe": {
+        "building": "STADTSCHMIEDE",
+        "silver": 85,
+        "materials": [
+          {
+            "id": "RES_EISEN",
+            "count": 3
+          },
+          {
+            "id": "RES_RUNENSPLITTER",
+            "count": 1
+          }
+        ]
+      },
+      "stats": {
+        "attack": 14,
+        "undeadDamageBonus": 15
+      }
+    },
+    {
+      "id": "WPN_HAFENMUSKETE_T3",
+      "name": "Schwere Hafen-Muskete",
+      "slot": "RECHTE_HAND",
+      "equipCategory": "SCHWARZPULVER_GEWEHR",
+      "magicTag": "NORMAL",
+      "tier": 3,
+      "source": [
+        "CRAFT_STADT",
+        "LOOT"
+      ],
+      "baseBuyPrice": 280,
+      "baseSellPrice": 140,
+      "craftRecipe": {
+        "building": "KRIEGSWERFT",
+        "silver": 160,
+        "materials": [
+          {
+            "id": "RES_EISEN",
+            "count": 5
+          },
+          {
+            "id": "RES_HOLZ",
+            "count": 3
+          },
+          {
+            "id": "MAT_ASCHBERNSTEIN",
+            "count": 1
+          }
+        ]
+      },
+      "stats": {
+        "attack": 26,
+        "armorPen": 25
+      }
+    },
+    {
+      "id": "WPN_MEISTERZWEIHAENDER_T3",
+      "name": "Meisterstahl-Breitschwert",
+      "slot": "RECHTE_HAND",
+      "equipCategory": "ZWEIHAND",
+      "magicTag": "NORMAL",
+      "tier": 3,
+      "source": [
+        "CRAFT_STADT"
+      ],
+      "baseBuyPrice": 310,
+      "baseSellPrice": 155,
+      "craftRecipe": {
+        "building": "MEISTERSCHMIEDE",
+        "silver": 180,
+        "materials": [
+          {
+            "id": "RES_EISEN",
+            "count": 7
+          },
+          {
+            "id": "MAT_KNOCHENPLATTE",
+            "count": 2
+          }
+        ]
+      },
+      "stats": {
+        "attack": 30,
+        "critChance": 8
+      }
+    },
+    {
+      "id": "WPN_ASCHERISS_RUNENKLINGE_T4",
+      "name": "Ascheriss-Runenklinge von Odris",
+      "slot": "RECHTE_HAND",
+      "equipCategory": "EINHAND",
+      "magicTag": "RUNEN_ITEM",
+      "tier": 4,
+      "source": [
+        "CRAFT_STADT",
+        "LOOT_ASCHERISS"
+      ],
+      "baseBuyPrice": 620,
+      "baseSellPrice": 310,
+      "craftRecipe": {
+        "building": "RUNENSCHMIEDE",
+        "silver": 360,
+        "materials": [
+          {
+            "id": "RES_EISEN",
+            "count": 8
+          },
+          {
+            "id": "RES_RUNENSPLITTER",
+            "count": 3
+          },
+          {
+            "id": "MAT_KNOCHENPLATTE",
+            "count": 2
+          }
+        ]
+      },
+      "stats": {
+        "attack": 34,
+        "critChance": 12,
+        "undeadDamageBonus": 25
+      }
+    },
+    {
+      "id": "WPN_SONNENFEUER_KOLBEN_T4",
+      "name": "Sonnenfeuer-Streitkolben",
+      "slot": "RECHTE_HAND",
+      "equipCategory": "EINHAND",
+      "magicTag": "GLUT_ITEM",
+      "tier": 4,
+      "source": [
+        "CRAFT_STADT",
+        "LOOT_ASCHERISS"
+      ],
+      "baseBuyPrice": 640,
+      "baseSellPrice": 320,
+      "craftRecipe": {
+        "building": "GLUT_ESSE",
+        "silver": 380,
+        "materials": [
+          {
+            "id": "RES_EISEN",
+            "count": 6
+          },
+          {
+            "id": "MAT_ASCHBERNSTEIN",
+            "count": 3
+          },
+          {
+            "id": "RES_RUNENSPLITTER",
+            "count": 2
+          }
+        ]
+      },
+      "stats": {
+        "attack": 32,
+        "fireDamage": 14,
+        "willpower": 4
+      }
+    },
+    {
+      "id": "OFF_HOLZSCHILD_T1",
+      "name": "Beschlagener Rundschild",
+      "slot": "LINKE_HAND",
+      "equipCategory": "SCHILD",
+      "magicTag": "NORMAL",
+      "tier": 1,
+      "source": [
+        "KAUF",
+        "LOOT"
+      ],
+      "baseBuyPrice": 40,
+      "baseSellPrice": 20,
+      "stats": {
+        "armor": 5,
+        "blockChance": 10
+      }
+    },
+    {
+      "id": "OFF_PARIERDOLCH_T1",
+      "name": "Schmaler Parierdolch",
+      "slot": "LINKE_HAND",
+      "equipCategory": "DOLCH_KLINGE",
+      "magicTag": "NORMAL",
+      "tier": 1,
+      "source": [
+        "KAUF",
+        "LOOT"
+      ],
+      "baseBuyPrice": 38,
+      "baseSellPrice": 19,
+      "stats": {
+        "attack": 4,
+        "critChance": 6
+      }
+    },
+    {
+      "id": "OFF_GEBETSBUCH_T1",
+      "name": "Versengtes Gebetsbuch der Flamme",
+      "slot": "LINKE_HAND",
+      "equipCategory": "FOKUS_RELIQUIE",
+      "magicTag": "GLUT_ITEM",
+      "tier": 1,
+      "source": [
+        "KAUF",
+        "LOOT"
+      ],
+      "baseBuyPrice": 46,
+      "baseSellPrice": 23,
+      "stats": {
+        "willpower": 2,
+        "healingBonus": 10
+      }
+    },
+    {
+      "id": "OFF_CHIRURGENBESTECK_T2",
+      "name": "Nordisches Feldscher-Besteck",
+      "slot": "LINKE_HAND",
+      "equipCategory": "CHIRURG_NEBENHAND",
+      "magicTag": "NORMAL",
+      "tier": 2,
+      "source": [
+        "KAUF",
+        "LOOT"
+      ],
+      "baseBuyPrice": 95,
+      "baseSellPrice": 47,
+      "stats": {
+        "willpower": 2,
+        "healingBonus": 20
+      }
+    },
+    {
+      "id": "OFF_SKALDENHORN_T2",
+      "name": "Runenbeschlagenes Kriegshorn",
+      "slot": "LINKE_HAND",
+      "equipCategory": "INSTRUMENT_NEBENHAND",
+      "magicTag": "RUNEN_ITEM",
+      "tier": 2,
+      "source": [
+        "KAUF",
+        "LOOT"
+      ],
+      "baseBuyPrice": 105,
+      "baseSellPrice": 52,
+      "stats": {
+        "willpower": 3,
+        "partyMoraleBonus": 10
+      }
+    },
+    {
+      "id": "OFF_ENTERPISTOLE_T2",
+      "name": "Steinschloss-Enterpistole",
+      "slot": "LINKE_HAND",
+      "equipCategory": "SCHWARZPULVER_PISTOLE",
+      "magicTag": "NORMAL",
+      "tier": 2,
+      "source": [
+        "KAUF",
+        "CRAFT_STADT"
+      ],
+      "baseBuyPrice": 115,
+      "baseSellPrice": 57,
+      "craftRecipe": {
+        "building": "KRIEGSWERFT",
+        "silver": 65,
+        "materials": [
+          {
+            "id": "RES_EISEN",
+            "count": 2
+          },
+          {
+            "id": "RES_HOLZ",
+            "count": 1
+          }
+        ]
+      },
+      "stats": {
+        "attack": 11,
+        "armorPen": 12
+      }
+    },
+    {
+      "id": "OFF_BASTIONSSCHILD_T3",
+      "name": "Stahl-Bastionsschild der Krone",
+      "slot": "LINKE_HAND",
+      "equipCategory": "SCHILD",
+      "magicTag": "NORMAL",
+      "tier": 3,
+      "source": [
+        "CRAFT_STADT"
+      ],
+      "baseBuyPrice": 260,
+      "baseSellPrice": 130,
+      "craftRecipe": {
+        "building": "MEISTERSCHMIEDE",
+        "silver": 150,
+        "materials": [
+          {
+            "id": "RES_EISEN",
+            "count": 6
+          },
+          {
+            "id": "MAT_BESTIENSEHNE",
+            "count": 2
+          }
+        ]
+      },
+      "stats": {
+        "armor": 14,
+        "blockChance": 22
+      }
+    },
+    {
+      "id": "OFF_AHNENSCHILDWALL_T4",
+      "name": "Runenschild des Alten Reiches",
+      "slot": "LINKE_HAND",
+      "equipCategory": "SCHILD",
+      "magicTag": "RUNEN_ITEM",
+      "tier": 4,
+      "source": [
+        "CRAFT_STADT",
+        "LOOT_ASCHERISS"
+      ],
+      "baseBuyPrice": 580,
+      "baseSellPrice": 290,
+      "craftRecipe": {
+        "building": "RUNENSCHMIEDE",
+        "silver": 340,
+        "materials": [
+          {
+            "id": "RES_EISEN",
+            "count": 7
+          },
+          {
+            "id": "RES_RUNENSPLITTER",
+            "count": 3
+          }
+        ]
+      },
+      "stats": {
+        "armor": 20,
+        "blockChance": 28,
+        "toughness": 4
+      }
+    },
+    {
+      "id": "ARM_GAMBESON_T1",
+      "name": "Wattierter Leinen-Gambeson",
+      "slot": "KOERPER",
+      "equipCategory": "STOFF",
+      "magicTag": "NORMAL",
+      "tier": 1,
+      "source": [
+        "KAUF",
+        "LOOT"
+      ],
+      "baseBuyPrice": 35,
+      "baseSellPrice": 17,
+      "stats": {
+        "armor": 3,
+        "willpower": 1
+      }
+    },
+    {
+      "id": "ARM_LEDER_T1",
+      "name": "Gehärteter Wolfsleder-Wams",
+      "slot": "KOERPER",
+      "equipCategory": "LEICHT",
+      "magicTag": "NORMAL",
+      "tier": 1,
+      "source": [
+        "KAUF",
+        "LOOT"
+      ],
+      "baseBuyPrice": 45,
+      "baseSellPrice": 22,
+      "stats": {
+        "armor": 6,
+        "agility": 1
+      }
+    },
+    {
+      "id": "ARM_KETTENHEMD_T1",
+      "name": "Nordisches Kettenhemd",
+      "slot": "KOERPER",
+      "equipCategory": "SCHWER",
+      "magicTag": "NORMAL",
+      "tier": 1,
+      "source": [
+        "KAUF",
+        "LOOT"
+      ],
+      "baseBuyPrice": 60,
+      "baseSellPrice": 30,
+      "stats": {
+        "armor": 10,
+        "toughness": 1
+      }
+    },
+    {
+      "id": "ARM_RUNENWAFFENROCK_T2",
+      "name": "Runenbestickter Waffenrock",
+      "slot": "KOERPER",
+      "equipCategory": "LEICHT",
+      "magicTag": "RUNEN_ITEM",
+      "tier": 2,
+      "source": [
+        "LOOT",
+        "CRAFT_STADT"
+      ],
+      "baseBuyPrice": 145,
+      "baseSellPrice": 72,
+      "craftRecipe": {
+        "building": "STADTSCHMIEDE",
+        "silver": 80,
+        "materials": [
+          {
+            "id": "MAT_BAERENPELZ",
+            "count": 2
+          },
+          {
+            "id": "RES_RUNENSPLITTER",
+            "count": 1
+          }
+        ]
+      },
+      "stats": {
+        "armor": 12,
+        "agility": 2,
+        "willpower": 2
+      }
+    },
+    {
+      "id": "ARM_PLATTE_T3",
+      "name": "Schwere Plattenrüstung der Mark",
+      "slot": "KOERPER",
+      "equipCategory": "SCHWER",
+      "magicTag": "NORMAL",
+      "tier": 3,
+      "source": [
+        "CRAFT_STADT"
+      ],
+      "baseBuyPrice": 320,
+      "baseSellPrice": 160,
+      "craftRecipe": {
+        "building": "MEISTERSCHMIEDE",
+        "silver": 190,
+        "materials": [
+          {
+            "id": "RES_EISEN",
+            "count": 8
+          },
+          {
+            "id": "MAT_BAERENPELZ",
+            "count": 2
+          }
+        ]
+      },
+      "stats": {
+        "armor": 24,
+        "toughness": 3
+      }
+    },
+    {
+      "id": "ARM_AHNENSTAHL_T4",
+      "name": "Runen-Plattenpanzer der Ahnen",
+      "slot": "KOERPER",
+      "equipCategory": "SCHWER",
+      "magicTag": "RUNEN_ITEM",
+      "tier": 4,
+      "source": [
+        "CRAFT_STADT",
+        "LOOT_ASCHERISS"
+      ],
+      "baseBuyPrice": 650,
+      "baseSellPrice": 325,
+      "craftRecipe": {
+        "building": "RUNENSCHMIEDE",
+        "silver": 380,
+        "materials": [
+          {
+            "id": "RES_EISEN",
+            "count": 9
+          },
+          {
+            "id": "RES_RUNENSPLITTER",
+            "count": 3
+          },
+          {
+            "id": "MAT_KNOCHENPLATTE",
+            "count": 2
+          }
+        ]
+      },
+      "stats": {
+        "armor": 32,
+        "toughness": 5,
+        "strength": 2
+      }
+    },
+    {
+      "id": "ARM_ERZENGEL_ROBE_T4",
+      "name": "Glutgewebte Ornat-Robe",
+      "slot": "KOERPER",
+      "equipCategory": "STOFF",
+      "magicTag": "GLUT_ITEM",
+      "tier": 4,
+      "source": [
+        "CRAFT_STADT",
+        "LOOT_ASCHERISS"
+      ],
+      "baseBuyPrice": 610,
+      "baseSellPrice": 305,
+      "craftRecipe": {
+        "building": "GLUT_ESSE",
+        "silver": 350,
+        "materials": [
+          {
+            "id": "MAT_ASCHBERNSTEIN",
+            "count": 3
+          },
+          {
+            "id": "RES_RUNENSPLITTER",
+            "count": 3
+          }
+        ]
+      },
+      "stats": {
+        "armor": 16,
+        "willpower": 6,
+        "fireResist": 30
+      }
+    },
+    {
+      "id": "HEAD_LEDERKAPPE_T1",
+      "name": "Genähte Lederkappe",
+      "slot": "KOPF",
+      "equipCategory": "LEICHT",
+      "magicTag": "NORMAL",
+      "tier": 1,
+      "source": [
+        "KAUF",
+        "LOOT"
+      ],
+      "baseBuyPrice": 28,
+      "baseSellPrice": 14,
+      "stats": {
+        "armor": 2,
+        "agility": 1
+      }
+    },
+    {
+      "id": "HEAD_EISENHAUBE_T1",
+      "name": "Nordische Eisenhaube",
+      "slot": "KOPF",
+      "equipCategory": "SCHWER",
+      "magicTag": "NORMAL",
+      "tier": 1,
+      "source": [
+        "KAUF",
+        "LOOT"
+      ],
+      "baseBuyPrice": 36,
+      "baseSellPrice": 18,
+      "stats": {
+        "armor": 4
+      }
+    },
+    {
+      "id": "HEAD_RUNENREIF_T2",
+      "name": "Silberner Runen-Stirnreif",
+      "slot": "KOPF",
+      "equipCategory": "STOFF",
+      "magicTag": "RUNEN_ITEM",
+      "tier": 2,
+      "source": [
+        "LOOT",
+        "KAUF"
+      ],
+      "baseBuyPrice": 110,
+      "baseSellPrice": 55,
+      "stats": {
+        "armor": 3,
+        "willpower": 3
+      }
+    },
+    {
+      "id": "HEAD_JARLSHELM_T4",
+      "name": "Gehörnter Runenhelm der Jarle",
+      "slot": "KOPF",
+      "equipCategory": "SCHWER",
+      "magicTag": "RUNEN_ITEM",
+      "tier": 4,
+      "source": [
+        "CRAFT_STADT",
+        "LOOT_ASCHERISS"
+      ],
+      "baseBuyPrice": 440,
+      "baseSellPrice": 220,
+      "craftRecipe": {
+        "building": "RUNENSCHMIEDE",
+        "silver": 250,
+        "materials": [
+          {
+            "id": "RES_EISEN",
+            "count": 5
+          },
+          {
+            "id": "RES_RUNENSPLITTER",
+            "count": 2
+          }
+        ]
+      },
+      "stats": {
+        "armor": 14,
+        "strength": 3,
+        "toughness": 2
+      }
+    },
+    {
+      "id": "LEGS_LEDERSTIEFEL_T1",
+      "name": "Genagelte Reisestiefel",
+      "slot": "BEINE",
+      "equipCategory": "LEICHT",
+      "magicTag": "NORMAL",
+      "tier": 1,
+      "source": [
+        "KAUF",
+        "LOOT"
+      ],
+      "baseBuyPrice": 30,
+      "baseSellPrice": 15,
+      "stats": {
+        "armor": 2,
+        "agility": 1
+      }
+    },
+    {
+      "id": "LEGS_BEINSCHIENEN_T2",
+      "name": "Eisen-Beinschienen",
+      "slot": "BEINE",
+      "equipCategory": "SCHWER",
+      "magicTag": "NORMAL",
+      "tier": 2,
+      "source": [
+        "KAUF",
+        "CRAFT_STADT"
+      ],
+      "baseBuyPrice": 90,
+      "baseSellPrice": 45,
+      "stats": {
+        "armor": 7,
+        "toughness": 1
+      }
+    },
+    {
+      "id": "LEGS_RUNENSTIEFEL_T4",
+      "name": "Runen-Schreitstiefel der Grenzwacht",
+      "slot": "BEINE",
+      "equipCategory": "LEICHT",
+      "magicTag": "RUNEN_ITEM",
+      "tier": 4,
+      "source": [
+        "CRAFT_STADT",
+        "LOOT_ASCHERISS"
+      ],
+      "baseBuyPrice": 420,
+      "baseSellPrice": 210,
+      "craftRecipe": {
+        "building": "RUNENSCHMIEDE",
+        "silver": 240,
+        "materials": [
+          {
+            "id": "MAT_BAERENPELZ",
+            "count": 2
+          },
+          {
+            "id": "RES_RUNENSPLITTER",
+            "count": 2
+          }
+        ]
+      },
+      "stats": {
+        "armor": 11,
+        "agility": 4,
+        "critChance": 5
+      }
+    },
+    {
+      "id": "NECK_WOLFSZAHN_T1",
+      "name": "Wolfszahn-Kette",
+      "slot": "HALS",
+      "equipCategory": "SCHMUCK",
+      "magicTag": "NORMAL",
+      "tier": 1,
+      "source": [
+        "KAUF",
+        "LOOT"
+      ],
+      "baseBuyPrice": 35,
+      "baseSellPrice": 17,
+      "stats": {
+        "strength": 1,
+        "critChance": 2
+      }
+    },
+    {
+      "id": "NECK_RUNENAMULETT_T2",
+      "name": "Schutzamulett der Ahnenrunen",
+      "slot": "HALS",
+      "equipCategory": "SCHMUCK",
+      "magicTag": "RUNEN_ITEM",
+      "tier": 2,
+      "source": [
+        "LOOT",
+        "KAUF"
+      ],
+      "baseBuyPrice": 130,
+      "baseSellPrice": 65,
+      "stats": {
+        "toughness": 2,
+        "willpower": 2
+      }
+    },
+    {
+      "id": "NECK_EWIGE_FLAMME_T4",
+      "name": "Reliquiar der Ewigen Flamme",
+      "slot": "HALS",
+      "equipCategory": "SCHMUCK",
+      "magicTag": "GLUT_ITEM",
+      "tier": 4,
+      "source": [
+        "LOOT_ASCHERISS",
+        "QUEST"
+      ],
+      "baseBuyPrice": 500,
+      "baseSellPrice": 250,
+      "stats": {
+        "willpower": 5,
+        "healingBonus": 25,
+        "fireDamage": 10
+      }
+    },
+    {
+      "id": "RING_EISEN_T1",
+      "name": "Schlichter Eisenring",
+      "slot": "RING",
+      "equipCategory": "SCHMUCK",
+      "magicTag": "NORMAL",
+      "tier": 1,
+      "source": [
+        "KAUF",
+        "LOOT"
+      ],
+      "baseBuyPrice": 25,
+      "baseSellPrice": 12,
+      "stats": {
+        "toughness": 1
+      }
+    },
+    {
+      "id": "RING_RUNENRING_T2",
+      "name": "Runenring der Beständigkeit",
+      "slot": "RING",
+      "equipCategory": "SCHMUCK",
+      "magicTag": "RUNEN_ITEM",
+      "tier": 2,
+      "source": [
+        "LOOT",
+        "KAUF"
+      ],
+      "baseBuyPrice": 115,
+      "baseSellPrice": 57,
+      "stats": {
+        "strength": 1,
+        "agility": 1,
+        "willpower": 1
+      }
+    },
+    {
+      "id": "RING_ALTES_REICH_T4",
+      "name": "Siegelring des Alten Reiches",
+      "slot": "RING",
+      "equipCategory": "SCHMUCK",
+      "magicTag": "RUNEN_ITEM",
+      "tier": 4,
+      "source": [
+        "LOOT_ASCHERISS",
+        "QUEST"
+      ],
+      "baseBuyPrice": 460,
+      "baseSellPrice": 230,
+      "stats": {
+        "strength": 3,
+        "toughness": 3,
+        "critChance": 5
+      }
+    }
+  ],
+  "partyRelics": [
+    {
+      "id": "RELIC_HORN_ALTES_REICH",
+      "name": "Kriegshorn des Alten Reiches",
+      "slot": "GRUPPEN_RELIKT",
+      "source": [
+        "QUEST",
+        "LOOT_ASCHERISS"
+      ],
+      "baseSellPrice": 300,
+      "combatEffect": "Erhöht den physischen Schaden aller 4 Gruppenmitglieder um 10 %.",
+      "worldEffect": null
+    },
+    {
+      "id": "RELIC_LATERNE_STILLE_FEDER",
+      "name": "Schwarze Laterne der Stillen Feder",
+      "slot": "GRUPPEN_RELIKT",
+      "source": [
+        "QUEST"
+      ],
+      "baseSellPrice": 350,
+      "combatEffect": "Erhöht die Ausweich- und Hinterhalts-Chance der Gruppe um 8 %.",
+      "worldEffect": "Reduziert den Nahrungsverbrauch auf Grenzland- und Pass-Etappen um 1."
+    },
+    {
+      "id": "RELIC_RUNENSTEIN_SCHILDWALL",
+      "name": "Runenstein des Schildwalls",
+      "slot": "GRUPPEN_RELIKT",
+      "source": [
+        "LOOT_ASCHERISS"
+      ],
+      "baseSellPrice": 320,
+      "combatEffect": "Gewährt der gesamten Gruppe +15 % Rüstung und +10 % Blockchance in den ersten 2 Zügen.",
+      "worldEffect": null
+    },
+    {
+      "id": "RELIC_ASCHENURNE_ODRIS",
+      "name": "Aschen-Urne von Odris",
+      "slot": "GRUPPEN_RELIKT",
+      "source": [
+        "LOOT_ASCHERISS"
+      ],
+      "baseSellPrice": 400,
+      "combatEffect": "Orden der Flamme: +25 % Feuerschaden. Andere Fraktionen: +25 % Feuer- & Untotenresistenz.",
+      "worldEffect": null
+    }
+  ]
+}

@@ -1,0 +1,276 @@
+{
+  "schemaVersion": "1.4.0",
+  "module": "faction_enemies_freie_haefen_part_3",
+  "factionRegion": "FREIE_HAEFEN",
+  "regionLabel": "Sturmküsten, Nebelbuchten & Seewege der Freien Häfen",
+  "regularEnemies": [
+    {
+      "id": "ENM_FH_TIEFSEE_KRABBLER",
+      "name": "Gepanzerter Klippen-Krabbler",
+      "family": "WILDTIERE",
+      "difficulty": "LEICHT",
+      "minLevel": 1,
+      "maxLevel": 6,
+      "stats": {
+        "hp": 36,
+        "attack": 8,
+        "armor": 6,
+        "speed": 8
+      },
+      "weaknesses": [
+        "ARMOR_PEN"
+      ],
+      "resistances": [
+        "PHYSICAL"
+      ]
+    },
+    {
+      "id": "ENM_FH_HAFEN_HALUNKE",
+      "name": "Verfemter Kai-Halsabschneider",
+      "family": "GESETZLOSE",
+      "difficulty": "LEICHT",
+      "minLevel": 2,
+      "maxLevel": 7,
+      "stats": {
+        "hp": 30,
+        "attack": 11,
+        "armor": 2,
+        "speed": 15
+      },
+      "weaknesses": [
+        "BLEED"
+      ],
+      "resistances": []
+    },
+    {
+      "id": "ENM_FH_MEUTERER_KORSAR",
+      "name": "Meuternder Enter-Korsar",
+      "family": "GESETZLOSE",
+      "difficulty": "MITTEL",
+      "minLevel": 5,
+      "maxLevel": 12,
+      "stats": {
+        "hp": 66,
+        "attack": 16,
+        "armor": 5,
+        "speed": 15
+      },
+      "weaknesses": [
+        "BLEED"
+      ],
+      "resistances": []
+    },
+    {
+      "id": "ENM_FH_SCHLICK_VIPER",
+      "name": "Salzmoor-Giftviper",
+      "family": "WILDTIERE",
+      "difficulty": "MITTEL",
+      "minLevel": 6,
+      "maxLevel": 13,
+      "stats": {
+        "hp": 54,
+        "attack": 17,
+        "armor": 2,
+        "speed": 17
+      },
+      "weaknesses": [
+        "FIRE",
+        "PHYSICAL"
+      ],
+      "resistances": [
+        "POISON"
+      ]
+    },
+    {
+      "id": "ENM_FH_SCHMUGGLER_SCHUETZE",
+      "name": "Salznebel-Pulverschütze",
+      "family": "GESETZLOSE",
+      "difficulty": "MITTEL",
+      "minLevel": 8,
+      "maxLevel": 15,
+      "stats": {
+        "hp": 64,
+        "attack": 20,
+        "armor": 4,
+        "speed": 13
+      },
+      "weaknesses": [
+        "PHYSICAL"
+      ],
+      "resistances": []
+    },
+    {
+      "id": "ENM_FH_NEBEL_ALCHEMIST",
+      "name": "Abtrünniger Hafen-Quacksalber",
+      "family": "KULTISTEN",
+      "difficulty": "MITTEL",
+      "minLevel": 9,
+      "maxLevel": 16,
+      "stats": {
+        "hp": 60,
+        "attack": 18,
+        "armor": 3,
+        "speed": 14
+      },
+      "weaknesses": [
+        "PHYSICAL"
+      ],
+      "resistances": [
+        "POISON"
+      ]
+    },
+    {
+      "id": "ENM_FH_ERTRUNKENER_SEEMANN",
+      "name": "Seetang-Wiedergänger",
+      "family": "UNTOTE",
+      "difficulty": "SCHWER",
+      "minLevel": 11,
+      "maxLevel": 19,
+      "stats": {
+        "hp": 128,
+        "attack": 22,
+        "armor": 9,
+        "speed": 9
+      },
+      "weaknesses": [
+        "FIRE",
+        "HOLY",
+        "RUNEN_ITEM"
+      ],
+      "resistances": [
+        "POISON",
+        "BLEED"
+      ]
+    },
+    {
+      "id": "ENM_FH_WRACK_KOLOSS",
+      "name": "Treibholz-Seeschrecken",
+      "family": "UNTOTE",
+      "difficulty": "SCHWER",
+      "minLevel": 14,
+      "maxLevel": 22,
+      "stats": {
+        "hp": 152,
+        "attack": 26,
+        "armor": 14,
+        "speed": 7
+      },
+      "weaknesses": [
+        "FIRE",
+        "ARMOR_PEN"
+      ],
+      "resistances": [
+        "POISON",
+        "BLEED",
+        "PHYSICAL"
+      ]
+    }
+  ],
+  "randomMinibosses": [
+    {
+      "id": "MB_FH_KAPITAEN_DRAVEN",
+      "name": "Kapitän „Kielholer“ Draven",
+      "title": "Schrecken der Nebelroute",
+      "family": "GESETZLOSE",
+      "difficulty": "BOSS",
+      "minLevel": 8,
+      "maxLevel": 18,
+      "spawnEdges": [
+        "SEEWEG",
+        "GRENZLAND"
+      ],
+      "stats": {
+        "hp": 185,
+        "attack": 28,
+        "armor": 10,
+        "speed": 16
+      },
+      "weaknesses": [
+        "BLEED"
+      ],
+      "resistances": [
+        "POISON"
+      ],
+      "lootProfile": {
+        "dropTableTier": "SCHWER",
+        "guaranteedMaterial": {
+          "id": "VAL_AHNENMUENZEN",
+          "count": 2
+        },
+        "equipmentDropChance": 0.45,
+        "relicDropChance": 0.08
+      }
+    },
+    {
+      "id": "MB_FH_SCHLICK_LEVIATHAN",
+      "name": "Der Schlick-Leviathan von Wrackbucht",
+      "title": "Tiefsee-Ungetüm",
+      "family": "WILDTIERE",
+      "difficulty": "BOSS",
+      "minLevel": 12,
+      "maxLevel": 22,
+      "spawnEdges": [
+        "SEEWEG"
+      ],
+      "stats": {
+        "hp": 250,
+        "attack": 30,
+        "armor": 14,
+        "speed": 9
+      },
+      "weaknesses": [
+        "FIRE",
+        "ARMOR_PEN"
+      ],
+      "resistances": [
+        "POISON",
+        "PHYSICAL"
+      ],
+      "lootProfile": {
+        "dropTableTier": "BOSS",
+        "guaranteedMaterial": {
+          "id": "MAT_BESTIENSEHNE",
+          "count": 2
+        },
+        "equipmentDropChance": 0.5,
+        "relicDropChance": 0.1
+      }
+    },
+    {
+      "id": "MB_FH_MADAME_SCHWARZPULVER",
+      "name": "Vespera „Pulverfaust“",
+      "title": "Flüchtige Sprengmeisterin der Riffe",
+      "family": "GESETZLOSE",
+      "difficulty": "BOSS",
+      "minLevel": 10,
+      "maxLevel": 20,
+      "spawnEdges": [
+        "KERNLAND",
+        "DORF_WEG",
+        "GRENZLAND"
+      ],
+      "stats": {
+        "hp": 190,
+        "attack": 31,
+        "armor": 8,
+        "speed": 14
+      },
+      "weaknesses": [
+        "PHYSICAL",
+        "BLEED"
+      ],
+      "resistances": [
+        "FIRE"
+      ],
+      "lootProfile": {
+        "dropTableTier": "SCHWER",
+        "guaranteedMaterial": {
+          "id": "MAT_ASCHBERNSTEIN",
+          "count": 1
+        },
+        "equipmentDropChance": 0.45,
+        "relicDropChance": 0.09
+      }
+    }
+  ]
+}

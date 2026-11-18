@@ -1,0 +1,513 @@
+{
+  "schemaVersion": "1.5.0",
+  "module": "faction_enemies_skills_and_loot_orden_part_1",
+  "factionRegion": "ORDEN_DER_FLAMME",
+  "regularEnemies": [
+    {
+      "id": "ENM_OF_SALAMANDER",
+      "name": "Glimmender Asche-Salamander",
+      "family": "WILDTIERE",
+      "difficulty": "LEICHT",
+      "minLevel": 1,
+      "maxLevel": 6,
+      "stats": {
+        "hp": 36,
+        "attack": 9,
+        "armor": 3,
+        "speed": 11
+      },
+      "weaknesses": [
+        "PHYSICAL"
+      ],
+      "resistances": [
+        "FIRE"
+      ],
+      "skills": [
+        {
+          "id": "SKL_GLUTBISS",
+          "name": "Glutbiss",
+          "type": "MELEE_FIRE",
+          "damageMult": 1.0,
+          "statusEffect": "BURN",
+          "statusChance": 0.25
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "WILDTIERE",
+        "materialRolls": 1,
+        "bonusMaterial": {
+          "id": "MAT_ASCHBERNSTEIN",
+          "chance": 0.15,
+          "count": 1
+        },
+        "equipmentDropChance": 0.12,
+        "equipmentTierPool": null
+      }
+    },
+    {
+      "id": "ENM_OF_GLUTKRAEHE",
+      "name": "Schwelende Aschenkrähe",
+      "family": "WILDTIERE",
+      "difficulty": "LEICHT",
+      "minLevel": 2,
+      "maxLevel": 7,
+      "stats": {
+        "hp": 26,
+        "attack": 11,
+        "armor": 1,
+        "speed": 16
+      },
+      "weaknesses": [
+        "PHYSICAL"
+      ],
+      "resistances": [
+        "FIRE"
+      ],
+      "skills": [
+        {
+          "id": "SKL_ASCHEREGEN_STURZ",
+          "name": "Sturzflug der Asche",
+          "type": "MELEE",
+          "damageMult": 1.15,
+          "statusEffect": "BLIND",
+          "statusChance": 0.2
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "WILDTIERE",
+        "materialRolls": 1,
+        "equipmentDropChance": 0.1,
+        "equipmentTierPool": null
+      }
+    },
+    {
+      "id": "ENM_OF_KETZER_ZELOT",
+      "name": "Abtrünniger Ketzer-Zelot",
+      "family": "KULTISTEN",
+      "difficulty": "MITTEL",
+      "minLevel": 5,
+      "maxLevel": 12,
+      "stats": {
+        "hp": 68,
+        "attack": 16,
+        "armor": 5,
+        "speed": 12
+      },
+      "weaknesses": [
+        "PHYSICAL"
+      ],
+      "resistances": [
+        "FIRE"
+      ],
+      "skills": [
+        {
+          "id": "SKL_FEUERPEITSCHE",
+          "name": "Geißel der Falschen Flamme",
+          "type": "MELEE_FIRE",
+          "damageMult": 1.1,
+          "statusEffect": "BURN",
+          "statusChance": 0.35
+        },
+        {
+          "id": "SKL_FANATISMUS",
+          "name": "Blinder Eifer",
+          "type": "SELF_BUFF",
+          "effect": "+20 % Angriff für 2 Züge"
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "KULTISTEN",
+        "materialRolls": 2,
+        "consumableDrop": {
+          "id": "POT_FOKUS_1",
+          "chance": 0.2
+        },
+        "equipmentDropChance": 0.25,
+        "equipmentTierPool": null
+      }
+    },
+    {
+      "id": "ENM_OF_ASCHEPILGER",
+      "name": "Wahnsinniger Geißel-Pilger",
+      "family": "GESETZLOSE",
+      "difficulty": "MITTEL",
+      "minLevel": 6,
+      "maxLevel": 13,
+      "stats": {
+        "hp": 62,
+        "attack": 18,
+        "armor": 3,
+        "speed": 14
+      },
+      "weaknesses": [
+        "BLEED"
+      ],
+      "resistances": [
+        "FIRE"
+      ],
+      "skills": [
+        {
+          "id": "SKL_VERZWEIFELTER_HIEB",
+          "name": "Rasender Fackelschlag",
+          "type": "MELEE_FIRE",
+          "damageMult": 1.25,
+          "statusEffect": "BLEED",
+          "statusChance": 0.25
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "GESETZLOSE",
+        "materialRolls": 2,
+        "equipmentDropChance": 0.24,
+        "equipmentTierPool": null
+      }
+    },
+    {
+      "id": "ENM_OF_SCHLACKENLAEUFER",
+      "name": "Glut-Schlackenläufer",
+      "family": "UNTOTE",
+      "difficulty": "MITTEL",
+      "minLevel": 8,
+      "maxLevel": 15,
+      "stats": {
+        "hp": 86,
+        "attack": 18,
+        "armor": 10,
+        "speed": 8
+      },
+      "weaknesses": [
+        "RUNEN_ITEM",
+        "ARMOR_PEN"
+      ],
+      "resistances": [
+        "FIRE",
+        "BLEED"
+      ],
+      "skills": [
+        {
+          "id": "SKL_SCHLACKENGRIFF",
+          "name": "Glühende Umklammerung",
+          "type": "MELEE_FIRE",
+          "damageMult": 1.15,
+          "statusEffect": "BURN",
+          "statusChance": 0.4
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "UNTOTE",
+        "materialRolls": 2,
+        "equipmentDropChance": 0.26,
+        "equipmentTierPool": null
+      }
+    },
+    {
+      "id": "ENM_OF_MAGMA_HYAENE",
+      "name": "Rußfell-Schluchtenjäger",
+      "family": "WILDTIERE",
+      "difficulty": "MITTEL",
+      "minLevel": 9,
+      "maxLevel": 16,
+      "stats": {
+        "hp": 74,
+        "attack": 20,
+        "armor": 5,
+        "speed": 15
+      },
+      "weaknesses": [
+        "BLEED"
+      ],
+      "resistances": [
+        "FIRE"
+      ],
+      "skills": [
+        {
+          "id": "SKL_KEHLBISS",
+          "name": "Reißender Kehlbiss",
+          "type": "MELEE",
+          "damageMult": 1.2,
+          "statusEffect": "BLEED",
+          "statusChance": 0.4
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "WILDTIERE",
+        "materialRolls": 2,
+        "equipmentDropChance": 0.25,
+        "equipmentTierPool": null
+      }
+    },
+    {
+      "id": "ENM_OF_VERBRANNTER_EIDBRECHER",
+      "name": "Verbrannter Ordens-Eidbrecher",
+      "family": "KULTISTEN",
+      "difficulty": "SCHWER",
+      "minLevel": 12,
+      "maxLevel": 20,
+      "stats": {
+        "hp": 138,
+        "attack": 25,
+        "armor": 14,
+        "speed": 10
+      },
+      "weaknesses": [
+        "ARMOR_PEN"
+      ],
+      "resistances": [
+        "FIRE",
+        "HOLY"
+      ],
+      "skills": [
+        {
+          "id": "SKL_ASCHENSPALTER",
+          "name": "Schwelender Zweihandhieb",
+          "type": "MELEE_FIRE",
+          "damageMult": 1.3,
+          "armorPen": 20
+        },
+        {
+          "id": "SKL_SCHILD_DER_ASCHE",
+          "name": "Aschenpanzer",
+          "type": "SELF_BUFF",
+          "effect": "+5 Rüstung für 2 Züge"
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "KULTISTEN",
+        "materialRolls": 2,
+        "bonusMaterial": {
+          "id": "VAL_RUNENTAFEL",
+          "chance": 0.25,
+          "count": 1
+        },
+        "equipmentDropChance": 0.38,
+        "equipmentTierPool": null
+      }
+    },
+    {
+      "id": "ENM_OF_GLUTBERG_AKOLYTH",
+      "name": "Blutrunen-Pyrohexer",
+      "family": "KULTISTEN",
+      "difficulty": "SCHWER",
+      "minLevel": 14,
+      "maxLevel": 22,
+      "stats": {
+        "hp": 112,
+        "attack": 29,
+        "armor": 6,
+        "speed": 12
+      },
+      "weaknesses": [
+        "PHYSICAL"
+      ],
+      "resistances": [
+        "FIRE",
+        "HOLY"
+      ],
+      "skills": [
+        {
+          "id": "SKL_ASCHENSTURM",
+          "name": "Sengender Aschensturm",
+          "type": "AOE_FIRE",
+          "damageMult": 0.85,
+          "statusEffect": "BURN",
+          "statusChance": 0.3
+        },
+        {
+          "id": "SKL_FLUCH_DER_GLUT",
+          "name": "Aschenfluch",
+          "type": "DEBUFF",
+          "effect": "-15 % Heilung erhalten für 3 Züge"
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "KULTISTEN",
+        "materialRolls": 3,
+        "consumableDrop": {
+          "id": "POT_FOKUS_2",
+          "chance": 0.25
+        },
+        "equipmentDropChance": 0.4,
+        "equipmentTierPool": null
+      }
+    }
+  ],
+  "randomMinibosses": [
+    {
+      "id": "MB_OF_INQUISITOR_VANE",
+      "name": "Inquisitor Vane der Verbrannte",
+      "title": "Abtrünniger Vollstrecker des Glutbergs",
+      "family": "KULTISTEN",
+      "difficulty": "BOSS",
+      "minLevel": 7,
+      "maxLevel": 18,
+      "spawnEdges": [
+        "GRENZLAND",
+        "PASS"
+      ],
+      "stats": {
+        "hp": 195,
+        "attack": 27,
+        "armor": 12,
+        "speed": 12
+      },
+      "weaknesses": [
+        "PHYSICAL",
+        "RUNEN_ITEM"
+      ],
+      "resistances": [
+        "FIRE",
+        "HOLY"
+      ],
+      "skills": [
+        {
+          "id": "SKL_URTEIL_DER_ASCHE",
+          "name": "Brennendes Urteil",
+          "type": "MELEE_FIRE",
+          "damageMult": 1.4,
+          "statusEffect": "BURN",
+          "statusChance": 0.5
+        },
+        {
+          "id": "SKL_SCHEITERHAUFEN",
+          "name": "Ring aus Glut",
+          "type": "AOE_FIRE",
+          "damageMult": 0.9,
+          "statusEffect": "BURN",
+          "statusChance": 0.35
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "KULTISTEN",
+        "materialRolls": 3,
+        "guaranteedMaterial": {
+          "id": "MAT_ASCHBERNSTEIN",
+          "count": 2
+        },
+        "equipmentDropChance": 0.45,
+        "equipmentTierPool": null,
+        "relicDropChance": 0.08
+      }
+    },
+    {
+      "id": "MB_OF_ASCHENDRACKE",
+      "name": "Ignis-Vurm, Schlund der Aschewüste",
+      "title": "Uralter Glut-Lindwurm",
+      "family": "WILDTIERE",
+      "difficulty": "BOSS",
+      "minLevel": 12,
+      "maxLevel": 22,
+      "spawnEdges": [
+        "GRENZLAND",
+        "PASS"
+      ],
+      "stats": {
+        "hp": 245,
+        "attack": 31,
+        "armor": 15,
+        "speed": 10
+      },
+      "weaknesses": [
+        "ARMOR_PEN",
+        "BLEED"
+      ],
+      "resistances": [
+        "FIRE"
+      ],
+      "skills": [
+        {
+          "id": "SKL_SCHWEIFSCHLAG",
+          "name": "Schuppen-Schweifschlag",
+          "type": "AOE_PHYSICAL",
+          "damageMult": 0.95,
+          "statusEffect": "STUN",
+          "statusChance": 0.25
+        },
+        {
+          "id": "SKL_GLUTATEM",
+          "name": "Versengender Odem",
+          "type": "AOE_FIRE",
+          "damageMult": 1.0,
+          "statusEffect": "BURN",
+          "statusChance": 0.45
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "WILDTIERE",
+        "materialRolls": 3,
+        "guaranteedMaterial": {
+          "id": "MAT_KNOCHENPLATTE",
+          "count": 2
+        },
+        "equipmentDropChance": 0.5,
+        "equipmentTierPool": null,
+        "relicDropChance": 0.1
+      }
+    },
+    {
+      "id": "MB_OF_ABT_MALAKOR",
+      "name": "Erzketzer Malakor von der Rußkapelle",
+      "title": "Verderbter Flammenpriester",
+      "family": "KULTISTEN",
+      "difficulty": "BOSS",
+      "minLevel": 10,
+      "maxLevel": 20,
+      "spawnEdges": [
+        "KERNLAND",
+        "DORF_WEG",
+        "GRENZLAND"
+      ],
+      "stats": {
+        "hp": 210,
+        "attack": 29,
+        "armor": 11,
+        "speed": 11
+      },
+      "weaknesses": [
+        "PHYSICAL",
+        "RUNEN_ITEM"
+      ],
+      "resistances": [
+        "FIRE",
+        "HOLY"
+      ],
+      "skills": [
+        {
+          "id": "SKL_DUNKLES_GEBET",
+          "name": "Lästerliches Gebet",
+          "type": "SELF_HEAL",
+          "healAmount": 45
+        },
+        {
+          "id": "SKL_SCHWARZE_FLAMME",
+          "name": "Kaltes Aschenfeuer",
+          "type": "RANGED_FIRE",
+          "damageMult": 1.35,
+          "statusEffect": "BURN",
+          "statusChance": 0.45
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "KULTISTEN",
+        "materialRolls": 3,
+        "guaranteedMaterial": {
+          "id": "VAL_RUNENTAFEL",
+          "count": 1
+        },
+        "equipmentDropChance": 0.45,
+        "equipmentTierPool": null,
+        "relicDropChance": 0.09
+      }
+    }
+  ]
+}

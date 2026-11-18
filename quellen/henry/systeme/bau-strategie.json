@@ -1,0 +1,130 @@
+{
+  "version": "1.0.0",
+  "project": "Aschenkrone - Welt Odris",
+  "system": "ui_modes_and_builder_progression",
+  "uiModes": {
+    "defaultMode": "rpg_view",
+    "toggleHotkey": "KeyM",
+    "modes": [
+      {
+        "id": "rpg_view",
+        "label": "Abenteuer & Ort (Rollenspiel)",
+        "description": "Fokus auf Heldengruppe (1+3), Dialoge, Quests, Moral-Entscheidungen, Händler, Schmied und Kämpfe.",
+        "visiblePanels": [
+          "partyStatus",
+          "locationHub",
+          "questLog",
+          "inventoryAndRelic",
+          "localActions"
+        ]
+      },
+      {
+        "id": "strategy_map_view",
+        "label": "Reichs- & Strategiekarte",
+        "description": "Vogelperspektive auf Odris mit Reise-Netz, Schutzbund-Gebieten, Straßenausbau, Stadt-Tiers, Belagerungen und Kriegskasse.",
+        "visiblePanels": [
+          "interactiveMap",
+          "resourceTopBar",
+          "factionReputationBar",
+          "constructionInspector",
+          "siegeAlerts",
+          "armadaProgressTracker"
+        ],
+        "mapOverlays": {
+          "protectorateBorders": "Zeigt befreite Schutzbund-Dörfer und ihren aktuellen Lieferstatus (0/6 bis 6/6 Etappen).",
+          "roadStatus": "Unterscheidet Kernland (durchgezogen), Grenzland (gestrichelt), Signalfeuer (Flamme) und Reichs-Handelsrouten (gold).",
+          "cityTiers": "Zeigt Ausbaustufe (Tier 0 bis Tier 3) und Verteidigungswert jeder Stadt.",
+          "siegeMarkers": "Blinkender roter Schild auf überfallenen oder belagerten Orten."
+        }
+      }
+    ]
+  },
+  "builderProgressionPhases": [
+    {
+      "phase": 1,
+      "id": "phase_wanderer",
+      "title": "Der namenlose Wanderer",
+      "unlockCondition": {
+        "act": 1,
+        "minFactionReputation": -100,
+        "maxFactionReputation": 19
+      },
+      "unlockedCapabilities": [
+        "map_travel_only",
+        "local_questing",
+        "merchant_trade",
+        "camp_rest"
+      ],
+      "lockedMessage": "Du bist hier nur ein Fremder. Gewinne zuerst das Vertrauen der Bevölkerung (Ruf +20), um Baurechte zu erhalten."
+    },
+    {
+      "phase": 2,
+      "id": "phase_protector",
+      "title": "Schutzherr der Dörfer",
+      "unlockCondition": {
+        "minFactionReputation": 20,
+        "minLiberatedVillagesInFaction": 1
+      },
+      "narrativeTrigger": "Die Dorfältesten bieten dir den Schutzbund an: Du sicherst die Wege und Dörfer, sie liefern ihren Zehnt ins Fraktions-Kontor.",
+      "unlockedCapabilities": [
+        "build_village_palisades",
+        "build_signal_fires",
+        "fortify_border_roads",
+        "receive_kontor_tithe_every_6_steps",
+        "respond_to_village_raids"
+      ]
+    },
+    {
+      "phase": 3,
+      "id": "phase_master_builder",
+      "title": "Reichs-Baumeister & Kommandant",
+      "unlockCondition": {
+        "minAct": 2,
+        "minFactionReputation": 40
+      },
+      "narrativeTrigger": "Jarl, Erzpriester oder Hafenmeister erteilen dir das offizielle Bau- und Befestigungsrecht für Städte und Werkstätten.",
+      "unlockedCapabilities": [
+        "rebuild_ruined_cities",
+        "upgrade_city_tier_1_and_2",
+        "construct_specialized_buildings",
+        "establish_imperial_trade_routes",
+        "auto_resolve_minor_raids_via_garrison"
+      ]
+    },
+    {
+      "phase": 4,
+      "id": "phase_bannerjarl",
+      "title": "Bannerjarl des Alten Reiches",
+      "unlockCondition": {
+        "minAct": 4,
+        "storyFlag": "great_thing_united",
+        "minFactionReputation": 60
+      },
+      "narrativeTrigger": "Auf dem Großen Thing unterstehen dir alle drei Menschen-Fraktionen gemeinsam für den Bau der Armada.",
+      "unlockedCapabilities": [
+        "upgrade_city_tier_3_citadel",
+        "unified_war_chest_tithe",
+        "build_armada_fleet",
+        "act5_overseas_expedition"
+      ]
+    }
+  ],
+  "gameplayLoopHooksForClaude": {
+    "onTravelStep": [
+      "Deduct Nahrung (1 Kernland/Dorf, 2 Grenzland/Pass; 0 auf Reichs-Handelsroute falls eskortiert)",
+      "Add +25 Silber if traveling along an established imperialTradeRoute",
+      "Increment travelStepCounter by +1",
+      "If travelStepCounter % 6 === 0: Credit protectorate tithes to nearest faction Kontor",
+      "If travelStepCounter % 8 === 0: Roll for border raid / siege event and resolve against garrisonDefenseScore"
+    ],
+    "onQuestComplete": [
+      "Present 3-way morality choice (good_deed, pragmatic_deed, bad_deed) unless custom story choices exist",
+      "Apply reputationDelta, silberMultiplier, and instantBonusResources",
+      "If village quest (q01) and good/pragmatic choice: Add village to protectorateList and check Phase 2 unlock"
+    ],
+    "onBuildAction": [
+      "Verify player phase unlock and resource costs (Nahrung, Holz, Eisen, Stein)",
+      "Deduct resources, apply reputationDelta, update map visual state and recalculate adjacent road danger / trade routes"
+    ]
+  }
+}

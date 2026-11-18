@@ -1,0 +1,541 @@
+{
+  "schemaVersion": "1.5.0",
+  "module": "faction_enemies_skills_and_loot_freie_haefen_part_3",
+  "factionRegion": "FREIE_HAEFEN",
+  "regularEnemies": [
+    {
+      "id": "ENM_FH_TIEFSEE_KRABBLER",
+      "name": "Gepanzerter Klippen-Krabbler",
+      "family": "WILDTIERE",
+      "difficulty": "LEICHT",
+      "minLevel": 1,
+      "maxLevel": 6,
+      "stats": {
+        "hp": 36,
+        "attack": 8,
+        "armor": 6,
+        "speed": 8
+      },
+      "weaknesses": [
+        "ARMOR_PEN"
+      ],
+      "resistances": [
+        "PHYSICAL"
+      ],
+      "skills": [
+        {
+          "id": "SKL_SCHERENGRIFF",
+          "name": "Zermalmende Schere",
+          "type": "MELEE",
+          "damageMult": 1.1,
+          "statusEffect": "BLEED",
+          "statusChance": 0.25
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "WILDTIERE",
+        "materialRolls": 1,
+        "equipmentDropChance": 0.1,
+        "equipmentTierPool": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "ENM_FH_HAFEN_HALUNKE",
+      "name": "Verfemter Kai-Halsabschneider",
+      "family": "GESETZLOSE",
+      "difficulty": "LEICHT",
+      "minLevel": 2,
+      "maxLevel": 7,
+      "stats": {
+        "hp": 30,
+        "attack": 11,
+        "armor": 2,
+        "speed": 15
+      },
+      "weaknesses": [
+        "BLEED"
+      ],
+      "resistances": [],
+      "skills": [
+        {
+          "id": "SKL_HINTERHAELTIGER_STICH",
+          "name": "Rostiger Nierenstich",
+          "type": "MELEE",
+          "damageMult": 1.15,
+          "statusEffect": "BLEED",
+          "statusChance": 0.35
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "GESETZLOSE",
+        "materialRolls": 1,
+        "equipmentDropChance": 0.12,
+        "equipmentTierPool": [
+          1
+        ]
+      }
+    },
+    {
+      "id": "ENM_FH_MEUTERER_KORSAR",
+      "name": "Meuternder Enter-Korsar",
+      "family": "GESETZLOSE",
+      "difficulty": "MITTEL",
+      "minLevel": 5,
+      "maxLevel": 12,
+      "stats": {
+        "hp": 66,
+        "attack": 16,
+        "armor": 5,
+        "speed": 15
+      },
+      "weaknesses": [
+        "BLEED"
+      ],
+      "resistances": [],
+      "skills": [
+        {
+          "id": "SKL_ENTERHAKEN_ZUG",
+          "name": "Hakenriss",
+          "type": "MELEE",
+          "damageMult": 1.2,
+          "statusEffect": "BLEED",
+          "statusChance": 0.3
+        },
+        {
+          "id": "SKL_SCHNELLFEUER_PISTOLE",
+          "name": "Hüftschuss aus der Steinschloss",
+          "type": "RANGED_PHYSICAL",
+          "damageMult": 1.1,
+          "armorPen": 15
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "GESETZLOSE",
+        "materialRolls": 2,
+        "consumableDrop": {
+          "id": "POT_HEILUNG_1",
+          "chance": 0.2
+        },
+        "equipmentDropChance": 0.25,
+        "equipmentTierPool": [
+          1,
+          2
+        ]
+      }
+    },
+    {
+      "id": "ENM_FH_SCHLICK_VIPER",
+      "name": "Salzmoor-Giftviper",
+      "family": "WILDTIERE",
+      "difficulty": "MITTEL",
+      "minLevel": 6,
+      "maxLevel": 13,
+      "stats": {
+        "hp": 54,
+        "attack": 17,
+        "armor": 2,
+        "speed": 17
+      },
+      "weaknesses": [
+        "FIRE",
+        "PHYSICAL"
+      ],
+      "resistances": [
+        "POISON"
+      ],
+      "skills": [
+        {
+          "id": "SKL_GIFTZAHN",
+          "name": "Fauliger Giftbiss",
+          "type": "MELEE",
+          "damageMult": 1.05,
+          "statusEffect": "POISON",
+          "statusChance": 0.55
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "WILDTIERE",
+        "materialRolls": 2,
+        "bonusMaterial": {
+          "id": "MAT_KRAEUTER",
+          "chance": 0.25,
+          "count": 1
+        },
+        "equipmentDropChance": 0.2,
+        "equipmentTierPool": [
+          1,
+          2
+        ]
+      }
+    },
+    {
+      "id": "ENM_FH_SCHMUGGLER_SCHUETZE",
+      "name": "Salznebel-Pulverschütze",
+      "family": "GESETZLOSE",
+      "difficulty": "MITTEL",
+      "minLevel": 8,
+      "maxLevel": 15,
+      "stats": {
+        "hp": 64,
+        "attack": 20,
+        "armor": 4,
+        "speed": 13
+      },
+      "weaknesses": [
+        "PHYSICAL"
+      ],
+      "resistances": [],
+      "skills": [
+        {
+          "id": "SKL_KARTUSCHENSCHUSS",
+          "name": "Hagel aus Schrot & Nägeln",
+          "type": "RANGED_PHYSICAL",
+          "damageMult": 1.25,
+          "armorPen": 20
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "GESETZLOSE",
+        "materialRolls": 2,
+        "consumableDrop": {
+          "id": "CON_SPLITTERBOMBE",
+          "chance": 0.2
+        },
+        "equipmentDropChance": 0.26,
+        "equipmentTierPool": [
+          1,
+          2
+        ]
+      }
+    },
+    {
+      "id": "ENM_FH_NEBEL_ALCHEMIST",
+      "name": "Abtrünniger Hafen-Quacksalber",
+      "family": "KULTISTEN",
+      "difficulty": "MITTEL",
+      "minLevel": 9,
+      "maxLevel": 16,
+      "stats": {
+        "hp": 60,
+        "attack": 18,
+        "armor": 3,
+        "speed": 14
+      },
+      "weaknesses": [
+        "PHYSICAL"
+      ],
+      "resistances": [
+        "POISON"
+      ],
+      "skills": [
+        {
+          "id": "SKL_SAEUREPHIOLE",
+          "name": "Ätzende Hafen-Phiole",
+          "type": "RANGED_POISON",
+          "damageMult": 1.15,
+          "statusEffect": "POISON",
+          "statusChance": 0.45
+        },
+        {
+          "id": "SKL_RAUCHBOMBE",
+          "name": "Beißender Teernebel",
+          "type": "AOE_DEBUFF",
+          "effect": "-15 % Trefferchance für alle Helden (2 Züge)"
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "KULTISTEN",
+        "materialRolls": 2,
+        "consumableDrop": {
+          "id": "CON_GEGENGIFT",
+          "chance": 0.25
+        },
+        "equipmentDropChance": 0.26,
+        "equipmentTierPool": [
+          1,
+          2
+        ]
+      }
+    },
+    {
+      "id": "ENM_FH_ERTRUNKENER_SEEMANN",
+      "name": "Seetang-Wiedergänger",
+      "family": "UNTOTE",
+      "difficulty": "SCHWER",
+      "minLevel": 11,
+      "maxLevel": 19,
+      "stats": {
+        "hp": 128,
+        "attack": 22,
+        "armor": 9,
+        "speed": 9
+      },
+      "weaknesses": [
+        "FIRE",
+        "HOLY",
+        "RUNEN_ITEM"
+      ],
+      "resistances": [
+        "POISON",
+        "BLEED"
+      ],
+      "skills": [
+        {
+          "id": "SKL_ABGRUND_GRIFF",
+          "name": "Griff der Tiefen",
+          "type": "MELEE",
+          "damageMult": 1.25,
+          "statusEffect": "POISON",
+          "statusChance": 0.35
+        },
+        {
+          "id": "SKL_SALZFLUCH",
+          "name": "Ertränkender Nebel",
+          "type": "AOE_PHYSICAL",
+          "damageMult": 0.8,
+          "statusEffect": "BLIND",
+          "statusChance": 0.25
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "UNTOTE",
+        "materialRolls": 3,
+        "equipmentDropChance": 0.38,
+        "equipmentTierPool": [
+          2,
+          3
+        ]
+      }
+    },
+    {
+      "id": "ENM_FH_WRACK_KOLOSS",
+      "name": "Treibholz-Seeschrecken",
+      "family": "UNTOTE",
+      "difficulty": "SCHWER",
+      "minLevel": 14,
+      "maxLevel": 22,
+      "stats": {
+        "hp": 152,
+        "attack": 26,
+        "armor": 14,
+        "speed": 7
+      },
+      "weaknesses": [
+        "FIRE",
+        "ARMOR_PEN"
+      ],
+      "resistances": [
+        "POISON",
+        "BLEED",
+        "PHYSICAL"
+      ],
+      "skills": [
+        {
+          "id": "SKL_MASTSCHLAG",
+          "name": "Schmetternder Schiffsmast",
+          "type": "MELEE",
+          "damageMult": 1.4,
+          "statusEffect": "STUN",
+          "statusChance": 0.3
+        },
+        {
+          "id": "SKL_MUSCHELPANZER",
+          "name": "Verkrusteter Kiel",
+          "type": "SELF_BUFF",
+          "effect": "+6 Rüstung für 2 Züge"
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "UNTOTE",
+        "materialRolls": 3,
+        "bonusMaterial": {
+          "id": "VAL_RUNENTAFEL",
+          "chance": 0.25,
+          "count": 1
+        },
+        "equipmentDropChance": 0.4,
+        "equipmentTierPool": [
+          2,
+          3
+        ]
+      }
+    }
+  ],
+  "randomMinibosses": [
+    {
+      "id": "MB_FH_KAPITAEN_DRAVEN",
+      "name": "Kapitän „Kielholer“ Draven",
+      "title": "Schrecken der Nebelroute",
+      "family": "GESETZLOSE",
+      "difficulty": "BOSS",
+      "minLevel": 8,
+      "maxLevel": 18,
+      "spawnEdges": [
+        "SEEWEG",
+        "GRENZLAND"
+      ],
+      "stats": {
+        "hp": 185,
+        "attack": 28,
+        "armor": 10,
+        "speed": 16
+      },
+      "weaknesses": [
+        "BLEED"
+      ],
+      "resistances": [
+        "POISON"
+      ],
+      "skills": [
+        {
+          "id": "SKL_DOPPEL_SALVE",
+          "name": "Breitseite aus zwei Läufen",
+          "type": "RANGED_PHYSICAL",
+          "damageMult": 1.35,
+          "armorPen": 25
+        },
+        {
+          "id": "SKL_ENTERBEFEHL",
+          "name": "Kielholen!",
+          "type": "MELEE",
+          "damageMult": 1.3,
+          "statusEffect": "BLEED",
+          "statusChance": 0.5
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "GESETZLOSE",
+        "materialRolls": 3,
+        "guaranteedMaterial": {
+          "id": "VAL_AHNENMUENZEN",
+          "count": 2
+        },
+        "equipmentDropChance": 0.45,
+        "equipmentTierPool": null,
+        "relicDropChance": 0.08
+      }
+    },
+    {
+      "id": "MB_FH_SCHLICK_LEVIATHAN",
+      "name": "Der Schlick-Leviathan von Wrackbucht",
+      "title": "Tiefsee-Ungetüm",
+      "family": "WILDTIERE",
+      "difficulty": "BOSS",
+      "minLevel": 12,
+      "maxLevel": 22,
+      "spawnEdges": [
+        "SEEWEG"
+      ],
+      "stats": {
+        "hp": 250,
+        "attack": 30,
+        "armor": 14,
+        "speed": 9
+      },
+      "weaknesses": [
+        "FIRE",
+        "ARMOR_PEN"
+      ],
+      "resistances": [
+        "POISON",
+        "PHYSICAL"
+      ],
+      "skills": [
+        {
+          "id": "SKL_TENTAKEL_PEITSCHE",
+          "name": "Hieb der Tiefsee-Tentakel",
+          "type": "AOE_PHYSICAL",
+          "damageMult": 0.9,
+          "statusEffect": "STUN",
+          "statusChance": 0.25
+        },
+        {
+          "id": "SKL_GIFTWOLKE_TIEFSEE",
+          "name": "Fauliger Gallenschwall",
+          "type": "AOE_POISON",
+          "damageMult": 0.85,
+          "statusEffect": "POISON",
+          "statusChance": 0.45
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "WILDTIERE",
+        "materialRolls": 3,
+        "guaranteedMaterial": {
+          "id": "MAT_BESTIENSEHNE",
+          "count": 2
+        },
+        "equipmentDropChance": 0.5,
+        "equipmentTierPool": null,
+        "relicDropChance": 0.1
+      }
+    },
+    {
+      "id": "MB_FH_MADAME_SCHWARZPULVER",
+      "name": "Vespera „Pulverfaust“",
+      "title": "Flüchtige Sprengmeisterin der Riffe",
+      "family": "GESETZLOSE",
+      "difficulty": "BOSS",
+      "minLevel": 10,
+      "maxLevel": 20,
+      "spawnEdges": [
+        "KERNLAND",
+        "DORF_WEG",
+        "GRENZLAND"
+      ],
+      "stats": {
+        "hp": 190,
+        "attack": 31,
+        "armor": 8,
+        "speed": 14
+      },
+      "weaknesses": [
+        "PHYSICAL",
+        "BLEED"
+      ],
+      "resistances": [
+        "FIRE"
+      ],
+      "skills": [
+        {
+          "id": "SKL_PULVERFASS_WURF",
+          "name": "Brennendes Pulverfass",
+          "type": "AOE_FIRE",
+          "damageMult": 1.0,
+          "statusEffect": "BURN",
+          "statusChance": 0.4
+        },
+        {
+          "id": "SKL_BLITZ_RUECKZUG",
+          "name": "Blendgranate",
+          "type": "DEBUFF",
+          "effect": "Stunnt ein Ziel für 1 Zug und gewährt +20 % Ausweichen"
+        }
+      ],
+      "loot": {
+        "silverRange": null,
+        "materialPoolRef": "GESETZLOSE",
+        "materialRolls": 3,
+        "guaranteedMaterial": {
+          "id": "MAT_ASCHBERNSTEIN",
+          "count": 1
+        },
+        "equipmentDropChance": 0.45,
+        "equipmentTierPool": null,
+        "relicDropChance": 0.09
+      }
+    }
+  ]
+}

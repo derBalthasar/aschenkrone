@@ -1,0 +1,420 @@
+{
+  "part": "3 of 3 (Freie Häfen - Full Combat Math, Unlock Levels, Prestige Scaling & World Resource Synergies)",
+  "version": "2.0.0",
+  "project": "Aschenkrone - Welt Odris",
+  "folk": "Menschen",
+  "faction": "Freie Häfen",
+  "magicAllowed": false,
+  "classes": [
+    {
+      "id": "fh_sturmkorsar",
+      "baseClass": "krieger",
+      "name": "Sturmkorsar",
+      "primaryStat": "kraft",
+      "combatStats": {
+        "baseHp": 120,
+        "baseStamina": 55,
+        "baseArmor": 7,
+        "baseCritChance": 0.15,
+        "baseDodgeChance": 0.1,
+        "initiative": 12
+      },
+      "worldAndResourceSynergy": {
+        "id": "syn_sturmkorsar",
+        "name": "Herr der schwarzen Segel",
+        "effect": "Senkt Seeweg-Kosten um -5 Silber; +2 zusätzliche Ressourcen (Holz/Eisen/Nahrung) bei See-Kaperfahrten."
+      },
+      "skills": [
+        {
+          "id": "sk_1",
+          "unlockLevel": 1,
+          "name": "Enterbeil-Spalter",
+          "staminaCost": 12,
+          "damageMult": 1.35,
+          "critBonus": 0.1,
+          "statusEffect": {
+            "type": "blutung",
+            "chance": 0.55,
+            "armorReduction": 2,
+            "duration": 3
+          }
+        },
+        {
+          "id": "sk_2",
+          "unlockLevel": 3,
+          "name": "Kettenwurf",
+          "staminaCost": 14,
+          "damageMult": 1.15,
+          "pullsBackRowToFront": true,
+          "statusEffect": {
+            "type": "betaeubt",
+            "chance": 0.55,
+            "duration": 1
+          }
+        },
+        {
+          "id": "sk_3",
+          "unlockLevel": 6,
+          "name": "Klingensturm der See",
+          "staminaCost": 18,
+          "target": "front_row",
+          "damageMult": 1.25,
+          "critBonus": 0.12
+        },
+        {
+          "id": "sk_4",
+          "unlockLevel": 10,
+          "name": "Piratenehre",
+          "staminaCost": 20,
+          "hits": 2,
+          "damageMultPerHit": 1.15,
+          "staminaOnKill": 15
+        }
+      ]
+    },
+    {
+      "id": "fh_tiefenwaechter",
+      "baseClass": "waechter",
+      "name": "Tiefenwächter",
+      "primaryStat": "zaehigkeit",
+      "combatStats": {
+        "baseHp": 145,
+        "baseStamina": 45,
+        "baseArmor": 12,
+        "baseCritChance": 0.06,
+        "baseDodgeChance": 0.04,
+        "initiative": 8
+      },
+      "worldAndResourceSynergy": {
+        "id": "syn_tiefenwaechter",
+        "name": "Meister der Hafenketten & Werften",
+        "effect": "Senkt Eisen- und Holzkosten beim Bau von Hafenketten, Schiffswerften und Stadt-Tiers um -1 Einheit (min. 1); halbiert Seegefahr."
+      },
+      "skills": [
+        {
+          "id": "tw_1",
+          "unlockLevel": 1,
+          "name": "Anker-Bollwerk",
+          "staminaCost": 14,
+          "buffEffect": {
+            "armorBonus": 6,
+            "guardAllies": true,
+            "poisonAndColdImmune": true,
+            "duration": 2
+          }
+        },
+        {
+          "id": "tw_2",
+          "unlockLevel": 3,
+          "name": "Harpunenstoß",
+          "staminaCost": 12,
+          "damageMult": 1.25,
+          "statusEffect": {
+            "type": "blutung",
+            "chance": 0.6,
+            "attackReduction": 0.2,
+            "duration": 2
+          }
+        },
+        {
+          "id": "tw_3",
+          "unlockLevel": 6,
+          "name": "Sturmhaltung",
+          "staminaCost": 16,
+          "buffEffect": {
+            "incomingDamageMult": 0.45,
+            "duration": 1
+          },
+          "selfHealRatio": 0.2
+        },
+        {
+          "id": "tw_4",
+          "unlockLevel": 10,
+          "name": "Tiefsee-Gegenschlag",
+          "staminaCost": 18,
+          "counterReflectRatio": 0.6,
+          "statusEffect": {
+            "type": "betaeubt",
+            "chance": 0.45,
+            "duration": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "fh_schwarzschuetze",
+      "baseClass": "spaeher",
+      "name": "Schwarzschütze",
+      "primaryStat": "geschick",
+      "combatStats": {
+        "baseHp": 100,
+        "baseStamina": 55,
+        "baseArmor": 5,
+        "baseCritChance": 0.2,
+        "baseDodgeChance": 0.14,
+        "initiative": 14
+      },
+      "worldAndResourceSynergy": {
+        "id": "syn_schwarzschuetze",
+        "name": "Krähennest-Ausguck",
+        "effect": "+25 Silber Einkommen auf etablierten Reichs-Handelsrouten; deckt Hinterhalte auf Straßen und Seewegen 1 Etappe im Voraus auf."
+      },
+      "skills": [
+        {
+          "id": "ss_1",
+          "unlockLevel": 1,
+          "name": "Panzerschuss",
+          "staminaCost": 12,
+          "damageMult": 1.4,
+          "armorIgnore": 0.45,
+          "critBonus": 0.1
+        },
+        {
+          "id": "ss_2",
+          "unlockLevel": 3,
+          "name": "Rauch- & Netzbolzen",
+          "staminaCost": 12,
+          "damageMult": 0.85,
+          "statusEffect": {
+            "type": "geblendet_gefesselt",
+            "chance": 0.65,
+            "accuracyReduction": 0.3,
+            "duration": 2
+          }
+        },
+        {
+          "id": "ss_3",
+          "unlockLevel": 6,
+          "name": "Splitterladung",
+          "staminaCost": 18,
+          "target": "all_enemies",
+          "damageMult": 1.1,
+          "statusEffect": {
+            "type": "blutung",
+            "chance": 0.5,
+            "duration": 2
+          }
+        },
+        {
+          "id": "ss_4",
+          "unlockLevel": 10,
+          "name": "Todesschuss",
+          "staminaCost": 22,
+          "damageMult": 2.4,
+          "critBonus": 0.25,
+          "critDamageBonus": 0.5
+        }
+      ]
+    },
+    {
+      "id": "fh_pulveralchemist",
+      "baseClass": "magier",
+      "name": "Pulver-Alchemist",
+      "primaryStat": "wille",
+      "combatStats": {
+        "baseHp": 95,
+        "baseStamina": 60,
+        "baseArmor": 4,
+        "baseCritChance": 0.15,
+        "baseDodgeChance": 0.1,
+        "initiative": 12
+      },
+      "worldAndResourceSynergy": {
+        "id": "syn_pulveralchemist",
+        "name": "Sprengmeister & Erzschmelzer",
+        "effect": "+1 Eisen und +1 Stein aus Dorf-Zehnten; -1 Eisen bei Schmiede-Upgrades."
+      },
+      "skills": [
+        {
+          "id": "pa_1",
+          "unlockLevel": 1,
+          "name": "Schwarzpulver-Bombe",
+          "staminaCost": 12,
+          "damageMult": 1.45,
+          "armorIgnore": 0.4,
+          "statusEffect": {
+            "type": "brennen",
+            "chance": 0.45,
+            "duration": 2
+          }
+        },
+        {
+          "id": "pa_2",
+          "unlockLevel": 3,
+          "name": "Blend- & Rauchgranate",
+          "staminaCost": 14,
+          "target": "all_enemies",
+          "damageMult": 0.65,
+          "statusEffect": {
+            "type": "betaeubt_geblendet",
+            "chance": 0.55,
+            "duration": 1
+          }
+        },
+        {
+          "id": "pa_3",
+          "unlockLevel": 6,
+          "name": "Griechisches Feuer",
+          "staminaCost": 18,
+          "target": "all_enemies",
+          "damageMult": 1.15,
+          "statusEffect": {
+            "type": "brennen",
+            "chance": 0.7,
+            "duration": 3
+          }
+        },
+        {
+          "id": "pa_4",
+          "unlockLevel": 10,
+          "name": "Pulverfass-Detonation",
+          "staminaCost": 26,
+          "target": "all_enemies",
+          "damageMult": 1.95,
+          "armorIgnore": 0.5,
+          "statusEffect": {
+            "type": "betaeubt",
+            "chance": 0.45,
+            "duration": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "fh_seuchenmedikus",
+      "baseClass": "heiler",
+      "name": "Seuchenmedikus",
+      "primaryStat": "wille",
+      "combatStats": {
+        "baseHp": 100,
+        "baseStamina": 60,
+        "baseArmor": 5,
+        "baseCritChance": 0.12,
+        "baseDodgeChance": 0.1,
+        "initiative": 12
+      },
+      "worldAndResourceSynergy": {
+        "id": "syn_seuchenmedikus",
+        "name": "Kontor-Alchemist",
+        "effect": "Tränke und Heilmittel kosten bei Händlern -30 % Silber; Gruppe erleidet keine Ausdauer-Mali bei Nahrungsmangel (1 Reiseetappe Puffer)."
+      },
+      "skills": [
+        {
+          "id": "sm_1",
+          "unlockLevel": 1,
+          "name": "Säure- & Ätzphiole",
+          "staminaCost": 10,
+          "damageMult": 1.25,
+          "statusEffect": {
+            "type": "gift_saeure",
+            "chance": 0.65,
+            "armorReduction": 3,
+            "duration": 3
+          }
+        },
+        {
+          "id": "sm_2",
+          "unlockLevel": 3,
+          "name": "Adrenalin-Elixier",
+          "staminaCost": 12,
+          "healMult": 1.55,
+          "buffEffect": {
+            "attackBonus": 0.15,
+            "initiativeBonus": 3,
+            "duration": 2
+          }
+        },
+        {
+          "id": "sm_3",
+          "unlockLevel": 6,
+          "name": "Destillierter Heilnebel",
+          "staminaCost": 20,
+          "target": "all_allies",
+          "healMult": 1.15,
+          "cleansesPoisonAndDisease": true
+        },
+        {
+          "id": "sm_4",
+          "unlockLevel": 10,
+          "name": "Wiederbelebungs-Tinktur",
+          "staminaCost": 22,
+          "reviveHpRatio": 0.45,
+          "buffEffect": {
+            "damageBonus": 0.25,
+            "duration": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "fh_schattenfreibeuter",
+      "baseClass": "schurke",
+      "name": "Schattenfreibeuter",
+      "primaryStat": "geschick",
+      "combatStats": {
+        "baseHp": 95,
+        "baseStamina": 55,
+        "baseArmor": 4,
+        "baseCritChance": 0.22,
+        "baseDodgeChance": 0.22,
+        "initiative": 16
+      },
+      "worldAndResourceSynergy": {
+        "id": "syn_schattenfreibeuter",
+        "name": "Schmugglerkönig der Häfen",
+        "effect": "+25 % Silber-Ertrag aus allen Quests und Kämpfen; +15 % Verkaufserlös bei Händlern in allen Hafenstädten."
+      },
+      "skills": [
+        {
+          "id": "sf_1",
+          "unlockLevel": 1,
+          "name": "Giftklingen-Stich",
+          "staminaCost": 12,
+          "damageMult": 1.3,
+          "critBonus": 0.15,
+          "statusEffect": {
+            "type": "gift",
+            "chance": 0.65,
+            "healingReduction": 0.5,
+            "duration": 3
+          }
+        },
+        {
+          "id": "sf_2",
+          "unlockLevel": 3,
+          "name": "Rauchbombe",
+          "staminaCost": 14,
+          "target": "all_allies",
+          "buffEffect": {
+            "dodgeBonus": 0.35,
+            "selfGuaranteedCritNextTurn": true,
+            "duration": 1
+          }
+        },
+        {
+          "id": "sf_3",
+          "unlockLevel": 6,
+          "name": "Kehlenschnitt",
+          "staminaCost": 16,
+          "damageMult": 1.65,
+          "bonusVsPoisoned": 0.55,
+          "critBonus": 0.2
+        },
+        {
+          "id": "sf_4",
+          "unlockLevel": 10,
+          "name": "Plünderer-Finte",
+          "staminaCost": 20,
+          "target": "all_enemies",
+          "damageMult": 0.95,
+          "stealsSilberFormula": "playerLevel * 8",
+          "statusEffect": {
+            "type": "gift",
+            "chance": 0.5,
+            "duration": 2
+          }
+        }
+      ]
+    }
+  ]
+}

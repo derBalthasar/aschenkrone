@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "2.2.0",
+  "module": "combat_armor_and_mana_formula_patch",
+  "armorMitigationSystem": {
+    "appliesTo": ["ALL_HEROES", "ALL_ENEMIES"],
+    "formula": "finalDamage = max(1, floor(rawDamage * (50 / (50 + targetArmor))))",
+    "rawDamageFormula": "rawDamage = (weaponAttack + (primaryCoreAttribute / 2)) * skillMultiplier * critMultiplier",
+    "examples": { "armor_0": "0 % Schadensreduktion", "armor_26": "34.2 % Schadensreduktion", "armor_50": "50.0 % Schadensreduktion", "armor_100": "66.7 % Schadensreduktion" },
+    "armorPenetrationRule": "effectiveArmor = targetArmor * (1 - armorPenPercent)"
+  },
+  "manaSystemSpecification": {
+    "maxManaFormula": "maxMana = 40 + (3 * WILLENSKRAFT) + (2 * INTELLIGENZ)",
+    "manaRegenerationPerTurn": 4,
+    "manaRegenerationOnCampRest": "FULL_RESTORE",
+    "resourceCostBySkillCategory": {
+      "MANA": ["FIRE_MAGIC", "HEALING_MAGIC", "PRAYER_AND_BLESSINGS", "RUNE_CASTING"],
+      "STAMINA": ["PURE_WEAPON_STRIKES", "RANGED_SHOTS", "ROGUE_TECHNIQUES", "SHIELD_AND_STANCE_SKILLS", "ALCHEMICAL_THROWS"]
+    },
+    "eligibleHeroClasses": ["PYROMANT", "KLERIKER_DER_FLAMME", "GLUTPALADIN", "INQUISITOR"]
+  }
+}

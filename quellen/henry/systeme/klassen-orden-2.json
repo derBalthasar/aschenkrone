@@ -1,0 +1,469 @@
+{
+  "version": "1.0.0",
+  "project": "Aschenkrone - Welt Odris",
+  "folk": "Menschen",
+  "faction": "Orden der Flamme",
+  "magicAllowed": true,
+  "specializationRules": {
+    "unlockLevel": 10,
+    "selectionRule": "Spieler wählt bei Erreichen von Stufe 10 dauerhaft 1 von 2 Spezialisierungen pro Klasse.",
+    "stacksWithAct3FactionSpec": true,
+    "signatureSkillRankScaling": {
+      "rank1_lvl10": {
+        "powerMult": 1.0,
+        "staminaDelta": 0,
+        "statusChanceBonus": 0.0
+      },
+      "rank2_lvl15": {
+        "powerMult": 1.25,
+        "staminaDelta": -1,
+        "statusChanceBonus": 0.05
+      },
+      "rank3_lvl20": {
+        "powerMult": 1.5,
+        "staminaDelta": -2,
+        "statusChanceBonus": 0.1
+      },
+      "rank4_lvl25_master": {
+        "powerMult": 1.8,
+        "staminaDelta": -4,
+        "statusChanceBonus": 0.15
+      }
+    }
+  },
+  "classSpecializations": [
+    {
+      "parentClassId": "odf_glutpaladin",
+      "parentClassName": "Glutpaladin",
+      "options": [
+        {
+          "id": "spec_odf_sonnenfeuer_templer",
+          "name": "Sonnenfeuer-Templer",
+          "theme": "Gnadenloser Vollstrecker der reinen Flamme – verbrennt Untote und Dämonen zu weißer Asche.",
+          "statBonuses": {
+            "kraft": 3,
+            "wille": 2,
+            "critDamageBonus": 0.25,
+            "bonusVsUndead": 0.25
+          },
+          "passiveEffect": {
+            "name": "Weißglut des Richters",
+            "effect": "Kritische Treffer entzünden das Ziel für 3 Runden und heilen den Templer um 15 % des verursachten Schadens."
+          },
+          "worldResourceBonus": {
+            "name": "Geißel der Ascherisse",
+            "effect": "+1 Runensplitter und +1 Eisen Beute nach dem Schließen von Ascherissen und Untoten-Begegnungen."
+          },
+          "signatureSkill": {
+            "id": "sig_sonnenfeuer_templer",
+            "unlockLevel": 10,
+            "name": "Sonnensturz-Urteil",
+            "staminaCost": 24,
+            "damageMult": 2.4,
+            "bonusVsBurningOrUndead": 0.5,
+            "critBonus": 0.2,
+            "statusEffect": {
+              "type": "weisse_glut",
+              "chance": 0.85,
+              "duration": 3,
+              "armorReduction": 4
+            }
+          }
+        },
+        {
+          "id": "spec_odf_aschenkreuzritter",
+          "name": "Aschenkreuzritter",
+          "theme": "Geweihter Heerführer des Ordens – führt seine Gefährten mit brennendem Banner in die Schlacht.",
+          "statBonuses": {
+            "kraft": 2,
+            "zaehigkeit": 3,
+            "baseArmor": 3,
+            "maxHp": 30
+          },
+          "passiveEffect": {
+            "name": "Aura des Ewigen Feuers",
+            "effect": "Alle Gruppenmitglieder verursachen +12 % Feuerschaden und sind immun gegen Furcht und Kälte-Mali."
+          },
+          "worldResourceBonus": {
+            "name": "Kreuzzugs-Zehnt",
+            "effect": "+4 Bonus-Ruf bei allen Ordens- und Wiederaufbau-Quests; +10 Garnisonsverteidigung in ausgebauten Städten."
+          },
+          "signatureSkill": {
+            "id": "sig_aschenkreuzritter",
+            "unlockLevel": 10,
+            "name": "Banner der Brennenden Krone",
+            "staminaCost": 20,
+            "target": "all_allies_and_enemies",
+            "damageMult": 1.3,
+            "buffEffect": {
+              "attackBonus": 0.25,
+              "fireDamageBonus": 0.2,
+              "duration": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "parentClassId": "odf_eidwaechter",
+      "parentClassName": "Eidwächter",
+      "options": [
+        {
+          "id": "spec_odf_runenkoloss",
+          "name": "Runenkoloss",
+          "theme": "Ein lebendes Bollwerk aus geschwärztem Stahl und eingravierten Schutzrunen.",
+          "statBonuses": {
+            "zaehigkeit": 4,
+            "wille": 1,
+            "baseArmor": 5,
+            "maxHp": 50
+          },
+          "passiveEffect": {
+            "name": "Ägis des Glutbergs",
+            "effect": "Reduziert erlittenen Magie-, Feuer- und Fluchschaden der gesamten Gruppe um 25 %."
+          },
+          "worldResourceBonus": {
+            "name": "Runenmaurer",
+            "effect": "Senkt Stein- und Eisenkosten beim Ausbau von Stadt-Tiers und Zitadellen um -1 Einheit (min. 1)."
+          },
+          "signatureSkill": {
+            "id": "sig_runenkoloss",
+            "unlockLevel": 10,
+            "name": "Runenfestung von Odris",
+            "staminaCost": 22,
+            "target": "all_allies",
+            "shieldAmountFormula": "zaehigkeit * 3.2",
+            "buffEffect": {
+              "armorBonus": 6,
+              "debuffImmune": true,
+              "duration": 2
+            }
+          }
+        },
+        {
+          "id": "spec_odf_flammenmaertyrer",
+          "name": "Flammenmärtyrer",
+          "theme": "Zieht den Schmerz seiner Gefährten auf sich und verbrennt Angreifer im Gegenstoß.",
+          "statBonuses": {
+            "zaehigkeit": 3,
+            "kraft": 2,
+            "baseArmor": 3,
+            "maxHp": 35
+          },
+          "passiveEffect": {
+            "name": "Brennendes Opfer",
+            "effect": "Jeder erlittene Treffer hüllt den Angreifer in Flammen und baut +3 Ausdauer für den Märtyrer auf."
+          },
+          "worldResourceBonus": {
+            "name": "Opferbereitschaft",
+            "effect": "Lager-Rast verbraucht -1 Nahrung (min. 1) und stellt +25 % mehr Ausdauer wieder her."
+          },
+          "signatureSkill": {
+            "id": "sig_flammenmaertyrer",
+            "unlockLevel": 10,
+            "name": "Schmelztiegel der Vergeltung",
+            "staminaCost": 20,
+            "target": "all_enemies",
+            "counterReflectRatio": 0.85,
+            "damageMult": 1.35,
+            "statusEffect": {
+              "type": "brennen",
+              "chance": 0.75,
+              "duration": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "parentClassId": "odf_inquisitor",
+      "parentClassName": "Inquisitor",
+      "options": [
+        {
+          "id": "spec_odf_hexenjaeger",
+          "name": "Hexen- & Ketzerjäger",
+          "theme": "Gnadenloser Vollstrecker mit runengeweihten Repetierbolzen – bricht Zauber und Flüche.",
+          "statBonuses": {
+            "geschick": 4,
+            "wille": 1,
+            "critChance": 0.12,
+            "critDamageBonus": 0.3
+          },
+          "passiveEffect": {
+            "name": "Siegelbrecher",
+            "effect": "+30 % Schaden gegen Zauberwirker, Kultisten und Untote; Treffer unterbrechen gegnerische Zauber."
+          },
+          "worldResourceBonus": {
+            "name": "Ketzertribunal",
+            "effect": "+25 % Silber-Belohnung bei Grenzpatrouillen und Kopfgeld-Aufträgen."
+          },
+          "signatureSkill": {
+            "id": "sig_hexenjaeger",
+            "unlockLevel": 10,
+            "name": "Geweihte Silbersalve",
+            "staminaCost": 22,
+            "damageMult": 2.45,
+            "armorIgnore": 0.6,
+            "critBonus": 0.25,
+            "statusEffect": {
+              "type": "stille_brennen",
+              "chance": 0.8,
+              "duration": 2
+            }
+          }
+        },
+        {
+          "id": "spec_odf_aschenfaehrtenleser",
+          "name": "Aschenfährtenleser",
+          "theme": "Meister der Fallen, Brennnetze und Aufklärung in den verheerten Grenzlanden.",
+          "statBonuses": {
+            "geschick": 3,
+            "zaehigkeit": 2,
+            "dodgeChance": 0.12,
+            "initiative": 4
+          },
+          "passiveEffect": {
+            "name": "Sicht durch den Rauch",
+            "effect": "Alle Gegner in der Aschewolke oder mit Ketzer-Mal erleiden +20 % kritischen Schaden."
+          },
+          "worldResourceBonus": {
+            "name": "Wächter der Passwege",
+            "effect": "Senkt Gefahren-Chance auf Gebirgspässen (P01–P03) und Grenzstraßen um -15 %; -1 Holz beim Bau von Signalfeuern."
+          },
+          "signatureSkill": {
+            "id": "sig_aschenfaehrtenleser",
+            "unlockLevel": 10,
+            "name": "Flammenfalle & Ketzerjagd",
+            "staminaCost": 20,
+            "target": "all_enemies",
+            "damageMult": 1.5,
+            "statusEffect": {
+              "type": "gefesselt_brennen",
+              "chance": 0.8,
+              "duration": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "parentClassId": "odf_pyromant",
+      "parentClassName": "Pyromant",
+      "options": [
+        {
+          "id": "spec_odf_vulkan_archon",
+          "name": "Glutberg-Archon",
+          "theme": "Kanalisiert die rohe Gewalt des Vulkans – verwandelt das gesamte Schlachtfeld in ein Flammenmeer.",
+          "statBonuses": {
+            "wille": 5,
+            "maxStamina": 20,
+            "critChance": 0.1,
+            "critDamageBonus": 0.25
+          },
+          "passiveEffect": {
+            "name": "Unersättliche Glut",
+            "effect": "Jeder Brand-Tick auf Gegnern stellt 2 Ausdauer für den Archon wieder her; +25 % Feuerschaden."
+          },
+          "worldResourceBonus": {
+            "name": "Alchemie der Tiefe",
+            "effect": "+1 Runensplitter bei jedem 2. geschlossenen Ascheriss; +25 % Verkaufserlös auf Glut-Relikte."
+          },
+          "signatureSkill": {
+            "id": "sig_vulkan_archon",
+            "unlockLevel": 10,
+            "name": "Eruption des Glutbergs",
+            "staminaCost": 28,
+            "target": "all_enemies",
+            "damageMult": 2.3,
+            "armorIgnore": 0.5,
+            "statusEffect": {
+              "type": "weisse_glut",
+              "chance": 0.9,
+              "duration": 3
+            }
+          }
+        },
+        {
+          "id": "spec_odf_runenschmied_magus",
+          "name": "Runenschmied-Magus",
+          "theme": "Verbindet arkane Runen mit Schmiedekunst – stärkt Waffen der Gruppe und sprengt gegnerische Rüstungen.",
+          "statBonuses": {
+            "wille": 3,
+            "kraft": 2,
+            "baseArmor": 4,
+            "maxStamina": 15
+          },
+          "passiveEffect": {
+            "name": "Brennende Waffenrunen",
+            "effect": "Alle Nah- und Fernkampfangriffe der gesamten Gruppe verursachen zusätzlichen Feuerschaden."
+          },
+          "worldResourceBonus": {
+            "name": "Meister der Runenschmiede",
+            "effect": "Senkt Eisen- und Runensplitter-Kosten beim Aufwerten von Ausrüstung um -1 Einheit (min. 1)."
+          },
+          "signatureSkill": {
+            "id": "sig_runenschmied_magus",
+            "unlockLevel": 10,
+            "name": "Zerschmetternde Runen-Nova",
+            "staminaCost": 22,
+            "target": "all_enemies_and_allies",
+            "damageMult": 1.65,
+            "statusEffect": {
+              "type": "ruestung_zerstoert",
+              "chance": 0.85,
+              "armorReduction": 5,
+              "duration": 3
+            },
+            "buffEffect": {
+              "groupAttackBonus": 0.2,
+              "duration": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "parentClassId": "odf_kleriker",
+      "parentClassName": "Kleriker der Flamme",
+      "options": [
+        {
+          "id": "spec_odf_sonnenpriester",
+          "name": "Hohepriester des Ewigen Lichts",
+          "theme": "Unerschöpflicher Quell heiliger Wärme – hält die Gruppe selbst im tiefsten Untoten-Gebiet am Leben.",
+          "statBonuses": {
+            "wille": 4,
+            "zaehigkeit": 1,
+            "maxStamina": 20,
+            "maxHp": 25
+          },
+          "passiveEffect": {
+            "name": "Gnade der Flamme",
+            "effect": "+30 % Heilwirkung; überschüssige Heilung wandelt sich in einen absorbierenden Lichtschild um."
+          },
+          "worldResourceBonus": {
+            "name": "Segen der Ernte",
+            "effect": "+2 Nahrung im Schutzbund-Zehnt aller befreiten Dörfer; +15 % Ruf-Gewinn bei guten Taten."
+          },
+          "signatureSkill": {
+            "id": "sig_sonnenpriester",
+            "unlockLevel": 10,
+            "name": "Leuchtfeuer der Erlösung",
+            "staminaCost": 24,
+            "target": "all_allies",
+            "healMult": 1.8,
+            "cleansesAllDebuffs": true,
+            "buffEffect": {
+              "deathWardTurns": 1,
+              "armorBonus": 4,
+              "duration": 2
+            }
+          }
+        },
+        {
+          "id": "spec_odf_laeuterer_eiferer",
+          "name": "Läuterer des Zorns",
+          "theme": "Kämpfender Priester – vernichtet Untote mit gleißendem Licht und verwandelt Schaden in Heilung.",
+          "statBonuses": {
+            "wille": 3,
+            "kraft": 2,
+            "critChance": 0.12,
+            "bonusVsUndead": 0.3
+          },
+          "passiveEffect": {
+            "name": "Sühne durch Feuer",
+            "effect": "40 % des mit Fähigkeiten verursachten Schadens heilen sofort den am stärksten verwundeten Gefährten."
+          },
+          "worldResourceBonus": {
+            "name": "Reinigung der Lande",
+            "effect": "Senkt die Cooldown-Etappen von Ascherissen um -1 Etappe (von 4 auf 3); +20 % EP gegen Untote."
+          },
+          "signatureSkill": {
+            "id": "sig_laeuterer_eiferer",
+            "unlockLevel": 10,
+            "name": "Säule des Heiligen Feuers",
+            "staminaCost": 22,
+            "target": "all_enemies",
+            "damageMult": 1.85,
+            "bonusVsUndead": 0.5,
+            "groupHealRatio": 0.35
+          }
+        }
+      ]
+    },
+    {
+      "parentClassId": "odf_schattenvollstrecker",
+      "parentClassName": "Schatten-Vollstrecker",
+      "options": [
+        {
+          "id": "spec_odf_aschenassassine",
+          "name": "Aschen-Assassine",
+          "theme": "Lautloser Richter der Geheimen Kammer – schlägt aus erstickendem Ruß mitten ins Herz.",
+          "statBonuses": {
+            "geschick": 4,
+            "wille": 1,
+            "critChance": 0.15,
+            "critDamageBonus": 0.35
+          },
+          "passiveEffect": {
+            "name": "Glutklinge im Dunkeln",
+            "effect": "Kritische Treffer verursachen gleichzeitig Blutung und Brand; +30 % Schaden gegen brennende Ziele."
+          },
+          "worldResourceBonus": {
+            "name": "Geheime Schatzkammern",
+            "effect": "+30 % Silber aus Beute und Truhen; deckt versteckte Schätze bei Dorf- und Riss-Erkundungen auf."
+          },
+          "signatureSkill": {
+            "id": "sig_aschenassassine",
+            "unlockLevel": 10,
+            "name": "Urteil der Schwarzen Asche",
+            "staminaCost": 22,
+            "damageMult": 2.55,
+            "armorIgnore": 0.65,
+            "critBonus": 0.3,
+            "statusEffect": {
+              "type": "blutung_brennen",
+              "chance": 0.9,
+              "duration": 3
+            }
+          }
+        },
+        {
+          "id": "spec_odf_schatteninquisitor",
+          "name": "Schatteninquisitor",
+          "theme": "Meister der Täuschung, Blend-Asche und lautlosen Sabotage.",
+          "statBonuses": {
+            "geschick": 3,
+            "wille": 2,
+            "dodgeChance": 0.15,
+            "initiative": 4
+          },
+          "passiveEffect": {
+            "name": "Nebel aus Ruß",
+            "effect": "Jedes Ausweichen hüllt den Angreifer in Asche (-20 % Genauigkeit) und gibt +6 Ausdauer zurück."
+          },
+          "worldResourceBonus": {
+            "name": "Flüsterer des Ordens",
+            "effect": "Umgeht alle Wegzölle; schlechte Quest-Entscheidungen kosten nur halben Rufverlust (-9 statt -18)."
+          },
+          "signatureSkill": {
+            "id": "sig_schatteninquisitor",
+            "unlockLevel": 10,
+            "name": "Sturm aus Ruß und Klingen",
+            "staminaCost": 20,
+            "target": "all_enemies",
+            "damageMult": 1.45,
+            "statusEffect": {
+              "type": "geblendet_blutung",
+              "chance": 0.8,
+              "duration": 2
+            },
+            "buffEffect": {
+              "selfDodgeBonus": 0.5,
+              "duration": 2
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

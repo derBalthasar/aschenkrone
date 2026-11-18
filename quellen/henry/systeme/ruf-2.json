@@ -1,0 +1,404 @@
+{
+  "part": "2 of 2 (Villages D35-D69, Reconstruction Projects & Armada War Chest)",
+  "version": "2.0.0",
+  "project": "Aschenkrone - Welt Odris",
+  "villages": [
+    {
+      "edgeId": "D35",
+      "village": "Eismeerby",
+      "city": "Glutvik",
+      "faction": "Orden der Flamme",
+      "resource": "nahrung",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D36",
+      "village": "Walstrand",
+      "city": "Glutvik",
+      "faction": "Orden der Flamme",
+      "resource": "nahrung",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D37",
+      "village": "Bienental",
+      "city": "Lichtheim",
+      "faction": "Orden der Flamme",
+      "resource": "nahrung",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D38",
+      "village": "Kapellby",
+      "city": "Lichtheim",
+      "faction": "Orden der Flamme",
+      "resource": "stein",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D39",
+      "village": "Leuchtfeuer",
+      "city": "Nordwacht",
+      "faction": "Orden der Flamme",
+      "resource": "holz",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D40",
+      "village": "Robbenstrand",
+      "city": "Nordwacht",
+      "faction": "Orden der Flamme",
+      "resource": "nahrung",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D41",
+      "village": "Gerstenhof",
+      "city": "Sigrunsheim",
+      "faction": "Orden der Flamme",
+      "resource": "nahrung",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D42",
+      "village": "Sigrunsquell",
+      "city": "Sigrunsheim",
+      "faction": "Orden der Flamme",
+      "resource": "stein",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D43",
+      "village": "Gebetsfels",
+      "city": "Thorvaldsklipp",
+      "faction": "Orden der Flamme",
+      "resource": "stein",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D44",
+      "village": "Kliffhof",
+      "city": "Thorvaldsklipp",
+      "faction": "Orden der Flamme",
+      "resource": "eisen",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D45",
+      "village": "Holzfällerby",
+      "city": "Wachtfeuer",
+      "faction": "Orden der Flamme",
+      "resource": "holz",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D46",
+      "village": "Wachthof",
+      "city": "Wachtfeuer",
+      "faction": "Orden der Flamme",
+      "resource": "eisen",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D47",
+      "village": "Fischerholm",
+      "city": "Perlvik",
+      "faction": "Freie Häfen",
+      "resource": "nahrung",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D48",
+      "village": "Gartenby",
+      "city": "Perlvik",
+      "faction": "Freie Häfen",
+      "resource": "nahrung",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D49",
+      "village": "Perlstrand",
+      "city": "Perlvik",
+      "faction": "Freie Häfen",
+      "resource": "stein",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D50",
+      "village": "Fjordhof",
+      "city": "Ankerfjord",
+      "faction": "Freie Häfen",
+      "resource": "holz",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D51",
+      "village": "Seilerby",
+      "city": "Ankerfjord",
+      "faction": "Freie Häfen",
+      "resource": "holz",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D52",
+      "village": "Bernsteinstrand",
+      "city": "Bernsvik",
+      "faction": "Freie Häfen",
+      "resource": "stein",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D53",
+      "village": "Tangby",
+      "city": "Bernsvik",
+      "faction": "Freie Häfen",
+      "resource": "nahrung",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D54",
+      "village": "Passhof",
+      "city": "Grenzmarkt",
+      "faction": "Freie Häfen",
+      "resource": "stein",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D55",
+      "village": "Saumby",
+      "city": "Grenzmarkt",
+      "faction": "Freie Häfen",
+      "resource": "holz",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D56",
+      "village": "Möwenstrand",
+      "city": "Möwenstad",
+      "faction": "Freie Häfen",
+      "resource": "nahrung",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D57",
+      "village": "Salzgarten",
+      "city": "Möwenstad",
+      "faction": "Freie Häfen",
+      "resource": "nahrung",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D58",
+      "village": "Nebelstrand",
+      "city": "Nebelvik",
+      "faction": "Freie Häfen",
+      "resource": "holz",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D59",
+      "village": "Schmugglerbucht",
+      "city": "Nebelvik",
+      "faction": "Freie Häfen",
+      "resource": "eisen",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D60",
+      "village": "Teerhag",
+      "city": "Salzwacht",
+      "faction": "Freie Häfen",
+      "resource": "holz",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D61",
+      "village": "Werftby",
+      "city": "Salzwacht",
+      "faction": "Freie Häfen",
+      "resource": "holz",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D62",
+      "village": "Inselhof",
+      "city": "Silberholm",
+      "faction": "Freie Häfen",
+      "resource": "nahrung",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D63",
+      "village": "Silbergrube",
+      "city": "Silberholm",
+      "faction": "Freie Häfen",
+      "resource": "eisen",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D64",
+      "village": "Klippenhof",
+      "city": "Skerheim",
+      "faction": "Freie Häfen",
+      "resource": "stein",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D65",
+      "village": "Robbenschär",
+      "city": "Skerheim",
+      "faction": "Freie Häfen",
+      "resource": "nahrung",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D66",
+      "village": "Räucherby",
+      "city": "Tranvik",
+      "faction": "Freie Häfen",
+      "resource": "nahrung",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D67",
+      "village": "Walby",
+      "city": "Tranvik",
+      "faction": "Freie Häfen",
+      "resource": "nahrung",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D68",
+      "village": "Kliffby",
+      "city": "Zollholm",
+      "faction": "Freie Häfen",
+      "resource": "stein",
+      "baseYield": 5
+    },
+    {
+      "edgeId": "D69",
+      "village": "Leuchtholm",
+      "city": "Zollholm",
+      "faction": "Freie Häfen",
+      "resource": "eisen",
+      "baseYield": 5
+    }
+  ],
+  "reconstructionProjects": [
+    {
+      "id": "rebuild_westvik",
+      "city": "Westvik",
+      "faction": "Kronreich",
+      "status": "Zerstört im Prolog",
+      "title": "Hafenpalisade & Kaimauer errichten",
+      "cost": {
+        "stein": 6,
+        "holz": 4
+      },
+      "rewards": {
+        "silber": 150,
+        "reputation": 20,
+        "cityFlag": "westvik_secured"
+      },
+      "narrativeEffect": "Westvik ist vor Plünderern sicher; Seewege ab Westvik haben -10 % Gefahr."
+    },
+    {
+      "id": "rebuild_aschenkloster",
+      "city": "Aschenkloster",
+      "faction": "Orden der Flamme",
+      "status": "Zerstört im Prolog",
+      "title": "Klostermauer & Ewiges Feuer neu weihen",
+      "cost": {
+        "stein": 6,
+        "holz": 4
+      },
+      "rewards": {
+        "silber": 150,
+        "reputation": 20,
+        "cityFlag": "aschenkloster_secured"
+      },
+      "narrativeEffect": "Die Archive des Ordens sind geschützt; Rast im Kloster ist kostenlos."
+    },
+    {
+      "id": "rebuild_perlvik",
+      "city": "Perlvik",
+      "faction": "Freie Häfen",
+      "status": "Zerstört im Prolog",
+      "title": "Kontor & Wellenbrecher wiederherstellen",
+      "cost": {
+        "stein": 5,
+        "holz": 5
+      },
+      "rewards": {
+        "silber": 180,
+        "reputation": 20,
+        "cityFlag": "perlvik_secured"
+      },
+      "narrativeEffect": "Die Kontore der Freien Häfen handeln wieder; +10 % Verkaufserlös auf Beute."
+    },
+    {
+      "id": "rebuild_steinwacht",
+      "city": "Steinwacht",
+      "faction": "Kronreich",
+      "status": "Belagerte Grenzstadt",
+      "title": "Wehrmauer & Torhaus verstärken",
+      "cost": {
+        "stein": 6,
+        "eisen": 3
+      },
+      "rewards": {
+        "silber": 150,
+        "reputation": 20,
+        "cityFlag": "steinwacht_secured"
+      },
+      "narrativeEffect": "Die Westgrenze hält den Überfällen der Staubreiter-Orks stand."
+    },
+    {
+      "id": "rebuild_eiswacht",
+      "city": "Eiswacht",
+      "faction": "Orden der Flamme",
+      "status": "Belagerte Grenzstadt",
+      "title": "Passfestung & Leuchtfeuer sichern",
+      "cost": {
+        "stein": 6,
+        "holz": 4
+      },
+      "rewards": {
+        "silber": 150,
+        "reputation": 20,
+        "cityFlag": "eiswacht_secured"
+      },
+      "narrativeEffect": "Die Pässe P01–P03 verlieren dauerhaft 15 % Gefahren-Chance."
+    },
+    {
+      "id": "rebuild_wachtfeuer",
+      "city": "Wachtfeuer",
+      "faction": "Orden der Flamme",
+      "status": "Belagerte Grenzstadt",
+      "title": "Bollwerk & Signalspiegel instand setzen",
+      "cost": {
+        "stein": 5,
+        "eisen": 3
+      },
+      "rewards": {
+        "silber": 150,
+        "reputation": 20,
+        "cityFlag": "wachtfeuer_secured"
+      },
+      "narrativeEffect": "Grenzstraße S47 wird gesichert (Gefahr sinkt von 40 % auf 10 %)."
+    }
+  ],
+  "armadaGoal": {
+    "unlockAct": 4,
+    "departureAct": 5,
+    "title": "Kriegskasse des Alten Reiches",
+    "countsStoredResourcesFromEarlierActs": true,
+    "requirements": {
+      "nahrung": 30,
+      "holz": 25,
+      "eisen": 25,
+      "stein": 20
+    },
+    "completionEffect": "Schaltet die Überfahrt der vereinten Armada von Odris in Akt 5 frei."
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "2.1.0",
+  "module": "system_reconciliation_patch",
+  "decisionsPart1": {
+    "1_xpCurveLevels21To30": {
+      "level20StepCost": 1900, "level20TotalXp": 19000, "stepFormulaFrom21": "1900 + (level - 20) * 350",
+      "exactStepCosts": { "21": 2250, "22": 2600, "23": 2950, "24": 3300, "25": 3650, "26": 4000, "27": 4350, "28": 4700, "29": 5050, "30": 5400 },
+      "totalXpAtLevel30": 57250
+    },
+    "2_armadaMainStoryProgression": {
+      "mandatoryForAct5Passage": {
+        "requirement": "FILLED_WAR_CHEST_ONLY",
+        "warChestResources": { "RES_NAHRUNG": 30, "RES_HOLZ": 25, "RES_EISEN": 25, "RES_STEIN": 20 },
+        "preventsSoftlockFor": ["GEAECHTET_RUN", "LOW_ECONOMY_RUN"]
+      },
+      "optionalFleetUpgrades": {
+        "buildings": ["BLD_HOCHZITADELLE_T3", "BLD_KRIEGSWERFT"],
+        "effect": "Stärkere Armada-Flotte: reduziert die Anzahl der Seegefechte gegen Totenschiffe während der Überfahrt nach Akt 5."
+      }
+    },
+    "3_outlawKontorAndCentralStorageRule": {
+      "kontorDefinition": "Gemeinsames Rohstoff-Zentrallager aller Städte einer Fraktion.",
+      "whenReputationIsGeachtet": { "minRep": -100, "maxRep": -25, "tradingBlocked": true, "villageTitheBlocked": true, "storedResourcesWithdrawalAllowed": true, "warChestContributionAllowed": true }
+    },
+    "4_villageLiberationRule": {
+      "triggerQuestId": "q01", "requiredOutcomes": ["GUTE_TAT", "SOELDNER_WEG"], "forbiddenOutcome": "SCHLECHTE_TAT",
+      "effect": "Schließt man q01 einer der 33 Städte mit guter oder pragmatischer (Söldner-)Wahl ab, gelten alle zu dieser Stadt gehörenden Dörfer (insgesamt 69) als befreit."
+    },
+    "5_startingCitySmithies": {
+      "preBuiltBuildingId": "BLD_STADTSCHMIEDE", "citiesWithPreBuiltSmithy": ["KRONHALL", "GLUTBERG", "PERLVIK"],
+      "notes": "Ermöglicht Waffen- und Rüstungs-Upgrades (+1/+2) bereits in Prolog und Akt 1 ohne Ruf-Sperre."
+    },
+    "6_prologCityStates": {
+      "PERLVIK": { "status": "DAMAGED_BUT_FULLY_USABLE", "notes": "Im Häfen-Prolog beschädigt, aber alle Funktionen (Markt, Kontor, Stadtschmiede, Kriegsrat) nutzbar; Wiederaufbau (+20 Ruf) bleibt als optionales Projekt." },
+      "ASCHENKLOSTER": { "status": "BESIEGED_AND_DAMAGED_BUT_USABLE", "notes": "In Akt 2/3 bedrängt und beschädigt, aber voll nutzbar; Wiederaufbau (+20 Ruf) bleibt als Projekt." },
+      "WESTVIK": { "status": "DESTROYED", "notes": "Bleibt gemäß 'Feuer über Westvik' zerstört." }
+    }
+  },
+  "decisionsPart2": {
+    "7_combinedBuildingsEffects": {
+      "BLD_SIGNALFEUER": { "cost": { "silver": 45, "wood": 6, "stone": 6, "iron": 0 }, "defenseBonus": 10, "combinedEffects": ["Senkt die Begegnungsgefahr (Wegenetz-Wert) in angrenzenden Kanten um -15 Prozentpunkte.", "Warnt 1 Reise-Etappe früher vor bevorstehenden Überfällen auf Siedlungen."] },
+      "BLD_GRENZSTRASSE_STEIN": { "cost": { "silver": 80, "wood": 0, "stone": 12, "iron": 0 }, "defenseBonus": 0, "combinedEffects": ["Senkt den Nahrungsverbrauch auf dieser Grenzland-Kante dauerhaft von 2 auf 1 Nahrung.", "Senkt die Begegnungsgefahr auf dieser Kante dauerhaft auf 10 % (statt 40 %)."] }
+    },
+    "8_travelEncounterResolution": {
+      "baseRiskSource": "EDGES_JSON_PATH_DANGER_VALUE",
+      "riskModifiers": ["BLD_SIGNALFEUER (-15 %)", "BLD_GRENZSTRASSE_STEIN (setzt Basisgefahr auf 10 %)", "PARTY_MORALE_MODIFIER (-10 % bis +15 %)", "MASTER_TALENT_MT_GRENZLAEUFER (-15 % pro Rang)"],
+      "onEncounterTriggered": { "minibossCheck": "USE_MINIBOSS_SPAWN_CHANCE_BY_EDGE_TYPE", "enemySelection": "USE_FACTION_REGION_POOL_BY_CURRENT_REGION" }
+    },
+    "9_humanDamageFormula": {
+      "appliesTo": ["ORDEN_DER_FLAMME", "KRONREICH", "FREIE_HAEFEN"], "replacesLegacyHalvingRule": true,
+      "formula": "finalDamage = max(1, floor((weaponAttack + (primaryCoreAttribute / 2)) * skillMultiplier * critMultiplier) - targetArmor)",
+      "critMultiplier": 1.5,
+      "primaryAttributeByClassGroup": { "MELEE_STRENGTH": "STAERKE", "RANGED_AND_ROGUE": "GESCHICK", "MAGIC_AND_PRAYER": "WILLENSKRAFT", "ALCHEMY_AND_TACTICS": "INTELLIGENZ" }
+    },
+    "10_manaSystemAndPotions": {
+      "resourceSplit": {
+        "STAMINA_CLASSES": ["BLUTRITTER_DER_KRONE", "EISERNER_BASTIONAER", "DAEMMERUNGSJAEGER", "RUNENSKALDE", "WUNDMEISTER", "NACHTKLINGE", "STURMKORSAR", "TIEFENWAECHTER", "SCHWARZSCHUETZE", "PULVER_ALCHEMIST", "SEUCHENMEDIKUS", "SCHATTENFREIBEUTER", "EIDWAECHTER", "SCHATTEN_VOLLSTRECKER"],
+        "MANA_AND_STAMINA_CLASSES": ["PYROMANT", "KLERIKER_DER_FLAMME", "GLUTPALADIN", "INQUISITOR"],
+        "notes": "Zauberaffine Klassen (Pyromant, Kleriker der Flamme, Glutpaladin, Inquisitor) besitzen neben Ausdauer einen eigenen Mana-Vorrat (skaliert mit WILLENSKRAFT und INTELLIGENZ) für Glutmagie und Gebete."
+      },
+      "newManaPotions": [
+        { "id": "POT_MANA_1", "name": "Gluttau-Phiole (Kleiner Manatrank)", "category": "ALCHEMIE", "tier": 1, "source": ["KAUF", "LOOT", "FELD_HANDWERK"], "baseBuyPrice": 22, "baseSellPrice": 11, "effect": "Stellt im Kampf 30 Mana wieder her." },
+        { "id": "POT_MANA_2", "name": "Aschstern-Elixier (Mittlerer Manatrank)", "category": "ALCHEMIE", "tier": 2, "source": ["KAUF", "FELD_HANDWERK"], "baseBuyPrice": 52, "baseSellPrice": 26, "effect": "Stellt im Kampf 75 Mana wieder her und gewährt +2 Willenskraft für 2 Züge." },
+        { "id": "POT_MANA_3", "name": "Essenz des Glutbergs (Großer Manatrank)", "category": "ALCHEMIE", "tier": 3, "source": ["KAUF"], "baseBuyPrice": 120, "baseSellPrice": 60, "effect": "Stellt im Kampf 160 Mana wieder her." }
+      ],
+      "manaPotionFieldRecipe": {
+        "id": "CRAFT_FIELD_MANA_1", "name": "Gluttau-Phiole destillieren", "requiredClasses": ["PYROMANT", "KLERIKER_DER_FLAMME", "PULVER_ALCHEMIST"],
+        "ingredients": [ { "id": "MAT_ASCHBERNSTEIN", "count": 1 }, { "id": "MAT_KRAEUTER", "count": 1 } ], "outputItemId": "POT_MANA_1", "outputCount": 1
+      }
+    },
+    "11_humanMasterRank25Rule": {
+      "appliesTo": "HUMAN_FACTIONS_ONLY", "level25Unlock": "SIGNATURE_SPECIALIZATION_SKILL_RANK_4_MASTER", "legacyMasterClassRemoved": true,
+      "notes": "Bei den Menschen ersetzt Rang 4 (Meisterstufe) der Signaturfähigkeit auf Stufe 25 die alte Meisterklasse aus dem Dokument vom 17.11."
+    },
+    "12_enemyScalingUpToLevel30": {
+      "maxScalingLevel": 30,
+      "rule": "Die bestehende Rangformel des Kampfdokuments wird linear bis Stufe 30 fortgeführt, sodass Gegner in Akt 5 (20–26) und im Untoten-Norden (25–30) nahtlos mitleveln."
+    }
+  }
+}
