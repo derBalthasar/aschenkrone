@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Aschenkrone · Pixelkampf V4 · Geschwindigkeitsregler</title>
+    <title>Aschenkrone · Pixelkampf V5 · Schwerthieb</title>
     <style>
       :root {
         color-scheme: dark;
@@ -493,7 +493,7 @@
     <main>
       <header>
         <div>
-          <p class="eyebrow">Aschenkrone · Testversion 4 · Pixelkampf</p>
+          <p class="eyebrow">Aschenkrone · Testversion 5 · Schwerthieb</p>
           <h1>Wölfe am Aschenpass</h1>
         </div>
         <a href="../../index.html">Zum Hauptspiel ↗</a>
@@ -638,7 +638,8 @@
           effect = null;
         let waiting = false,
           enemyCursor = -1;
-        let moving = null,
+        let gesture = null,
+          moving = null,
           drawingTime = 0;
         const places = [
           { x: 140, y: 82 },
@@ -731,6 +732,7 @@
           log = [];
           effect = null;
           moving = null;
+          gesture = null;
           if (ko) {
             party[2].hp = 0;
             healTarget = 2;
@@ -974,6 +976,104 @@
             ctx.fill();
           }
         }
+        function pixelLine(x1, y1, x2, y2, color, width = 2) {
+          const steps = Math.max(
+            1,
+            Math.ceil(Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1))),
+          );
+          for (let i = 0; i <= steps; i++)
+            paint(
+              x1 + ((x2 - x1) * i) / steps - width / 2,
+              y1 + ((y2 - y1) * i) / steps - width / 2,
+              width,
+              width,
+              color,
+            );
+        }
+        function weaponAngle(progress) {
+          if (progress < 0.32) return -0.3 - 1.9 * (progress / 0.32);
+          if (progress < 0.78) return -2.2 + 3.05 * ((progress - 0.32) / 0.46);
+          return 0.85 - 0.4 * ((progress - 0.78) / 0.22);
+        }
+        function weaponGesture(h, g) {
+          const angle = weaponAngle(g.progress),
+            sx = 25,
+            sy = 26;
+          const hx = sx + Math.cos(angle) * 13,
+            hy = sy + Math.sin(angle) * 13;
+          const blade = g.kind === "sword";
+          const length = blade ? 36 : 32;
+          const tx = hx + Math.cos(angle) * length,
+            ty = hy + Math.sin(angle) * length;
+          if (blade && g.progress > 0.34 && g.progress < 0.78) {
+            ctx.save();
+            ctx.globalAlpha = 0.25;
+            for (const delay of [0.08, 0.16]) {
+              const a = weaponAngle(Math.max(0.32, g.progress - delay));
+              pixelLine(
+                sx + Math.cos(a) * 15,
+                sy + Math.sin(a) * 15,
+                sx + Math.cos(a) * 49,
+                sy + Math.sin(a) * 49,
+                "#b9d3c8",
+                2,
+              );
+            }
+            ctx.restore();
+          }
+          pixelLine(sx, sy, hx, hy, h.color, 6);
+          paint(hx - 2, hy - 2, 5, 5, "#d5ad82");
+          pixelLine(
+            hx - Math.cos(angle) * 7,
+            hy - Math.sin(angle) * 7,
+            hx,
+            hy,
+            "#735039",
+            4,
+          );
+          pixelLine(
+            hx,
+            hy,
+            tx,
+            ty,
+            blade ? "#455655" : "#a88754",
+            blade ? 6 : 4,
+          );
+          if (blade) {
+            pixelLine(
+              hx + Math.cos(angle) * 4,
+              hy + Math.sin(angle) * 4,
+              tx,
+              ty,
+              "#cadcd0",
+              3,
+            );
+            pixelLine(
+              hx + Math.cos(angle) * 5 - 1,
+              hy + Math.sin(angle) * 5 - 1,
+              tx - 1,
+              ty - 1,
+              "#f7f2db",
+              1,
+            );
+            pixelLine(
+              hx - Math.sin(angle) * 7,
+              hy + Math.cos(angle) * 7,
+              hx + Math.sin(angle) * 7,
+              hy - Math.cos(angle) * 7,
+              "#d5b273",
+              3,
+            );
+          } else {
+            paint(
+              tx - 3,
+              ty - 3,
+              6,
+              6,
+              g.kind === "cast" ? "#dd985f" : "#d1bd7b",
+            );
+          }
+        }
         function human(h, x, y, pose = false) {
           ctx.save();
           ctx.translate(Math.round(x - 16), Math.round(y - 49));
@@ -983,6 +1083,12 @@
             ctx.translate(-15, -28);
             ctx.globalAlpha = 0.55;
           }
+          const g = gesture?.index === party.indexOf(h) ? gesture : null;
+          if (g)
+            ctx.translate(
+              Math.round(Math.sin(g.progress * Math.PI) * 3),
+              g.progress > 0.4 && g.progress < 0.8 ? 2 : 0,
+            );
           const z = 2;
           const r = (a, b, w, k, c) => paint(a * z, b * z, w * z, k * z, c);
           r(5, 1, 7, 3, "#4f392e");
@@ -991,7 +1097,7 @@
           r(10, 5, 1, 1, "#252825");
           r(4, 10, 9, 9, h.color);
           r(3, 12, 2, 7, h.color);
-          r(12, 11, 2, 7, h.color);
+          if (!g) r(12, 11, 2, 7, h.color);
           const stride =
             pose && $("motion").checked
               ? Math.floor(drawingTime / (130 * timingScale())) % 2
@@ -1003,12 +1109,14 @@
           r(6, 11, 2, 7, "#d7cba1");
           r(4, 17, 9, 2, "#503b2a");
           r(3, 17, 2, 2, "#d5ad82");
-          r(12, 16, 2, 2, "#d5ad82");
+          if (!g) r(12, 16, 2, 2, "#d5ad82");
           if (h.role === "Ritterin") {
             r(1, 11, 3, 7, "#99a8a1");
             r(1, 12, 1, 5, "#ced2bd");
-            r(pose ? 15 : 14, pose ? 7 : 12, 1, 12, "#d0d7c7");
-            r(13, 17, 4, 1, "#d0ac67");
+            if (!g) {
+              r(14, 12, 1, 12, "#d0d7c7");
+              r(13, 17, 4, 1, "#d0ac67");
+            }
           }
           if (h.role === "Waldläuferin") {
             r(14, 10, 1, 10, "#c6a774");
@@ -1018,8 +1126,10 @@
           }
           if (h.role === "Magierin") {
             r(3, 10, 12, 2, h.color);
-            r(13, 9, 1, 14, "#b38b5b");
-            r(12, 8, 3, 3, "#cf936b");
+            if (!g) {
+              r(13, 9, 1, 14, "#b38b5b");
+              r(12, 8, 3, 3, "#cf936b");
+            }
             r(6, 0, 5, 2, "#9999bf");
           }
           if (h.role === "Heilerin") {
@@ -1028,6 +1138,7 @@
             r(9, 12, 2, 5, "#d1a45a");
             r(8, 13, 4, 1, "#d1a45a");
           }
+          if (g) weaponGesture(h, g);
           ctx.restore();
         }
         function wolf(e, x, y, i) {
@@ -1078,19 +1189,20 @@
               paint(x - 5, y + 9, 10, 2, "#e8c580");
               paint(x - 2, y + 11, 4, 2, "#e8c580");
             }
-            human(h, x, y, moving?.index === i && moving.x > 0);
+            human(h, x, y, moving?.index === i && moving.walking);
             ctx.globalAlpha = 1;
-            sceneLabel(
-              h.name + (!h.hp ? " KO" : ""),
-              x,
-              y + 20,
-              i === actor && enemyCursor < 0 ? "#f1cb7d" : "#d5dccd",
-            );
+            if (moving?.index !== i)
+              sceneLabel(
+                h.name + (!h.hp ? " KO" : ""),
+                x,
+                y + 20,
+                i === actor && enemyCursor < 0 ? "#f1cb7d" : "#d5dccd",
+              );
           });
           enemies.forEach((e, i) => {
             let { x, y } = foePlaces[i];
             if (effect?.side === "enemy" && effect.index === i) {
-              x += effect.move || 0;
+              x += (effect.move || 0) + (effect.recoil || 0);
               if (effect.flash && Math.floor(t / (110 * timingScale())) % 2)
                 ctx.globalAlpha = 0.25;
             }
@@ -1111,6 +1223,21 @@
             const a = effect.beam;
             paint(a.x - 5, a.y - 4, 10, 8, a.color);
             paint(a.x + 5, a.y - 2, 8, 4, "#f4d8a2");
+          }
+          if (effect?.slash) {
+            const a = effect.slash;
+            if (a.progress > 0) {
+              ctx.save();
+              ctx.globalAlpha = a.opacity;
+              const sx = a.x - 24,
+                sy = a.y - 46,
+                ex = sx + 48 * a.progress,
+                ey = sy + 42 * a.progress;
+              pixelLine(sx - 3, sy + 3, ex - 3, ey + 3, "#648b83", 7);
+              pixelLine(sx, sy, ex, ey, "#e4d6ad", 5);
+              pixelLine(sx, sy - 1, ex, ey - 1, "#fff9df", 2);
+              ctx.restore();
+            }
           }
           if (effect?.spark) {
             const a = effect.spark;
@@ -1154,22 +1281,51 @@
             requestAnimationFrame(step);
           });
         }
-        async function impact(side, index, value, healing = false) {
+        async function impact(
+          side,
+          index,
+          value,
+          healing = false,
+          style = "spark",
+          onContact = null,
+        ) {
           const pos = side === "ally" ? places[index] : foePlaces[index];
-          effect = { side, index, flash: !healing };
-          await animate(420, (n) => {
-            effect.text = {
-              x: pos.x,
-              y: pos.y - 40 - n * 18,
-              value: (healing ? "+" : "−") + value,
-              color: healing ? "#c4e0a0" : "#ffe4ab",
-            };
-            effect.spark = {
-              x: pos.x,
-              y: pos.y - 22,
-              radius: 6 + n * 20,
-              color: healing ? "#a8ca89" : "#dcaf72",
-            };
+          effect = { side, index, flash: !healing && style !== "slash" };
+          let contacted = false;
+          if (style === "slash")
+            $("phase").textContent = "SCHWERTHIEB · SCHNITT";
+          await animate(style === "slash" ? 320 : 420, (n) => {
+            if (gesture && (style === "slash" || style === "staff"))
+              gesture.progress = 0.32 + 0.68 * Math.min(1, n / 0.85);
+            if (style === "slash" && n >= 0.28 && !contacted) {
+              onContact?.();
+              contacted = true;
+            }
+            effect.flash = !healing && (style !== "slash" || n >= 0.28);
+            if (style !== "slash" || n >= 0.28)
+              effect.text = {
+                x: pos.x,
+                y: pos.y - 40 - n * 18,
+                value: (healing ? "+" : "−") + value,
+                color: healing ? "#c4e0a0" : "#ffe4ab",
+              };
+            if (style === "slash") {
+              effect.slash = {
+                x: pos.x,
+                y: pos.y,
+                progress: Math.max(0, Math.min(1, (n - 0.12) / 0.48)),
+                opacity: n > 0.8 ? (1 - n) / 0.2 : 1,
+              };
+              effect.recoil =
+                n < 0.28 ? 0 : Math.sin((Math.PI * (n - 0.28)) / 0.72) * 6;
+            } else {
+              effect.spark = {
+                x: pos.x,
+                y: pos.y - 22,
+                radius: 6 + n * 20,
+                color: healing ? "#a8ca89" : "#dcaf72",
+              };
+            }
           });
           effect = null;
         }
@@ -1178,8 +1334,8 @@
           const pos = places[actor],
             target = foePlaces[i];
           if (style === "sword") {
-            moving = { index: actor, x: 0, y: 0 };
-            await animate(280, (n) => {
+            moving = { index: actor, x: 0, y: 0, walking: true };
+            await animate(240, (n) => {
               moving.x = n * (target.x - pos.x - 45);
               moving.y = n * (target.y - pos.y);
             });
@@ -1195,10 +1351,36 @@
                 }),
             );
           }
-          const loss = Math.min(damage, enemies[i].hp);
-          enemies[i].hp -= loss;
-          await impact("enemy", i, loss);
           if (style === "sword") {
+            moving.walking = false;
+            gesture = {
+              index: actor,
+              kind: actor === 0 ? "sword" : "staff",
+              progress: 0,
+            };
+            $("phase").textContent =
+              actor === 0 ? "SCHWERTHIEB · AUSHOLEN" : "STABHIEB · AUSHOLEN";
+            await animate(140, (n) => (gesture.progress = n * 0.32));
+          }
+          const loss = Math.min(damage, enemies[i].hp);
+          const slash = style === "sword" && actor === 0;
+          if (!slash) enemies[i].hp -= loss;
+          await impact(
+            "enemy",
+            i,
+            loss,
+            false,
+            style === "sword" ? (actor === 0 ? "slash" : "staff") : "spark",
+            slash
+              ? () => {
+                  enemies[i].hp -= loss;
+                }
+              : null,
+          );
+          if (style === "sword") {
+            gesture = null;
+            moving.walking = true;
+            $("phase").textContent = "RÜCKKEHR";
             await animate(200, (n) => {
               moving.x = (1 - n) * (target.x - pos.x - 45);
               moving.y = (1 - n) * (target.y - pos.y);
@@ -1372,6 +1554,8 @@
             finishTurn();
           } finally {
             effect = null;
+            gesture = null;
+            moving = null;
             busy = false;
             render();
           }
