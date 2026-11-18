@@ -29,9 +29,12 @@ jobs:
           node --check spiel/karte.js
           node --check spiel/knoten-daten.js
           node --check spiel/knoten.js
+          node --check spiel/nebenquests-daten.js
+          node --check spiel/nebenquests.js
           node --check spiel/oberflaeche.js
       - name: Spielregeln testen
         run: |
           node --test spiel/regeln.test.cjs
           node --test spiel/kampf.test.cjs
           node --test spiel/karte.test.cjs
+          node --test spiel/nebenquests.test.cjs

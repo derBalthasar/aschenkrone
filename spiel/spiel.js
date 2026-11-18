@@ -2119,6 +2119,8 @@
       if (rules.handlungHier(state)) button(krise, "Zur Handlung zurückkehren", () => update(rules.zurHandlung(state)), { story: true });
     }
     content.append(krise);
+    const aushang = weltAushang(ort);
+    if (aushang) content.append(aushang);
 
     // Bereiche A bis D
     const tabs = element("div");
@@ -2151,6 +2153,35 @@
     panel.setAttribute("aria-labelledby", "welt-tab-" + welt.tab);
     ({ hofstaat: weltHofstaat, lager: weltLager, held: weltHeld, aufbruch: weltAufbruch })[welt.tab](panel, ort);
     content.append(tabs, panel);
+  }
+
+  // Aushang: Nebenquests des Ortes (Gemini-Ausarbeitung, spiel/nebenquests.js). Nur lesbar, noch nicht spielbar.
+  function weltAushang(ort) {
+    const eintrag = typeof nebenquests !== "undefined" ? nebenquests.fuerOrt(ort.id) : null;
+    if (!eintrag?.auftraege.length) return null;
+    const box = element("details");
+    box.className = "welt-aushang";
+    box.append(element("summary", "Aushang in " + ort.name + " · " + eintrag.auftraege.length + " Aufträge · Stufe " + eintrag.stufen));
+    const stand = element("p", eintrag.stand + (eintrag.weg ? " Dorfweg " + eintrag.weg + ": " + nebenquests.wegName(eintrag.weg) + "." : ""));
+    stand.className = "welt-aushang-stand";
+    box.append(stand);
+    const liste = element("ul");
+    for (const auftrag of eintrag.auftraege) {
+      const item = element("li");
+      const kopf = element("p");
+      kopf.append(element("strong", auftrag.titel), " · " + auftrag.art);
+      item.append(kopf, element("p", auftrag.text), element("p", "Lohn: " + auftrag.lohn));
+      const wege = nebenquests.wegeImText(auftrag.text + " " + auftrag.lohn);
+      if (wege.length) item.append(element("p", "Wege: " + wege.map(k => k + " " + nebenquests.wegName(k)).join(", ")));
+      if (auftrag.hinweis) {
+        const hinweis = element("p", auftrag.hinweis);
+        hinweis.className = "welt-aushang-hinweis";
+        item.append(hinweis);
+      }
+      liste.append(item);
+    }
+    box.append(liste);
+    return box;
   }
 
   function weltHofstaat(panel, ort) {

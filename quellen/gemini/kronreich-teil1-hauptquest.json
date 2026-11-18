@@ -1,0 +1,148 @@
+{
+  "meta": {
+    "game": "Aschenkrone",
+    "world": "Odris",
+    "time": "Herbst 612 n. E. (Nacht des Erwachens)",
+    "faction": "Kronreich",
+    "factionId": "hum_kronreich",
+    "motto": "Eine Krone, ein Volk",
+    "resourceType": "Korn",
+    "currency": "Silber",
+    "magicAllowed": false,
+    "maxCompanions": 3,
+    "rules": {
+      "noTimeLimit": true,
+      "keepSecret": ["Identität des Bleichen Skalden", "Identität der Stillen Feder"]
+    }
+  },
+  "companions": [
+    {
+      "id": "comp_kron_sigrid",
+      "name": "Sigrid Eisenschild",
+      "role": "Schildmaid / Tank",
+      "recruitLocation": "Kronhall",
+      "recruitAct": 1,
+      "questId": "kronhall_q10",
+      "ability": "Unbrechbarer Schildwall"
+    },
+    {
+      "id": "comp_kron_wulfgar",
+      "name": "Wulfgar Rossbrecher",
+      "role": "Kavallerist / Späher",
+      "recruitLocation": "Rosshag",
+      "recruitAct": 2,
+      "questId": "rosshag_q10",
+      "ability": "Sturmangriff der Steppe"
+    },
+    {
+      "id": "comp_kron_fenris",
+      "name": "Fenris Ulfsson",
+      "role": "Meister-Bogenschütze",
+      "recruitLocation": "Ulfsborg",
+      "recruitAct": 3,
+      "questId": "ulfsborg_q10",
+      "ability": "Blattschuss aus dem Hinterhalt"
+    }
+  ],
+  "mainQuestline": {
+    "chapter": 1,
+    "estimatedDurationHours": 11,
+    "prolog": {
+      "id": "hum_kronreich_prolog",
+      "title": "Feuer über Westvik",
+      "status": "implemented",
+      "startLocation": "Westvik",
+      "endLocation": "Kronhall",
+      "summary": "Erntefest in Westvik, Überfall der Rostsegel, Entscheidung über Korn-Tribut, Flucht nach Kronhall wo König Harald IV. zusammenbricht."
+    },
+    "acts": [
+      {
+        "act": 1,
+        "id": "hum_kronreich_act1",
+        "title": "Der Thron wankt",
+        "levelRange": "1-5",
+        "region": "Kronreich (Kernland & Westmark)",
+        "focus": "Diplomatie, Intrige, Grenzverteidigung",
+        "steps": [
+          { "step": 1, "location": "Kronhall", "title": "Der Schwur am Krankenbett", "description": "Kronprinzessin Astrid ernennt den Spieler zum Reichsboten. Am Bett des todkranken König Harald IV. fällt ein stummer Heiler auf, der graue Asche verbrennt. Aufbruch nach Hagenfels zu Jarl Ragnvald." },
+          { "step": 2, "location": "Hagenfels / Westmark", "title": "Das verbrannte Korn", "description": "Jarl Ragnvald fordert einen Beweis der Stärke, bevor er Truppen für die Krone stellt. Verteidigung der Höfe der Westmark gegen Deserteure und Plünderer." },
+          { "step": 3, "location": "Westvik / Steinwacht", "title": "Feuer an der Westmark", "description": "Konfrontation mit Kapitän Urgash und der Vorhut der Rostsegel an der Westküste." }
+        ],
+        "keyChoice": {
+          "optionA": { "id": "kron_act1_fight", "label": "Rostsegel blutig zurückschlagen & Ragnvald warnen", "effect": "Ork-Bedrohung -5; Ragnvald stellt Truppen, misstraut aber dem Hof in Kronhall." },
+          "optionB": { "id": "kron_act1_truce", "label": "Waffenstillstand mit Urgash (40 Silber) & Hof schützen", "effect": "Ruhe an der Westküste; Astrid behält volle Kontrolle, Kultist bleibt länger unentdeckt." }
+        }
+      },
+      {
+        "act": "2_or_3_branch_A",
+        "id": "hum_kronreich_branch_haefen",
+        "title": "Die abtrünnigen Häfen",
+        "freeOrder": true,
+        "recommendedOrder": 2,
+        "levelRange": "6-10",
+        "sisterFaction": "Freie Häfen",
+        "mainLocations": ["Grenzmarkt", "Perlvik", "Zollholm", "Salzwacht"],
+        "steps": [
+          { "step": 1, "location": "Grenzmarkt / Perlvik", "title": "Der verschlossene Hafen", "description": "Verhandlung mit Thingsprecherin Solveig Valsdottir und dem Gildenrat über Schiffe und Nachschub trotz der Kronschuld." },
+          { "step": 2, "location": "Nebelvik / Zollholm", "title": "Schmuggel im Nebel", "description": "Ausheben einer Schmugglerbucht und Sicherstellung von Aethari-Schriften und nördlichem Totenstaub." },
+          { "step": 3, "location": "Perlvik", "title": "Der Vertrag von Perlvik", "description": "Einigung mit den Freien Häfen über den Bau und die Bereitstellung einer Flotte." }
+        ],
+        "keyChoice": {
+          "optionA": { "id": "kron_haefen_diplomacy", "label": "Reichsthing & Handelsprivilegien (80 Silber)", "effect": "Handelsflotte & Gold-Boni freigeschaltet; friedlicher Bund." },
+          "optionB": { "id": "kron_haefen_force", "label": "Gildenrat mit Schmuggelbeweisen erpressen & Werften besetzen", "effect": "Sofortige Kriegsschiffe in Salzwacht, aber Unruhe in den Häfen." }
+        }
+      },
+      {
+        "act": "2_or_3_branch_B",
+        "id": "hum_kronreich_branch_orden",
+        "title": "Der Schwur am Glutberg",
+        "freeOrder": true,
+        "recommendedOrder": 3,
+        "levelRange": "11-15",
+        "sisterFaction": "Orden der Flamme",
+        "mainLocations": ["Eiswacht", "Aschenkloster", "Glutberg"],
+        "steps": [
+          { "step": 1, "location": "Eiswacht (Pass P02)", "title": "Der Zug über den Eispass", "description": "Eskorte eines Korntrecks (kostet 20 Korn) über den Eispass zu Ser Bjarne vom Eispass." },
+          { "step": 2, "location": "Aschenkloster", "title": "Die flackernde Wacht", "description": "Entsatz eines vom Kult der Bleichen Ewigkeit und Draugr bedrängten Ordensklosters; Begegnung mit Seherin Freydis." },
+          { "step": 3, "location": "Glutberg", "title": "Der Schwur am Glutberg", "description": "Bündnisschluss mit Hochmeisterin Ragna Glutherz und Erzpriester Thorvald in der Halle der Ewigen Flamme." }
+        ],
+        "keyChoice": {
+          "optionA": { "id": "kron_orden_ally", "label": "Gleichberechtigter Schildbund gegen den Norden", "effect": "Schaltet Ordensritter und Glutrunen-Waffen frei." },
+          "optionB": { "id": "kron_orden_command", "label": "Orden unter das Kriegsrecht der Krone stellen", "effect": "Schaltet Belagerungswaffen und Disziplin-Boni frei, senkt aber Ordens-Moral." }
+        },
+        "act3Specialization": {
+          "trigger": "Nach Abschluss beider Schwester-Zweige (Akt 2 & 3)",
+          "options": [
+            { "id": "spec_eiserne_krone", "name": "Eiserne Krone", "bonus": "Schwere Infanterie, höhere Rüstung, -25% Kornkosten auf Reisen." },
+            { "id": "spec_banner_der_glut", "name": "Banner der Glut", "bonus": "Runengeschmiedete Waffen (+Feuerschaden gegen Untote), Söldner-Boni." }
+          ]
+        }
+      },
+      {
+        "act": 4,
+        "id": "hum_kronreich_act4",
+        "title": "Das Alte Reich ersteht neu",
+        "levelRange": "16-18",
+        "region": "Gesamtes Menschenland (Kronhall, Perlvik, Glutberg)",
+        "includesFolkQuest": "Volksquest: Das Alte Reich",
+        "steps": [
+          { "step": 1, "location": "Kronhall (Katakomben)", "title": "Entlarvung des Grabwächters", "description": "Der stumme Heiler am Krankenbett Harald IV. wird als lokaler Grabwächter des Kults der Bleichen Ewigkeit entlarvt und seine 8-köpfige Kultzelle zerschlagen. (Der Bleiche Skalde selbst bleibt unerkannt)." },
+          { "step": 2, "location": "Kronhall (Großes Thing)", "title": "Das Große Thing", "description": "Astrid, Jarl Ragnvald, Solveig Valsdottir und Ragna Glutherz vereinen die drei Menschenfraktionen; der Spieler steigt zum Bannerjarl auf." },
+          { "step": 3, "location": "Salzwacht / Perlvik", "title": "Rüstung der Armada", "description": "Fertigstellung der Kriegsschiffe und Verladung von Korn und Truppen für die Überfahrt." }
+        ]
+      },
+      {
+        "act": 5,
+        "id": "hum_kronreich_act5",
+        "title": "Über das Innere Meer",
+        "levelRange": "19-20",
+        "region": "Haupthafen -> Seewege -> Neuer Kontinent",
+        "steps": [
+          { "step": 1, "location": "Perlvik / Salzwacht", "title": "Auslaufen der Reichsflotte", "description": "Die vereinte Menschenarmada verlässt den Nordwesten von Odris." },
+          { "step": 2, "location": "Inneres Meer", "title": "Totenschiffe im Nebel", "description": "Abwehr eines Angriffs untoter Kriegsschiffe aus dem hohen Norden auf hoher See." },
+          { "step": 3, "location": "Fremde Küste (Neuer Kontinent)", "title": "Der Brückenkopf", "description": "Eroberung eines Küstenabschnitts auf dem neuen Kontinent und Errichtung des ersten Feldlagers. Ende Kapitel 1." }
+        ]
+      }
+    ]
+  }
+}

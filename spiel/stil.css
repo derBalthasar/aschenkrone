@@ -549,6 +549,13 @@ button.map-marker[aria-pressed="true"] { background: #694623; }
 .welt-alarm { padding: .35rem .55rem; border-left: 4px solid #b8432f; background: #f3d9c6; }
 .welt-hooks { margin: .4rem 0; padding-left: 1.1rem; }
 .welt-hooks li { margin-block: .25rem; }
+.welt-aushang { margin-top: .9rem; }
+.welt-aushang summary { cursor: pointer; font-weight: 600; }
+.welt-aushang ul { margin: .4rem 0; padding-left: 1.1rem; }
+.welt-aushang li { margin-block: .55rem; }
+.welt-aushang li p { margin: .15rem 0; overflow-wrap: anywhere; }
+.welt-aushang-stand, .welt-aushang-hinweis { font-size: .85rem; color: #69492d; }
+.welt-aushang-hinweis { font-style: italic; }
 .welt-tabs { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: 1rem; border-bottom: 1px solid #ad9066; }
 .welt-tabs button { flex: 1 1 8.5rem; min-height: 2.75rem; padding: .3rem .6rem; font: inherit; color: #4b3420; background: #e0caa3;
   border: 1px solid #ad9066; border-bottom: 0; border-radius: 4px 4px 0 0; cursor: pointer; }
