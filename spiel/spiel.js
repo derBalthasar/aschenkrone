@@ -2188,9 +2188,10 @@
       liste.append(item);
     }
     box.append(liste);
-    box.append(element("p", "Fraktions-Spezialisierung (" + reihe.spezialisierung.ausloeser + "): " +
+    box.append(element("p", "Fraktions-Spezialisierung (" + reihe.spezialisierung.ausloeser + ", " + reihe.spezialisierung.zusaetzlich + "): " +
       reihe.spezialisierung.optionen.map(o => o.name + " – " + o.bonus).join(" · ")));
-    box.append(element("p", "Begleiter: " + reihe.begleiter.map(b => b.name + " (" + b.rolle + ", " + knoten.get(b.ort).name +
+    box.append(element("p", "Begleiter: " + reihe.begleiter.map(b => b.name + " (" + b.rolle + ", " +
+      (klassen.fraktionen[fraktion]?.klassen[b.klasse]?.name ?? b.klasse) + ", " + knoten.get(b.ort).name +
       ", Akt " + b.akt + ")").join(", ")));
     const stand = element("p", "Plan der Hauptquest. Die Akte werden noch gebaut.");
     stand.className = "welt-aushang-stand";

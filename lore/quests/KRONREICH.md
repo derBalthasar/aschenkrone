@@ -8,6 +8,10 @@ Stand: 18. 11. 2026. Grundlage ist die Ausarbeitung von Gemini (Quelltext unver�
 3. Die Stufen folgen Gemini, bis Stufe 20 (eigene Tabelle `kampf.questStufenFraktion.kronreich`).
 4. Der Bleiche Skalde wird in Akt 4 entdeckt, damit die Bedrohung durch die Untoten erklärt ist. **Der Skalde ist Erzpriester Thorvald vom Glutberg.**
 5. Geheim bleibt nur die Identität der Stillen Feder.
+6. Die Fraktions-Spezialisierung kommt **zusätzlich** zur Spezialisierung der Klasse.
+7. **Runenwaffen darf das Kronreich tragen, Glutwaffen nicht.**
+8. Akt 5: Das Ziel der Überfahrt ist **frei wählbar**. Elfen, Orks und Zwerge kann man als Verbündete gewinnen oder unterwerfen. Wer zum Kontinent der Untoten segelt, um die Untoten-Bedrohung zu vernichten, wählt den extrem schweren Weg.
+9. Keine zwei Späher unter den Begleitern: Wulfgar bleibt Späher (im Kronreich „Steppenreiter“), Fenris wird Krieger (Huskarl). Diese Klassenwahl ist vorläufig und von Henry noch zu bestätigen.
 
 | Teil | Stand im Spiel |
 | --- | --- |
@@ -47,12 +51,12 @@ Orte: Eiswacht, Aschenkloster, Glutberg.
 3. **Der Schwur am Glutberg** (Glutberg): Bündnis mit Hochmeisterin Ragna Glutherz und Erzpriester Thorvald in der Halle der Ewigen Flamme. Hier begegnet der Held dem Skalden, ohne es zu wissen.
 
 Entscheidung:
-- **A:** Ein gleichberechtigter Schildbund gegen den Norden. Schaltet Ordensritter und Glutrunen-Waffen frei.
+- **A:** Ein gleichberechtigter Schildbund gegen den Norden. Schaltet Ordensritter und Glutrunen-Waffen frei (Runenwaffen, im Kronreich erlaubt).
 - **B:** Den Orden unter das Kriegsrecht der Krone stellen. Schaltet Belagerungswaffen und Disziplin-Boni frei, senkt aber die Moral des Ordens.
 
-### Spezialisierung (nach Abschluss beider Schwester-Zweige)
+### Fraktions-Spezialisierung (nach Abschluss beider Schwester-Zweige, zusätzlich zur Klassen-Spezialisierung)
 - **Eiserne Krone:** schwere Infanterie, höhere Rüstung, −25 % Kornkosten auf Reisen.
-- **Banner der Glut:** runengeschmiedete Waffen (+Feuerschaden gegen Untote), Söldner-Boni.
+- **Banner der Glut:** runengeschmiedete Waffen (+Feuerschaden gegen Untote), Söldner-Boni. Es sind Runenwaffen, also im Kronreich erlaubt.
 
 ### Akt 4 „Das Alte Reich ersteht neu“ (Stufe 16–18, mit der Volksquest „Das Alte Reich“)
 1. **Entlarvung des Bleichen Skalden** (Katakomben von Kronhall): Der stumme Heiler am Krankenbett wird als Grabwächter des Kults entlarvt, seine 8-köpfige Zelle wird zerschlagen. Seine Briefe führen zum Bleichen Skalden selbst: **Erzpriester Thorvald vom Glutberg**. Seit über hundert Jahren hält ihn die Totenmagie des Nordens am Leben. Als Preis dafür schwächt er die Ewige Flamme, und je schwächer sie brennt, desto stärker werden die Untoten im hohen Norden. Der Held stellt ihn in den Katakomben (Endgegner). Untoten-Bedrohung −15 (Welt-Hebel nach `lore/ERRATA.md`).
@@ -62,27 +66,21 @@ Entscheidung:
 ### Akt 5 „Über das Innere Meer“ (Stufe 19–20)
 1. **Auslaufen der Reichsflotte** (Perlvik, Salzwacht): Die vereinte Armada der Menschen verlässt den Nordwesten von Odris.
 2. **Totenschiffe im Nebel** (Inneres Meer): Abwehr eines Angriffs untoter Kriegsschiffe aus dem hohen Norden auf hoher See.
-3. **Der Brückenkopf** (fremde Küste, neuer Kontinent): Eroberung eines Küstenabschnitts und Errichtung des ersten Feldlagers. Ende von Kapitel 1.
+3. **Der Brückenkopf** (fremde Küste, frei wählbarer Kontinent): Eroberung eines Küstenabschnitts und Errichtung des ersten Feldlagers. Das Ziel wählt der Spieler frei: Elfen im Osten, Orks im Südwesten oder Zwerge im Südosten, jeweils als Verbündete oder um sie zu unterwerfen. Wer die Untoten-Bedrohung an der Wurzel vernichten will, segelt zum Kontinent der Untoten im hohen Norden; das ist der schwerste Weg. Ende von Kapitel 1.
 
 ## Begleiter
 
 Die Gruppengrenze im Spiel liegt bei 3 Gefährten plus Held (`rules.partyLimit`).
 
-| Name | Rolle | Anwerbung | Auftrag | Fähigkeit |
-| --- | --- | --- | --- | --- |
-| Sigrid Eisenschild | Schildmaid / Tank | Kronhall, Akt 1 | kronhall_q10 „Die eiserne Schuld“ | Unbrechbarer Schildwall |
-| Wulfgar Rossbrecher | Kavallerist / Späher | Rosshag, Akt 2 | rosshag_q10 „Der Eid der Reiter“ | Sturmangriff der Steppe |
-| Fenris Ulfsson | Meister-Bogenschütze | Ulfsborg, Akt 3 | ulfsborg_q10 „Der Jäger von Wolfstal“ | Blattschuss aus dem Hinterhalt |
+| Name | Rolle | Klasse | Anwerbung | Auftrag | Fähigkeit |
+| --- | --- | --- | --- | --- | --- |
+| Sigrid Eisenschild | Schildmaid / Tank | Wächter (Burgvogt) | Kronhall, Akt 1 | kronhall_q10 „Die eiserne Schuld“ | Unbrechbarer Schildwall |
+| Wulfgar Rossbrecher | Kavallerist / Späher | Späher (Steppenreiter) | Rosshag, Akt 2 | rosshag_q10 „Der Eid der Reiter“ | Sturmangriff der Steppe |
+| Fenris Ulfsson | Meister-Bogenschütze | Krieger (Huskarl), vorläufig | Ulfsborg, Akt 3 | ulfsborg_q10 „Der Jäger von Wolfstal“ | Blattschuss aus dem Hinterhalt |
 
-## Offene Fragen an Henry
+## Offene Frage an Henry
 
-Diese Punkte passen noch nicht zusammen und werden nicht stillschweigend entschieden:
-
-1. **Klassen- und Fraktions-Spezialisierung:** Laut `lore/KLASSEN.md` wählt jede Klasse ab Quest-Stufe 3 eine von zwei eigenen Spezialisierungen. Ersetzen „Eiserne Krone“ und „Banner der Glut“ diese im Kronreich, oder kommen sie dazu? Der Zeitpunkt passt bereits: Nach beiden Schwester-Zweigen sind drei Akte abgeschlossen.
-2. **Freie Reihenfolge und feste Stufen:** Häfen haben Stufe 6–10, Glutberg 11–15. Spielt man den Glutberg zuerst, kommt man mit etwa Stufe 6 in ein Gebiet für Stufe 11–15 (das Ordensland ist sogar Stufe 15–20). Sollen sich die Gegner nach der Reihenfolge richten?
-3. **Glut- und Runenwaffen ohne Magie:** „Banner der Glut“, Glutrunen-Waffen und einige Nebenquest-Belohnungen (Runen-Dolch, Runentalisman, Runensattel, Glutpanzer-Wams, Glutstahl-Klinge) sind Gegenstände aus Magie. Gilt: Das Kronreich darf sie tragen, aber keine Magie wirken?
-4. **Ziel der Überfahrt:** Welcher Kontinent ist der „neue Kontinent“ in Akt 5? Die Totenschiffe kommen aus dem hohen Norden (Untote).
-5. **Zwei Späher:** Wulfgar und Fenris wären beide Späher. Gefährten sollen aber unterschiedliche Klassen haben.
+**Freie Reihenfolge und feste Stufen:** Die Häfen sind für Stufe 6–10 gedacht, der Glutberg für 11–15. Wer nach Akt 1 (etwa Stufe 5) zuerst zum Glutberg geht, trifft dort auf Gegner, die für Stufe 11–15 gebaut sind. Vorschlag: Der erste Schwester-Zweig ist immer Stufe 6–10 und der zweite immer 11–15, egal welcher zuerst gespielt wird. Die Gegner passen sich also der Reihenfolge an.
 
 ## Folgen für andere Fraktionen (später beheben)
 
@@ -95,7 +93,7 @@ Diese Punkte passen noch nicht zusammen und werden nicht stillschweigend entschi
 
 Die Texte sind wörtlich übernommen. Korrigiert ist nur ein Bestiariumsname: „Irrglühte“ heißt im Kanon „Irrglut“. Alle Orte, Dörfer, Erträge und Weg-Kennungen S, P, M und D sind gegen das Knotennetz geprüft (`spiel/nebenquests.test.cjs`). Offen und im Spiel als Hinweis am Auftrag markiert:
 
-- Runen- oder Glutgegenstände als Lohn (siehe Frage 3).
+- hagenfels_q07: Die Glutstahl-Klinge ist eine Glutwaffe und im Kronreich nicht tragbar. Sie taugt nur als Beute zum Verkauf. Runengegenstände (Runen-Dolch, Runentalisman, Runensattel) sind erlaubt. Das Glutpanzer-Wams ist eine Rüstung aus Käferpanzer und keine Waffe.
 - westvik_q03: Von Westvik führt keine Straße direkt nach Kronhall. Der Weg geht über S23 nach Steinwacht.
 - rosshag_q02: Der Titel nennt die Rostsegel (Orkpiraten), der Text Kundschafter der Staubreiter zu Lande.
 - Riffhaie, Wrackkrabben und Bären stehen im Bestiarium, aber nicht in der Liste „Kronreich und Eispass“.

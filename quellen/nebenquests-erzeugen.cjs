@@ -35,9 +35,9 @@ const wegKennungen = {
 
 const korrekturen = [["Irrglühte", "Irrglut"]];
 
-const magie = "Prüfen: Runen- oder Glutgegenstand als Lohn, im Kronreich ist Magie nach Königsrecht verboten.";
+// Henry, 18. 11. 2026: Runenwaffen darf das Kronreich tragen, Glutwaffen nicht.
 const hinweise = {
-  kornwik_q06: magie, rosshag_q03: magie, eikmark_q06: magie, hagenfels_q07: magie, eikmark_q07: magie,
+  hagenfels_q07: "Glutwaffe: Im Kronreich nicht tragbar (Henry, 18. 11. 2026). Die Glutstahl-Klinge taugt nur als Beute zum Verkauf.",
   westvik_q03: "Prüfen: Von Westvik führt keine Straße direkt nach Kronhall (S23 nach Steinwacht, dann weiter).",
   rosshag_q02: "Prüfen: Titel nennt die Rostsegel (Orkpiraten), der Text Kundschafter der Staubreiter zu Lande.",
   kronhall_q10: "Begleiterin aus Geminis Hauptquest-Vorschlag, im Spiel noch nicht angelegt.",
@@ -76,7 +76,17 @@ const aenderungen = {
       "(Endgegner). Untoten-Bedrohung −15.",
     vermerk: "Änderung Henry (18. 11. 2026): Der Skalde wird hier entdeckt. Gemini ließ ihn unerkannt. Der Skalde ist Erzpriester Thorvald (Henry, 18. 11. 2026).",
   },
+  "hum_kronreich_act5/3": {
+    ort: "Fremde Küste (frei wählbarer Kontinent)",
+    text: "Eroberung eines Küstenabschnitts und Errichtung des ersten Feldlagers. Das Ziel wählt der Spieler frei: die Elfen " +
+      "im Osten, die Orks im Südwesten oder die Zwerge im Südosten, jeweils als Verbündete oder um sie zu unterwerfen. Wer " +
+      "die Untoten-Bedrohung an der Wurzel vernichten will, segelt zum Kontinent der Untoten im hohen Norden: der " +
+      "schwerste Weg. Ende Kapitel 1.",
+    vermerk: "Änderung Henry (18. 11. 2026): Kontinent frei wählbar, Bündnis oder Unterwerfung; Untote extrem schwer.",
+  },
 };
+// Klassen der Begleiter (Henry, 18. 11. 2026: keine zwei Späher). Wulfgar ist Steppenreiter (Späher des Kronreichs).
+const begleiterKlassen = { comp_kron_sigrid: "waechter", comp_kron_wulfgar: "spaeher", comp_kron_fenris: "krieger" };
 const teil1 = JSON.parse(fs.readFileSync(path.join(root, "quellen/gemini/kronreich-teil1-hauptquest.json"), "utf8"));
 const ml = teil1.mainQuestline;
 const wahl = (choice) => choice ? Object.values(choice).map((o) => ({ id: o.id, label: o.label, folge: o.effect })) : [];
@@ -86,7 +96,7 @@ const akte = ml.acts.map((a) => ({
   titel: a.title,
   stufen: a.levelRange,
   ...(a.freeOrder ? { freieReihenfolge: true, empfohlen: a.recommendedOrder, schwester: a.sisterFaction } : {}),
-  ort: a.region ?? a.mainLocations.join(", "),
+  ort: (a.id === "hum_kronreich_act5" ? "Haupthafen -> Seewege -> frei wählbarer Kontinent" : a.region) ?? a.mainLocations.join(", "),
   ...(a.focus ? { fokus: a.focus } : {}),
   ...(a.includesFolkQuest ? { volksquest: a.includesFolkQuest } : {}),
   schritte: a.steps.map((st) => ({ ort: st.location, titel: st.title, text: st.description,
@@ -99,8 +109,9 @@ const reihe = {
   kapitel: ml.chapter,
   prolog: { titel: ml.prolog.title, text: ml.prolog.summary },
   akte,
-  spezialisierung: { ausloeser: spez.trigger, optionen: spez.options.map((o) => ({ id: o.id, name: o.name, bonus: o.bonus })) },
-  begleiter: teil1.companions.map((c) => ({ id: c.id, name: c.name, rolle: c.role, ort: knoten.nachName[c.recruitLocation],
+  // Henry, 18. 11. 2026: Die Fraktions-Spezialisierung kommt zur Spezialisierung der Klasse hinzu.
+  spezialisierung: { ausloeser: spez.trigger, zusaetzlich: "zusätzlich zur Spezialisierung der Klasse", optionen: spez.options.map((o) => ({ id: o.id, name: o.name, bonus: o.bonus })) },
+  begleiter: teil1.companions.map((c) => ({ id: c.id, name: c.name, rolle: c.role, klasse: begleiterKlassen[c.id], ort: knoten.nachName[c.recruitLocation],
     akt: c.recruitAct, auftrag: c.questId, faehigkeit: c.ability })),
   geheim: ["Identität der Stillen Feder"],
 };

@@ -74,6 +74,13 @@ test("Fraktionsreihe Kronreich folgt Geminis Aufbau", () => {
     "Das Alte Reich ersteht neu", "Über das Innere Meer"]);
   assert.equal(reihe.prolog.titel, "Feuer über Westvik");
   assert.equal(reihe.spezialisierung.optionen.length, 2);
+  const klassen = reihe.begleiter.map((begleiter) => begleiter.klasse);
+  assert.equal(new Set(klassen).size, klassen.length, "Begleiter brauchen verschiedene Klassen");
+  const klassenDatei = fs.readFileSync(path.join(root, "spiel/klassen.js"), "utf8");
+  for (const klasse of klassen) assert.ok(new RegExp("\\b" + klasse + ": k\\(").test(klassenDatei), klasse);
+  const akt5 = reihe.akte.find((akt) => akt.nr === "5");
+  assert.match(akt5.schritte[2].text, /frei/);
+  assert.equal(reihe.spezialisierung.zusaetzlich, "zusätzlich zur Spezialisierung der Klasse");
   for (const begleiter of reihe.begleiter) {
     assert.equal(knoten.get(begleiter.ort)?.fraktion, "kronreich", begleiter.name);
     assert.ok(D.kronreich.orte[begleiter.ort].auftraege.some((q) => q.id === begleiter.auftrag), begleiter.auftrag);
