@@ -53,7 +53,48 @@ const reisekarte = (() => {
   const wegeVon = (id) => wege.filter((weg) => weg.a === id || weg.b === id);
   const wegZwischen = (a, b) => wege.find((weg) => (weg.a === a && weg.b === b) || (weg.a === b && weg.b === a)) ?? null;
 
-  return { daten: D, breite, hoehe, ausschnitt, bilder, titel: D.titel, orte, wege, wegeVon, wegZwischen, lage, hat,
+  // Dorfnamen (Henry: alle Ortsnamen sind zu sehen). Städte sind auf dem Kartenbild beschriftet, Dörfer nicht.
+  // Jeder Dorfname bekommt die erste freie von acht Lagen um seinen Punkt, wie bei der Weltkarte selbst: Er meidet
+  // gedruckte Namen, Ortsmarken und schon gesetzte Dorfnamen. Maße in Karteneinheiten bei 100 %.
+  const dorfSchrift = 7.5;
+  const ueberlappung = (a, b) => Math.max(0, Math.min(a[2], b[2]) - Math.max(a[0], b[0])) * Math.max(0, Math.min(a[3], b[3]) - Math.max(a[1], b[1]));
+  const beschriftung = (() => {
+    const belegt = (D.belegt ?? []).map(([ax, ay, bx, by]) => [(ax - x0) / massstab, (ay - y0) / massstab, (bx - x0) / massstab, (by - y0) / massstab]);
+    for (const ort of orte) {
+      const r = ort.typ === "dorf" ? 2.5 : 5;
+      belegt.push([ort.x - r, ort.y - r, ort.x + r, ort.y + r]);
+    }
+    const lagen = {};
+    for (const ort of orte.filter((entry) => entry.typ === "dorf")) {
+      const w = ort.name.length * dorfSchrift * 0.5;
+      const h = dorfSchrift * 1.05;
+      const r = 3.5;
+      // Rechts, links, oben, unten, dann die Ecken (x links oben des Namens).
+      const kandidaten = [[r, -h / 2], [-r - w, -h / 2], [-w / 2, -r - h], [-w / 2, r], [r, -r - h], [-r - w, -r - h], [r, r], [-r - w, r]];
+      // SVG-Anker je Lage, damit der Name beim Vergrößern (kleinere Schrift) am Punkt bleibt.
+      const anker = [[r, h * 0.3, "start"], [-r, h * 0.3, "end"], [0, -r - h * 0.2, "middle"], [0, r + h * 0.8, "middle"],
+        [r, -r - h * 0.2, "start"], [-r, -r - h * 0.2, "end"], [r, r + h * 0.8, "start"], [-r, r + h * 0.8, "end"]];
+      let beste = null;
+      kandidaten.forEach(([dx, dy], index) => {
+        const box = [ort.x + dx, ort.y + dy, ort.x + dx + w, ort.y + dy + h];
+        let wert = belegt.reduce((summe, andere) => summe + ueberlappung(box, andere), 0) + index * 0.5;
+        if (box[0] < 0 || box[2] > breite || box[1] < 0 || box[3] > hoehe) wert += 1e6;
+        if (!beste || wert < beste.wert) beste = { wert, index, box };
+      });
+      belegt.push(beste.box);
+      const [ax, ay, ausrichtung] = anker[beste.index];
+      lagen[ort.id] = [Math.round(ax * 10) / 10, Math.round(ay * 10) / 10, ausrichtung];
+    }
+    return lagen;
+  })();
+
+  // Gedruckte Ortsnamen der Weltkarte an derselben Stelle, damit Wege und Marken sie nicht verdecken.
+  // [Name, x, Grundlinie y, Breite, Schriftgröße, Hauptstadt] in Karteneinheiten.
+  const gedruckteNamen = (D.namen ?? []).map(([name, [ax, ay, bx], groesse]) => [name, (ax - x0) / massstab,
+    (ay - y0 + groesse * 0.73) / massstab, (bx - ax) / massstab, groesse / massstab, groesse >= 23])
+    .filter(([, x, y, w]) => x + w > 0 && x < breite && y > 0 && y < hoehe + 20);
+
+  return { daten: D, breite, hoehe, ausschnitt, bilder, beschriftung, gedruckteNamen, titel: D.titel, orte, wege, wegeVon, wegZwischen, lage, hat,
     volkVon, wegArtNamen };
 })();
 if (typeof module !== "undefined") module.exports = reisekarte;

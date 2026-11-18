@@ -1015,8 +1015,9 @@
   // Ein Klick auf einen Ort zeigt Weg, Kosten, Gefahr und Gegner. Nachbarorte lassen sich direkt bereisen,
   // eine Etappe nach der anderen, wie unter „Aufbruch“.
   const rkZoomStufen = [1, 1.5, 2, 3];
-  // Dorfnamen erst auf Wunsch, sonst wird das Kernland unlesbar. Auf dem Handy startet die Karte vergrößert.
-  const rk = { zoom: null, auswahl: null, zeigen: { strasse: true, pass: true, dorfweg: true, seeweg: true, doerfer: false, namen: false } };
+  // Henry (18. 11. 2026): Alle Ortsnamen sind zu sehen. Die Namen der Städte liegen deckungsgleich mit dem Kartenbild
+  // über den Wegen, Dörfer beschriftet die Reisekarte selbst. Auf dem Handy startet die Karte vergrößert.
+  const rk = { zoom: null, auswahl: null, zeigen: { strasse: true, pass: true, dorfweg: true, seeweg: true, doerfer: true, namen: true } };
   const rkFilterNamen = { ...reisekarte.wegArtNamen, doerfer: "Dorfnamen", namen: "Stadtnamen" };
   const rkVolkNamen = { orks: "Orks", untote: "Untote", elfen: "Elfen", zwerge: "Zwerge", menschen: "Menschen" };
 
@@ -1109,11 +1110,12 @@
       if (ort.typ === "hauptstadt") svgElement("circle", { r: 2.2, class: "rk-kern" }, gruppe);
       // Größere Trefferfläche für Finger und Maus.
       svgElement("circle", { r: ort.typ === "dorf" ? 5 : 8, class: "rk-treffer" }, gruppe);
-      // Städte tragen ihren Namen schon auf der Weltkarte, Dörfer nicht.
-      if (ort.typ === "dorf" ? rk.zeigen.doerfer || wichtig : rk.zeigen.namen) {
-        const links = ort.x > W - 80;
-        const name = svgElement("text", { x: links ? -8 : 8, y: ort.typ === "dorf" ? 2.5 : 3.5, "text-anchor": links ? "end" : "start",
-          class: "rk-name" + (ort.typ === "dorf" ? " rk-name-dorf" : "") }, gruppe);
+      // Städte tragen ihren Namen auf der Weltkarte (Ebene unten), Dörfer beschriftet die Reisekarte.
+      if (ort.typ === "dorf" && (rk.zeigen.doerfer || wichtig)) {
+        // Dorfnamen stehen an ihrer freien Lage, die den gedruckten Namen der Weltkarte ausweicht.
+        const [dx, dy, anker] = reisekarte.beschriftung[ort.id];
+        const name = svgElement("text", { x: dx, y: dy, "text-anchor": anker,
+          class: "rk-name rk-name-dorf" }, gruppe);
         name.textContent = ort.name;
       }
       const waehlen = () => {
@@ -1127,6 +1129,14 @@
         event.preventDefault();
         waehlen();
       });
+    }
+    if (rk.zeigen.namen) {
+      const namen = svgElement("g", { class: "rk-gedruckt", "aria-hidden": "true" }, board);
+      for (const [text, x, y, breite, groesse, haupt] of reisekarte.gedruckteNamen) {
+        const name = svgElement("text", { x, y, textLength: breite, lengthAdjust: "spacingAndGlyphs", "font-size": groesse,
+          class: haupt ? "rk-gedruckt-haupt" : "" }, namen);
+        name.textContent = text;
+      }
     }
     renderReisekarteInfo(hier, ziele);
   }

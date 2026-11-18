@@ -933,9 +933,13 @@ h1, h2 { font-family: var(--font-title); letter-spacing: .01em; }
 .rk-kern { fill: #1a130d; }
 .rk-typ-dorf .rk-punkt { fill: #b5aa99; stroke-width: .8; }
 .rk-name { font: 600 calc(10.5px / var(--rk-z, 1)) var(--font-ui); fill: #f1e3c8; paint-order: stroke; stroke: #120e0b; stroke-width: 3px; stroke-linejoin: round; }
-.rk-typ-hauptstadt .rk-name { font-size: calc(12px / var(--rk-z, 1)); fill: #f3d9a4; }
-.rk-uebersee .rk-name { font-style: italic; fill: #cfd8e0; }
-.rk-name-dorf { font-weight: 400; font-size: calc(7.5px / var(--rk-z, 1)); fill: #c9bda6; stroke-width: 2.4px; }
+/* Gedruckte Ortsnamen der Weltkarte, deckungsgleich über Wegen und Marken */
+.rk-gedruckt { pointer-events: none; }
+.rk-gedruckt text { font-family: "DejaVu Serif", Georgia, "Times New Roman", serif; font-weight: 700; fill: #faf4e6;
+  paint-order: stroke; stroke: #140c08; stroke-width: 1.15px; stroke-linejoin: round; }
+.rk-gedruckt text.rk-gedruckt-haupt { fill: #ffe296; }
+/* Feste Größe in Karteneinheiten: Die Lage der Dorfnamen ist für diese Größe berechnet. */
+.rk-name-dorf { font-weight: 400; font-size: 7.5px; fill: #c9bda6; stroke-width: 2.4px; }
 .rk-zielring { fill: none; stroke: #9fe07a; stroke-width: 1.8; }
 .rk-gesperrt .rk-zielring { stroke: #ff8a7a; stroke-dasharray: 2 2; }
 .rk-ring { fill: none; stroke: #fff3dc; stroke-width: 1.5; }

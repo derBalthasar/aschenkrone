@@ -76,12 +76,15 @@ if (fehler.length) {
   process.exit(1);
 }
 
-const daten = { titel: "Menschenlande und Seewege", breite, hoehe, regeln: quelle.meta.rules, orte, wege };
+// Gedruckte Namen der verbindlichen Weltkarte (quellen/beschriftung-erzeugen.py), damit Dorfnamen sie nicht verdecken.
+const { boxen, namen } = JSON.parse(fs.readFileSync(path.join(root, "quellen/karte-beschriftung.json"), "utf8"));
+const daten = { titel: "Menschenlande und Seewege", breite, hoehe, regeln: quelle.meta.rules, orte, wege, belegt: boxen, namen };
 const kopf = `"use strict";
 
 // Erzeugt von quellen/reisekarte-erzeugen.cjs aus quellen/gemini/karte-menschen.json. Nicht von Hand ändern,
 // sondern die Quelle oder das Skript anpassen und neu ausführen.
-// Weg: [Kennung, Knoten A, Knoten B]
+// Weg: [Kennung, Knoten A, Knoten B]; belegt: Rechtecke gedruckter Namen [x0, y0, x1, y1] auf der Weltkarte;
+// namen: gedruckte Ortsnamen [Name, Rechteck, Schriftgröße], die Reisekarte legt sie lesbar über die Wege
 `;
 fs.writeFileSync(path.join(root, "spiel/reisekarte-daten.js"), kopf + "const reisekarteDaten = " + JSON.stringify(daten) +
   ";\nif (typeof module !== \"undefined\") module.exports = reisekarteDaten;\n");

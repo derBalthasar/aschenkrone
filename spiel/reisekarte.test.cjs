@@ -50,3 +50,14 @@ test("die erzeugte Datei entspricht Quelle und Skript", () => {
   execFileSync(process.execPath, [path.join(root, "quellen/reisekarte-erzeugen.cjs")], { stdio: "pipe" });
   assert.equal(fs.readFileSync(datei, "utf8"), vorher);
 });
+
+test("alle Ortsnamen sind zu sehen: Städte gedruckt, Dörfer ohne Überdeckung gedruckter Namen", () => {
+  const gedruckt = new Set(reisekarte.gedruckteNamen.map(([name]) => name));
+  for (const ort of reisekarte.orte.filter((entry) => entry.typ !== "dorf")) assert.ok(gedruckt.has(ort.name), ort.name + " fehlt");
+  const doerfer = reisekarte.orte.filter((ort) => ort.typ === "dorf");
+  assert.equal(doerfer.length, 69);
+  for (const ort of doerfer) {
+    const [, , anker] = reisekarte.beschriftung[ort.id];
+    assert.ok(["start", "end", "middle"].includes(anker), ort.name);
+  }
+});
