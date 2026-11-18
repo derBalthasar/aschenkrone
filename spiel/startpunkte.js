@@ -94,7 +94,8 @@ const startpunkte = (() => {
         place: "Zollholm · Zollinseln", title: "Morgengrauen auf den Zollinseln",
         text: "Im ersten Licht siehst du Perlvik über dem Wasser rauchen. Die Elfenhändler bedanken sich leise. Die Gilde wird wissen wollen, wer das Gildenhaus angezündet hat und wohin die Schriften gebracht wurden.",
       },
-      akte: ["Die Zollinseln", "Gold und Eisen", "Der Handel mit den Grünen Bannern", "Die Kronschuld", "Die Flotte gen Norden"],
+      // Akt 2 und 3 in freier Reihenfolge (Gemini-Aufbau, Henry 18. 11. 2026, lore/quests/HAEFEN.md).
+      akte: ["Die Zollinseln", "Die Kronschuld", "Gold und Eisen", "Das Alte Reich & Der Bleiche Skalde", "Die Flotte gen Norden"],
     },
     orden: {
       ort: "Aschenkloster", volk: "menschen", prolog: "Die Nacht der kalten Feuer", motto: "Solange die Flamme brennt",
@@ -649,6 +650,9 @@ const startpunkte = (() => {
     orden: { knoten: "glutberg", label: "Auf dem Glutberg bleiben und Akt 1 beginnen",
       text: "Hochmeisterin Ragna Glutherz ruft die Ritter zusammen. Aushang und Hauptquest findest du im Stadtfenster von Glutberg. Die Geschichte um Kornwik wartet, bis du dorthin reist.",
       message: "Du bleibst in der Halle der Ewigen Flamme. Hochmeisterin Ragna Glutherz und Erzpriester Thorvald erwarten dich am Altar." },
+    haefen: { knoten: "zollholm", label: "In Zollholm bleiben und Akt 1 beginnen",
+      text: "Von Zollholm aus sicherst du die Seewege, bis Perlvik dich zurückruft. Aushang und Hauptquest findest du im Stadtfenster von Zollholm. Die Geschichte um Kornwik wartet, bis du dorthin reist.",
+      message: "Du gehst im Hafen von Zollholm an Land. Der Zollmeister weiß schon vom Brand in Perlvik." },
   };
   const storageSites = {};
   const prologe = {};

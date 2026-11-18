@@ -1,6 +1,6 @@
 "use strict";
 
-// Nebenquests (Gemini-Ausarbeitung Kronreich und Orden der Flamme, 18. 11. 2026): Orte, Dörfer und Weg-Kennungen müssen zum Knotennetz passen.
+// Nebenquests (Gemini-Ausarbeitung Kronreich, Orden der Flamme und Freie Häfen, 18. 11. 2026): Orte, Dörfer und Weg-Kennungen müssen zum Knotennetz passen.
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -21,9 +21,9 @@ test("jede Weg-Kennung ist eine echte Kante im Knotennetz", () => {
   }
 });
 
-const FRAKTIONEN = { kronreich: 136, orden: 133 };
+const FRAKTIONEN = { kronreich: 136, orden: 133, haefen: 133 };
 
-test("alle 34 Orte von Kronreich und Orden haben einen Aushang, die Städte je zehn Aufträge", () => {
+test("alle 34 Orte jeder Menschen-Fraktion haben einen Aushang, die Städte je zehn Aufträge", () => {
   for (const fraktion of Object.keys(FRAKTIONEN)) {
     const orte = Object.values(knoten.alle).filter((ort) => ort.fraktion === fraktion);
     assert.equal(orte.length, 34, fraktion);
@@ -152,18 +152,52 @@ test("Alphatiere des Ordens stammen aus dem Bestiarium und kommen je einmal vor"
   assert.deepEqual(namen.sort(), ["Der Letzte Mammut", "Die Mutter der Tiefen", "Skarn der Weiße Bär"]);
 });
 
+// Patch Henry, 18. 11. 2026: Das Alphatier von Zollholm heißt Die Schwarze Krake (Bestiarium und Auftrag).
+test("Alphatiere der Häfen stammen aus dem Bestiarium, Mutter Tiefe ist umbenannt", () => {
+  const bestiarium = fs.readFileSync(path.join(root, "bestiarium/daten.js"), "utf8");
+  const namen = Object.values(D.haefen.orte).flatMap((o) => o.auftraege).filter((q) => q.art === "Alphatier-Jagd").map((q) => q.titel.replace("Alphatier: ", ""));
+  for (const name of namen) assert.ok(bestiarium.includes("[\"" + name + "\""), name);
+  assert.deepEqual(namen.sort(), ["Der Kapitän", "Die Schwarze Krake"]);
+  // Nur der Änderungsvermerk nennt den alten Namen noch.
+  const ohneVermerk = JSON.stringify(D, (key, value) => key === "hinweis" ? undefined : value);
+  assert.ok(!ohneVermerk.includes("Mutter Tiefe") && !bestiarium.includes("Mutter Tiefe"));
+  assert.equal(D.haefen.orte.zollholm.auftraege[9].spiel.gegner, "schwarzekrake");
+});
+
+// Patch Henry, 18. 11. 2026: Kriegsrat im Haupthafen, Abfahrt aus dem echten Starthafen der Route.
+test("Akt 5 aller Menschen: Kriegsrat mit Zielwahl, Seewege beginnen im Starthafen", () => {
+  const kriegsrat = { kronreich: ["perlvik"], orden: ["nordwacht", "glutberg"], haefen: ["perlvik"] };
+  for (const [fraktion, orte] of Object.entries(kriegsrat)) {
+    const reihe = D[fraktion].reihe;
+    assert.deepEqual(reihe.flotte.kriegsrat, orte, fraktion);
+    const akt5 = reihe.akte.find((akt) => akt.nr === "5");
+    assert.match(akt5.schritte[0].titel, /Kriegsrat/, fraktion);
+    assert.deepEqual(reihe.flotte.ziele.map((z) => z.volk), ["elfen", "zwerge", "orks", "untote"]);
+    for (const ziel of reihe.flotte.ziele) for (const start of ziel.starthaefen) for (const weg of start.wege) {
+      assert.ok(D.wegKennungen[weg].includes(start.hafen), weg + " ab " + start.hafen);
+      assert.equal(knoten.verbindung(...D.wegKennungen[weg]).kantenTyp, "seeweg", weg);
+    }
+  }
+  const elfen = D.haefen.reihe.flotte.ziele[0].starthaefen;
+  assert.deepEqual(elfen, [{ hafen: "zollholm", wege: ["M53"] }]);
+});
+
 test("die erzeugte Datei entspricht Quelle und Skript", () => {
   const datei = fs.readFileSync(path.join(root, "spiel/nebenquests-daten.js"), "utf8");
-  for (const name of ["kronreich-teil2-nebenquests.json", "orden-teil2a-nebenquests.json", "orden-teil2b-nebenquests.json"]) {
+  // Umbenannt per Patch Henry (18. 11. 2026): zollholm_q10 „Mutter Tiefe“ heißt im Spiel „Die Schwarze Krake“.
+  const umbenannt = new Set(["zollholm_q10"]);
+  for (const name of ["kronreich-teil2-nebenquests.json", "orden-teil2a-nebenquests.json", "orden-teil2b-nebenquests.json",
+    "haefen-teil2a-nebenquests.json", "haefen-teil2b-nebenquests.json"]) {
     const quelle = JSON.parse(fs.readFileSync(path.join(root, "quellen/gemini", name), "utf8"));
-    const titel = quelle.cities.flatMap((stadt) => [...stadt.sideQuests, ...stadt.villages.flatMap((dorf) => dorf.quests)]).map((q) => q.title);
+    const titel = quelle.cities.flatMap((stadt) => [...stadt.sideQuests, ...stadt.villages.flatMap((dorf) => dorf.quests)])
+      .filter((q) => !umbenannt.has(q.id)).map((q) => q.title);
     for (const t of titel) assert.ok(datei.includes(JSON.stringify(t).slice(1, -1)), name + " fehlt: " + t);
   }
 });
 
 // Prüfkriterien der Arbeitsanweisung „Volk der Menschen“ (Henry, 18. 11. 2026).
 test("je Fraktion 11 Städte mit q01 bis q10, 23 Dörfer mit Dorfweg, drei Begleiter verschiedener Klassen", () => {
-  const klassen = { kronreich: ["waechter", "spaeher", "krieger"], orden: ["waechter", "magier", "spaeher"] };
+  const klassen = { kronreich: ["waechter", "spaeher", "krieger"], orden: ["waechter", "magier", "spaeher"], haefen: ["spaeher", "schurke", "waechter"] };
   const alleIds = new Set();
   for (const fraktion of Object.keys(klassen)) {
     const orte = Object.entries(D[fraktion].orte);
@@ -190,5 +224,11 @@ test("je Fraktion 11 Städte mit q01 bis q10, 23 Dörfer mit Dorfweg, drei Begle
       assert.match(b.auftrag, /_q10$/);
     }
   }
-  assert.deepEqual([...new Set(Object.values(D.orden.orte).map(o => o.stufen))], ["1-5"], "Orden: einheitlich Stufe 1–5");
+  // Patch Henry, 18. 11. 2026: alle 33 Städte (und ihre Dörfer) mit Stufe 1–5 am Aushang.
+  for (const fraktion of Object.keys(klassen)) {
+    assert.deepEqual([...new Set(Object.values(D[fraktion].orte).map(o => o.stufen))], ["1-5"], fraktion + ": einheitlich Stufe 1–5");
+  }
+  assert.equal(alleIds.size, 136 + 133 + 133);
+  assert.deepEqual(D.haefen.reihe.begleiter.map(b => b.id), ["comp_haefen_karen", "comp_haefen_soren", "comp_haefen_halvor"]);
+  assert.deepEqual(D.haefen.reihe.begleiter.map(b => b.auftrag), ["perlvik_q10", "nebelvik_q10", "salzwacht_q10"]);
 });

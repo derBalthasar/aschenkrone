@@ -122,7 +122,7 @@ const lands = [
     ["Tiefenkrake", "Offene See", "Jäger", "greift Schiffe an, packt Besatzung", "Feuer, Harpunen", "Krakenauge"],
     ["Sturmrochen", "Offene See", "Revier", "Blitz, betäubt mehrere", "Fernkampf", "Rochenhaut"],
   ], alpha: [
-    ["Mutter Tiefe", "der größte Tiefenkrake. Die Seeleute der Freien Häfen halten ihn für einen Boten der Wellenmutter und opfern ihm jedes Jahr ein Schiff."],
+    ["Die Schwarze Krake", "der größte Tiefenkrake. Die Seeleute der Freien Häfen halten sie für eine Botin der Wellenmutter und opfern ihr jedes Jahr ein Schiff."],
     ["Der Kapitän", "eine Wrackkrabbe, die einen Admiralshut trägt und ein ganzes Wrack verteidigt."],
   ], flora: [
     ["Salzkraut", "Riffe", "Grundstoff für Heiltränke auf See"],

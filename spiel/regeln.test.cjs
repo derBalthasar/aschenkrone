@@ -217,8 +217,8 @@ for (const faction of factionIds) {
   assert.ok(rules.storageOpen(fled), faction + " braucht ein Zentrallager an der Zuflucht");
   for (const entry of fled.journal) if (entry.length > 300) longJournal.push(faction + ": " + entry);
   let sent = rules.choose(fled, "reise");
-  // Kronreich und Orden beginnen Akt 1 in ihrer Hauptstadt. Kornwik wartet als Handlung, bis der Held dorthin reist.
-  const hauptstadt = { kronreich: "kronhall", orden: "glutberg" }[faction];
+  // Die Menschen beginnen Akt 1 im Weltknoten (Kronhall, Glutberg, Zollholm). Kornwik wartet als Handlung, bis der Held dorthin reist.
+  const hauptstadt = { kronreich: "kronhall", orden: "glutberg", haefen: "zollholm" }[faction];
   if (hauptstadt) {
     assert.equal(sent.scene, "weltknoten");
     assert.equal(sent.knoten, hauptstadt);
@@ -1673,6 +1673,35 @@ console.log("Charakter-Entwurf geprüft.");
   assert.equal(gnade.hauptquest.wahl, "orden_act1_mercy");
   assert.equal(rules.hauptWeiter(orden, "kron_act1_truce"), orden, "nur die Wahl der eigenen Fraktion");
   assert.equal(rules.hauptquest(imOrt("hof", "kronhall")), null);
+
+  // Hauptquest Freie Häfen: Zollholm → Möwenstad → Silberholm → Perlvik (Wahl), Aushang und Begleiter.
+  let haefen = imOrt("haefen", "zollholm");
+  haefen = { ...haefen, health: rules.healthLimit(haefen), hauptquest: { schritt: 0, wahl: null } };
+  assert.equal(rules.hauptquest(haefen).titel, "Die Zollinseln");
+  assert.equal(rules.aushang(haefen).length, 10);
+  const versteck = rules.hauptWeiter(haefen);
+  assert.equal(versteck.combat.id, "auftrag-schmuggler");
+  haefen = sieg(versteck);
+  assert.equal(haefen.hauptquest.schritt, 1);
+  assert.equal(rules.hauptGrund(haefen), "weiter in Möwenstad");
+  const kuriere = rules.hauptWeiter({ ...haefen, knoten: "moewenstad", health: rules.healthLimit(haefen) });
+  assert.equal(kuriere.combat.id, "auftrag-spione");
+  haefen = rules.hauptWeiter({ ...sieg(kuriere), knoten: "silberholm" });
+  assert.equal(haefen.hauptquest.schritt, 3);
+  haefen = { ...haefen, knoten: "perlvik" };
+  const silber = haefen.silver;
+  const schatten = reload(rules.hauptWeiter(haefen, "haefen_act1_shadow"));
+  assert.equal(schatten.silver, silber + 80, "Wahl im Schatten bringt 80 Silber");
+  assert.ok(schatten.marks.includes("haefen_act1_shadow"));
+  const gilde = rules.hauptWeiter(haefen, "haefen_act1_guild");
+  assert.ok(gilde.ressource > haefen.ressource || gilde.ressource === rules.vorratMax, "Wahl der Gilde bringt Gold");
+  assert.equal(rules.hauptWeiter(haefen, "orden_act1_mercy"), haefen, "nur die Wahl der eigenen Fraktion");
+  // Begleiterin Karen Salzklinge nach perlvik_q10; Gold ist der Vorrat der Häfen.
+  let karen = rules.auftragAnnehmen(haefen, "perlvik_q10");
+  assert.equal(karen.weltAuftraege.perlvik_q10.status, "aktiv");
+  const zoll = rules.auftragAnnehmen(imOrt("haefen", "zollholm"), "zollholm_q01");
+  assert.match(zoll.journal.at(-1), /M31/);
+  assert.equal(rules.auftragGrund(imOrt("kronreich", "perlvik"), "perlvik_q01"), null, "Schwesterfraktionen nehmen Häfen-Aufträge an");
 
   // Beschädigte Einträge werden abgelehnt.
   assert.throws(() => reload({ ...held, weltAuftraege: { erfunden_q01: { status: "aktiv", wahl: 0 } } }), /beschädigt/);

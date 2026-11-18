@@ -64,9 +64,19 @@ Entscheidung:
 3. **Rüstung der Armada** (Salzwacht, Perlvik): Fertigstellung der Kriegsschiffe, Verladung von Korn und Truppen für die Überfahrt.
 
 ### Akt 5 „Über das Innere Meer“ (Stufe 19–20)
-1. **Auslaufen der Reichsflotte** (Perlvik, Salzwacht): Die vereinte Armada der Menschen verlässt den Nordwesten von Odris.
+1. **Kriegsrat und Auslaufen der Armada** (Perlvik): Im Haupthafen Perlvik tagt der letzte Kriegsrat der vereinten Menschen. Hier wählst du das Ziel der Armada: die Elfen im Osten, die Orks im Südwesten oder die Zwerge im Südosten, jeweils als Bündnis oder um sie zu unterwerfen, oder als extrem schweren Weg die Untoten im hohen Norden. Danach verlegt die Flotte in den Starthafen ihrer Route und läuft dort aus (Tabelle unten).
+   > Änderung Henry (18. 11. 2026): Kriegsrat mit Zielwahl im Haupthafen, Abfahrt aus dem echten Starthafen der Route.
 2. **Totenschiffe im Nebel** (Inneres Meer): Abwehr eines Angriffs untoter Kriegsschiffe aus dem hohen Norden auf hoher See.
 3. **Der Brückenkopf** (fremde Küste, frei wählbarer Kontinent): Eroberung eines Küstenabschnitts und Errichtung des ersten Feldlagers. Das Ziel wählt der Spieler frei: Elfen im Osten, Orks im Südwesten oder Zwerge im Südosten, jeweils als Verbündete oder um sie zu unterwerfen. Wer die Untoten-Bedrohung an der Wurzel vernichten will, segelt zum Kontinent der Untoten im hohen Norden; das ist der schwerste Weg. Ende von Kapitel 1.
+
+**Akt 5, Kriegsrat und Starthäfen (Patch Henry, 18. 11. 2026):**
+
+| Ziel | Wahl | Starthafen und Seeweg |
+| --- | --- | --- |
+| Elfen | Bündnis oder Unterwerfung | Zollholm: M53 nach Laubmarkt |
+| Zwerge | Bündnis oder Unterwerfung | Zollholm: M52 Erzhafen, M55 Salzbucht, M57 Westhort |
+| Orks | Bündnis oder Unterwerfung | Westvik: M09 Zhar-Kesh, M06 Rostbucht; Sandvik: M02 Rostbucht, M05 Zhar-Kesh |
+| Untote (extrem schwer) | Vernichtung | Tranvik: M50 Draugrsund, M51 Totenwacht; Nordwacht: M13 Draugrsund |
 
 ## Begleiter
 

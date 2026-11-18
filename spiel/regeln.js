@@ -1737,7 +1737,7 @@ const rules = (() => {
   const NQ = typeof nebenquests !== "undefined" ? nebenquests : null;
   const auftragEp = 50;
   const auftragIndex = {};
-  if (NQ) for (const fraktion of ["kronreich", "orden"]) {
+  if (NQ) for (const fraktion of ["kronreich", "orden", "haefen"]) {
     for (const [ort, eintrag] of Object.entries(NQ.daten[fraktion]?.orte ?? {})) {
       for (const auftrag of eintrag.auftraege) auftragIndex[auftrag.id] = { ...auftrag, ort, fraktion };
     }
@@ -1764,8 +1764,9 @@ const rules = (() => {
     diealte: "moorschlinger", graufang: "grauwolf", frostbaer: "frostbaer", deserteure: "deserteure" };
   const aehnlicherGegner = { wegelagerer: "deserteure", schmuggler: "deserteure", spione: "deserteure", kultisten: "deserteure",
     kulthauptmann: "deserteure", orkvortrupp: "nacht-kronreich", urgash: "nacht-kronreich", aschenkraehen: "galgenkraehe",
-    skarn: "frostbaer", aschenmammut: "keiler", letztermammut: "keiler" };
-  const menschenGegner = new Set(["kultisten", "schmuggler", "spione", "deserteure", "wegelagerer", "orkvortrupp", "kulthauptmann", "urgash"]);
+    skarn: "frostbaer", aschenmammut: "keiler", letztermammut: "keiler", orkpiraten: "nacht-kronreich" };
+  const menschenGegner = new Set(["kultisten", "schmuggler", "spione", "deserteure", "wegelagerer", "orkvortrupp", "kulthauptmann", "urgash",
+    "orkpiraten"]);
   // Kapitän Urgash führt nur die Vorhut der Rostsegel. Er kämpft als Elite, damit Akt 1 auch allein fair bleibt
   // (Kampfdokument: ein einzelner Held schafft 1 Elite, ein Anführer braucht eine Gruppe).
   const auftragGegner = { ...(NQ?.daten.gegnerTypen ?? {}),
@@ -1795,10 +1796,13 @@ const rules = (() => {
     ulfsborg_q10: ["fenris", "Fenris spannt schweigend seinen Bogen. Der Plünderer, der seine Familie tötete, liegt im Wolfstal. Jetzt will er weiterziehen."],
     aschenkloster_q10: ["halvar", "Bruder Halvar hat das Ordensbanner zurück. Seine Wunden sind verbunden, und auf seinem Schild glühen die Runen."],
     brandstein_q10: ["gunhild", "Gunhild klopft den Schwefelstaub aus ihrer Robe. Seit der Runenkammer schuldet sie dir ihr Leben."],
+    perlvik_q10: ["karen", "Karen Salzklinge wischt das Salz von ihrer Harpune. Seit ihr den Hafen gemeinsam verteidigt habt, will sie mit dir auf See."],
+    nebelvik_q10: ["soren", "Sören Nebeltritt taucht aus dem Hafenrauch auf, als hätte er schon immer neben dir gestanden. Er kennt jede Schmugglerbucht der Küste."],
+    salzwacht_q10: ["halvor", "Zollhauptmann Halvor Eisentau hängt den Enterhaken an den Gürtel. Wer Salzwacht hält, sagt er, der hält auch eine Planke."],
     nordwacht_q10: ["malte", "Malte hat den Wachturm gehalten, bis du kamst. Die Signalhörner bläst er nicht mehr allein."],
   };
   const begleiterNachAuftrag = {};
-  if (NQ) for (const fraktion of ["kronreich", "orden"]) for (const begleiter of NQ.reihe(fraktion)?.begleiter ?? []) {
+  if (NQ) for (const fraktion of ["kronreich", "orden", "haefen"]) for (const begleiter of NQ.reihe(fraktion)?.begleiter ?? []) {
     const [id, introduction] = begleiterTexte[begleiter.auftrag] ?? [];
     if (!id || !auftragIndex[begleiter.auftrag]) continue;
     begleiterNachAuftrag[begleiter.auftrag] = id;
@@ -1823,6 +1827,16 @@ const rules = (() => {
         text: "In der Schwefelgrube bei Brandstein frisst ein Runenfresser die geweihten Steine. Ohne Schwefel bleiben die Runenbecken kalt." },
       { schritt: 2, ort: "glutberg", wahl: true },
     ],
+    // Freie Häfen: Start in Zollholm nach der Flucht aus Perlvik. Schritt 2 führt über M31 nach Möwenstad und M30 nach Silberholm,
+    // Schritt 3 über M40 zurück nach Perlvik (Gemini, 18. 11. 2026). Jede Überfahrt kostet 15 Silber.
+    haefen: [
+      { schritt: 0, ort: "zollholm", gegner: "schmuggler" },
+      { schritt: 1, ort: "moewenstad", gegner: "spione", titel: "Kuriere in Möwenstad",
+        text: "Über den Seeweg M31 bist du nach Möwenstad gesegelt. Im Hafen warten Kuriere mit verschlüsselten Briefen auf ein Schiff nach Norden. Fang sie ab, bevor sie ablegen." },
+      { schritt: 1, ort: "silberholm", titel: "Die Briefe der Stillen Feder",
+        text: "In Silberholm wartet eine Nachricht der Stillen Feder. Wer sie schreibt, bleibt im Dunkeln. Sie entschlüsselt die Briefe: Kult-Reeder schmuggeln Knochen aus dem Norden, und einer sitzt im Hafenthing von Perlvik." },
+      { schritt: 2, ort: "perlvik", wahl: true },
+    ],
   };
   // Folgen der Wahl am Ende von Akt 1 (Gemini). Freischaltungen und spätere Folgen werden als Marke gespeichert.
   const wahlFolgen = {
@@ -1830,6 +1844,8 @@ const rules = (() => {
     kron_act1_truce: { silber: 40 },
     orden_act1_mercy: { vorrat: 10 },
     orden_act1_wrath: { leisten: { untote: -5 } },
+    haefen_act1_guild: { vorrat: 10 },
+    haefen_act1_shadow: { silberLohn: 80 },
   };
   const hauptAkt = (fraktion) => NQ?.reihe(fraktion)?.akte[0] ?? null;
   const hauptStand = (state) => state.hauptquest ?? { schritt: 0, wahl: null };
@@ -2018,6 +2034,7 @@ const rules = (() => {
     const folge = wahlFolgen[stand.wahl];
     const option = hauptAkt(state.faction).wahl.find(entry => entry.id === stand.wahl);
     if (folge.silber) state.silver -= folge.silber;
+    if (folge.silberLohn) state.silver += folge.silberLohn;
     if (folge.vorrat) state.ressource = Math.min(vorratMax, state.ressource + folge.vorrat);
     for (const [leisteId, wert] of Object.entries(folge.leisten ?? {})) setzeLeiste(state, leisteId, leiste(state, leisteId) + wert);
     note(state, option.label + ": " + option.folge);

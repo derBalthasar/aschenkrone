@@ -1,0 +1,1185 @@
+{
+  "faction": "Freie Häfen",
+  "section": "Missing Cities (Ankerfjord, Bernsvik, Grenzmarkt, Moewenstad, Nebelvik, Salzwacht)",
+  "cities": [
+    {
+      "city": "Ankerfjord",
+      "type": "Hafenstadt",
+      "levelRange": "2-6",
+      "sideQuests": [
+        {
+          "id": "ankerfjord_q01",
+          "title": "Tauwerk für die Bundesflotte",
+          "category": "Fraktion",
+          "description": "Sichere den Transport von Schiffstauen aus Seilerby über D51 für die Werften von Ankerfjord.",
+          "roads": [
+            "D51"
+          ],
+          "enemies": [
+            "Wegelagerer"
+          ],
+          "reward": "25 Silber, +7 Gold",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "ankerfjord_q02",
+          "title": "Räucherfisch aus Fjordhof",
+          "category": "Dorf-Verbindung",
+          "description": "Schütze die Fischer von Fjordhof (D50) vor plündernden Deserteuren.",
+          "roads": [
+            "D50"
+          ],
+          "enemies": [
+            "Deserteure"
+          ],
+          "reward": "25 Silber, +5 Gold",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "ankerfjord_q03",
+          "title": "Der verlorene Kornhändler",
+          "category": "Kaltfrieden (Kronreich)",
+          "description": "Ein Kaufmann aus dem Kronreich bietet über Mittelsmänner Korn gegen Schiffstaue an – ein Verstoß gegen das Handelsembargo.",
+          "roads": [
+            "S49"
+          ],
+          "enemies": [],
+          "reward": "40 Silber (oder +7 Gold)",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "ankerfjord_q04",
+          "title": "Der Runenkompass",
+          "category": "Kaltfrieden (Orden)",
+          "description": "Ein Kapitän hat einen zwergisch-ordentlichen Runenkompass an Bord, doch die Mannschaft droht wegen des Magie-Aberglaubens mit Meuterei.",
+          "roads": [
+            "M22"
+          ],
+          "enemies": [],
+          "reward": "35 Silber, Runenkompass (tragbar)",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "ankerfjord_q05",
+          "title": "Schmuggel nach Schattmund",
+          "category": "Kult-Spur",
+          "description": "Sieben Kultisten der Bleichen Ewigkeit verladen über den sehr langen Seeweg M20 Gold und Reliquien für die Erinnernden im Land der Untoten.",
+          "roads": [
+            "M20"
+          ],
+          "enemies": [
+            "Kultisten"
+          ],
+          "reward": "Untoten-Bedrohung -4, 50 Silber",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "ankerfjord_q06",
+          "title": "Die Stimme aus Draugrsund",
+          "category": "Weltkonflikt (Untote)",
+          "description": "Ein verstörter Kapitän, der auf der Route M16 einem Geisterschiff entkam, berichtet von der Langen Nacht im hohen Norden.",
+          "roads": [
+            "M16"
+          ],
+          "enemies": [],
+          "reward": "25 Silber, Welt-Lore (Untote)",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "ankerfjord_q07",
+          "title": "Riffhaie in der Fjordmündung",
+          "category": "Bestiarium",
+          "description": "Aggressive Riffhaie greifen Fischerboote an der Einfahrt nach Nebelvik (S48) an.",
+          "roads": [
+            "S48"
+          ],
+          "enemies": [
+            "Riffhaie"
+          ],
+          "reward": "40 Silber, Haizahn-Entermesser",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "ankerfjord_q08",
+          "title": "Aschenschlick im Hafen",
+          "category": "Nacht des Erwachens",
+          "description": "Ascheregen verklebt die Seilwinden der Seilerei; hilf bei der Reinigung und bekämpfe Hafenratten.",
+          "roads": [
+            "D51"
+          ],
+          "enemies": [
+            "Hafenratten"
+          ],
+          "reward": "25 Silber, +5 Gold",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "ankerfjord_q09",
+          "title": "Das Wrack von M17",
+          "category": "Lore",
+          "description": "Birg auf dem Seeweg M17 Richtung Möwenstad das Logbuch eines verschollenen Handelsschiffs.",
+          "roads": [
+            "M17"
+          ],
+          "enemies": [
+            "Wrackkrabben"
+          ],
+          "reward": "45 Silber, Seekarte",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "ankerfjord_q10",
+          "title": "Die Sperrkette von Ankerfjord",
+          "category": "Gewichtig",
+          "description": "Schmiede mit den Seilern und Schmieden von Ankerfjord eine schwere Hafenkette über die Fjordmündung, um Überfälle aus M16 und M20 abzuwehren.",
+          "roads": [
+            "M16",
+            "M20"
+          ],
+          "enemies": [
+            "Schmuggler"
+          ],
+          "reward": "Untoten-Bedrohung -3; Ankerfjord ist vor Seeüberfällen geschützt",
+          "deadlineRounds": null,
+          "openPoint": null
+        }
+      ],
+      "villages": [
+        {
+          "village": "Seilerby",
+          "road": "D51",
+          "yield": "Tauwerk",
+          "quests": [
+            {
+              "id": "seilerby_q01",
+              "title": "Salzkraut für die Taue",
+              "description": "Sammle Salzkraut an den Klippen zum Imprägnieren der Schiffstaue und wehre Galgenkrähen ab.",
+              "roads": [
+                "D51"
+              ],
+              "enemies": [
+                "Galgenkrähen"
+              ],
+              "reward": "20 Silber, +5 Gold",
+              "deadlineRounds": null,
+              "openPoint": null
+            }
+          ]
+        },
+        {
+          "village": "Fjordhof",
+          "road": "D50",
+          "yield": "Fisch",
+          "quests": [
+            {
+              "id": "fjordhof_q01",
+              "title": "Die verschwundenen Reusen",
+              "description": "Vertreibe Wrackkrabben, die die Fischreusen zerstören.",
+              "roads": [
+                "D50"
+              ],
+              "enemies": [
+                "Wrackkrabben"
+              ],
+              "reward": "20 Silber, +4 Gold",
+              "deadlineRounds": null,
+              "openPoint": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "city": "Bernsvik",
+      "type": "Hafenstadt",
+      "levelRange": "2-6",
+      "sideQuests": [
+        {
+          "id": "bernsvik_q01",
+          "title": "Der Bernstein von Bernsteinstrand",
+          "category": "Fraktion",
+          "description": "Schütze die Bernsteinsammler auf D52 vor Strandräubern und Schmugglerbanden.",
+          "roads": [
+            "D52"
+          ],
+          "enemies": [
+            "Wegelagerer"
+          ],
+          "reward": "35 Silber, +7 Gold",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "bernsvik_q02",
+          "title": "Tang für die Salzkocher",
+          "category": "Dorf-Verbindung",
+          "description": "Eskortiere Tangwagen aus Tangby (D53) sicher nach Bernsvik.",
+          "roads": [
+            "D53"
+          ],
+          "enemies": [
+            "Galgenkrähen"
+          ],
+          "reward": "20 Silber, +5 Gold",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "bernsvik_q03",
+          "title": "Zollstreit an der Wachtfeuer-Straße",
+          "category": "Kaltfrieden (Orden)",
+          "description": "Auf der Grenzstraße S47 nach Wachtfeuer verlangen Ordensritter eine Durchsuchung aller Bernsteinwagen nach verbotenen Toten-Reliquien.",
+          "roads": [
+            "S47"
+          ],
+          "enemies": [],
+          "reward": "35 Silber, Kaltfrieden-Lore",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "bernsvik_q04",
+          "title": "Der gesuchte Adlige aus Kronhall",
+          "category": "Kaltfrieden (Kronreich)",
+          "description": "Ein geflohener Kronreich-Adliger will sich auf einem Schiff nach Süden (M25) absetzen – gegen 50 Silber Schweigegeld.",
+          "roads": [
+            "M25"
+          ],
+          "enemies": [],
+          "reward": "50 Silber (oder +7 Gold bei Auslieferung)",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "bernsvik_q05",
+          "title": "Der Totenhandel von Draugrsund",
+          "category": "Kult-Spur",
+          "description": "Neun reiche Kaufleute des Kults der Bleichen Ewigkeit betreiben über M23 und M27 einen geheimen Handel mit Reliquien aus Draugrsund und Totenwacht.",
+          "roads": [
+            "M23",
+            "M27"
+          ],
+          "enemies": [
+            "Kultisten"
+          ],
+          "reward": "Untoten-Bedrohung -4, 55 Silber",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "bernsvik_q06",
+          "title": "Warum die Zwerge Bernstein kaufen",
+          "category": "Weltkonflikt (Zwerge)",
+          "description": "Ein Zwergenhändler erklärt, warum seine Sippe im Südosten so viel Bernstein für ihre Runenschmieden braucht, seit die Glut im Mutterberg erwacht ist.",
+          "roads": [],
+          "enemies": [],
+          "reward": "30 Silber, Welt-Lore (Zwerge)",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "bernsvik_q07",
+          "title": "Sturmrochen vor der Küste",
+          "category": "Bestiarium",
+          "description": "Ein Schwarm Sturmrochen greift Handelsschiffe auf dem kurzen Seeweg M24 nach Nebelvik an.",
+          "roads": [
+            "M24"
+          ],
+          "enemies": [
+            "Sturmrochen"
+          ],
+          "reward": "45 Silber, Rochenleder-Umhang",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "bernsvik_q08",
+          "title": "Ascheregen auf den Bernsteinbänken",
+          "category": "Nacht des Erwachens",
+          "description": "Schwarze Asche bedeckt die Küste von D52; hilf beim Bergen der verschütteten Bernsteinfunde.",
+          "roads": [
+            "D52"
+          ],
+          "enemies": [
+            "Wrackkrabben"
+          ],
+          "reward": "30 Silber, +5 Gold",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "bernsvik_q09",
+          "title": "Die Geleitschutz-Fahrt nach Nordwacht",
+          "category": "Fraktion",
+          "description": "Bringe dringend benötigte Vorräte über den sehr langen Seeweg M12 in die nördliche Ordensfestung Nordwacht.",
+          "roads": [
+            "M12"
+          ],
+          "enemies": [
+            "Sturmrochen"
+          ],
+          "reward": "50 Silber, +6 Gold",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "bernsvik_q10",
+          "title": "Der Leuchtturm von Bernsvik",
+          "category": "Gewichtig",
+          "description": "Verstärke den großen Leuchtturm von Bernsvik mit Bernstein-Spiegeln und einer Wachmannschaft, um die gefährlichen Seewege M23 und M27 nach Norden zu überwachen.",
+          "roads": [
+            "M23",
+            "M27"
+          ],
+          "enemies": [
+            "Kultisten"
+          ],
+          "reward": "Untoten-Bedrohung -3; Schutz der Nord-Seewege in Akt 3 & 4",
+          "deadlineRounds": null,
+          "openPoint": null
+        }
+      ],
+      "villages": [
+        {
+          "village": "Bernsteinstrand",
+          "road": "D52",
+          "yield": "Bernstein",
+          "quests": [
+            {
+              "id": "bernsteinstrand_q01",
+              "title": "Die gestohlene Bernstein-Truhe",
+              "description": "Verfolge Schmuggler, die den gesamten Monatsfund entwendet haben.",
+              "roads": [
+                "D52"
+              ],
+              "enemies": [
+                "Schmuggler"
+              ],
+              "reward": "30 Silber, Bernstein-Talisman",
+              "deadlineRounds": null,
+              "openPoint": null
+            }
+          ]
+        },
+        {
+          "village": "Tangby",
+          "road": "D53",
+          "yield": "Tang",
+          "quests": [
+            {
+              "id": "tangby_q01",
+              "title": "Wrackkrabben in den Tangfeldern",
+              "description": "Räume die Küste von aggressiven Wrackkrabben.",
+              "roads": [
+                "D53"
+              ],
+              "enemies": [
+                "Wrackkrabben"
+              ],
+              "reward": "20 Silber, +4 Gold",
+              "deadlineRounds": null,
+              "openPoint": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "city": "Grenzmarkt",
+      "type": "Stadt",
+      "levelRange": "1-6",
+      "sideQuests": [
+        {
+          "id": "grenzmarkt_q01",
+          "title": "Maultiere für den Passhandel",
+          "category": "Fraktion",
+          "description": "Sichere eine Herde Lastmaultiere aus Passhof über D54 für die Handelszüge im Gebirge.",
+          "roads": [
+            "D54"
+          ],
+          "enemies": [
+            "Wegelagerer"
+          ],
+          "reward": "25 Silber, +7 Gold",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "grenzmarkt_q02",
+          "title": "Warenlager in Saumby",
+          "category": "Dorf-Verbindung",
+          "description": "Verteidige die vollbeladenen Lagerhäuser von Saumby (D55) gegen plündernde Deserteure.",
+          "roads": [
+            "D55"
+          ],
+          "enemies": [
+            "Deserteure"
+          ],
+          "reward": "30 Silber, +6 Gold",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "grenzmarkt_q03",
+          "title": "Der Streit zwischen Eikmark und Haraldstad",
+          "category": "Kaltfrieden (Kronreich)",
+          "description": "Auf den Grenzstraßen S02 (nach Eikmark) und S10 (nach Haraldstad) blockieren Kronreich-Zöllner die Handelskarawanen. Handle einen freien Durchzug aus.",
+          "roads": [
+            "S02",
+            "S10"
+          ],
+          "enemies": [],
+          "reward": "45 Silber, Kaltfrieden-Lore",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "grenzmarkt_q04",
+          "title": "Die geweihte Kiste aus Sigrunsheim",
+          "category": "Kaltfrieden (Orden)",
+          "description": "Ein Ordensbote aus Sigrunsheim (S45) verlangt geleitete Durchreise für eine Truhe mit Runenrelikten – doch abergläubische Händler wollen die Magie nicht in der Stadt dulden.",
+          "roads": [
+            "S45"
+          ],
+          "enemies": [
+            "Kultisten"
+          ],
+          "reward": "40 Silber, Runen-Amulett (tragbar)",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "grenzmarkt_q05",
+          "title": "Falsche Münzen, echte Knochen",
+          "category": "Kult-Spur",
+          "description": "Acht reiche Kaufleute des Kults der Bleichen Ewigkeit nutzen das Marktgewühl von Grenzmarkt, um Totenreliquien aus dem Norden an Adlige aus dem Kronreich weiterzuverkaufen.",
+          "roads": [
+            "S02",
+            "S53"
+          ],
+          "enemies": [
+            "Kultisten"
+          ],
+          "reward": "Untoten-Bedrohung -3, 50 Silber",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "grenzmarkt_q06",
+          "title": "Warum die Zwerge das Gebirge meiden",
+          "category": "Weltkonflikt (Zwerge)",
+          "description": "Ein fahrender Zwergenhändler erzählt am Marktfeuer, wie die Glut des Mutterbergs die tiefen Stollen im Südosten bedroht und die Zwerge gegen die anderen Völker misstrauisch macht.",
+          "roads": [],
+          "enemies": [],
+          "reward": "25 Silber, Welt-Lore (Zwerge)",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "grenzmarkt_q07",
+          "title": "Die flüsternde Feder am Schwarzen Brett",
+          "category": "Intrige",
+          "description": "Ein unauffälliger Schreiber hinterlässt eine mit einer Feder gesiegelte Warnung vor einem Hinterhalt auf S54 nach Skerheim (Spur der Stillen Feder, Identität bleibt geheim).",
+          "roads": [
+            "S54"
+          ],
+          "enemies": [
+            "Wegelagerer"
+          ],
+          "reward": "40 Silber, Intrigen-Lore",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "grenzmarkt_q08",
+          "title": "Galgenkrähen über dem Pass",
+          "category": "Bestiarium",
+          "description": "Ein Schwarm Galgenkrähen greift Packtiere auf der Straße S53 nach Perlvik an.",
+          "roads": [
+            "S53"
+          ],
+          "enemies": [
+            "Galgenkrähen"
+          ],
+          "reward": "30 Silber, Krähenfeder-Mantel",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "grenzmarkt_q09",
+          "title": "Aschenstaub auf den Handelswegen",
+          "category": "Nacht des Erwachens",
+          "description": "Besorge Salzkraut und Heilmittel für erkrankte Karawanenführer nach dem schweren Ascheregen.",
+          "roads": [
+            "D54"
+          ],
+          "enemies": [
+            "Hafenratten"
+          ],
+          "reward": "25 Silber, 2x Heilmittel (Wert je 12 Silber)",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "grenzmarkt_q10",
+          "title": "Der Freihandelsbrief von Grenzmarkt",
+          "category": "Gewichtig",
+          "description": "Sichere den neutralen Marktplatz gegen Übergriffe von allen drei Menschenfraktionen, damit Grenzmarkt als dauerhafter Nachschubknoten für Akt 2 und 3 dient.",
+          "roads": [
+            "S02",
+            "S10",
+            "S45",
+            "S53"
+          ],
+          "enemies": [
+            "Wegelagerer",
+            "Spione"
+          ],
+          "reward": "+10 Gold; Reisen über Grenzmarkt kosten 1 Vorrat weniger",
+          "deadlineRounds": null,
+          "openPoint": null
+        }
+      ],
+      "villages": [
+        {
+          "village": "Passhof",
+          "road": "D54",
+          "yield": "Maultiere",
+          "quests": [
+            {
+              "id": "passhof_q01",
+              "title": "Die entlaufenen Lasttiere",
+              "description": "Fange erschreckte Maultiere nach einem Nachbeben ein und vertreibe Grauwölfe.",
+              "roads": [
+                "D54"
+              ],
+              "enemies": [
+                "Grauwölfe"
+              ],
+              "reward": "20 Silber, +5 Gold",
+              "deadlineRounds": null,
+              "openPoint": null
+            }
+          ]
+        },
+        {
+          "village": "Saumby",
+          "road": "D55",
+          "yield": "Handelswaren",
+          "quests": [
+            {
+              "id": "saumby_q01",
+              "title": "Die falschen Zollpapiere",
+              "description": "Überführe Betrüger, die gestohlene Waren aus Bernsvik (S50) umetikettieren.",
+              "roads": [
+                "D55",
+                "S50"
+              ],
+              "enemies": [
+                "Schmuggler"
+              ],
+              "reward": "25 Silber, +5 Gold",
+              "deadlineRounds": null,
+              "openPoint": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "city": "Möwenstad",
+      "type": "Hafenstadt",
+      "levelRange": "2-6",
+      "sideQuests": [
+        {
+          "id": "moewenstad_q01",
+          "title": "Salz aus den Inselsalinen",
+          "category": "Fraktion",
+          "description": "Schütze die Salzkocher von Salzgarten (D57) vor Strandräubern.",
+          "roads": [
+            "D57"
+          ],
+          "enemies": [
+            "Wegelagerer"
+          ],
+          "reward": "25 Silber, +7 Gold",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "moewenstad_q02",
+          "title": "Die Fischer von Möwenstrand",
+          "category": "Dorf-Verbindung",
+          "description": "Vertreibe Wrackkrabben, die die Boote am Möwenstrand (D56) beschädigen.",
+          "roads": [
+            "D56"
+          ],
+          "enemies": [
+            "Wrackkrabben"
+          ],
+          "reward": "25 Silber, +5 Gold",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "moewenstad_q03",
+          "title": "Der Schiffbrüchige aus Sandvik",
+          "category": "Kaltfrieden (Kronreich)",
+          "description": "Rette einen gestrandeten Seemann aus dem Kronreich von einem Korallenriff und erfahre von der Kornnot im Westen.",
+          "roads": [],
+          "enemies": [
+            "Riffhaie"
+          ],
+          "reward": "30 Silber, Kronreich-Lore",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "moewenstad_q04",
+          "title": "Pilger auf Irrfahrt",
+          "category": "Kaltfrieden (Orden)",
+          "description": "Ein vom Kurs abgekommenes Boot mit Ordensnovizen sucht Wasser und Vorräte auf Möwenstad.",
+          "roads": [],
+          "enemies": [],
+          "reward": "35 Silber (oder +6 Gold)",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "moewenstad_q05",
+          "title": "Schmuggel nach Rubinhafen und Schattmund",
+          "category": "Kult-Spur",
+          "description": "Sieben Kultisten der Bleichen Ewigkeit nutzen die einsame Insel als Zwischenhalt für verbotene Fahrten über M28 und M29 zu den Erinnernden im Land der Untoten.",
+          "roads": [
+            "M28",
+            "M29"
+          ],
+          "enemies": [
+            "Kultisten"
+          ],
+          "reward": "Untoten-Bedrohung -4, 55 Silber",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "moewenstad_q06",
+          "title": "Die Blutsteine von Rubinhafen",
+          "category": "Weltkonflikt (Untote)",
+          "description": "Ein alter Inselkapitän zeigt dir einen roten Kristall aus Rubinhafen (M28) und erklärt, warum die Untoten im Norden nach dem Blut und der Lebenswärme der Lebenden dürsten.",
+          "roads": [
+            "M28"
+          ],
+          "enemies": [],
+          "reward": "30 Silber, Welt-Lore (Untote)",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "moewenstad_q07",
+          "title": "Treibgut aus dem Elfenmeer",
+          "category": "Weltkonflikt (Elfen)",
+          "description": "An der Ostküste der Insel wird eine geschnitzte Elfen-Boje mit Warnzeichen vor den Untoten-Seewegen M29 und M31 angespült.",
+          "roads": [
+            "M29",
+            "M31"
+          ],
+          "enemies": [],
+          "reward": "25 Silber, Welt-Lore (Elfen)",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "moewenstad_q08",
+          "title": "Sturmrochen auf der Route nach Zollholm",
+          "category": "Bestiarium",
+          "description": "Ein Schwarm Sturmrochen greift Handelsschiffe auf dem Seeweg M31 nach Zollholm an.",
+          "roads": [
+            "M31"
+          ],
+          "enemies": [
+            "Sturmrochen"
+          ],
+          "reward": "45 Silber, Rochenleder-Schild",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "moewenstad_q09",
+          "title": "Aschenregen auf den Salzgärten",
+          "category": "Nacht des Erwachens",
+          "description": "Vulkanasche verunreinigt die offenen Salzpfannen; hilf beim Reinigen und vertreibe Galgenkrähen.",
+          "roads": [
+            "D57"
+          ],
+          "enemies": [
+            "Galgenkrähen"
+          ],
+          "reward": "25 Silber, +5 Gold",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "moewenstad_q10",
+          "title": "Alphatier: Der Kapitän",
+          "category": "Alphatier-Jagd",
+          "description": "In den Wracks südlich von Möwenstad haust Der Kapitän, eine riesige Wrackkrabbe mit einem alten Admiralshut auf dem Panzer.",
+          "roads": [
+            "M31"
+          ],
+          "enemies": [
+            "Der Kapitän"
+          ],
+          "reward": "65 Silber, Admiralshut des Kapitäns",
+          "deadlineRounds": null,
+          "openPoint": null
+        }
+      ],
+      "villages": [
+        {
+          "village": "Möwenstrand",
+          "road": "D56",
+          "yield": "Fisch",
+          "quests": [
+            {
+              "id": "moewenstrand_q01",
+              "title": "Riffhaie in der Bucht",
+              "description": "Erlege zwei Riffhaie, die die Fischerboote am Auslaufen hindern.",
+              "roads": [
+                "D56"
+              ],
+              "enemies": [
+                "Riffhaie"
+              ],
+              "reward": "25 Silber, Haizahn-Dolch",
+              "deadlineRounds": null,
+              "openPoint": null
+            }
+          ]
+        },
+        {
+          "village": "Salzgarten",
+          "road": "D57",
+          "yield": "Salz",
+          "quests": [
+            {
+              "id": "salzgarten_q01",
+              "title": "Die gestohlenen Salzsäcke",
+              "description": "Stelle Schmuggler, die unverzolltes Salz auf Boote verladen.",
+              "roads": [
+                "D57"
+              ],
+              "enemies": [
+                "Schmuggler"
+              ],
+              "reward": "20 Silber, +5 Gold",
+              "deadlineRounds": null,
+              "openPoint": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "city": "Nebelvik",
+      "type": "Hafenstadt",
+      "levelRange": "2-6",
+      "sideQuests": [
+        {
+          "id": "nebelvik_q01",
+          "title": "Fischfang im dichten Nebel",
+          "category": "Fraktion",
+          "description": "Eskortiere die Fischer von Nebelstrand (D58) sicher zurück in den Hafen.",
+          "roads": [
+            "D58"
+          ],
+          "enemies": [
+            "Riffhaie"
+          ],
+          "reward": "25 Silber, +6 Gold",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "nebelvik_q02",
+          "title": "Ordnung in der Schmugglerbucht",
+          "category": "Dorf-Verbindung",
+          "description": "In der Schmugglerbucht (D59) streiten zwei Banden um beschlagnahmte Handelswaren.",
+          "roads": [
+            "D59"
+          ],
+          "enemies": [
+            "Schmuggler"
+          ],
+          "reward": "35 Silber, +6 Gold",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "nebelvik_q03",
+          "title": "Verbotenes Korn aus dem Westen",
+          "category": "Kaltfrieden (Kronreich)",
+          "description": "Ein Kapitän aus Salzwacht (M34) bringt über Umwege geschmuggeltes Kronreich-Korn nach Nebelvik.",
+          "roads": [
+            "M34"
+          ],
+          "enemies": [],
+          "reward": "40 Silber (oder +7 Gold)",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "nebelvik_q04",
+          "title": "Die geschmuggelte Glutlaterne",
+          "category": "Kaltfrieden (Orden)",
+          "description": "In der Schmugglerbucht (D59) taucht eine magische Glutlaterne des Ordens auf – die Seeleute weigern sich, an Bord zu gehen, solange sie in der Stadt ist.",
+          "roads": [
+            "D59"
+          ],
+          "enemies": [
+            "Schmuggler"
+          ],
+          "reward": "40 Silber, Glutlaterne (nur Handelsware/Beute zum Verkauf)",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "nebelvik_q05",
+          "title": "Totenschiffe in der Nebelbucht",
+          "category": "Kult-Spur",
+          "description": "Acht Kultisten der Bleichen Ewigkeit empfangen nachts in der Schmugglerbucht (D59) verfluchte Fracht über die Seewege M32 (Draugrsund) und M37 (Totenwacht).",
+          "roads": [
+            "D59",
+            "M32",
+            "M37"
+          ],
+          "enemies": [
+            "Kultisten"
+          ],
+          "reward": "Untoten-Bedrohung -4, 55 Silber",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "nebelvik_q06",
+          "title": "Flaschenpost aus Schattmund",
+          "category": "Weltkonflikt (Untote)",
+          "description": "Ein Fischer findet auf der Route M35 nach Schattmund eine versiegelte Urne mit alten Schriften über den Fall der nördlichen Königreiche.",
+          "roads": [
+            "M35"
+          ],
+          "enemies": [],
+          "reward": "30 Silber, Welt-Lore (Untote)",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "nebelvik_q07",
+          "title": "Die Elfen-Späher im Nebel",
+          "category": "Weltkonflikt (Elfen)",
+          "description": "Ein Schmuggler zeigt dir einen silbernen Elfenpfeil und berichtet, wie die Elfen im Osten ihre Wälder mit Dornen und Schatten gegen Eindringlinge verteidigen.",
+          "roads": [
+            "D59"
+          ],
+          "enemies": [],
+          "reward": "25 Silber, Welt-Lore (Elfen)",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "nebelvik_q08",
+          "title": "Tiefenkrake vor Nebelvik",
+          "category": "Bestiarium",
+          "description": "Eine Tiefenkrake greift Schiffe auf dem Seeweg M33 nach Perlvik an.",
+          "roads": [
+            "M33"
+          ],
+          "enemies": [
+            "Tiefenkrake"
+          ],
+          "reward": "55 Silber, Krakenleder-Wams",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "nebelvik_q09",
+          "title": "Hafenratten in den Nebelspeichern",
+          "category": "Nacht des Erwachens",
+          "description": "Nach dem Ascheregen fallen Schwärme von Hafenratten über die gelagerten Trockenfische her.",
+          "roads": [
+            "D58"
+          ],
+          "enemies": [
+            "Hafenratten"
+          ],
+          "reward": "25 Silber, +5 Gold",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "nebelvik_q10",
+          "title": "Schatten im Nebel",
+          "category": "Begleiter (2/3)",
+          "description": "Die Schattenklinge Sören Nebeltritt wurde bei einem Auftrag gegen Kult-Schmuggler in der Schmugglerbucht (D59) umzingelt. Rette ihn und birg die verschlüsselten Frachtlisten.",
+          "roads": [
+            "D59"
+          ],
+          "enemies": [
+            "Kultisten",
+            "Schmuggler"
+          ],
+          "reward": "Begleiter: Sören Nebeltritt (2/3)",
+          "deadlineRounds": null,
+          "openPoint": null
+        }
+      ],
+      "villages": [
+        {
+          "village": "Nebelstrand",
+          "road": "D58",
+          "yield": "Fisch",
+          "quests": [
+            {
+              "id": "nebelstrand_q01",
+              "title": "Das verschollene Nebelhorn",
+              "description": "Birg das kupferne Nebelhorn von einer Klippe voller Wrackkrabben.",
+              "roads": [
+                "D58"
+              ],
+              "enemies": [
+                "Wrackkrabben"
+              ],
+              "reward": "20 Silber, +5 Gold",
+              "deadlineRounds": null,
+              "openPoint": null
+            }
+          ]
+        },
+        {
+          "village": "Schmugglerbucht",
+          "road": "D59",
+          "yield": "Schmuggelware",
+          "quests": [
+            {
+              "id": "schmugglerbucht_q01",
+              "title": "Die versenkte Kiste",
+              "description": "Hebe eine geschmuggelte Waffenkiste aus der flachen Bucht und wehre Riffhaie ab.",
+              "roads": [
+                "D59"
+              ],
+              "enemies": [
+                "Riffhaie"
+              ],
+              "reward": "30 Silber, Entermesser",
+              "deadlineRounds": null,
+              "openPoint": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "city": "Salzwacht",
+      "type": "Hafenstadt",
+      "levelRange": "2-6",
+      "sideQuests": [
+        {
+          "id": "salzwacht_q01",
+          "title": "Schiffsholz aus Werftby",
+          "category": "Fraktion",
+          "description": "Sichere die Holzlieferungen aus Werftby über D61 für die Kriegsschiffe von Admiral Knut Salzhand.",
+          "roads": [
+            "D61"
+          ],
+          "enemies": [
+            "Wegelagerer"
+          ],
+          "reward": "30 Silber, +7 Gold",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "salzwacht_q02",
+          "title": "Teer für die Schiffsrümpfe",
+          "category": "Dorf-Verbindung",
+          "description": "Verteidige die Teerbrenner von Teerhag (D60) gegen Brandstifter.",
+          "roads": [
+            "D60"
+          ],
+          "enemies": [
+            "Deserteure"
+          ],
+          "reward": "25 Silber, +6 Gold",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "salzwacht_q03",
+          "title": "Eisen für die Bundesflotte",
+          "category": "Kaltfrieden (Kronreich)",
+          "description": "Ein Schmied aus dem Kronreich bietet heimlich Geschützrohre und Anker an, verlangt aber doppelten Preis wegen des Kaltfriedens.",
+          "roads": [
+            "S56"
+          ],
+          "enemies": [],
+          "reward": "45 Silber (oder +7 Gold)",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "salzwacht_q04",
+          "title": "Der zwergische Geschützmeister",
+          "category": "Weltkonflikt (Zwerge)",
+          "description": "Ein Gehilfe von Meister Orrin Kupferbart erklärt den Bau von Schwarzpulver-Kanonen und erzählt, wie die Zwerge im Südosten ihre Tiefenfestungen verteidigen.",
+          "roads": [],
+          "enemies": [],
+          "reward": "35 Silber, Welt-Lore (Zwerge)",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "salzwacht_q05",
+          "title": "Sabotage auf den Hellingen",
+          "category": "Kult-Spur",
+          "description": "Sieben Kultisten der Bleichen Ewigkeit versuchen, das neue Flaggschiff von Admiral Knut Salzhand vor der Fahrt nach Norden (M42) anzuzünden.",
+          "roads": [
+            "M42"
+          ],
+          "enemies": [
+            "Kultisten"
+          ],
+          "reward": "Untoten-Bedrohung -4, 50 Silber",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "salzwacht_q06",
+          "title": "Die Piraten von Rostbucht",
+          "category": "Weltkonflikt (Orks)",
+          "description": "Ein ehemaliger Pirat aus Knut Salzhands Mannschaft berichtet von einer Fahrt auf M43 nach Rostbucht und erklärt, warum die Staubreiter-Orks aus Verzweiflung rauben.",
+          "roads": [
+            "M43"
+          ],
+          "enemies": [],
+          "reward": "30 Silber, Welt-Lore (Orks)",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "salzwacht_q07",
+          "title": "Meuterei auf der Reede",
+          "category": "Intrige",
+          "description": "Unzufriedene Söldner meutern auf einem Transportschiff auf der Straße nach Skerheim (S57).",
+          "roads": [
+            "S57"
+          ],
+          "enemies": [
+            "Deserteure"
+          ],
+          "reward": "45 Silber, Enteraxt",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "salzwacht_q08",
+          "title": "Tiefenkrake vor der Kriegswerft",
+          "category": "Bestiarium",
+          "description": "Eine Tiefenkrake blockiert die Hafeneinfahrt Richtung Silberholm (M44).",
+          "roads": [
+            "M44"
+          ],
+          "enemies": [
+            "Tiefenkrake"
+          ],
+          "reward": "55 Silber, Krakenbein-Talisman",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "salzwacht_q09",
+          "title": "Brennender Ascheregen im Teerlager",
+          "category": "Nacht des Erwachens",
+          "description": "Heiße Vulkanasche droht die Teerfässer in Teerhag zu entzünden; hilf beim Löschen und bekämpfe Hafenratten.",
+          "roads": [
+            "D60"
+          ],
+          "enemies": [
+            "Hafenratten"
+          ],
+          "reward": "25 Silber, +5 Gold",
+          "deadlineRounds": null,
+          "openPoint": null
+        },
+        {
+          "id": "salzwacht_q10",
+          "title": "Der Schwur der Kriegswerft",
+          "category": "Begleiter (3/3)",
+          "description": "Zollhauptmann Halvor Eisentau verteidigt das Hauptarsenal von Salzwacht gegen Kult-Saboteure und Meuterer. Schlage den Angriff gemeinsam mit ihm zurück.",
+          "roads": [
+            "D61"
+          ],
+          "enemies": [
+            "Kultisten",
+            "Deserteure"
+          ],
+          "reward": "Begleiter: Zollhauptmann Halvor Eisentau (3/3)",
+          "deadlineRounds": null,
+          "openPoint": null
+        }
+      ],
+      "villages": [
+        {
+          "village": "Werftby",
+          "road": "D61",
+          "yield": "Holz",
+          "quests": [
+            {
+              "id": "werftby_q01",
+              "title": "Eichenstämme für den Kiel",
+              "description": "Schütze die Holzfäller vor Galgenkrähen und Wegelagerern.",
+              "roads": [
+                "D61"
+              ],
+              "enemies": [
+                "Galgenkrähen",
+                "Wegelagerer"
+              ],
+              "reward": "25 Silber, +5 Gold",
+              "deadlineRounds": null,
+              "openPoint": null
+            }
+          ]
+        },
+        {
+          "village": "Teerhag",
+          "road": "D60",
+          "yield": "Teer",
+          "quests": [
+            {
+              "id": "teerhag_q01",
+              "title": "Schwarzer Rauch über Teerhag",
+              "description": "Fange Saboteure ab, die die Teergruben vergiften wollen.",
+              "roads": [
+                "D60"
+              ],
+              "enemies": [
+                "Schmuggler"
+              ],
+              "reward": "20 Silber, +5 Gold",
+              "deadlineRounds": null,
+              "openPoint": null
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

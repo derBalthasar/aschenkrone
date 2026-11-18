@@ -63,13 +63,23 @@ Glutberg, Kronhall, Nordwacht / Glutvik · enthält Volksquest: Das Alte Reich
 3. **Der Kreuzzug rüstet** (Nordwacht / Glutvik): Die Flotte sammelt sich an den Nordhäfen, und die Wachfeuer brennen wieder hell.
 
 ### Akt 5 „Über das Innere Meer“ (Stufe 19–20)
-Nordwacht / Glutvik -> Seewege -> frei wählbarer Kontinent
+Nordwacht / Glutberg (Kriegsrat) -> Starthafen der Route -> frei wählbarer Kontinent
 
 > Änderung Henry (18. 11. 2026): Bei Gemini „Über das Nordmeer“. Das Ziel ist frei wählbar, und nur der Weg zu den Untoten führt über das Nordmeer.
 
-1. **Auslaufen der Kreuzzugsflotte** (Nordwacht / Glutvik): Mit dem Segen der neu entfachten Ewigen Flamme sticht die Menschenarmada in See.
+1. **Kriegsrat und Auslaufen der Armada** (Nordwacht / Glutberg): Im Haupthafen Nordwacht / Glutberg tagt der letzte Kriegsrat der vereinten Menschen. Hier wählst du das Ziel der Armada: die Elfen im Osten, die Orks im Südwesten oder die Zwerge im Südosten, jeweils als Bündnis oder um sie zu unterwerfen, oder als extrem schweren Weg die Untoten im hohen Norden. Danach verlegt die Flotte in den Starthafen ihrer Route und läuft dort aus (Tabelle unten).
+   > Änderung Henry (18. 11. 2026): Kriegsrat mit Zielwahl im Haupthafen, Abfahrt aus dem echten Starthafen der Route.
 2. **Feuer auf den Wellen** (Inneres Meer / Nordmeer): Abwehr eines Angriffs untoter Kriegsschiffe auf hoher See mithilfe geweihter Glutrunen.
 3. **Der Brückenkopf** (Fremde Küste (frei wählbarer Kontinent)): Landung an der gewählten Küste (Elfen im Osten, Orks im Südwesten, Zwerge im Südosten als Bündnis oder Unterwerfung – oder der extrem schwere Weg direkt gegen die Untoten im hohen Norden). Ende Kapitel 1.
+
+**Akt 5, Kriegsrat und Starthäfen (Patch Henry, 18. 11. 2026):**
+
+| Ziel | Wahl | Starthafen und Seeweg |
+| --- | --- | --- |
+| Elfen | Bündnis oder Unterwerfung | Zollholm: M53 nach Laubmarkt |
+| Zwerge | Bündnis oder Unterwerfung | Zollholm: M52 Erzhafen, M55 Salzbucht, M57 Westhort |
+| Orks | Bündnis oder Unterwerfung | Westvik: M09 Zhar-Kesh, M06 Rostbucht; Sandvik: M02 Rostbucht, M05 Zhar-Kesh |
+| Untote (extrem schwer) | Vernichtung | Tranvik: M50 Draugrsund, M51 Totenwacht; Nordwacht: M13 Draugrsund |
 
 ### Fraktions-Spezialisierung (Nach Abschluss beider Schwester-Zweige, zusätzlich zur Spezialisierung der Klasse)
 - **Sonnenklingen**: Maximale Glutmagie im Nahkampf, verheerender Feuerschaden gegen Untote.

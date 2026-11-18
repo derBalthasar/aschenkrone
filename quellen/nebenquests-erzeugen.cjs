@@ -51,11 +51,37 @@ const wegKennungen = {
   D39: ["nordwacht", "leuchtfeuer"], D40: ["nordwacht", "robbenstrand"], D41: ["sigrunsheim", "gerstenhof"],
   D42: ["sigrunsheim", "sigrunsquell"], D43: ["thorvaldsklipp", "gebetsfels"], D44: ["thorvaldsklipp", "kliffhof"],
   D45: ["wachtfeuer", "holzfaellerby"], D46: ["wachtfeuer", "wachthof"],
+  // Freie Häfen und Seewege zu den anderen Völkern (Orte und Wege der Menschen, 18. 11. 2026)
+  S48: ["ankerfjord", "nebelvik"], S49: ["ankerfjord", "silberholm"], S50: ["bernsvik", "grenzmarkt"],
+  S51: ["bernsvik", "silberholm"], S53: ["grenzmarkt", "perlvik"], S54: ["grenzmarkt", "skerheim"],
+  S55: ["nebelvik", "silberholm"], S56: ["perlvik", "salzwacht"], S57: ["salzwacht", "skerheim"],
+  M15: ["ankerfjord", "bernsvik"], M16: ["ankerfjord", "draugrsund"], M17: ["ankerfjord", "moewenstad"],
+  M18: ["ankerfjord", "perlvik"], M19: ["ankerfjord", "salzwacht"], M20: ["ankerfjord", "schattmund"],
+  M21: ["ankerfjord", "skerheim"], M22: ["ankerfjord", "tranvik"], M24: ["bernsvik", "nebelvik"], M26: ["bernsvik", "skerheim"],
+  M27: ["bernsvik", "totenwacht"], M28: ["moewenstad", "rubinhafen"], M29: ["moewenstad", "schattmund"],
+  M30: ["moewenstad", "silberholm"], M31: ["moewenstad", "zollholm"], M32: ["draugrsund", "nebelvik"],
+  M33: ["nebelvik", "perlvik"], M34: ["nebelvik", "salzwacht"], M35: ["nebelvik", "schattmund"], M36: ["nebelvik", "skerheim"],
+  M37: ["nebelvik", "totenwacht"], M38: ["nebelvik", "tranvik"], M39: ["draugrsund", "perlvik"], M40: ["perlvik", "silberholm"],
+  M41: ["perlvik", "skerheim"], M42: ["draugrsund", "salzwacht"], M43: ["rostbucht", "salzwacht"],
+  M44: ["salzwacht", "silberholm"], M45: ["draugrsund", "silberholm"], M46: ["silberholm", "skerheim"],
+  M47: ["silberholm", "totenwacht"], M48: ["silberholm", "tranvik"], M49: ["rostbucht", "skerheim"],
+  M50: ["draugrsund", "tranvik"], M51: ["totenwacht", "tranvik"], M52: ["erzhafen", "zollholm"], M53: ["laubmarkt", "zollholm"],
+  M54: ["rubinhafen", "zollholm"], M55: ["salzbucht", "zollholm"], M56: ["schattmund", "zollholm"],
+  M57: ["westhort", "zollholm"], D47: ["perlvik", "fischerholm"], D48: ["perlvik", "gartenby"], D49: ["perlvik", "perlstrand"],
+  D50: ["ankerfjord", "fjordhof"], D51: ["ankerfjord", "seilerby"], D52: ["bernsvik", "bernsteinstrand"],
+  D53: ["bernsvik", "tangby"], D54: ["grenzmarkt", "passhof"], D55: ["grenzmarkt", "saumby"],
+  D56: ["moewenstad", "moewenstrand"], D57: ["moewenstad", "salzgarten"], D58: ["nebelvik", "nebelstrand"],
+  D59: ["nebelvik", "schmugglerbucht"], D60: ["salzwacht", "teerhag"], D61: ["salzwacht", "werftby"],
+  D62: ["silberholm", "inselhof"], D63: ["silberholm", "silbergrube"], D64: ["skerheim", "klippenhof"],
+  D65: ["skerheim", "robbenschaer"], D66: ["tranvik", "raeucherby"], D67: ["tranvik", "walby"], D68: ["zollholm", "kliffby"],
+  D69: ["zollholm", "leuchtholm"],
 };
 
 // Henry, 18. 11. 2026: Die Orden-Begleiter heißen anders, weil Bjarne (Ser Bjarne vom Eispass) und Solveig
 // (Thingsprecherin Solveig Valsdottir) schon vergeben sind.
-const korrekturen = [["Irrglühte", "Irrglut"], ["Bjarne Eisenrun", "Halvar Eisenrun"], ["Solveig Gluthand", "Gunhild Gluthand"]];
+// Gemini schrieb einmal „Haizahn-Harpoon“ (englisch); im Spiel heißt die Waffe Haizahn-Harpune.
+const korrekturen = [["Irrglühte", "Irrglut"], ["Bjarne Eisenrun", "Halvar Eisenrun"], ["Solveig Gluthand", "Gunhild Gluthand"],
+  ["Haizahn-Harpoon", "Haizahn-Harpune"]];
 const text = (wert) => korrekturen.reduce((s, [alt, neu]) => s.split(alt).join(neu), wert);
 const lies = (datei) => JSON.parse(fs.readFileSync(path.join(root, "quellen/gemini", datei), "utf8"));
 // Dorfnamen sind nicht weltweit eindeutig (Ziegenalm gibt es zweimal), daher über die Stadt auflösen.
@@ -129,9 +155,34 @@ function reiheAus(teil1, f) {
       return { id: f.begleiterIds?.[c.id] ?? c.id, name: text(c.name), rolle: c.role, klasse, ort: knoten.nachName[c.recruitLocation],
         akt: c.recruitAct, auftrag: c.questId, faehigkeit: c.ability, ...(f.begleiterVermerke?.[c.id] ? { vermerk: f.begleiterVermerke[c.id] } : {}) };
     }),
+    flotte: { kriegsrat: f.kriegsrat, ziele: flotteZiele },
     geheim: f.geheim,
   };
 }
+
+// Patch Henry, 18. 11. 2026 (Feinschliff Volk der Menschen, Punkt 1): Akt 5 beginnt mit dem Kriegsrat im Haupthafen.
+// Dort wählt der Spieler das Ziel. Danach verlegt die Flotte in den echten Starthafen der gewählten Seeweg-Route.
+const flotteZiele = [
+  { volk: "elfen", name: "Elfen", wahl: ["Bündnis", "Unterwerfung"], starthaefen: [{ hafen: "zollholm", wege: ["M53"] }] },
+  { volk: "zwerge", name: "Zwerge", wahl: ["Bündnis", "Unterwerfung"], starthaefen: [{ hafen: "zollholm", wege: ["M52", "M55", "M57"] }] },
+  { volk: "orks", name: "Orks", wahl: ["Bündnis", "Unterwerfung"],
+    starthaefen: [{ hafen: "westvik", wege: ["M09", "M06"] }, { hafen: "sandvik", wege: ["M02", "M05"] }] },
+  { volk: "untote", name: "Untote", wahl: ["Vernichtung"], schwer: "extrem schwer",
+    starthaefen: [{ hafen: "tranvik", wege: ["M50", "M51"] }, { hafen: "nordwacht", wege: ["M13"] }] },
+];
+for (const z of flotteZiele) for (const s of z.starthaefen) for (const k of s.wege) {
+  if (!wegKennungen[k]?.includes(s.hafen)) throw new Error("Flotte: " + k + " beginnt nicht in " + s.hafen);
+}
+const kriegsratSchritt = (ort) => ({
+  ort,
+  titel: "Kriegsrat und Auslaufen der Armada",
+  text: "Im Haupthafen " + ort + " tagt der letzte Kriegsrat der vereinten Menschen. Hier wählst du das Ziel der Armada: " +
+    "die Elfen im Osten, die Orks im Südwesten oder die Zwerge im Südosten, jeweils als Bündnis oder um sie zu unterwerfen, " +
+    "oder als extrem schweren Weg die Untoten im hohen Norden. Danach verlegt die Flotte in den Starthafen ihrer Route und läuft " +
+    "dort aus: Zollholm für die Elfen (M53) und die Zwerge (M52, M55, M57), Westvik oder Sandvik für die Orks (M09, M06, M02, M05), " +
+    "Tranvik (M50, M51) oder Nordwacht (M13) für die Untoten.",
+  vermerk: "Änderung Henry (18. 11. 2026): Kriegsrat mit Zielwahl im Haupthafen, Abfahrt aus dem echten Starthafen der Route.",
+});
 
 // Der Bleiche Skalde (Henry, 18. 11. 2026): Erzpriester Thorvald, entlarvt in Akt 4. Er erklärt die Untoten-Bedrohung.
 const skalde = "Erzpriester Thorvald vom Glutberg";
@@ -166,6 +217,7 @@ const kronreich = {
         "(Endgegner). Untoten-Bedrohung −15.",
       vermerk: "Änderung Henry (18. 11. 2026): Der Skalde wird hier entdeckt. Gemini ließ ihn unerkannt. Der Skalde ist Erzpriester Thorvald (Henry, 18. 11. 2026).",
     },
+    "hum_kronreich_act5/1": kriegsratSchritt("Perlvik"),
     "hum_kronreich_act5/3": {
       ort: "Fremde Küste (frei wählbarer Kontinent)",
       text: "Eroberung eines Küstenabschnitts und Errichtung des ersten Feldlagers. Das Ziel wählt der Spieler frei: die Elfen " +
@@ -175,12 +227,15 @@ const kronreich = {
       vermerk: "Änderung Henry (18. 11. 2026): Kontinent frei wählbar, Bündnis oder Unterwerfung; Untote extrem schwer.",
     },
   },
-  aktAenderungen: { hum_kronreich_act5: { ort: "Haupthafen -> Seewege -> frei wählbarer Kontinent" } },
+  aktAenderungen: { hum_kronreich_act5: { ort: "Perlvik (Kriegsrat) -> Starthafen der Route -> frei wählbarer Kontinent" } },
+  kriegsrat: ["perlvik"],
+  // Patch Henry, 18. 11. 2026 (Punkt 2): Alle 33 Städte der Menschen haben am Aushang Stufe 1–5.
+  stufen: "1-5",
   // Klassen der Begleiter (Henry, 18. 11. 2026: keine zwei Späher). Wulfgar ist Steppenreiter (Späher des Kronreichs).
   begleiterKlassen: { comp_kron_sigrid: "waechter", comp_kron_wulfgar: "spaeher", comp_kron_fenris: "krieger" },
   geheim: ["Identität der Stillen Feder"],
   quelle: "Gemini, 18. 11. 2026, auf Grundlage von „Orte und Wege der Menschen“",
-  stand: "Aushang: Helden des Kronreichs und des Ordens nehmen die Aufträge an. Andere Völker lesen nur mit.",
+  stand: "Aushang: Helden der drei Menschen-Fraktionen nehmen die Aufträge an. Andere Völker lesen nur mit.",
 };
 
 // ---------- Orden der Flamme ----------
@@ -211,24 +266,74 @@ const orden = {
       text: "Du sicherst den Korntreck von Kronhall über Pass P02 zurück nach Eiswacht. Auf dem Pass warten Schnee, Wegelagerer und die Zöllner beider Seiten.",
       vermerk: "Änderung Henry (18. 11. 2026): Bei Gemini lief der Treck über S04 und S01 nach Brandstein, also nicht über den Eispass. Jetzt passt er zur Kronreich-Seite („Der Zug über den Eispass“).",
     },
+    "orden_act5/1": kriegsratSchritt("Nordwacht / Glutberg"),
     "orden_act4/1": {
       vermerk: "Wie beim Kronreich: Der Bleiche Skalde ist Erzpriester Thorvald und wird in Akt 4 entlarvt (Henry, 18. 11. 2026). In Akt 1 tritt er unerkannt auf.",
     },
   },
   aktAenderungen: {
     orden_branch_kronreich: { ort: "Eiswacht, Kronhall" },
-    orden_act5: { titel: "Über das Innere Meer", ort: "Nordwacht / Glutvik -> Seewege -> frei wählbarer Kontinent",
+    orden_act5: { titel: "Über das Innere Meer", ort: "Nordwacht / Glutberg (Kriegsrat) -> Starthafen der Route -> frei wählbarer Kontinent",
       vermerk: "Änderung Henry (18. 11. 2026): Bei Gemini „Über das Nordmeer“. Das Ziel ist frei wählbar, und nur der Weg zu den Untoten führt über das Nordmeer." },
   },
   prologText: "Herbst 612 n. E., die Nacht des Erwachens: Novizenweihe im Aschenkloster, ein gefallener Bruder steht im Kreuzgang " +
     "wieder auf, Kultisten löschen die Wachfeuer von Nordwacht, und am Glutberg flackert die Ewige Flamme. (Zusammenfassung des Prologs im Spiel.)",
   geheim: [],
+  kriegsrat: ["nordwacht", "glutberg"],
   // Henry, 18. 11. 2026: Alle Startgebiete des Ordens in Akt 1 haben Stufe 1–5. Höhere Stufen greifen über die Akt-Reihenfolge.
   stufen: "1-5",
   // Einheitliche Kennungen der Begleiter (Arbeitsanweisung Volk der Menschen, 18. 11. 2026).
   begleiterIds: { comp_orden_bjarne: "comp_orden_halvar", comp_orden_solveig: "comp_orden_gunhild" },
   quelle: "Gemini, 18. 11. 2026, auf Grundlage von „Orte und Wege der Menschen“",
-  stand: "Aushang: Helden des Kronreichs und des Ordens nehmen die Aufträge an. Andere Völker lesen nur mit.",
+  stand: "Aushang: Helden der drei Menschen-Fraktionen nehmen die Aufträge an. Andere Völker lesen nur mit.",
+};
+
+// ---------- Freie Häfen ----------
+// Gemini, 18. 11. 2026: Hauptquest, Nebenquests Teil A (Perlvik, Silberholm, Skerheim, Tranvik, Zollholm) und Teil B
+// (Ankerfjord, Bernsvik, Grenzmarkt, Möwenstad, Nebelvik, Salzwacht). Silberholm q01–q08 hat Henry am 18. 11. 2026 nachgeliefert.
+const rune = "Runengegenstand: Für die Freien Häfen tragbar (Henry, 18. 11. 2026). Bis es Ausrüstungswerte dafür gibt, liegt er als Beute im Rucksack.";
+const haefen = {
+  teil1: "haefen-teil1-hauptquest.json",
+  teil2: ["haefen-teil2a-nebenquests.json", "haefen-teil2b-nebenquests.json"],
+  hinweise: {
+    ankerfjord_q04: rune, grenzmarkt_q04: rune, silberholm_q04: rune,
+    nebelvik_q04: "Glutgegenstand: Die Glutlaterne taugt nur als Handelsware und Beute zum Verkauf (Henry, 18. 11. 2026).",
+    zollholm_q10: "Änderung Henry (18. 11. 2026): Bei Gemini „Mutter Tiefe“. Umbenannt in „Die Schwarze Krake“, damit sie nicht mit der Mutter der Tiefen aus dem Ordensland verwechselt wird.",
+    skerheim_q07: "Gemini schrieb „Haizahn-Harpoon“. Im Spiel heißt der Lohn Haizahn-Harpune.",
+  },
+  // Patch Henry, 18. 11. 2026 (Punkt 3): Das Alphatier der Tiefenkraken heißt Die Schwarze Krake.
+  ersatz: {
+    zollholm_q10: { title: "Alphatier: Die Schwarze Krake", enemies: ["Die Schwarze Krake"], reward: "65 Silber, Trophäe der Schwarzen Krake",
+      description: "In den tiefen Gewässern rund um die Zollinseln lauert die Schwarze Krake, der größte Tiefenkrake des Inneren Meeres, " +
+        "und zieht ganze Zollkutter in die Tiefe." },
+  },
+  aenderungen: {
+    // Arbeitsanweisung Volk der Menschen, 18. 11. 2026: „Gold und Eisen“ folgt den echten Straßen.
+    "haefen_branch_orden/2": {
+      ort: "Wachtfeuer / Lichtheim / Brandstein",
+      text: "Von Wachtfeuer reist du über S43 nach Lichtheim und über S28 weiter nach Brandstein. Dort verhandelst du über " +
+        "Schwefellieferungen für die Schiffskanonen von Admiral Knut Salzhand, während Erzpriester Thorvald misstrauisch deine Schritte beobachtet.",
+      vermerk: "Änderung Henry (18. 11. 2026): Weg über Lichtheim (S43, S28).",
+    },
+    "haefen_branch_orden/3": {
+      ort: "Thorvaldsklipp / Glutberg",
+      text: "Über S30 nach Thorvaldsklipp und S38 hinauf zum Glutberg. Am Gipfel schließt du mit Hochmeisterin Ragna Glutherz und " +
+        "Seherin Freydis den Pakt über gemeinsame Kreuzzugs- und Handelsflotten.",
+      vermerk: "Änderung Henry (18. 11. 2026): Weg über Thorvaldsklipp (S30, S38).",
+    },
+    "haefen_act5/1": kriegsratSchritt("Perlvik"),
+  },
+  aktAenderungen: {
+    haefen_act5: { ort: "Perlvik (Kriegsrat) -> Starthafen der Route -> frei wählbarer Kontinent" },
+  },
+  kriegsrat: ["perlvik"],
+  prologText: "Herbst 612 n. E., die Nacht des Erwachens: Ein Schmugglerschiff aus dem Norden läuft in Perlvik ein. Im Laderaum " +
+    "liegen Aethari-Schriften und gefesselte Elfenhändler. Kurz nach Mitternacht brennt das Gildenhaus, die Schriften verschwinden, " +
+    "und der Held flieht mit den Elfen nach Zollholm. (Zusammenfassung des Prologs im Spiel.)",
+  geheim: ["Identität der Stillen Feder"],
+  stufen: "1-5",
+  quelle: "Gemini, 18. 11. 2026, auf Grundlage von „Orte und Wege der Menschen“",
+  stand: "Aushang: Helden der drei Menschen-Fraktionen nehmen die Aufträge an. Andere Völker lesen nur mit.",
 };
 
 // ---------- Spielwerte (Henry, 18. 11. 2026: Haupt- und Nebenquests spielbar) ----------
@@ -261,12 +366,21 @@ const gegnerTypen = {
   letztermammut: { name: "Der Letzte Mammut", rang: "anfuehrer", alpha: true },
   graufang: { name: "Graufang", rang: "anfuehrer", alpha: true },
   diealte: { name: "Die Alte vom Moor", rang: "anfuehrer", alpha: true },
+  // Freie Häfen (Bestiarium „Meere und Inseln“)
+  hafenratten: { name: "Hafenratten", rang: "mitlaeufer", anzahl: 3, leader: "Hafenratte", ally: "Hafenratte" },
+  orkpiraten: { name: "Orkpiraten", rang: "mitlaeufer", anzahl: 3, leader: "Piratenkapitän", ally: "Orkpirat" },
+  tiefenkrake: { name: "Tiefenkrake", rang: "elite" }, sturmrochen: { name: "Sturmrochen", rang: "elite" },
+  schwarzekrake: { name: "Die Schwarze Krake", rang: "anfuehrer", alpha: true },
+  kapitaen: { name: "Der Kapitän", rang: "anfuehrer", alpha: true },
 };
 const gegnerNachName = { "Grauwolf": "grauwoelfe", "Grauwölfe": "grauwoelfe", "Kultisten": "kultisten", "Schmuggler": "schmuggler",
   "Spione": "spione", "Deserteure": "deserteure", "Wegelagerer": "wegelagerer", "Aschenkrähen": "aschenkraehen",
   "Schneeschleicher": "schneeschleicher", "Stollenkriecher": "stollenkriecher", "Frostbär": "frostbaer", "Eishauer": "eishauer",
   "Klippenwyrm": "klippenwyrm", "Glutwurm": "glutwurm", "Runenfresser": "runenfresser", "Aschenmammut": "aschenmammut",
-  "Skarn der Weiße Bär": "skarn", "Die Mutter der Tiefen": "mutterdertiefen", "Der Letzte Mammut": "letztermammut" };
+  "Skarn der Weiße Bär": "skarn", "Die Mutter der Tiefen": "mutterdertiefen", "Der Letzte Mammut": "letztermammut",
+  "Galgenkrähen": "galgenkraehen", "Riffhaie": "riffhaie", "Wrackkrabben": "wrackkrabben", "Hafenratten": "hafenratten",
+  "Orkpiraten": "orkpiraten", "Tiefenkrake": "tiefenkrake", "Sturmrochen": "sturmrochen", "Die Schwarze Krake": "schwarzekrake",
+  "Der Kapitän": "kapitaen" };
 // Das Kronreich hat Gemini ohne Gegnerliste geliefert. Die Gegner folgen hier aus dem Auftragstext (erste Regel gewinnt).
 const gegnerAusText = [
   [/Graufang/, "graufang"], [/uralten Moorschlinger/, "diealte"], [/Kult-Hauptmann/, "kulthauptmann"],
@@ -281,19 +395,19 @@ const gegnerAusText = [
 
 const gegenstandNachName = { Heilmittel: "harzverband", Heiltrank: "harzverband", Gegenmittel: "gegengift", Gegengift: "gegengift" };
 // Lohnteile, die kein Gegenstand sind, sondern als Vermerk (Wissen, Ruf, spätere Folgen) im Spielstand bleiben.
-const vermerkMuster = /Lore|Ruf|Bonus|bonus|Segen|in Akt|Akt \d|Begleiter|Frühwarnung|Flotte|Schutz vor|Überfallgefahr|kosten? \d Vorrat|Spur|Beweise|Briefe|hält|können/;
+const vermerkMuster = /Lore|Ruf|Bonus|bonus|Segen|in Akt|Akt \d|Begleiter|Frühwarnung|Flotte|Schutz |Überfallgefahr|kosten? \d Vorrat|Spur|Beweise|Briefe|hält|können|dauerhaft|sicherer|geschützt/;
 const slug = (t) => t.toLowerCase().replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const trophaeen = {};
 
 function lohnAus(text, ressource) {
   const lohn = { silber: 0, vorrat: 0, leisten: {}, gegenstaende: [], vermerke: [] };
   for (let teil of text.split(/[,;]|\s&\s(?!\d)/).map((t) => t.trim()).filter(Boolean)) {
-    teil = teil.replace(/\s*\((Wert[^)]*|\d\/\d[^)]*)\)?$/, "").trim();
+    teil = teil.replace(/\s*\((Wert[^)]*|\d\/\d[^)]*|tragbar|nur Handelsware[^)]*)\)?$/, "").trim();
     // Eine schließende Klammer bleibt nur, wenn sie zu einer öffnenden gehört („Moral-Bonus im Großen Thing (Akt 4)“).
     if (teil.endsWith(")") && (teil.match(/\(/g) ?? []).length < (teil.match(/\)/g) ?? []).length) teil = teil.slice(0, -1).trim();
     let m;
     if ((m = teil.match(/^(\d+) Silber/))) lohn.silber += +m[1];
-    else if ((m = teil.match(/^([+-−]\d+) (Korn|Glaube)$/))) lohn.vorrat += +m[1].replace("−", "-");
+    else if ((m = teil.match(/^([+-−]\d+) (Korn|Glaube|Gold)( bei Auslieferung)?$/))) lohn.vorrat += +m[1].replace("−", "-");
     else if ((m = teil.match(/^Untoten-Bedrohung ([-−]\d+)/))) lohn.leisten.untote = +m[1].replace("−", "-");
     else if ((m = teil.match(/^Ork-Bedrohung ([-−]\d+)/))) lohn.leisten.orks = +m[1].replace("−", "-");
     else if ((m = teil.match(/(?:Weg|Reisen auf) ([SPMD]\d\d) koste[nt]? 1 Vorrat weniger/))) { lohn.wegRabatt = m[1]; lohn.vermerke.push(teil); }
@@ -308,6 +422,7 @@ function lohnAus(text, ressource) {
   return lohn;
 }
 
+const menschenFraktionen = ["kronreich", "orden", "haefen"];
 function spielwerte(q, ortId, fraktionId) {
   const gegner = (q.gegner?.length ? q.gegner.map((n) => gegnerNachName[n]).filter(Boolean) : null) ??
     (fraktionId === "kronreich" ? [gegnerAusText.find(([re]) => re.test(q.text))?.[1]].filter(Boolean) : []);
@@ -315,7 +430,12 @@ function spielwerte(q, ortId, fraktionId) {
   const wege = q.wege ?? [...new Set(q.text.match(/\b[SPMD]\d\d\b/g) ?? [])].filter((k) => wegKennungen[k]);
   // Ein Kampfauftrag auf einem Weg, der am Auftragsort beginnt, wird beim Reisen über diesen Weg ausgelöst.
   // Alle anderen erledigt der Held am Auftragsort.
-  const weg = gegner.length ? wege.find((k) => wegKennungen[k].includes(ortId)) : undefined;
+  // Ein Seeweg in fremdes Land (etwa M39 nach Draugrsund) löst nichts aus: Dort abzufangen hieße, als Held der Stufe 1
+  // ins Land der Untoten zu segeln. Solche Aufträge erledigt der Held am Auftragsort (im Hafen, vor dem Auslaufen).
+  // Wege ins eigene Land gehen vor Wegen zu den Schwesterfraktionen.
+  const anderesEnde = (k) => knoten.get(wegKennungen[k].find((id) => id !== ortId))?.fraktion;
+  const amOrt = wege.filter((k) => wegKennungen[k].includes(ortId) && menschenFraktionen.includes(anderesEnde(k)));
+  const weg = gegner.length ? (amOrt.find((k) => anderesEnde(k) === fraktionId) ?? amOrt[0]) : undefined;
   const [haupt, oder] = q.lohn.split(/\s*\(oder\s*/);
   return { gegner: gegner[0] ?? null, ...(weg ? { weg } : {}), lohn: [lohnAus(haupt), ...(oder ? [lohnAus(oder.replace(/\)$/, ""))] : [])] };
 }
@@ -325,12 +445,15 @@ function fraktion(f) {
   for (const id of Object.keys(f.hinweise)) {
     if (!Object.values(orte).some((o) => o.auftraege.some((q) => q.id === id))) throw new Error("Hinweis ohne Auftrag: " + id);
   }
-  const fraktionId = f === kronreich ? "kronreich" : "orden";
+  const fraktionId = f.id;
   for (const [ortId, eintrag] of Object.entries(orte)) for (const q of eintrag.auftraege) q.spiel = spielwerte(q, ortId, fraktionId);
   return { volk: "menschen", reihe: reiheAus(lies(f.teil1), f), quelle: f.quelle, stand: f.stand, ...(f.fehlt ? { fehlt: f.fehlt } : {}), orte };
 }
 
-const daten = { kronreich: fraktion(kronreich), orden: fraktion(orden), wegKennungen, gegnerTypen };
+kronreich.id = "kronreich";
+orden.id = "orden";
+haefen.id = "haefen";
+const daten = { kronreich: fraktion(kronreich), orden: fraktion(orden), haefen: fraktion(haefen), wegKennungen, gegnerTypen };
 daten.trophaeen = trophaeen;
 
 const kopf = `"use strict";
@@ -340,7 +463,7 @@ const kopf = `"use strict";
 `;
 fs.writeFileSync(path.join(root, "spiel/nebenquests-daten.js"), kopf + "const nebenquestDaten = " + JSON.stringify(daten) +
   ";\nif (typeof module !== \"undefined\") module.exports = nebenquestDaten;\n");
-for (const id of ["kronreich", "orden"]) {
+for (const id of ["kronreich", "orden", "haefen"]) {
   const orte = Object.values(daten[id].orte);
   console.log(id + ":", orte.length, "Orte,", orte.reduce((n, o) => n + o.auftraege.length, 0), "Aufträge");
 }
