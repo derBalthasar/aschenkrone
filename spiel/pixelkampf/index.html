@@ -1,0 +1,1182 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Aschenkrone · Pixelkampf</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #131815;
+        --panel: #202923;
+        --edge: #46503d;
+        --gold: #e2bd77;
+        --ink: #f0eadb;
+        --muted: #a4ad9c;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: radial-gradient(ellipse at top, #303a2b, var(--bg) 65%);
+        color: var(--ink);
+        font:
+          15px/1.5 system-ui,
+          sans-serif;
+        min-height: 100vh;
+      }
+      button,
+      a,
+      select {
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+        color: inherit;
+        border: 1px solid var(--edge);
+        background: #28342b;
+        border-radius: 5px;
+        padding: 0.6rem 0.8rem;
+      }
+      button:hover:not(:disabled) {
+        background: #3a4937;
+        border-color: var(--gold);
+      }
+      button:focus-visible,
+      a:focus-visible,
+      summary:focus-visible {
+        outline: 3px solid var(--gold);
+        outline-offset: 3px;
+      }
+      button:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+      a {
+        color: var(--gold);
+      }
+      main {
+        max-width: 1240px;
+        padding: 24px;
+        margin: auto;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+      .eyebrow {
+        margin: 0;
+        color: var(--gold);
+        font: 12px monospace;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+      }
+      h1 {
+        font:
+          clamp(26px, 4vw, 42px) Georgia,
+          serif;
+        margin: 4px 0;
+      }
+      h2 {
+        font:
+          24px Georgia,
+          serif;
+        margin: 5px 0 12px;
+      }
+      p {
+        margin: 0.4rem 0;
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 300px;
+        gap: 16px;
+      }
+      .arena {
+        border: 1px solid #6b7150;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #18211c;
+        box-shadow: 0 18px 50px #0005;
+      }
+      .arena-bar {
+        padding: 10px 16px;
+        background: #222c23;
+        display: flex;
+        gap: 12px;
+        justify-content: space-between;
+        font: 12px monospace;
+        color: var(--gold);
+      }
+      canvas {
+        width: 100%;
+        height: auto;
+        display: block;
+        image-rendering: pixelated;
+        aspect-ratio: 640/300;
+        cursor: crosshair;
+      }
+      .enemies {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        padding: 12px;
+        background: #1c261f;
+      }
+      .enemy {
+        text-align: left;
+        padding: 8px;
+        min-width: 0;
+      }
+      .enemy strong {
+        display: block;
+        font-size: 12px;
+      }
+      .enemy span {
+        font: 11px monospace;
+        color: var(--muted);
+      }
+      progress {
+        width: 100%;
+        height: 6px;
+        display: block;
+        accent-color: #8fb57a;
+        border: 0;
+        margin-top: 6px;
+      }
+      .enemy progress {
+        accent-color: #d29a70;
+      }
+      [aria-pressed="true"] {
+        border-color: var(--gold);
+        box-shadow: inset 0 0 0 1px var(--gold);
+      }
+      .party {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+        margin-top: 12px;
+      }
+      .member {
+        padding: 10px;
+        text-align: left;
+        position: relative;
+        min-width: 0;
+        background: #202a23;
+      }
+      .member strong {
+        font-size: 14px;
+      }
+      .member small {
+        display: block;
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .member.current:before {
+        content: "◆";
+        color: var(--gold);
+        position: absolute;
+        right: 9px;
+        top: 8px;
+      }
+      .member.fallen {
+        filter: grayscale(1);
+        background: #292321;
+      }
+      .member .numbers {
+        font: 12px monospace;
+        display: block;
+        margin-top: 8px;
+      }
+      .side {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .panel {
+        padding: 18px;
+        border: 1px solid var(--edge);
+        border-radius: 8px;
+        background: #1e2821;
+      }
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .actions button {
+        text-align: left;
+        min-height: 60px;
+      }
+      .actions button span {
+        display: block;
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .primary {
+        background: #806039;
+        color: #fff2d5;
+        border-color: #bd995c;
+      }
+      .target {
+        padding: 10px 0;
+        font-size: 12px;
+        color: var(--gold);
+      }
+      #message {
+        min-height: 3em;
+        font-size: 14px;
+      }
+      #items {
+        display: grid;
+        gap: 7px;
+        margin-top: 10px;
+      }
+      #items[hidden] {
+        display: none;
+      }
+      .legend {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        font: 11px monospace;
+        color: var(--muted);
+        margin: 12px 0;
+      }
+      .log {
+        padding-left: 20px;
+        max-height: 200px;
+        overflow: auto;
+        color: #bcc6b4;
+        font-size: 12px;
+      }
+      .log li {
+        padding: 3px 0;
+      }
+      .footer {
+        margin-top: 20px;
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .footer button {
+        font-size: 12px;
+      }
+      .notice {
+        font-size: 12px;
+        color: var(--muted);
+        max-width: 680px;
+      }
+      .result {
+        color: var(--gold);
+        font:
+          20px Georgia,
+          serif;
+        margin: 12px 0;
+      }
+      details summary {
+        cursor: pointer;
+        font-size: 13px;
+        color: var(--gold);
+      }
+      noscript {
+        display: block;
+        padding: 20px;
+      }
+      @media (max-width: 850px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .side {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+        }
+        .panel {
+          padding: 14px;
+        }
+      }
+      @media (max-width: 540px) {
+        main {
+          padding: 12px;
+        }
+        header {
+          align-items: start;
+        }
+        header > a {
+          font-size: 12px;
+        }
+        .side {
+          display: flex;
+        }
+        .party {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .enemies {
+          gap: 5px;
+          padding: 7px;
+        }
+        .enemy {
+          padding: 6px;
+        }
+        .enemy strong {
+          font-size: 11px;
+        }
+        .enemy span {
+          font-size: 10px;
+        }
+        .arena-bar {
+          font-size: 10px;
+          padding: 8px;
+        }
+        .actions button {
+          min-height: 55px;
+        }
+        .footer {
+          margin-top: 12px;
+        }
+      }
+      progress {
+        appearance: none;
+      }
+      progress::-webkit-progress-bar {
+        background: #354033;
+        border-radius: 2px;
+      }
+      progress::-webkit-progress-value {
+        background: #8daa75;
+        border-radius: 2px;
+      }
+      progress::-moz-progress-bar {
+        background: #8daa75;
+      }
+      .enemy progress::-webkit-progress-value {
+        background: #bb946b;
+      }
+      .enemy progress::-moz-progress-bar {
+        background: #bb946b;
+      }
+      @media (max-width: 540px) {
+        .layout {
+          display: flex;
+          flex-direction: column;
+        }
+        .layout > section,
+        .side {
+          display: contents;
+        }
+        .arena {
+          order: 0;
+        }
+        .side > .panel:first-child {
+          order: 1;
+        }
+        .party {
+          order: 2;
+        }
+        .legend {
+          order: 3;
+        }
+        .side > .panel:last-child {
+          order: 4;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <p class="eyebrow">Aschenkrone · Spielbare Testszene</p>
+          <h1>Wölfe am Aschenpass</h1>
+        </div>
+        <a href="../../index.html">Zum Hauptspiel ↗</a>
+      </header>
+      <noscript>Zum Spielen bitte JavaScript aktivieren.</noscript>
+      <div class="layout">
+        <section aria-label="Kampfbühne und Gruppe">
+          <div class="arena">
+            <div class="arena-bar">
+              <span id="round">RUNDE 1</span
+              ><span id="phase">DEINE GRUPPE</span>
+            </div>
+            <canvas
+              id="stage"
+              width="640"
+              height="300"
+              aria-label="Pixel-Kampfszene: Gruppe links, Wölfe rechts. Ziele auch über die beschrifteten Karten wählbar."
+            ></canvas>
+            <div
+              id="enemies"
+              class="enemies"
+              role="group"
+              aria-label="Angriffsziel wählen"
+            ></div>
+          </div>
+          <div
+            id="party"
+            class="party"
+            role="group"
+            aria-label="Ziel für Heilung oder Wiederbelebung wählen"
+          ></div>
+          <div class="legend">
+            <span>◆ Aktive Figur</span
+            ><span>Goldener Rahmen: gewähltes Ziel</span
+            ><span>LP: Leben · MP: Magie</span>
+          </div>
+        </section>
+        <aside class="side">
+          <section class="panel">
+            <p class="eyebrow" id="actor-role">Dein Zug</p>
+            <h2 id="actor-name">Tala</h2>
+            <p id="message" role="status" aria-live="polite">
+              Wähle ein Ziel und eine Aktion.
+            </p>
+            <p class="target" id="targets"></p>
+            <div class="actions">
+              <button id="attack" class="primary">
+                Angriff<span>Waffe einsetzen</span></button
+              ><button id="skill">Fähigkeit<span>Klassenaktion</span></button
+              ><button id="guard">Deckung<span>Schaden halbieren</span></button
+              ><button id="bag" aria-expanded="false" aria-controls="items">
+                Gegenstand<span>Heilen oder wiederbeleben</span>
+              </button>
+            </div>
+            <div id="items" hidden>
+              <button id="potion">Heilkraut</button
+              ><button id="revive">Lebensfunke</button>
+            </div>
+            <p id="result" class="result" role="status"></p>
+          </section>
+          <section class="panel">
+            <details open>
+              <summary>Kampfprotokoll</summary>
+              <ol id="log" class="log" aria-label="Letzte Kampfaktionen"></ol>
+            </details>
+            <p class="muted">
+              Jedes aktive Mitglied handelt einmal, anschließend greifen die
+              Wölfe an. Ohne Zeitdruck.
+            </p>
+          </section>
+        </aside>
+      </div>
+      <div class="footer">
+        <div>
+          <button id="reset">Kampf neu starten</button>
+          <button id="scenario">Wiederbelebung testen</button>
+        </div>
+        <p class="notice">
+          Eigenständiger Grafik- und Bedienprototyp mit vereinfachten
+          Demoregeln. Keine Spielstände, kein Einfluss auf das Hauptspiel.
+          Figuren und Landschaft werden als originale Pixelgrafiken gezeichnet.
+        </p>
+      </div>
+    </main>
+    <script>
+      "use strict";
+      (() => {
+        const $ = (id) => document.getElementById(id),
+          canvas = $("stage"),
+          ctx = canvas.getContext("2d");
+        const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+        let party,
+          enemies,
+          round,
+          actor,
+          enemyTarget,
+          healTarget,
+          acted,
+          busy,
+          over,
+          potions,
+          revives,
+          log = [],
+          effect = null;
+        let moving = null,
+          drawingTime = 0;
+        const places = [
+          { x: 140, y: 82 },
+          { x: 104, y: 139 },
+          { x: 145, y: 195 },
+          { x: 108, y: 252 },
+        ];
+        const foePlaces = [
+          { x: 480, y: 98 },
+          { x: 523, y: 169 },
+          { x: 463, y: 245 },
+        ];
+        const heroes = [
+          {
+            name: "Tala",
+            role: "Ritterin",
+            max: 40,
+            mp: 6,
+            power: 11,
+            color: "#a66b4d",
+            skill: "Schildstoß",
+            cost: 2,
+          },
+          {
+            name: "Neri",
+            role: "Waldläuferin",
+            max: 30,
+            mp: 8,
+            power: 9,
+            color: "#73906a",
+            skill: "Doppelschuss",
+            cost: 2,
+          },
+          {
+            name: "Sela",
+            role: "Magierin",
+            max: 26,
+            mp: 12,
+            power: 6,
+            color: "#7c7fa8",
+            skill: "Runenfeuer",
+            cost: 3,
+          },
+          {
+            name: "Heda",
+            role: "Heilerin",
+            max: 28,
+            mp: 12,
+            power: 7,
+            color: "#d1b88b",
+            skill: "Heilung",
+            cost: 3,
+          },
+        ];
+        function note(text) {
+          $("message").textContent = text;
+          log.unshift(text);
+          log = log.slice(0, 14);
+          $("log").replaceChildren(
+            ...log.map((t) => {
+              const li = document.createElement("li");
+              li.textContent = t;
+              return li;
+            }),
+          );
+        }
+        function start(ko = false) {
+          party = heroes.map((h) => ({
+            ...h,
+            hp: h.max,
+            maxMp: h.mp,
+            guard: false,
+          }));
+          enemies = [
+            { name: "Aschenleitwolf", hp: 62, max: 62, power: 12 },
+            { name: "Grauwolf", hp: 38, max: 38, power: 9 },
+            { name: "Jungwolf", hp: 30, max: 30, power: 7 },
+          ];
+          round = 1;
+          actor = 0;
+          enemyTarget = 0;
+          healTarget = 0;
+          acted = new Set();
+          busy = false;
+          over = false;
+          potions = 3;
+          revives = 1;
+          log = [];
+          effect = null;
+          moving = null;
+          if (ko) {
+            party[2].hp = 0;
+            healTarget = 2;
+          }
+          $("items").hidden = true;
+          $("bag").setAttribute("aria-expanded", "false");
+          note(
+            ko
+              ? "Sela ist kampfunfähig. Wähle Gegenstand → Lebensfunke."
+              : "Wölfe versperren den Pass. Tala ist am Zug.",
+          );
+          render();
+        }
+        function card(text, cls, click) {
+          const b = document.createElement("button");
+          b.className = cls;
+          b.addEventListener("click", click);
+          b.setAttribute("aria-label", text);
+          return b;
+        }
+        function meter(value, max) {
+          const m = document.createElement("progress");
+          m.value = value;
+          m.max = max;
+          return m;
+        }
+        function render() {
+          $("round").textContent = "RUNDE " + round;
+          $("phase").textContent = over
+            ? "KAMPF BEENDET"
+            : busy
+              ? "AKTION LÄUFT"
+              : "DEINE GRUPPE";
+          $("enemies").replaceChildren(
+            ...enemies.map((e, i) => {
+              const b = card(
+                e.name + ", " + e.hp + " von " + e.max + " LP",
+                "enemy",
+                () => {
+                  if (busy || over) return;
+                  enemyTarget = i;
+                  render();
+                },
+              );
+              b.disabled = busy || over || !e.hp;
+              b.setAttribute("aria-pressed", String(i === enemyTarget));
+              const title = document.createElement("strong");
+              title.textContent = e.name;
+              const hp = document.createElement("span");
+              hp.textContent = e.hp ? e.hp + " / " + e.max + " LP" : "Besiegt";
+              b.append(title, meter(e.hp, e.max), hp);
+              return b;
+            }),
+          );
+          $("party").replaceChildren(
+            ...party.map((h, i) => {
+              const b = card(
+                h.name +
+                  ", " +
+                  h.hp +
+                  " von " +
+                  h.max +
+                  " LP. Heilziel wählen.",
+                "member" +
+                  (i === actor && !over ? " current" : "") +
+                  (!h.hp ? " fallen" : ""),
+                () => {
+                  if (busy || over) return;
+                  healTarget = i;
+                  render();
+                },
+              );
+              b.disabled = busy || over;
+              b.setAttribute("aria-pressed", String(i === healTarget));
+              const n = document.createElement("strong");
+              n.textContent = h.name;
+              const r = document.createElement("small");
+              r.textContent = h.role;
+              const hp = document.createElement("span");
+              hp.className = "numbers";
+              hp.textContent = h.hp + " / " + h.max + " LP";
+              const m = meter(h.hp, h.max);
+              m.setAttribute("aria-label", h.name + " Lebenspunkte");
+              const s = document.createElement("small");
+              s.textContent = !h.hp
+                ? "Kampfunfähig"
+                : h.guard
+                  ? "In Deckung"
+                  : acted.has(i)
+                    ? "Hat gehandelt"
+                    : "Bereit";
+              const mp = document.createElement("small");
+              mp.textContent = h.mp + " / " + h.maxMp + " MP";
+              b.append(n, r, hp, m, mp, s);
+              return b;
+            }),
+          );
+          const h = party[actor];
+          $("actor-name").textContent = over ? "Kampf beendet" : h.name;
+          $("actor-role").textContent = over
+            ? "Aschenpass"
+            : h.role + " · Dein Zug";
+          $("targets").textContent =
+            "Angriff: " +
+            enemies[enemyTarget].name +
+            " · Heilung: " +
+            party[healTarget].name;
+          $("skill").replaceChildren(document.createTextNode(h.skill));
+          const cost = document.createElement("span");
+          cost.textContent =
+            h.cost + " MP" + (actor === 3 ? " · Gewähltes Heilziel" : "");
+          $("skill").append(cost);
+          for (const id of [
+            "attack",
+            "skill",
+            "guard",
+            "bag",
+            "reset",
+            "scenario",
+          ])
+            $(id).disabled =
+              busy ||
+              (["attack", "skill", "guard", "bag"].includes(id) && over);
+          $("skill").disabled ||=
+            h.mp < h.cost ||
+            (actor === 3 &&
+              (!party[healTarget].hp ||
+                party[healTarget].hp === party[healTarget].max));
+          $("potion").textContent =
+            "Heilkraut · " + potions + " übrig · +18 LP";
+          $("revive").textContent =
+            "Lebensfunke · " + revives + " übrig · 35 % LP";
+          $("potion").disabled =
+            busy ||
+            over ||
+            !potions ||
+            !party[healTarget].hp ||
+            party[healTarget].hp === party[healTarget].max;
+          $("revive").disabled =
+            busy || over || !revives || party[healTarget].hp > 0;
+          $("result").textContent = over
+            ? enemies.every((e) => !e.hp)
+              ? "Der Pass ist frei. Sieg!"
+              : "Die Gruppe ist gefallen."
+            : "";
+          draw();
+        }
+        function paint(x, y, w, h, color) {
+          ctx.fillStyle = color;
+          ctx.fillRect(Math.round(x), Math.round(y), w, h);
+        }
+        function terrain() {
+          paint(0, 0, 640, 300, "#26362f");
+          paint(0, 0, 640, 106, "#253a3c");
+          paint(0, 0, 640, 42, "#35494a");
+          paint(0, 38, 640, 3, "#465452");
+          ctx.fillStyle = "#34443c";
+          ctx.beginPath();
+          ctx.moveTo(0, 95);
+          for (let x = 0; x <= 640; x += 32)
+            ctx.lineTo(x, 36 + ((x * 13) % 63));
+          ctx.lineTo(640, 142);
+          ctx.lineTo(0, 142);
+          ctx.fill();
+          for (let i = 0; i < 19; i++) {
+            const x = i * 39 - 12,
+              y = 58 + ((i * 7) % 33);
+            paint(x + 8, y, 5, 61, "#28312a");
+            for (let t = 0; t < 4; t++)
+              paint(x - t * 4, y + t * 11, 22 + t * 8, 13, "#1c302c");
+          }
+          ctx.fillStyle = "#6a6650";
+          ctx.beginPath();
+          ctx.moveTo(255, 102);
+          ctx.lineTo(337, 102);
+          ctx.lineTo(470, 300);
+          ctx.lineTo(175, 300);
+          ctx.fill();
+          for (let i = 0; i < 95; i++) {
+            const x = (i * 103 + 31) % 640,
+              y = 115 + ((i * 47) % 181);
+            paint(x, y, 3 + (i % 3) * 2, 2, i % 3 ? "#455140" : "#7d7a59");
+          }
+          paint(32, 162, 17, 31, "#626957");
+          paint(28, 160, 25, 6, "#89917a");
+          paint(38, 169, 3, 13, "#bdae79");
+          paint(592, 190, 18, 36, "#565f50");
+          paint(587, 187, 28, 6, "#7b826a");
+          for (const p of [...places, ...foePlaces]) {
+            ctx.fillStyle = "#18231d66";
+            ctx.beginPath();
+            ctx.ellipse(p.x, p.y + 4, 25, 6, 0, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+        function human(h, x, y, pose = false) {
+          ctx.save();
+          ctx.translate(Math.round(x - 16), Math.round(y - 49));
+          if (!h.hp) {
+            ctx.translate(17, 40);
+            ctx.rotate(-Math.PI / 2);
+            ctx.translate(-15, -28);
+            ctx.globalAlpha = 0.55;
+          }
+          const z = 2;
+          const r = (a, b, w, k, c) => paint(a * z, b * z, w * z, k * z, c);
+          r(5, 1, 7, 3, "#4f392e");
+          r(4, 3, 9, 4, "#4f392e");
+          r(5, 4, 7, 6, "#d5ad82");
+          r(10, 5, 1, 1, "#252825");
+          r(4, 10, 9, 9, h.color);
+          r(3, 12, 2, 7, h.color);
+          r(12, 11, 2, 7, h.color);
+          const stride = pose && !reduce ? Math.floor(drawingTime / 70) % 2 : 0;
+          r(5, 18, 3, 5 + stride, "#394541");
+          r(9, 18, 3, 6 - stride, "#394541");
+          r(4, 22, 4, 2, "#242e29");
+          r(9, 22, 4, 2, "#242e29");
+          r(6, 11, 2, 7, "#d7cba1");
+          r(4, 17, 9, 2, "#503b2a");
+          r(3, 17, 2, 2, "#d5ad82");
+          r(12, 16, 2, 2, "#d5ad82");
+          if (h.role === "Ritterin") {
+            r(1, 11, 3, 7, "#99a8a1");
+            r(1, 12, 1, 5, "#ced2bd");
+            r(pose ? 15 : 14, pose ? 7 : 12, 1, 12, "#d0d7c7");
+            r(13, 17, 4, 1, "#d0ac67");
+          }
+          if (h.role === "Waldläuferin") {
+            r(14, 10, 1, 10, "#c6a774");
+            r(15, 12, 1, 6, "#c6a774");
+            r(13, 13, 1, 5, "#e3d8b3");
+            r(4, 2, 10, 2, h.color);
+          }
+          if (h.role === "Magierin") {
+            r(3, 10, 12, 2, h.color);
+            r(13, 9, 1, 14, "#b38b5b");
+            r(12, 8, 3, 3, "#cf936b");
+            r(6, 0, 5, 2, "#9999bf");
+          }
+          if (h.role === "Heilerin") {
+            r(4, 2, 9, 2, "#e6ddbb");
+            r(4, 11, 2, 9, "#e6ddbb");
+            r(9, 12, 2, 5, "#d1a45a");
+            r(8, 13, 4, 1, "#d1a45a");
+          }
+          ctx.restore();
+        }
+        function wolf(e, x, y, i) {
+          ctx.save();
+          ctx.translate(Math.round(x - 26), Math.round(y - 30));
+          if (!e.hp) {
+            ctx.globalAlpha = 0.3;
+            ctx.translate(0, 14);
+          }
+          const c = i === 0 ? "#b0afa0" : "#8a968b";
+          paint(8, 7, 35, 17, c);
+          paint(1, 2, 17, 17, c);
+          paint(1, -4, 5, 9, c);
+          paint(11, -2, 5, 8, c);
+          paint(-5, 10, 13, 7, "#c4bda2");
+          paint(-6, 11, 4, 4, "#27322e");
+          paint(5, 6, 3, 3, "#d6b078");
+          paint(9, 24, 6, 7, c);
+          paint(33, 21, 6, 10, c);
+          paint(42, 4, 11, 7, c);
+          paint(49, 0, 7, 6, c);
+          paint(17, 20, 21, 4, "#69766b");
+          ctx.restore();
+        }
+        function draw(t = 0) {
+          drawingTime = t;
+          terrain();
+          party.forEach((h, i) => {
+            let { x, y } = places[i];
+            if (moving?.index === i) {
+              x += moving.x;
+              y += moving.y;
+            }
+            if (effect?.side === "ally" && effect.index === i) {
+              x += effect.move || 0;
+              if (effect.flash && Math.floor(t / 65) % 2) ctx.globalAlpha = 0.3;
+            }
+            if (i === actor && !busy && !over && h.hp) {
+              paint(x - 5, y + 9, 10, 2, "#e8c580");
+              paint(x - 2, y + 11, 4, 2, "#e8c580");
+            }
+            human(h, x, y, moving?.index === i && moving.x > 0);
+            ctx.globalAlpha = 1;
+          });
+          enemies.forEach((e, i) => {
+            let { x, y } = foePlaces[i];
+            if (effect?.side === "enemy" && effect.index === i) {
+              x += effect.move || 0;
+              if (effect.flash && Math.floor(t / 65) % 2)
+                ctx.globalAlpha = 0.25;
+            }
+            wolf(e, x, y, i);
+            ctx.globalAlpha = 1;
+            if (i === enemyTarget && e.hp && !over) {
+              paint(x - 8, y - 48, 16, 2, "#dcb87c");
+              paint(x - 4, y - 46, 8, 3, "#dcb87c");
+            }
+          });
+          if (effect?.beam) {
+            const a = effect.beam;
+            paint(a.x - 5, a.y - 4, 10, 8, a.color);
+            paint(a.x + 5, a.y - 2, 8, 4, "#f4d8a2");
+          }
+          if (effect?.spark) {
+            const a = effect.spark;
+            for (let j = 0; j < 10; j++) {
+              const ang = (j * Math.PI) / 5;
+              paint(
+                a.x + Math.cos(ang) * a.radius,
+                a.y + Math.sin(ang) * a.radius,
+                3,
+                3,
+                a.color,
+              );
+            }
+          }
+          if (effect?.text) {
+            const a = effect.text;
+            ctx.font = "bold 15px monospace";
+            ctx.textAlign = "center";
+            ctx.fillStyle = "#15221c";
+            ctx.fillText(a.value, a.x + 1, a.y + 1);
+            ctx.fillStyle = a.color;
+            ctx.fillText(a.value, a.x, a.y);
+          }
+        }
+        const pause = (ms) =>
+          new Promise((resolve) => setTimeout(resolve, reduce ? 0 : ms));
+        function animate(ms, frame) {
+          return new Promise((resolve) => {
+            const start = performance.now();
+            function step(t) {
+              const n = reduce ? 1 : Math.min(1, (t - start) / ms);
+              frame(n);
+              draw(t);
+              if (n < 1) requestAnimationFrame(step);
+              else resolve();
+            }
+            requestAnimationFrame(step);
+          });
+        }
+        async function impact(side, index, value, healing = false) {
+          const pos = side === "ally" ? places[index] : foePlaces[index];
+          effect = { side, index, flash: !healing };
+          await animate(420, (n) => {
+            effect.text = {
+              x: pos.x,
+              y: pos.y - 40 - n * 18,
+              value: (healing ? "+" : "−") + value,
+              color: healing ? "#c4e0a0" : "#ffe4ab",
+            };
+            effect.spark = {
+              x: pos.x,
+              y: pos.y - 22,
+              radius: 6 + n * 20,
+              color: healing ? "#a8ca89" : "#dcaf72",
+            };
+          });
+          effect = null;
+        }
+        async function attackFoe(i, damage, style = "sword") {
+          if (!enemies[i].hp) return;
+          const pos = places[actor],
+            target = foePlaces[i];
+          if (style === "sword") {
+            moving = { index: actor, x: 0, y: 0 };
+            await animate(280, (n) => {
+              moving.x = n * (target.x - pos.x - 45);
+              moving.y = n * (target.y - pos.y);
+            });
+          } else {
+            effect = {};
+            await animate(
+              330,
+              (n) =>
+                (effect.beam = {
+                  x: pos.x + (target.x - pos.x) * n,
+                  y: pos.y - 24 + (target.y - pos.y) * n,
+                  color: style === "fire" ? "#e7955f" : "#d2c395",
+                }),
+            );
+          }
+          const loss = Math.min(damage, enemies[i].hp);
+          enemies[i].hp -= loss;
+          await impact("enemy", i, loss);
+          if (style === "sword") {
+            await animate(200, (n) => {
+              moving.x = (1 - n) * (target.x - pos.x - 45);
+              moving.y = (1 - n) * (target.y - pos.y);
+            });
+            moving = null;
+          }
+          effect = null;
+          note(
+            party[actor].name +
+              " trifft " +
+              enemies[i].name +
+              ": " +
+              loss +
+              " Schaden.",
+          );
+        }
+        async function next() {
+          acted.add(actor);
+          if (enemies.every((e) => !e.hp)) {
+            over = true;
+            note("Die Wölfe sind besiegt. Der Weg ist frei.");
+            return;
+          }
+          const available = party.findIndex(
+            (h, i) => h.hp > 0 && !acted.has(i),
+          );
+          if (available >= 0) {
+            actor = available;
+            return;
+          }
+          $("phase").textContent = "GEGNERZUG";
+          for (let i = 0; i < enemies.length; i++) {
+            if (!enemies[i].hp) continue;
+            const living = party
+              .map((h, index) => ({ h, index }))
+              .filter((e) => e.h.hp);
+            if (!living.length) break;
+            const victim = living[(round + i) % living.length].index;
+            const from = foePlaces[i],
+              to = places[victim];
+            note(enemies[i].name + " greift " + party[victim].name + " an.");
+            effect = { side: "enemy", index: i };
+            await animate(
+              280,
+              (n) =>
+                (effect.move = -Math.sin(n * Math.PI) * (from.x - to.x - 35)),
+            );
+            const damage = Math.ceil(
+              enemies[i].power * (party[victim].guard ? 0.5 : 1),
+            );
+            const loss = Math.min(party[victim].hp, damage);
+            party[victim].hp -= loss;
+            await impact("ally", victim, loss);
+            note(
+              party[victim].name +
+                " verliert " +
+                loss +
+                " LP" +
+                (!party[victim].hp ? " und fällt aus." : "."),
+            );
+            await pause(120);
+          }
+          if (party.every((h) => !h.hp)) {
+            over = true;
+            note("Deine Gruppe ist gefallen. Starte einen neuen Versuch.");
+            return;
+          }
+          round++;
+          acted.clear();
+          party.forEach((h) => (h.guard = false));
+          actor = party.findIndex((h) => h.hp > 0);
+          enemyTarget = enemies.findIndex((e) => e.hp > 0);
+        }
+        async function act(kind) {
+          if (busy || over) return;
+          const h = party[actor],
+            patient = party[healTarget];
+          if (
+            kind === "skill" &&
+            (h.mp < h.cost ||
+              (actor === 3 && (!patient.hp || patient.hp === patient.max)))
+          )
+            return;
+          if (
+            kind === "potion" &&
+            (!potions || !patient.hp || patient.hp === patient.max)
+          )
+            return;
+          if (kind === "revive" && (!revives || patient.hp > 0)) return;
+          busy = true;
+          $("items").hidden = true;
+          $("bag").setAttribute("aria-expanded", "false");
+          render();
+          try {
+            if (kind === "attack") {
+              await attackFoe(
+                enemyTarget,
+                h.power,
+                actor === 1 ? "arrow" : "sword",
+              );
+            } else if (kind === "skill") {
+              h.mp -= h.cost;
+              if (actor === 3) {
+                const amount = Math.min(18, patient.max - patient.hp);
+                patient.hp += amount;
+                await impact("ally", healTarget, amount, true);
+                note("Heda heilt " + patient.name + ": +" + amount + " LP.");
+              } else if (actor === 1) {
+                const original = enemyTarget;
+                await attackFoe(original, 8, "arrow");
+                const second = enemies[original].hp
+                  ? original
+                  : enemies.findIndex((e) => e.hp > 0);
+                if (second >= 0) await attackFoe(second, 8, "arrow");
+              } else {
+                await attackFoe(
+                  enemyTarget,
+                  actor === 2 ? 18 : 15,
+                  actor === 2 ? "fire" : "sword",
+                );
+              }
+            } else if (kind === "guard") {
+              h.guard = true;
+              note(
+                h.name +
+                  " geht in Deckung. Schaden bis zum nächsten Gruppenzug halbiert.",
+              );
+              await pause(200);
+            } else {
+              const amount =
+                kind === "revive"
+                  ? Math.ceil(patient.max * 0.35)
+                  : Math.min(18, patient.max - patient.hp);
+              if (kind === "revive") {
+                revives--;
+                acted.add(healTarget);
+              } else potions--;
+              patient.hp += amount;
+              await impact("ally", healTarget, amount, true);
+              note(
+                kind === "revive"
+                  ? patient.name +
+                      " steht wieder auf. Ab nächster Runde einsatzbereit."
+                  : patient.name + " erhält " + amount + " LP.",
+              );
+            }
+            if (enemies[enemyTarget].hp === 0) {
+              const living = enemies.findIndex((e) => e.hp > 0);
+              if (living >= 0) enemyTarget = living;
+            }
+            await next();
+            if (!over) note(party[actor].name + " ist am Zug.");
+          } finally {
+            effect = null;
+            busy = false;
+            render();
+          }
+        }
+        ["attack", "skill", "guard", "potion", "revive"].forEach((id) =>
+          $(id).addEventListener("click", () => act(id)),
+        );
+        $("bag").addEventListener("click", () => {
+          if (busy || over) return;
+          $("items").hidden = !$("items").hidden;
+          $("bag").setAttribute("aria-expanded", String(!$("items").hidden));
+        });
+        $("reset").addEventListener("click", () => {
+          if (!busy) start();
+        });
+        $("scenario").addEventListener("click", () => {
+          if (!busy) start(true);
+        });
+        canvas.addEventListener("click", (event) => {
+          if (busy || over) return;
+          const box = canvas.getBoundingClientRect(),
+            x = ((event.clientX - box.left) * 640) / box.width,
+            y = ((event.clientY - box.top) * 300) / box.height;
+          let i = foePlaces.findIndex(
+            (p) => Math.abs(p.x - x) < 38 && y > p.y - 45 && y < p.y + 12,
+          );
+          if (i >= 0 && enemies[i].hp) {
+            enemyTarget = i;
+            render();
+            return;
+          }
+          i = places.findIndex(
+            (p) => Math.abs(p.x - x) < 32 && y > p.y - 55 && y < p.y + 12,
+          );
+          if (i >= 0) {
+            healTarget = i;
+            render();
+          }
+        });
+        start();
+      })();
+    </script>
+  </body>
+</html>
