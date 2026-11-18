@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Aschenkrone · Pixelkampf V5 · Schwerthieb</title>
+    <title>Aschenkrone · Pixelkampf V6 · Stabzauber</title>
     <style>
       :root {
         color-scheme: dark;
@@ -493,7 +493,7 @@
     <main>
       <header>
         <div>
-          <p class="eyebrow">Aschenkrone · Testversion 5 · Schwerthieb</p>
+          <p class="eyebrow">Aschenkrone · Testversion 6 · Stabzauber</p>
           <h1>Wölfe am Aschenpass</h1>
         </div>
         <a href="../../index.html">Zum Hauptspiel ↗</a>
@@ -995,8 +995,148 @@
           if (progress < 0.78) return -2.2 + 3.05 * ((progress - 0.32) / 0.46);
           return 0.85 - 0.4 * ((progress - 0.78) / 0.22);
         }
+        const castingAngle = (p) =>
+          -0.55 - 0.65 * Math.sin((Math.min(1, p / 0.5) * Math.PI) / 2);
+        function staffTip(progress) {
+          const angle = castingAngle(progress),
+            base = places[actor];
+          return {
+            x: base.x - 16 + 25 + Math.cos(angle) * 45,
+            y: base.y - 49 + 26 + Math.sin(angle) * 45,
+          };
+        }
+        const magicColors = {
+          arcane: { color: "#8fc7ed", dark: "#46698f", light: "#e8f6ff" },
+          fire: { color: "#f2ac58", dark: "#b55337", light: "#fff1b5" },
+          holy: { color: "#e6d28f", dark: "#a59563", light: "#fff9da" },
+          heal: { color: "#a8d793", dark: "#48785c", light: "#e6ffd7" },
+        };
+        function rune(x, y, r, color, alpha = 1) {
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          pixelLine(x - r, y, x, y - r / 3, color, 2);
+          pixelLine(x, y - r / 3, x + r, y, color, 2);
+          pixelLine(x + r, y, x, y + r / 3, color, 2);
+          pixelLine(x, y + r / 3, x - r, y, color, 2);
+          pixelLine(x - 5, y, x + 5, y, color, 2);
+          pixelLine(x, y - 3, x, y + 3, color, 2);
+          ctx.restore();
+        }
+        function drawMagic() {
+          if (effect?.charge) {
+            const a = effect.charge,
+              c = magicColors[a.kind];
+            rune(
+              a.base.x,
+              a.base.y + 5,
+              18 + a.progress * 8,
+              c.color,
+              0.45 + 0.5 * a.progress,
+            );
+            rune(a.x, a.y, 4 + a.progress * 7, c.color);
+            paint(a.x - 3, a.y - 3, 6, 6, c.light);
+            for (let j = 0; j < 6; j++) {
+              const angle = (j * Math.PI) / 3 + a.progress * 3,
+                r = 20 - a.progress * 10;
+              paint(
+                a.x + Math.cos(angle) * r,
+                a.y + Math.sin(angle) * r,
+                2,
+                2,
+                c.color,
+              );
+            }
+          }
+          if (effect?.magicOrb) {
+            const a = effect.magicOrb,
+              c = magicColors[a.kind];
+            for (let i = 5; i > 0; i--) {
+              const x = a.x - a.dx * i * 5,
+                y = a.y - a.dy * i * 5;
+              paint(x - 2, y - 2, 4, 4, i % 2 ? c.dark : c.color);
+            }
+            paint(a.x - 6, a.y - 5, 12, 10, c.dark);
+            paint(a.x - 4, a.y - 4, 8, 8, c.color);
+            paint(a.x - 2, a.y - 2, 4, 4, c.light);
+            if (a.kind === "fire") {
+              paint(a.x - 5, a.y - 10, 4, 7, c.color);
+              paint(a.x + 2, a.y - 8, 3, 5, c.light);
+            } else {
+              pixelLine(a.x - 9, a.y, a.x + 9, a.y, c.light, 1);
+              pixelLine(a.x, a.y - 8, a.x, a.y + 8, c.light, 1);
+            }
+          }
+          if (effect?.magicHit) {
+            const a = effect.magicHit,
+              c = magicColors[a.kind],
+              fade = 1 - a.progress * 0.7;
+            rune(a.x, a.y + 6, 24, c.color, fade);
+            for (let j = 0; j < 5; j++) {
+              const x = a.x + (j - 2) * 8,
+                y = a.y - 10 - a.progress * (25 + (j % 2) * 9);
+              if (a.kind === "fire") {
+                paint(x - 3, y, 6, 16, c.dark);
+                paint(x - 2, y - 4, 4, 13, c.color);
+                paint(x - 1, y - 6, 2, 8, c.light);
+              } else {
+                pixelLine(x - 3, y, x + 3, y, c.color, 2);
+                pixelLine(x, y - 4, x, y + 4, c.light, 2);
+              }
+            }
+          }
+        }
+        async function castMagic(side, index, kind, apply) {
+          const c = magicColors[kind],
+            base = places[actor],
+            target = side === "ally" ? places[index] : foePlaces[index];
+          gesture = { index: actor, kind: "cast", progress: 0, color: c.color };
+          effect = {};
+          $("phase").textContent = "ZAUBER · MAGIE SAMMELN";
+          await animate(200, (n) => {
+            gesture.progress = n;
+            effect.charge = { ...staffTip(n), base, kind, progress: n };
+          });
+          const source = staffTip(1),
+            dx = target.x - source.x,
+            dy = target.y - 22 - source.y,
+            length = Math.hypot(dx, dy) || 1;
+          effect = {};
+          $("phase").textContent = "ZAUBER · FLUG";
+          await animate(
+            300,
+            (n) =>
+              (effect.magicOrb = {
+                x: source.x + dx * n,
+                y: source.y + dy * n - Math.sin(Math.PI * n) * 12,
+                dx: dx / length,
+                dy: dy / length,
+                kind,
+              }),
+          );
+          const value = apply();
+          effect = { side, index, flash: side === "enemy" };
+          $("phase").textContent =
+            side === "ally" ? "ZAUBER · HEILUNG" : "ZAUBER · TREFFER";
+          await animate(300, (n) => {
+            effect.magicHit = { x: target.x, y: target.y, kind, progress: n };
+            effect.text = {
+              x: target.x,
+              y: target.y - 40 - n * 18,
+              value: (side === "ally" ? "+" : "−") + value,
+              color: c.light,
+            };
+            if (side === "enemy") effect.recoil = Math.sin(Math.PI * n) * 3;
+          });
+          effect = null;
+          $("phase").textContent = "ZAUBER · AUSKLANG";
+          await animate(100, (n) => (gesture.progress = 1 - n));
+          gesture = null;
+        }
         function weaponGesture(h, g) {
-          const angle = weaponAngle(g.progress),
+          const angle =
+              g.kind === "cast"
+                ? castingAngle(g.progress)
+                : weaponAngle(g.progress),
             sx = 25,
             sy = 26;
           const hx = sx + Math.cos(angle) * 13,
@@ -1065,13 +1205,7 @@
               3,
             );
           } else {
-            paint(
-              tx - 3,
-              ty - 3,
-              6,
-              6,
-              g.kind === "cast" ? "#dd985f" : "#d1bd7b",
-            );
+            paint(tx - 3, ty - 3, 6, 6, g.color ?? "#d1bd7b");
           }
         }
         function human(h, x, y, pose = false) {
@@ -1133,6 +1267,10 @@
             r(6, 0, 5, 2, "#9999bf");
           }
           if (h.role === "Heilerin") {
+            if (!g) {
+              r(13, 9, 1, 14, "#a58c5d");
+              r(12, 8, 3, 3, "#e6d28f");
+            }
             r(4, 2, 9, 2, "#e6ddbb");
             r(4, 11, 2, 9, "#e6ddbb");
             r(9, 12, 2, 5, "#d1a45a");
@@ -1219,6 +1357,7 @@
               paint(x - 4, y - 46, 8, 3, "#dcb87c");
             }
           });
+          drawMagic();
           if (effect?.beam) {
             const a = effect.beam;
             paint(a.x - 5, a.y - 4, 10, 8, a.color);
@@ -1331,6 +1470,24 @@
         }
         async function attackFoe(i, damage, style = "sword") {
           if (!enemies[i].hp) return;
+          if (actor >= 2 && style === "sword")
+            style = actor === 2 ? "arcane" : "holy";
+          if (["arcane", "holy", "fire"].includes(style)) {
+            const loss = Math.min(damage, enemies[i].hp);
+            await castMagic("enemy", i, style, () => {
+              enemies[i].hp -= loss;
+              return loss;
+            });
+            note(
+              party[actor].name +
+                " trifft " +
+                enemies[i].name +
+                ": " +
+                loss +
+                " Magieschaden.",
+            );
+            return;
+          }
           const pos = places[actor],
             target = foePlaces[i];
           if (style === "sword") {
@@ -1505,8 +1662,10 @@
               h.mp -= h.cost;
               if (actor === 3) {
                 const amount = Math.min(18, patient.max - patient.hp);
-                patient.hp += amount;
-                await impact("ally", healTarget, amount, true);
+                await castMagic("ally", healTarget, "heal", () => {
+                  patient.hp += amount;
+                  return amount;
+                });
                 note("Heda heilt " + patient.name + ": +" + amount + " LP.");
               } else if (actor === 1) {
                 const original = enemyTarget;
