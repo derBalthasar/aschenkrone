@@ -290,9 +290,10 @@ const kampf = (() => {
   // Liefert alle Fähigkeiten eines Helden mit Stufe, Kosten, Abklingzeit und Regelwirkung.
   function klassenFaehigkeiten(fraktion, rolle) {
     const eintrag = F.fraktionen[fraktion].klassen[rolle];
-    return eintrag.liste.map(([name, wirkung], index) => {
+    return eintrag.liste.map(([name, wirkung, zahlung], index) => {
       const stufe = F.stufen[index];
-      return { id: "f" + stufe, stufe, name, wirkung, zahlung: eintrag.zahlung, ...budget[stufe], regel: lies(wirkung) };
+      // Menschen (Henry, 18. 11. 2026): Mana oder Ausdauer je Fähigkeit statt je Klasse.
+      return { id: "f" + stufe, stufe, name, wirkung, zahlung: zahlung ?? eintrag.zahlung, ...budget[stufe], regel: lies(wirkung) };
     });
   }
 

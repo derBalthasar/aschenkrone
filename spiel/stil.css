@@ -986,3 +986,10 @@ h1, h2 { font-family: var(--font-title); letter-spacing: .01em; }
 .vital-nahrung { --bar: #8a6a2c; }
 .vital-moral { --bar: #4f6b8a; }
 .trade-list .actions { margin-bottom: .4rem; }
+
+/* Siedlung, Bau und Ruhmestaten der Menschen (Bau- und Endgame-Datei) */
+.welt-siedlung, .welt-endgame { margin: 0 0 1rem; }
+.welt-siedlung > summary, .welt-endgame > summary { cursor: pointer; font-weight: 600; }
+.welt-bauten { list-style: none; padding: 0; margin: .5rem 0; display: grid; gap: .5rem; }
+.welt-bauten li { display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem .5rem; }
+.welt-bauten li .action { flex-basis: 100%; }

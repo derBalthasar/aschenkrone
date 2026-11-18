@@ -520,7 +520,7 @@ assert.equal(updated.scene, yard.scene);
 assert.equal(updated.role, "spaeher");
 assert.equal(updated.faction, "haefen");
 assert.equal(updated.umschulung, false);
-assert.equal(rules.title(updated), "Seeschütze");
+assert.equal(rules.title(updated), "Schwarzschütze");
 assert.ok(yard.inventory.every(item => updated.inventory.includes(item)));
 assert.equal(rules.weapon(updated), "bogen");
 assert.equal(reload(updated).faction, "haefen");
@@ -1540,6 +1540,13 @@ console.log("Reisebegegnungen (ruhig, scheu, Jäger, Alphatier, Ausweichen) gepr
   assert.match(ambush.combat.id, /^sys-ENM_OF_/);
   const sysFeind = rules.systeme.gegnerNach[ambush.combat.id.slice(4)];
   assert.equal(ambush.combat.feinde[0].max, rules.systeme.kampfWerte(sysFeind.id, ambush.combat.feinde[0].stufe).lp);
+  // Patch 2.5.1: Systemgegner tragen ihre Rüstung in den Kampf (prozentuale Minderung mit Konstante 14).
+  assert.equal(ambush.combat.feinde[0].ruestung ?? 0, rules.systeme.kampfWerte(sysFeind.id, ambush.combat.feinde[0].stufe).ruestung);
+  {
+    const vorher = ambush.combat.feinde[0].lp;
+    const nachher = rules.strike(ambush, "spear", highRoll);
+    if (nachher.combat) assert.ok(vorher - nachher.combat.feinde[0].lp >= 1, "Rüstung lässt mindestens 1 Schaden durch");
+  }
   assert.equal(ambush.combat.weiter, "weltknoten");
   assert.equal(rules.read(JSON.stringify(ambush)).combat.weiter, "weltknoten");
   const evaded = rules.strike(ambush, "evade");
@@ -1566,10 +1573,12 @@ console.log("Weltebene (Knotennetz, Weltleisten, Vorrat, Seewege, Pässe, Stolle
   assert.equal(plan.stufenpunkte, 0);
   same(plan.training, { strength: 1, will: 1 });
   assert.equal(rules.entwurf(ready, { training: { strength: 3 } }), ready, "Zu viele Punkte: nichts wird gespeichert");
-  const spez = rules.entwurf({ ...ready, questStufe: 3 }, { training: { strength: 2 }, spez: { variante: "a", grundwert: "will", fertigkeit: "mut" } });
+  // Menschen spezialisieren sich ab Erfahrungsstufe 10 (Patch 2.0.0 Punkt 9), Quest-Stufe 3 reicht nicht mehr.
+  assert.equal(rules.spezBereit({ ...ready, questStufe: 3 }), false);
+  const spez = rules.entwurf({ ...ready, xp: 4500 }, { training: { strength: 2 }, spez: { variante: "a", grundwert: "will", fertigkeit: "mut" } });
   assert.equal(spez.build.spez.variante, "a");
   assert.equal(spez.build.fertigkeiten.mut, ready.build.fertigkeiten.mut + 1);
-  assert.equal(rules.entwurf(ready, { spez: { variante: "a", grundwert: "will", fertigkeit: "mut" } }), ready, "Spezialisierung erst ab Quest-Stufe 3");
+  assert.equal(rules.entwurf(ready, { spez: { variante: "a", grundwert: "will", fertigkeit: "mut" } }), ready, "Spezialisierung erst ab Erfahrungsstufe 10");
 }
 console.log("Charakter-Entwurf geprüft.");
 
@@ -1874,3 +1883,77 @@ console.log("Charakter-Entwurf geprüft.");
   assert.deepEqual(plain(reload(alt).weltAuftraege), {});
 }
 console.log("Aufträge am Aushang, Wegaufträge, Wegrabatt, Trophäen, Begleiter und Akt 1 (Kronreich, Orden) geprüft.");
+
+// Teil 4 der Gemini-Systeme: Siedlung, Bau, Garnison, Wiederaufbau, Endgame, Stufe 30, Meister-Talente und Ahnen.
+{
+  const imOrt = (faction, ort, extra = {}) => ({ ...rules.create("Tala", faction, "frau", 1, "krieger"), scene: "weltknoten", knoten: ort,
+    xp: 300, ...extra });
+  const SY = rules.systeme;
+  // Kronhall in Phase 3 (Akt 2, Ruf 40) mit gefülltem Kontor.
+  let s = imOrt("kronreich", "kronhall", { questStufe: 1, silver: 2000, ressource: 40,
+    factionRuf: { groves: 45 }, kontor: { kronreich: { nahrung: 50, holz: 100, eisen: 100, stein: 100, runensplitter: 5 } } });
+  let info = rules.siedlungInfo(s);
+  assert.equal(info.phase.nr, 3);
+  assert.equal(info.stufe.stufe, 0);
+  assert.equal(info.ausbauGrund, null);
+  s = reload(rules.siedlungAusbauen(s));
+  assert.equal(s.siedlungen.kronhall, 1);
+  assert.equal(s.silver, 2000 - 150);
+  assert.equal(s.kontor.kronreich.holz, 85);
+  info = rules.siedlungInfo(s);
+  assert.equal(info.stufe.name, "Befestigte Marktstadt");
+  assert.ok(info.gebaeude.find((g) => g.id === "BLD_STADTSCHMIEDE").steht, "Kronhall hat seine Stadtschmiede schon");
+  const gilde = info.gebaeude.find((g) => g.id === "BLD_SPAEHERGILDE");
+  assert.ok(gilde && !gilde.grund, "Spähergilde ab Stufe 1");
+  s = reload(rules.gebaeudeBauen(s, "BLD_SPAEHERGILDE"));
+  assert.ok(s.gebaeude.kronhall.includes("BLD_SPAEHERGILDE"));
+  assert.equal(rules.gebaeudeBauen(s, "BLD_SPAEHERGILDE"), s, "kein zweites Mal");
+  // Garnison: 25 Silber, 2 Nahrung, 1 Eisen je Truppe, +5 Verteidigung.
+  const vorher = rules.siedlungInfo(s).verteidigung;
+  s = reload(rules.garnisonRekrutieren(s));
+  assert.equal(s.garnison.kronhall, 1);
+  assert.equal(rules.siedlungInfo(s).verteidigung, vorher + 5);
+  // Reparatur nach Plünderung.
+  assert.equal(rules.ortReparieren(s), s, "nichts zu reparieren");
+  s = reload(rules.ortReparieren({ ...s, gepluendert: ["kronhall"] }));
+  assert.deepEqual(plain(s.gepluendert), []);
+  // Endgame: erst nach Akt 1, Patrouille in Kronhall, Lohn nach dem Sieg.
+  assert.equal(rules.endgameListe({ ...s, questStufe: 0 }).find((e) => e.id === "patrouille").grund, "erst nach Akt 1");
+  const patrouille = rules.endgameListe(s).find((e) => e.id === "patrouille");
+  assert.equal(patrouille.grund, null);
+  rules.setTravelDice(() => 0);
+  let kampf = rules.endgameStarten({ ...s, health: rules.healthLimit(s) }, "patrouille");
+  assert.match(kampf.combat.id, /^sys-ENM_/);
+  assert.equal(reload(kampf).combat.endgame.id, "patrouille");
+  for (let zug = 0; kampf.combat && zug < 60; zug++) kampf = rules.strike(kampf, "spear", highRoll);
+  assert.equal(kampf.scene, "weltknoten");
+  assert.ok(kampf.journal.some((t) => t.startsWith("Grenzpatrouillen & Kopfgeld-Tafeln abgeschlossen")));
+  assert.equal(kampf.endgame.patrouille, kampf.etappen ?? 0);
+  // Stufe 30 für Menschen, Stufe 20 bleibt Grenze der anderen Völker.
+  assert.equal(rules.progression(imOrt("kronreich", "kronhall", { xp: 57250 })).level, 30);
+  assert.equal(rules.progression(imOrt("kronreich", "kronhall", { xp: 19000 })).level, 20);
+  assert.equal(rules.progression(imOrt("kronreich", "kronhall", { xp: 21250 })).level, 21);
+  // Meister-Talente ab Stufe 22: Schildwall +10 % LP je Rang.
+  let meister = imOrt("kronreich", "kronhall", { xp: 57250 });
+  meister.health = rules.healthLimit(meister);
+  assert.equal(rules.aufstiegInfo(meister).talentPunkte, 5);
+  const lp = rules.healthLimit(meister);
+  meister = reload(rules.talentLernen(meister, "MT_EISENWALL"));
+  assert.equal(meister.talente.MT_EISENWALL, 1);
+  assert.equal(rules.healthLimit(meister), Math.round(lp * 1.1));
+  // Ahnen: je 5000 EP über Stufe 30 ein Punkt.
+  assert.equal(rules.aufstiegInfo(meister).ahnenPunkte, 0);
+  meister = reload(rules.ahnenLernen({ ...meister, xp: 62250 }, "perk_iron_blood"));
+  assert.equal(meister.ahnen.perk_iron_blood, 1);
+  // Signatur in Rang 4 ab Stufe 25 (Faktor 1,8).
+  const zwanzig = rules.specialize(imOrt("kronreich", "kronhall", { xp: 19000 }), "a");
+  const legende = { ...zwanzig, xp: 33750 };
+  const sig = (st) => rules.abilities(st).find((f) => f.stufe === 20);
+  if (sig(zwanzig)) {
+    assert.match(sig(zwanzig).name, /Rang 3/);
+    assert.match(sig(legende).name, /Rang 4/);
+  }
+  // Andere Völker sehen keine Siedlung der Menschen.
+  assert.equal(rules.siedlungInfo(imOrt("tiefes-koenigreich", "kronhall")), null);
+}
+console.log("Siedlung, Bau, Garnison, Endgame, Stufe 30, Meister-Talente und Ahnen geprüft.");

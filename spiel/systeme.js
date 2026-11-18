@@ -616,6 +616,20 @@ const systeme = (() => {
   // Menschen-Klasse eines Helden: Fraktion und Grundklasse (Rolle).
   const klasseVon = (fraktion, rolle) => Object.values(D.klassen).find((k) => k.fraktion === fraktion && k.rolle === rolle) ?? null;
 
+  // ---- Neue Klassen der Menschen (Patch 2.0.0 Punkt 1): ersetzen Namen, Spezialisierungen und Fähigkeiten ----
+  // der bisherigen Klassen von Kronreich, Orden und Freien Häfen. Stufe 15 und 20 belegt die Signaturfähigkeit
+  // der gewählten Spezialisierung (spiel/regeln.js).
+  if (typeof klassen !== "undefined" && typeof faehigkeiten !== "undefined") {
+    for (const [fraktion, rollen] of Object.entries(D.menschenKlassen)) {
+      for (const [rolle, k] of Object.entries(rollen)) {
+        Object.assign(klassen.fraktionen[fraktion].klassen[rolle], { name: k.name, spielweise: k.spielweise, ressource: k.ressource, a: k.a, b: k.b });
+        faehigkeiten.fraktionen[fraktion].klassen[rolle] = { zahlung: k.zahlung,
+          liste: [...k.liste, k.signatur.a[0], k.signatur.a[1]], signatur: k.signatur };
+      }
+      klassen.fraktionen[fraktion].magie = fraktion === "orden";
+    }
+  }
+
   return {
     daten: D, MENSCHEN, ROHSTOFFE, rufSchluessel, istMensch,
     maxStufe, epFuer, stufeAus, ahnenPunkte, talentPunkte, talentRang, talentGrund, talentLernen, ahnenGrund, ahnenLernen, signaturRang,

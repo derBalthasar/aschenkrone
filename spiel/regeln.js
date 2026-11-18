@@ -749,10 +749,13 @@ const rules = (() => {
 
   // Erfahrungsstufen 1 bis 20 (100 × n EP von Stufe n auf n+1). Die Stufe schaltet Fähigkeiten, LP und Kraft frei.
   // Grundwertpunkte gibt es nur noch aus Spielständen vor dem Kampfdokument (stufenpunkte).
+  // Menschen (Patch 2.1.0 Punkt 1): Stufen bis 30, ab 21 mit Henrys festen Schritten.
+  const stufeVon = (state) => menschen(state) ? SY.stufeAus(state.xp ?? 0) : kampf.stufeAus(state.xp ?? 0);
   function progression(state) {
-    const stufe = kampf.stufeAus(state.xp);
-    return { level: stufe, xp: state.xp, next: stufe < kampf.maxStufe ? kampf.epFuer(stufe + 1) : null,
-      floor: kampf.epFuer(stufe), points: trainingLeft(state) };
+    const stufe = stufeVon(state);
+    const [max, ep] = menschen(state) ? [SY.maxStufe, SY.epFuer] : [kampf.maxStufe, kampf.epFuer];
+    return { level: stufe, xp: state.xp, next: stufe < max ? ep(stufe + 1) : null,
+      floor: ep(stufe), points: trainingLeft(state) };
   }
   const trainingLeft = (state) => state.stufenpunkte ?? 0;
   const legacyThresholds = [0, 75, 175, 285, 410, 560];
@@ -770,7 +773,14 @@ const rules = (() => {
   }
   const gearSkill = (gear) => gear.skill ?? ({ strength: "nahkampf", agility: gear.airborne ? "fernkampf" : "nahkampf", mind: "magie" })[gear.stat];
   // Lebenspunkte hängen an der Rolle und der Erfahrungsstufe (Kampfdokument).
-  const healthLimit = (state) => kampf.lebenspunkte(profile(state.faction, state.role), kampf.stufeAus(state.xp ?? 0));
+  // Menschen (Patch 2.4.0): Grund-LP aus Henrys Klassen geteilt durch 3,5, Zuwachs je Stufe wie im Kampfdokument.
+  const healthLimit = (state) => {
+    const neu = SY.istMensch(state.faction) && SY.daten.menschenKlassen[state.faction]?.[state.role];
+    if (!neu) return kampf.lebenspunkte(profile(state.faction, state.role), kampf.stufeAus(state.xp ?? 0));
+    // Meister-Talent Schildwall +10 % je Rang, Eisernes Ahnenblut +25 LP je Rang (÷ 3,5).
+    const grund = neu.lp + kampf.lpTabelle[profile(state.faction, state.role)][1] * (SY.stufeAus(state.xp ?? 0) - 1);
+    return Math.round(grund * (1 + 0.1 * SY.talentRang(state, "MT_EISENWALL"))) + SY.skaliert(25) * (state.ahnen?.perk_iron_blood ?? 0);
+  };
   const legacyHealthLimit = (state) => 18 + heroAttributes(state).strength + 2 * state.build.fertigkeiten.verteidigung;
   const emberLimit = (state) => 1 + Math.floor(heroAttributes(state).will / 3);
   // Halten und Blocken über Verteidigung, Ausweichen über Geschick.
@@ -796,8 +806,13 @@ const rules = (() => {
   }
 
   // Spezialisierung ab Quest-Stufe 3: Titel, +1 Fertigkeitspunkt, +1 Grundwert. Die Wahl gilt für immer.
+  // Patch 2.0.0 Punkt 9: Menschen spezialisieren sich ab Erfahrungsstufe 10, die anderen Völker ab Quest-Stufe 3.
+  const spezBereit = (state) => SY.istMensch(state.faction) ? level(state) >= 10 : state.questStufe >= K.regeln.spezialisierungStufe;
+  const spezHinweis = (state) => SY.istMensch(state.faction) ? "ab Erfahrungsstufe 10" : "ab Quest-Stufe " + K.regeln.spezialisierungStufe;
+  // Patch 2.1.0 Punkt 11: Bei den Menschen ersetzt Rang 4 der Signaturfähigkeit (Stufe 25) die Meisterklasse.
+  const meisterBereit = (state) => !SY.istMensch(state.faction) && Boolean(state.build.spez) && !state.build.meister && state.vereinigt;
   function specialize(previous, variante, grundwert, fertigkeit) {
-    if (previous.build.spez || previous.questStufe < K.regeln.spezialisierungStufe || previous.combat || !previous.health ||
+    if (previous.build.spez || !spezBereit(previous) || previous.combat || !previous.health ||
         !["a", "b"].includes(variante) || !own(K.fertigkeiten, fertigkeit)) return previous;
     const build = structuredClone(previous.build);
     build.spez = { variante, grundwert };
@@ -814,7 +829,7 @@ const rules = (() => {
 
   // Meisterklasse nach der Vereinigung des eigenen Volkes: +1 Fertigkeitspunkt und +2 Grundwerte.
   function ascend(previous, grundwerte, fertigkeit) {
-    if (!previous.build.spez || previous.build.meister || !previous.vereinigt || previous.combat || !previous.health ||
+    if (!meisterBereit(previous) || previous.combat || !previous.health ||
         !own(K.fertigkeiten, fertigkeit)) return previous;
     const build = structuredClone(previous.build);
     build.meister = { grundwerte: { ...grundwerte } };
@@ -832,6 +847,11 @@ const rules = (() => {
     if (once && state.rewards.includes(id)) return;
     const previousLevel = progression(state).level;
     if (once) state.rewards.push(id);
+    // Menschen: Veteran von Odris +10 % EP je Rang, Erbe der Baumeister +15 % Silber je Rang.
+    if (menschen(state)) {
+      xp = Math.round(xp * (1 + 0.1 * SY.talentRang(state, "MT_SCHLACHTFUEHRER")));
+      silver = Math.round(silver * (1 + 0.15 * (state.ahnen?.perk_master_steward ?? 0)));
+    }
     state.xp += xp;
     // Errata 9: Begleiter in der aktiven Gruppe erhalten dieselben EP wie die Spielfigur.
     if (xp) for (const member of state.party ?? []) {
@@ -2006,6 +2026,7 @@ const rules = (() => {
       world.gear[g.id] = { slot, stat: fokus ? "mind" : fern || g.equipCategory === "DOLCH_KLINGE" ? "agility" : "strength",
         ...(g.equipCategory === "DOLCH_KLINGE" ? { skill: "nahkampf" } : {}),
         power: SY.skaliert(w.attack), pierce: sysWert(w.armorPen, 10),
+        ...(w.armorPen ? { durchdringung: w.armorPen / 100 } : {}), ...(w.critChance ? { krit: w.critChance } : {}),
         magic: sysWert(w.fireDamage, 5) + sysWert(w.willpower, 3),
         ...(/ZWEIHAND|BOGEN|GEWEHR|STAB/.test(g.equipCategory) ? { twoHanded: true } : {}) };
     } else if (slot) {
@@ -2313,6 +2334,140 @@ const rules = (() => {
       (SY.kasseVoll(state) ? " Die Kriegskasse ist gefüllt: Die Armada kann auslaufen." : ""));
     return true;
   });
+  // ---- Siedlung der Menschen (Bau-Datei, Patch 1.6.0, 2.1.0): Ausbau, Gebäude, Straßen, Garnison, Wiederaufbau ----
+  function siedlungInfo(state) {
+    if (!menschen(state) || state.scene !== "weltknoten") return null;
+    const ort = N.get(state.knoten);
+    if (!ort || !SY.istMensch(ort.fraktion)) return null;
+    const stufe = SY.siedlungsStufe(state, ort.id);
+    const naechste = SY.daten.siedlungsStufen[stufe + 1] ?? null;
+    const phase = SY.phase(state, ort.fraktion);
+    const stehend = SY.gebaeudeIn(state, ort.id);
+    return {
+      ort: ort.id, name: ort.name, fraktion: ort.fraktion, dorf: ort.typ === "dorf",
+      phase: { nr: phase, ...SY.daten.phasen[phase - 1] },
+      stufe: SY.daten.siedlungsStufen[stufe], naechste, ausbauGrund: SY.ausbauGrund(state, ort.id),
+      gebaeude: Object.values(SY.daten.gebaeude).filter((g) => g.ort !== "KANTE_GRENZLAND")
+        .map((g) => ({ ...g, steht: stehend.includes(g.id), grund: SY.bauGrund(state, ort.id, g.id) }))
+        .filter((g) => g.steht || !/passt nicht/.test(g.grund ?? "")),
+      strassen: SY.wegeAm(ort.id).map((id) => {
+        const [a, b] = wegEnden(id);
+        const anderer = N.get(a === ort.id ? b : a);
+        return { id, ziel: anderer?.name ?? id, gepflastert: (state.strassen ?? []).includes(id), grund: SY.strasseGrund(state, ort.id, id) };
+      }).filter((w) => w.gepflastert || w.grund !== "nur Grenzland-Straßen"),
+      strassenKosten: SY.kostenText(SY.daten.gebaeude.BLD_GRENZSTRASSE_STEIN.kosten),
+      verteidigung: SY.verteidigung(state, ort.id), garnison: state.garnison?.[ort.id] ?? 0,
+      rekrutierenGrund: SY.rekrutierenGrund(state, ort.id), rekrutierenKosten: SY.kostenText(SY.daten.garnison.kosten),
+      beschaedigt: (state.gepluendert ?? []).includes(ort.id) || (state.pausiert?.[ort.id] ?? 0) > (state.etappen ?? 0),
+      reparierenGrund: SY.reparierenGrund(state, ort.id), reparaturKosten: SY.kostenText(SY.daten.garnison.reparatur),
+      wiederaufbau: SY.daten.wiederaufbau.filter((w) => w.ort === ort.id)
+        .map((w) => ({ ...w, fertig: (state.marks ?? []).includes(w.marke), grund: SY.wiederaufbauGrund(state, w.id) })),
+    };
+  }
+  const wegEnden = (id) => (typeof nebenquests !== "undefined" ? nebenquests : require("./nebenquests.js")).daten.wegKennungen[id] ?? [];
+  const siedlungAusbauen = kontorAktion((state) => {
+    const ziel = SY.ausbauen(state, state.knoten);
+    if (!ziel) return false;
+    note(state, N.get(state.knoten).name + " ist jetzt " + ziel.name + ". " + ziel.wirkung);
+    return true;
+  });
+  const gebaeudeBauen = kontorAktion((state, id) => {
+    if (!SY.bauen(state, state.knoten, id)) return false;
+    note(state, "Gebaut in " + N.get(state.knoten).name + ": " + SY.daten.gebaeude[id].name + ". " + SY.daten.gebaeude[id].wirkung);
+    return true;
+  });
+  const strasseBauen = kontorAktion((state, wegId) => {
+    if (!SY.strassePflastern(state, state.knoten, wegId)) return false;
+    note(state, "Die Grenzstraße ist gepflastert. Der Weg ist sicherer · Ruf +" + SY.daten.rufAusloeser.secure_border_road.ruf + ".");
+    return true;
+  });
+  const garnisonRekrutieren = kontorAktion((state) => {
+    if (!SY.rekrutieren(state, state.knoten)) return false;
+    note(state, "Eine Truppe verstärkt die Garnison von " + N.get(state.knoten).name + " (Verteidigung " + SY.verteidigung(state, state.knoten) + ").");
+    return true;
+  });
+  const ortReparieren = kontorAktion((state) => {
+    if (!SY.reparieren(state, state.knoten)) return false;
+    note(state, N.get(state.knoten).name + " ist wieder aufgebaut. Der Zehnt fließt wieder.");
+    return true;
+  });
+  const wiederaufbau = kontorAktion((state, id) => {
+    const w = SY.wiederaufbauen(state, id);
+    if (!w) return false;
+    note(state, w.titel + ": abgeschlossen · +" + w.silber + " Silber · Ruf +" + w.ruf + ". " + w.wirkung);
+    return true;
+  });
+
+  // ---- Endgame der Menschen (Endgame-Datei, Patch 1.6.0, 1.6.1): Patrouillen, Ascherisse, Eskorten, Kaperfahrten, Turniere ----
+  function endgameListe(state) {
+    if (!menschen(state) || state.scene !== "weltknoten") return [];
+    return Object.entries(SY.daten.endgame).map(([id, a]) => {
+      const ort = a.orte?.find((o) => (o.ort ?? o) === state.knoten);
+      return { id, name: a.name, titel: ort?.name ?? a.name, ep: a.ep, silber: a.silber, wellen: a.wellen ?? 1,
+        grund: SY.endgameGrund(state, id, state.knoten), hier: !a.orte || Boolean(ort) };
+    }).filter((e) => e.hier);
+  }
+  function endgameStarten(previous, id) {
+    if (!imHub(previous) || !menschen(previous) || previous.tatOffen || SY.endgameGrund(previous, id, previous.knoten)) return previous;
+    const state = structuredClone(previous);
+    endgameKampf(state, id, 1);
+    return state;
+  }
+  function endgameKampf(state, id, welle) {
+    const a = SY.daten.endgame[id];
+    const ort = N.get(state.knoten);
+    const region = SY.daten.gegnerRegionen[ort.fraktion] ? ort.fraktion : state.faction;
+    const stufe = Math.max(gebietsStufe(state, ort.id), level(state));
+    const g = SY.begegnung(state, region, id === "kaperfahrt" ? "seeweg" : "strasse", stufe, travelDice);
+    note(state, a.name + (a.wellen ? " · Welle " + welle + " von " + a.wellen : "") + ": " + g.name + " stellt sich euch!");
+    startFight(state, sysKampf(g.id), true, g.werte.stufe);
+    if (state.combat) Object.assign(state.combat, { weiter: "weltknoten", endgame: { id, welle, ort: ort.id } });
+    else if (!state.health) arrive(state, "defeat");
+  }
+  function endgameSieg(state, e) {
+    const a = SY.daten.endgame[e.id];
+    if (a.wellen && e.welle < a.wellen) {
+      endgameKampf(state, e.id, e.welle + 1);
+      return;
+    }
+    const lohn = SY.endgameLohn(state, e.id, e.ort, travelDice);
+    const roh = Object.entries(lohn.rohstoffe).map(([r, n]) => n + " " + SY.daten.rohstoffe[r].name.replace(/ \(.*\)/, "") + " ins Kontor");
+    note(state, a.name + " abgeschlossen: +" + lohn.silber + " Silber" + (roh.length ? ", " + roh.join(", ") : "") + (a.ruf ? ", Ruf +" + a.ruf : "") + ".");
+    grant(state, "endgame-" + e.id, lohn.ep, 0, [], false);
+  }
+
+  // ---- Meister-Talente (Stufe 22–30) und Blut der Ahnen (ab Stufe 30) ----
+  function aufstiegInfo(state) {
+    if (!menschen(state)) return null;
+    const stufe = level(state);
+    const vergeben = Object.values(state.talente ?? {}).reduce((s, n) => s + n, 0);
+    const ahnenVergeben = Object.values(state.ahnen ?? {}).reduce((s, n) => s + n, 0);
+    return { stufe, maxStufe: SY.maxStufe, signaturRang: SY.signaturRang(stufe),
+      talentPunkte: SY.talentPunkte(stufe) - vergeben, talentStufen: SY.daten.aufstieg.talentStufen,
+      talente: SY.daten.aufstieg.talente.map((t) => ({ ...t, rang: SY.talentRang(state, t.id), max: SY.daten.aufstieg.talentMaxRang,
+        grund: SY.talentGrund(state, t.id, stufe) })),
+      ahnenPunkte: SY.ahnenPunkte(state.xp ?? 0) - ahnenVergeben,
+      ahnen: SY.daten.aufstieg.ahnen.pfade.map((p) => ({ ...p, rang: state.ahnen?.[p.id] ?? 0, grund: SY.ahnenGrund(state, p.id, state.xp ?? 0) })) };
+  }
+  function talentLernen(previous, id) {
+    if (!menschen(previous) || previous.combat || SY.talentGrund(previous, id, level(previous))) return previous;
+    const state = structuredClone(previous);
+    const lp = healthLimit(state);
+    SY.talentLernen(state, id, level(state));
+    state.health += healthLimit(state) - lp;
+    note(state, "Meister-Talent gelernt: " + SY.daten.aufstieg.talente.find((t) => t.id === id).name + " (Rang " + SY.talentRang(state, id) + ").");
+    return state;
+  }
+  function ahnenLernen(previous, pfad) {
+    if (!menschen(previous) || previous.combat || SY.ahnenGrund(previous, pfad, previous.xp ?? 0)) return previous;
+    const state = structuredClone(previous);
+    const lp = healthLimit(state);
+    SY.ahnenLernen(state, pfad, state.xp ?? 0);
+    state.health += healthLimit(state) - lp;
+    note(state, "Blut der Ahnen: " + SY.daten.aufstieg.ahnen.pfade.find((p) => p.id === pfad).name + " (Rang " + state.ahnen[pfad] + ").");
+    return state;
+  }
+
   // Moral, Rang und Zustand für die Anzeige.
   function lage(state) {
     if (!menschen(state)) return null;
@@ -2570,11 +2725,18 @@ const rules = (() => {
   // ---- Kampf nach dem Kampfdokument (17. 11. 2026): Runden, Initiative, Ausdauer, Mana und Fähigkeiten ----
   // Ohne Kampfraster: Fläche trifft alle Feinde, Verlangsamen und Zurückstoßen senken den Schaden des Ziels um 1.
 
-  const level = (state) => kampf.stufeAus(state.xp);
+  const level = (state) => stufeVon(state);
   const kraft = (state) => {
     const stufe = level(state);
     const extra = Math.floor((stufe - 1) / 2);
     const magie = K.fraktionen[state.faction].magie ? state.build.fertigkeiten.magie : 0;
+    // Menschen (Patch 2.1.0 Punkt 10, 2.4.0): Mana nur für Pyromant, Kleriker der Flamme, Glutpaladin und Inquisitor,
+    // 12 + Willenskraft + Intelligenz/2.
+    const klasse = menschenKlasse(state);
+    if (klasse) {
+      const werte = heroAttributes(state);
+      return { ausdauer: 10 + extra + SY.skaliert(10) * (state.ahnen?.perk_iron_blood ?? 0), mana: klasse.mana ? SY.maxMana(werte.will, werte.mind) : 0 };
+    }
     return { ausdauer: 10 + extra, mana: magie > 0 ? 2 * magie + extra : 0 };
   };
   const resourceName = (state) => K.fraktionen[state.faction].ressource;
@@ -2594,10 +2756,19 @@ const rules = (() => {
   function abilities(state) {
     const stufe = level(state);
     const spez = state.build.spez?.variante;
-    const list = kampf.klassenFaehigkeiten(state.faction, state.role).map((f) => ({
+    const signatur = SY.istMensch(state.faction) ? faehigkeiten.fraktionen[state.faction].klassen[state.role].signatur : null;
+    let list = kampf.klassenFaehigkeiten(state.faction, state.role).map((f) => ({
       ...f, frei: stufe >= f.stufe,
-      spezialisiert: (spez === "a" && f.stufe === 6) || (spez === "b" && f.stufe === 10),
+      spezialisiert: !signatur && ((spez === "a" && f.stufe === 6) || (spez === "b" && f.stufe === 10)),
     }));
+    if (signatur) {
+      // Stufe 15 und 20: Signaturfähigkeit der gewählten Spezialisierung in Rang 2 und 3; Rang 3 ersetzt Rang 2.
+      list = list.map((f) => {
+        if (f.stufe < 15) return f;
+        const [name, wirkung, zahlung] = signatur[spez ?? "a"][f.stufe === 15 ? 0 : stufe >= 25 ? 2 : 1];
+        return { ...f, name, wirkung, zahlung, regel: kampf.lies(wirkung), frei: f.frei && Boolean(spez), signatur: true };
+      }).filter((f) => !(f.stufe === 15 && stufe >= 20 && spez));
+    }
     if (state.build.meister) {
       for (const f of kampf.meisterFaehigkeiten(state.faction, state.role)) list.push({ ...f, frei: stufe >= f.stufe, spezialisiert: false });
     }
@@ -2656,7 +2827,7 @@ const rules = (() => {
       const lp = group ? values.lp : Math.round(values.lp * (1 + 0.25 * size));
       const name = index === 0 ? (group?.leader ?? fight.name ?? creature.name) : group.ally + " " + index;
       return { name, rang: spec.rang, stufe: spec.stufe, lp, max: lp, schaden: values.schaden, aktionen: values.aktionen,
-        geschick, tags: spec.tags ?? [], status: {} };
+        geschick, tags: spec.tags ?? [], status: {}, ...(fight.system && values.ruestung ? { ruestung: values.ruestung } : {}) };
     });
   }
 
@@ -2833,6 +3004,24 @@ const rules = (() => {
     // Relikte der Gruppe: Feuerschaden und Schaden gegen Untote.
     if (fire) amount += reliktWert(state, "fireDamage");
     if (foe.tags.includes("untot")) amount = Math.round(amount * (1 + reliktWert(state, "damageVsUndead")));
+    // Patch 2.2.0/2.5.1: Kritische Treffer (×1,5) nach Kritchance der Waffe, ohne Zufall über einen Zähler,
+    // und Rüstung der Systemgegner als prozentuale Minderung mit Konstante 14, gesenkt durch Durchschlag.
+    if (actor === "hero" && menschen(state)) {
+      // Meister-Talent Klinge & Wucht +8 % je Rang, Zorn der Alten Könige +5 % je Rang.
+      const plus = 0.08 * SY.talentRang(state, "MT_KLINGENSTURM") + 0.05 * (state.ahnen?.perk_ancestral_might ?? 0);
+      if (plus) amount = Math.round(amount * (1 + plus));
+      const gear = world.gear[weapon(state)] ?? {};
+      if (gear.krit) {
+        const held = state.combat.held;
+        held.kritZaehler = (held.kritZaehler ?? 0) + gear.krit;
+        if (held.kritZaehler >= 100) {
+          held.kritZaehler -= 100;
+          amount = Math.floor(amount * SY.daten.kampf.krit);
+          note(state, "Kritischer Treffer gegen " + foe.name + " (×" + String(SY.daten.kampf.krit).replace(".", ",") + ").");
+        }
+      }
+    }
+    if (foe.ruestung) amount = SY.schaden(amount, foe.ruestung, actor === "hero" ? world.gear[weapon(state)]?.durchdringung ?? 0 : 0);
     const value = Math.min(foe.lp, amount + (foe.status.verwundbar?.wert ?? 0));
     foe.lp -= value;
     if (fire && round) round.usedFire = true;
@@ -3160,6 +3349,7 @@ const rules = (() => {
     grant(state, "kampf-" + fightId, xp, world.battleRewards[fightId]?.[1] ?? 0, result.loot, !result.random);
     arrive(state, turn.weiter ?? result.to);
     if (turn.auftrag) auftragSieg(state, turn.auftrag);
+    if (turn.endgame) endgameSieg(state, turn.endgame);
     return true;
   }
 
@@ -3228,10 +3418,18 @@ const rules = (() => {
           const victim = active[victimCursor++ % active.length];
           const heroTarget = victim.id === "hero";
           const armor = (heroTarget ? gearBonus(state, "armor") : memberGearBonus(state, victim.id, "armor")) + reliktWert(state, "partyResistance");
-          const reduction = Math.floor(((heroTarget ? protection(state) : 2) + armor) / 2);
           const defense = heroTarget && round.guarding ? Math.max(6, round.ward) : round.ward;
           const guarding = defense > 0;
-          let hit = Math.max(guarding ? 0 : 1, damage - reduction - defense);
+          let hit;
+          if (menschen(state)) {
+            // Patch 2.2.0/2.5.1: Rüstung mindert prozentual (Konstante 14); Klassenrüstung zählt beim Helden mit.
+            const klassenRuestung = heroTarget ? (SY.daten.menschenKlassen[state.faction]?.[state.role]?.ruestung ?? 0) +
+              SY.skaliert(4) * SY.talentRang(state, "MT_EISENWALL") : 2;
+            hit = damage > 0 ? Math.max(guarding ? 0 : 1, SY.schaden(damage, klassenRuestung + armor) - defense) : 0;
+          } else {
+            const reduction = Math.floor(((heroTarget ? protection(state) : 2) + armor) / 2);
+            hit = Math.max(guarding ? 0 : 1, damage - reduction - defense);
+          }
           if (heroTarget) {
             if (index === 0 && action === 0) { heroHit = true; heroGuarded = guarding; }
             const absorbed = Math.min(held.schild, hit);
@@ -3293,7 +3491,7 @@ const rules = (() => {
     const held = turn.held;
     const max = kraft(state);
     held.ausdauer = Math.min(max.ausdauer, held.ausdauer + 2);
-    held.mana = Math.min(max.mana, held.mana + 2);
+    held.mana = Math.min(max.mana, held.mana + (menschen(state) ? SY.daten.kampf.mana.jeZug : 2));
     for (const id of Object.keys(held.abklingen)) {
       if (--held.abklingen[id] <= 0) delete held.abklingen[id];
     }
@@ -3477,7 +3675,9 @@ const rules = (() => {
     weltLeisten, leistenNamen, leistenStart, gegenkraefte, niederlagen, vorratMax, vorratStart, seewegSilber, vorratAnwerbung,
     vertragKosten, ertragMenge, ertragPause, weltRunde, aktuellerKnoten, weltOffen, betreteWelt, handlungHier, zurHandlung,
     reiseGrund, reiseZiele, reise, rastGrund, rastKosten, handelOffen,
-    taten, tatWaehlen, ausruester, ausruesterHandel, ausruestungGrund, handwerkListe, handwerk, schmiedeInfo, schmieden, kontorInfo, kontorHandel, nahrungTragen, spenden, lage, systeme: SY,
+    spezBereit, spezHinweis, meisterBereit, taten, tatWaehlen, ausruester, ausruesterHandel, ausruestungGrund, handwerkListe, handwerk, schmiedeInfo, schmieden, kontorInfo, kontorHandel, nahrungTragen, spenden, lage, systeme: SY,
+    siedlungInfo, siedlungAusbauen, gebaeudeBauen, strasseBauen, garnisonRekrutieren, ortReparieren, wiederaufbau,
+    endgameListe, endgameStarten, aufstiegInfo, talentLernen, ahnenLernen,
     auftragGrund, auftragAnnehmen, ausfuehrenGrund, auftragAusfuehren, aushang, auftraege, hauptquest, hauptGrund, hauptWeiter, auftragEp, rast, ertragGrund, ertragEinholen, vertragGrund, vertragSchliessen, entwurf,
     levelThresholds: Array.from({ length: kampf.maxStufe }, (_, index) => kampf.epFuer(index + 1)) };
 })();
