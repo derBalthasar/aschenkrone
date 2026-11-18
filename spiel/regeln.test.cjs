@@ -1418,7 +1418,12 @@ console.log("Reisebegegnungen (ruhig, scheu, Jäger, Alphatier, Ausweichen) gepr
   assert.throws(() => rules.read(JSON.stringify({ ...hub, scene: "weltende" })), /beschädigt/);
 
   // Seewege: eigener Hafen oder Handelsvertrag, 15 Silber je Überfahrt.
-  const westvik = { ...hub, knoten: "westvik", silver: 40 };
+  // Übersee zu fremden Völkern erst in Akt 5 (Wegenetz der Menschen, Quest-Stufe 4).
+  const westvikFrueh = { ...hub, knoten: "westvik", silver: 40, questStufe: 3 };
+  const seeFrueh = rules.reiseZiele(westvikFrueh).find(weg => weg.kantenTyp === "seeweg");
+  assert.equal(seeFrueh.grund, "Übersee erst in Akt 5");
+  assert.equal(rules.reise(westvikFrueh, seeFrueh.zielId), westvikFrueh);
+  const westvik = { ...hub, knoten: "westvik", silver: 40, questStufe: 4 };
   const see = rules.reiseZiele(westvik).find(weg => weg.kantenTyp === "seeweg");
   assert.equal(see.grund, null);
   const sailed = rules.reise(westvik, see.zielId);
@@ -1439,6 +1444,21 @@ console.log("Reisebegegnungen (ruhig, scheu, Jäger, Alphatier, Ausweichen) gepr
   assert.equal(rules.vertragGrund({ ...dwarf, scene: "weltknoten", knoten: "aschenthron" }), "Orks und Zwerge verhandeln nicht miteinander");
   assert.equal(rules.vertragSchliessen({ ...hub, knoten: "ambossheim" }).weltLeisten.erzfieber, 40);
   assert.equal(rules.vertragSchliessen({ ...hub, knoten: "kragmar" }).weltLeisten.orks, 35);
+
+  // Wegenetz der Menschen: P03 Eispass hat 25 % Jäger, Grauwölfe oder den Klippenwyrm auf Gebietsstufe.
+  {
+    const folge = (values) => { let index = 0; rules.setTravelDice(() => values[Math.min(index++, values.length - 1)]); };
+    const amPass = { ...hub, knoten: "eiswacht", health: rules.healthLimit(hub) };
+    folge([0.74]);
+    assert.equal(rules.reise(amPass, "brandstein").combat, null, "74 liegt noch unter 55 ruhig + 20 scheu");
+    folge([0.75, 0.5, 0.9, 0]);
+    const wyrm = rules.reise(amPass, "brandstein");
+    assert.equal(wyrm.combat.id, "auftrag-klippenwyrm");
+    assert.equal(wyrm.combat.weiter, "weltknoten");
+    folge([0.75, 0.5, 0, 0]);
+    assert.equal(rules.reise(amPass, "brandstein").combat.id, "jagd-grauwolf");
+    rules.setTravelDice(() => 0);
+  }
 
   // Pässe: Der Zollpass schließt ab Erzfieber 50.
   const zoll = knoten.get("zollburg").verbindungen.find(weg => weg.pass === "Zollpass");
@@ -1481,7 +1501,8 @@ console.log("Reisebegegnungen (ruhig, scheu, Jäger, Alphatier, Ausweichen) gepr
   assert.equal(rules.hire({ ...hub, ressource: 15 }, "steppenreiter", "vorrat").party.length, 0);
 
   // Hinterhalt auf einer Grenzlandkante im Kronreich: Kampf, danach zurück in den Hub.
-  rules.setTravelDice(() => 0.5);
+  // P01 Heidvang–Eiswacht: 40 ruhig, 20 scheu, 40 Jäger; 70 ist ein Jäger, der dritte Wert wählt den Grauwolf.
+  { let index = 0; const werte = [0.7, 0.5, 0]; rules.setTravelDice(() => werte[Math.min(index++, werte.length - 1)]); }
   const ambush = rules.reise({ ...toHeidvang, xp: 300, health: 60 }, "eiswacht");
   rules.setTravelDice(() => 0);
   assert.equal(ambush.combat.id, "jagd-grauwolf");

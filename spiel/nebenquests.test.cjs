@@ -246,3 +246,22 @@ test("Gruppen-Relikte stammen aus ihrem Auftrag, Rechte je Fraktion", () => {
     assert.ok(!D.trophaeen["beute-" + relikt.name.toLowerCase()], relikt.name + " ist keine Trophäe mehr");
   }
 });
+
+test("Wegenetz der Menschen: 186 Wege mit Gefahr, Gegnern aus dem Spiel und passender Zone", () => {
+  const { regeln, wege } = D.wegenetz;
+  assert.equal(Object.keys(wege).length, 186);
+  assert.match(regeln.see.text ?? JSON.stringify(regeln.see), /Akt 5/);
+  for (const [kennung, weg] of Object.entries(wege)) {
+    assert.ok(D.wegKennungen[kennung], kennung + " fehlt in den Weg-Kennungen");
+    assert.ok(weg.gefahr > 0 && weg.gefahr < 0.8, kennung + " Gefahr");
+    for (const gegner of weg.gegner) assert.match(gegner, /^(jagd|auftrag)-/, kennung);
+    const [a, b] = D.wegKennungen[kennung];
+    const kante = knoten.verbindung(a, b);
+    if (kennung.startsWith("M")) assert.equal(kante.kantenTyp, "seeweg", kennung);
+    if (/^[SD]/.test(kennung)) assert.equal(kante.sicherheit === "kernland" ? 0.1 : 0.4, weg.gefahr, kennung);
+  }
+  // P03 Eispass Orden–Kronreich ist Kernland mit Klippenwyrm.
+  assert.equal(knoten.verbindung("eiswacht", "brandstein").sicherheit, "kernland");
+  assert.deepEqual(wege.P03.gegner, ["jagd-grauwolf", "auftrag-klippenwyrm"]);
+  assert.equal(wege.P03.gefahr, 0.25);
+});

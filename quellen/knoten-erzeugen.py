@@ -195,7 +195,10 @@ for pass_name, stadt in PAESSE.items():
         if b not in knoten or eintrag[1] != "strasse":
             continue
         if knoten[b]["fraktion"] != knoten[s]["fraktion"] or entfernung(punkt, knoten[b]["p"]) < entfernung(knoten[s]["p"], knoten[b]["p"]):
-            kante(s, b, "pass", "grenzland", 2, 0, pass_=pass_name)
+            # Henry, 18. 11. 2026 (Wegenetz der Menschen): Der Eispass innerhalb des Ordenslands (P03 Brandstein – Eiswacht)
+            # ist Kernland und kostet 1 Vorrat. Die Pässe der Zwerge bleiben, bis ihr Wegenetz kommt.
+            sicher = sicherheit_land(s, b) if pass_name == "Eispass" else "grenzland"
+            kante(s, b, "pass", sicher, 1 if sicher == "kernland" else 2, 0, pass_=pass_name)
     if not any(e[1] == "pass" for e in knoten[s]["kanten"].values()):
         naechste = min((b for b in knoten[s]["kanten"]), key=lambda b: entfernung(punkt, knoten[b]["p"]))
         kante(s, naechste, "pass", "grenzland", 2, 0, pass_=pass_name)
@@ -231,6 +234,14 @@ while True:
         break
     _, a, b = min(kandidaten)
     kante(a, b, "seeweg", "grenzland", 0, 15)
+
+# Henry, 18. 11. 2026 (Wegenetz der Menschen): Seewege zwischen zwei Häfen derselben Menschen-Fraktion sind Kernland
+# („Menschen (Kernland)“, 15 % Gefahr). Die Seewege der anderen Völker bleiben, bis ihr Wegenetz kommt.
+MENSCHEN = {"kronreich", "orden", "haefen"}
+for a in haefen:
+    for b, e in knoten[a]["kanten"].items():
+        if e[1] == "seeweg" and knoten[a]["fraktion"] == knoten[b]["fraktion"] and knoten[a]["fraktion"] in MENSCHEN:
+            e[2] = "kernland"
 
 # ---- Tiefer Stollen unter der Meerenge ----
 kante("stollenmund", "aschenthron", "tiefer_stollen", "grenzland", 2, 0, probe=["willenskraft", "intelligenz"], glut=1)

@@ -474,6 +474,33 @@ for (const r of relikte.relicItems) {
 }
 daten.relikte = { system: relikte.partyRelicSystem, gegenstaende: relikte.relicItems };
 
+// Wegenetz der Menschen (Henry, 18. 11. 2026, quellen/henry/wegenetz-menschen.json): Gefahr und Gegner je Weg.
+// Enden, Wegtyp, Zone und Kosten müssen zum Knotennetz passen (spiel/knoten-daten.js, quellen/knoten-erzeugen.py).
+const wegenetz = JSON.parse(fs.readFileSync(path.join(root, "quellen/henry/wegenetz-menschen.json"), "utf8"));
+const wegGegner = { "Grauwölfe": "jagd-grauwolf", "Galgenkrähen": "jagd-galgenkraehe", "Eishauer": "auftrag-eishauer",
+  "Klippenwyrm": "auftrag-klippenwyrm" };
+// Dorfnamen gibt es doppelt (Ziegenalm, Nebelstrand): Dörfer erst über ihre Stadt suchen.
+const ortId = (name, anderes) => dorfId(name, anderes) ?? knoten.nachName[name] ??
+  Object.values(knoten.alle).find((o) => o.name === name && o.verbindungen.some((v) => v.zielId === anderes))?.id;
+daten.wegenetz = { regeln: { land: wegenetz.landRules, see: wegenetz.seaRules }, wege: {} };
+for (const e of [...wegenetz.landEdges, ...wegenetz.seaEdges]) {
+  const von = knoten.nachName[e.from] ?? ortId(e.from, knoten.nachName[e.to]);
+  const zu = ortId(e.to, von);
+  const enden = wegKennungen[e.id];
+  if (!enden || [von, zu].sort().join() !== [...enden].sort().join()) throw new Error("Wegenetz: " + e.id + " passt nicht zu " + enden);
+  const kante = knoten.verbindung(von, zu);
+  const typ = { S: "strasse", D: "strasse", P: "pass", M: "seeweg" }[e.id[0]];
+  const zone = e.zone?.toLowerCase() ?? (e.targetFolk ? (e.targetFolk === "Menschen (Kernland)" ? "kernland" : "grenzland") : "kernland");
+  const kosten = e.costType === "Silber" ? kante.kostenGold : kante.kostenRessource;
+  if (kante.kantenTyp !== typ || kante.sicherheit !== zone || kosten !== e.cost) {
+    throw new Error("Wegenetz: " + e.id + " weicht vom Knotennetz ab (" + [kante.kantenTyp, kante.sicherheit, kosten] + ")");
+  }
+  for (const g of e.enemies ?? []) if (!wegGegner[g]) throw new Error("Wegenetz: unbekannter Gegner " + g);
+  daten.wegenetz.wege[e.id] = { gefahr: e.dangerChance, gegner: (e.enemies ?? []).map((g) => wegGegner[g]),
+    ...(e.distance ? { entfernung: e.distance } : {}), ...(e.lengthCategory ? { laenge: e.lengthCategory } : {}),
+    ...(e.targetFolk ? { ziel: e.targetFolk } : {}) };
+}
+
 const kopf = `"use strict";
 
 // Erzeugt von quellen/nebenquests-erzeugen.cjs aus quellen/gemini/. Nicht von Hand ändern,

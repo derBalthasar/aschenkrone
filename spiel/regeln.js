@@ -1557,6 +1557,8 @@ const rules = (() => {
     return state;
   }
 
+  // Akt 5 beginnt, wenn Akt 1 bis 4 abgeschlossen sind (Quest-Stufe 4).
+  const uebersee = 4;
   // Seewege brauchen einen Hafen am Abfahrtsort, der dir gehört oder einem Vertragspartner.
   function schiffBereit(state, ort) {
     return ort.hatHafen && (ort.fraktion === state.faction || (state.vertraege ?? []).includes(ort.fraktion));
@@ -1572,6 +1574,11 @@ const rules = (() => {
         return ort.hatHafen ? "kein Schiff: Handelsvertrag mit " + K.fraktionen[ort.fraktion].name + " nötig" : "kein Hafen";
       }
       if (state.silver < weg.kostenGold) return "zu wenig Silber";
+      // Henry, 18. 11. 2026 (Wegenetz der Menschen): Übersee-Routen zu fremden Völkern öffnen sich erst in Akt 5.
+      const ziel = N.get(zielId);
+      if (people(state.faction) === "menschen" && people(ziel.fraktion) !== "menschen" && (state.questStufe ?? 0) < uebersee) {
+        return "Übersee erst in Akt 5";
+      }
     }
     if (weg.pass === "Zollpass" && leiste(state, "erzfieber") >= 50) return "Zollpass gesperrt (Erzfieber ab 50)";
     return null;
@@ -1589,8 +1596,17 @@ const rules = (() => {
 
   // Reisebegegnungen auf Kanten des Knotennetzes. Werte gibt es bisher nur für die Tiere der Menschenlande.
   const jaegerNachFraktion = { kronreich: ["jagd-galgenkraehe", "jagd-grauwolf"], orden: ["jagd-grauwolf"], haefen: ["jagd-galgenkraehe"] };
-  function knotenBegegnung(state, weg, ziel) {
-    const table = world.encounterTables[weg.sicherheit === "kernland" ? "kernland" : "grenzland"];
+  // Wegenetz der Menschen (Henry, 18. 11. 2026): Jeder Weg hat seine eigene Gefahr (Anteil der Jäger-Begegnungen)
+  // und seine Gegner. Scheue Tiere bleiben bei 20 %, der Rest der Reise ist ruhig.
+  const wegDaten = (von, zu) => NQ?.daten.wegenetz?.wege[wegKennung(von, zu)] ?? null;
+  function begegnungsTabelle(weg, daten) {
+    if (!daten) return world.encounterTables[weg.sicherheit === "kernland" ? "kernland" : "grenzland"];
+    const jaeger = Math.round(daten.gefahr * 100);
+    return [[100 - jaeger - 20, "ruhig"], [20, "scheu"], [jaeger, "jaeger"]];
+  }
+  function knotenBegegnung(state, weg, ziel, von = null) {
+    const daten = von ? wegDaten(von, ziel.id) : null;
+    const table = begegnungsTabelle(weg, daten);
     const roll = Math.floor(travelDice() * 100);
     let summe = 0;
     let kind = table.find(([weight]) => roll < (summe += weight))?.[1] ?? "ruhig";
@@ -1614,7 +1630,7 @@ const rules = (() => {
       if (passed) receive(state, ["galgenwurz"]);
       return;
     }
-    const pool = weg.kantenTyp === "seeweg" ? null : jaegerNachFraktion[ziel.fraktion];
+    const pool = weg.kantenTyp === "seeweg" ? null : daten?.gegner.length ? daten.gegner : jaegerNachFraktion[ziel.fraktion];
     if (!pool) {
       note(state, weg.kantenTyp === "seeweg"
         ? "Unterwegs: Fremde Segel folgen euch bis zum Abend. Dann dreht das Schiff ab."
@@ -1623,7 +1639,8 @@ const rules = (() => {
     }
     const fight = travelDice() < 0.1 ? pick(world.encounterPools.alpha) : pick(pool);
     note(state, "Hinterhalt unterwegs: " + world.fights[fight].name + "!");
-    startFight(state, fight);
+    // Einzelgegner aus dem Wegenetz (Eishauer, Klippenwyrm) kämpfen auf Gebietsstufe wie im Auftrag.
+    startFight(state, fight, true, fight.startsWith("auftrag-") ? gebietsStufe(state, ziel.id) : null);
     if (state.combat) Object.assign(state.combat, { weiter: "weltknoten", hinterhalt: true });
     else if (!state.health) arrive(state, "defeat");
   }
@@ -1660,7 +1677,7 @@ const rules = (() => {
       auftragKampfStarten(state, auftrag.spiel.gegner, unterwegs, auftrag.ort, "Unterwegs auf " + auftrag.spiel.weg + " · " + auftrag.titel);
       return state;
     }
-    knotenBegegnung(state, weg, ziel);
+    knotenBegegnung(state, weg, ziel, von);
     return state;
   }
   const reise = (...args) => timedAction(args[0], reiseStep(...args));
