@@ -873,11 +873,17 @@ h1, h2 { font-family: var(--font-title); letter-spacing: .01em; }
 .rk-toggle:focus-visible, .rk-zoom button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .rk-zoom { display: flex; align-items: center; gap: .4rem; margin: 0; }
 .rk-zoom button { min-width: 2.25rem; min-height: 2.25rem; }
-#rk-zoom-label { min-width: 3.2rem; text-align: center; font-variant-numeric: tabular-nums; color: var(--muted); }
+#rk-zu-mir { min-height: 2.25rem; padding-inline: .7rem; white-space: nowrap; }
+#rk-region { min-height: 2.25rem; padding: .2rem .5rem; font: inherit; font-size: .9rem; color: var(--ivory); background: #1a1511; border: 1px solid var(--line); }
+#rk-region:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .rk-body { flex: 1 1 auto !important; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(15rem, 19rem); }
-.rk-scroll { overflow: auto; overscroll-behavior: contain; background: #16202a; }
+.rk-scroll { position: relative; overflow: hidden; overscroll-behavior: contain; background: #16202a; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+.rk-scroll:active { cursor: grabbing; }
 .rk-scroll:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-.rk-svg { display: block; min-width: 100%; height: auto; }
+.rk-svg { display: block; width: 100%; height: 100%; }
+/* Weit draußen nur das Kartenbild mit den Städten, nah dran Dörfer, Wege und Dorfnamen. */
+.rk-svg:not(.rk-nah) :is(.rk-wege, .rk-dorfnamen) { display: none; }
+.rk-svg:not(.rk-nah) .rk-typ-dorf:not(.rk-wichtig) { display: none; }
 .rk-info { overflow: auto; padding: .8rem 1rem; border-left: 1px solid var(--line); background: #1d1813; font-size: .92rem; }
 .rk-info h3 { margin: 0 0 .2rem; font-family: var(--font-title); color: #f3d9a4; }
 .rk-info h4 { margin: 1rem 0 .3rem; font-size: .8rem; letter-spacing: .09em; text-transform: uppercase; color: var(--accent); }
@@ -909,14 +915,14 @@ h1, h2 { font-family: var(--font-title); letter-spacing: .01em; }
 .rk-meer { fill: #1a2833; }
 .rk-meer, .rk-land, .rk-wege { pointer-events: none; }
 .rk-schleier { fill: #0d0a08; opacity: .28; }
-.rk-weg { fill: none; stroke-linecap: round; }
-.rk-strasse.rk-kernland { stroke: #c9b07a; stroke-width: 1.6; }
-.rk-strasse.rk-grenzland { stroke: #f0a443; stroke-width: 1.6; stroke-dasharray: 5 3; }
-.rk-pass { stroke: #cfe3f0; stroke-width: 2.2; stroke-dasharray: 1 3.5; }
-.rk-dorfweg { stroke: #8a7b62; stroke-width: .9; }
-.rk-seeweg { stroke: #5fa3c9; stroke-width: 1.1; stroke-dasharray: 4 4; opacity: .75; }
+.rk-weg { fill: none; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.rk-strasse.rk-kernland { stroke: #e3c98c; stroke-width: 2.2; }
+.rk-strasse.rk-grenzland { stroke: #f0a443; stroke-width: 2.2; stroke-dasharray: 7 4; }
+.rk-pass { stroke: #cfe3f0; stroke-width: 3; stroke-dasharray: 1 5; }
+.rk-dorfweg { stroke: #b3a383; stroke-width: 1.3; }
+.rk-seeweg { stroke: #6fb6dc; stroke-width: 1.6; stroke-dasharray: 6 5; opacity: .8; }
 .rk-seeweg.rk-kernland { opacity: .95; }
-.rk-weg.rk-aktiv { stroke: #9fe07a; stroke-width: 3; opacity: 1; }
+.rk-weg.rk-aktiv { stroke: #9fe07a; stroke-width: 4; opacity: 1; }
 .rk-ort { cursor: pointer; }
 .rk-ort:focus { outline: none; }
 .rk-ort:focus-visible .rk-treffer { stroke: #fff3dc; stroke-width: 1.5; }
@@ -932,19 +938,22 @@ h1, h2 { font-family: var(--font-title); letter-spacing: .01em; }
 .rk-typ-hauptstadt .rk-punkt { fill: #d4a857; }
 .rk-kern { fill: #1a130d; }
 .rk-typ-dorf .rk-punkt { fill: #b5aa99; stroke-width: .8; }
-.rk-name { font: 600 calc(10.5px / var(--rk-z, 1)) var(--font-ui); fill: #f1e3c8; paint-order: stroke; stroke: #120e0b; stroke-width: 3px; stroke-linejoin: round; }
 /* Gedruckte Ortsnamen der Weltkarte, deckungsgleich über Wegen und Marken */
-.rk-gedruckt { pointer-events: none; }
+.rk-gedruckt text { pointer-events: none; }
+.rk-gedruckt text.rk-klickbar { pointer-events: auto; cursor: pointer; }
+.rk-gedruckt text.rk-gewaehlt-name { fill: #9fe07a; }
+.rk-gedruckt-leer text:not(.rk-gewaehlt-name) { fill: transparent; stroke: none; }
+.rk-gedruckt text:focus-visible { outline: none; fill: #fff3dc; }
 .rk-gedruckt text { font-family: "DejaVu Serif", Georgia, "Times New Roman", serif; font-weight: 700; fill: #faf4e6;
   paint-order: stroke; stroke: #140c08; stroke-width: 1.15px; stroke-linejoin: round; }
 .rk-gedruckt text.rk-gedruckt-haupt { fill: #ffe296; }
-/* Feste Größe in Karteneinheiten: Die Lage der Dorfnamen ist für diese Größe berechnet. */
-.rk-name-dorf { font-weight: 400; font-size: 7.5px; fill: #c9bda6; stroke-width: 2.4px; }
+/* Dorfnamen wachsen mit der Karte (Größe als Attribut), ihre Lage ist für diese Größe berechnet. */
+.rk-name-dorf { font-family: var(--font-ui); font-weight: 500; fill: #f1e3c8; paint-order: stroke; stroke: #120e0b; stroke-width: 3.5px; stroke-linejoin: round; pointer-events: none; }
+.rk-name-dorf.rk-name-hier { fill: #ffcf8a; }
 .rk-zielring { fill: none; stroke: #9fe07a; stroke-width: 1.8; }
 .rk-gesperrt .rk-zielring { stroke: #ff8a7a; stroke-dasharray: 2 2; }
 .rk-ring { fill: none; stroke: #fff3dc; stroke-width: 1.5; }
 .rk-puls { fill: none; stroke: #ff9a3d; stroke-width: 2.5; animation: rk-puls 1.8s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
-.rk-hier .rk-name { fill: #ffcf8a; }
 @keyframes rk-puls { 50% { stroke-width: 4.5; opacity: .55; } }
 @media (prefers-reduced-motion: reduce) { .rk-puls { animation: none; } }
 @media (max-width: 52rem) {
@@ -954,8 +963,10 @@ h1, h2 { font-family: var(--font-title); letter-spacing: .01em; }
 @media (max-width: 42rem) {
   .reisekarte { width: 100vw; max-width: 100vw; height: 100svh; max-height: 100svh; margin: 0; border: none; }
   .reisekarte[open] { height: 100svh; }
-  .rk-tools { padding: .4rem 1rem; flex-wrap: nowrap; }
-  .rk-filter { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .rk-tools { padding: .4rem 1rem; gap: .4rem; }
+  .rk-filter { flex: 1 1 100%; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .rk-zoom { flex: 1 1 100%; }
+  #rk-region { flex: 1; }
   .rk-toggle { flex: none; }
   .rk-zoom #rk-zoom-label { display: none; }
   .rk-legend { display: none; }

@@ -11,7 +11,6 @@
   const origin = el("origin");
   const role = el("class");
   const volkWahl = el("volk-wahl");
-  const mapPlaces = el("map-places");
   const appearance = el("appearance");
   const variant = el("variant");
   let state = null;
@@ -277,50 +276,8 @@
     return figure;
   }
 
-  // Karte in drei Stufen (spiel/karte.js): Gebiet, Fraktion, Welt. Die Stufe ist eine Ansichtseinstellung dieses
-  // Browsers und gehört nicht zum Spielstand.
-  const mapLevelKey = "aschenkrone.kartenstufe";
-  let mapLevel = "gebiet";
-  let mapCentered = null;
-  try {
-    const savedLevel = localStorage.getItem(mapLevelKey);
-    if (karte.stufen.includes(savedLevel)) mapLevel = savedLevel;
-  } catch {
-    // Ohne Speicher beginnt die Karte beim Gebiet.
-  }
-  for (const control of document.querySelectorAll("[data-map-level]")) {
-    control.addEventListener("click", () => {
-      mapLevel = control.dataset.mapLevel;
-      mapCentered = null;
-      try {
-        localStorage.setItem(mapLevelKey, mapLevel);
-      } catch {
-        // Die Stufe gilt dann nur in diesem Fenster.
-      }
-      if (state) renderMap();
-    });
-  }
-
-  const svgNS = "http://www.w3.org/2000/svg";
-  const routeLines = world.routes.map(([from, to]) => {
-    const line = document.createElementNS(svgNS, "line");
-    const a = karte.daten.reise[from]?.p;
-    const b = karte.daten.reise[to]?.p;
-    if (a && b) for (const [key, value] of Object.entries({ x1: a[0], y1: a[1], x2: b[0], y2: b[1] })) line.setAttribute(key, value);
-    else line.setAttribute("visibility", "hidden");
-    el("map-routes").append(line);
-    return line;
-  });
-
-  function placeOnMap(node, view, point) {
-    const pos = karte.prozent(view.rect, point);
-    if (!pos) return false;
-    node.style.left = pos[0] + "%";
-    node.style.top = pos[1] + "%";
-    mapPlaces.append(node);
-    return true;
-  }
-
+  // Kartenreiter (Henry, 18. 11. 2026): Die Bildkarte in drei Stufen ist entfallen, die Welt zeigt die Reisekarte als
+  // Pop-up. Hier bleiben Standort, Reiseziele der Handlung und die nächste Etappe.
   function renderMap() {
     const scene = world.scenes[state.scene];
     const current = scene.map;
@@ -331,16 +288,9 @@
     }
     const plan = el("map-plan");
     const destinations = el("map-destinations");
-    for (const line of routeLines) line.classList.remove("route-active");
     plan.replaceChildren();
     const selected = travels.get(target);
     if (selected) {
-      const stops = selected.stops;
-      for (const [index, [from, to]] of world.routes.entries()) {
-        if (stops.some((stop, i) => (stop === from && stops[i + 1] === to) || (stop === to && stops[i + 1] === from))) {
-          routeLines[index].classList.add("route-active");
-        }
-      }
       plan.append(element("p", selected.stops.map(id => world.destinations[id].name).join(" → ")));
       button(plan, "Nächste Etappe: " + world.destinations[selected.stops[1] ?? target].name,
         () => update(rules.choose(state, selected.first)));
@@ -354,138 +304,33 @@
       target = null;
     }
 
-    // Ausschnitt und Kartenbild der gewählten Stufe. In der Weltreise steht der Held auf einem Knoten.
     const node = state.scene === "weltknoten" ? knoten.get(state.knoten) : null;
-    const here = node ? { punkt: node.punkt, name: node.name, fraktion: node.fraktion, reise: false } : karte.lage(scene, world.destinations);
-    el("map-routes").classList.toggle("map-routes-off", Boolean(node));
-    const view = karte.ansicht(mapLevel, here, state.faction);
-    const [vx, vy, vw, vh] = view.rect;
-    const picture = karte.bild(view.rect);
-    const image = el("map-image");
-    if (image.getAttribute("src") !== picture.src) image.src = picture.src;
-    image.style.left = (picture.rect[0] - vx) / vw * 100 + "%";
-    image.style.top = (picture.rect[1] - vy) / vh * 100 + "%";
-    image.style.width = picture.rect[2] / vw * 100 + "%";
-    image.style.height = picture.rect[3] / vh * 100 + "%";
-    const board = el("map-board");
-    board.style.aspectRatio = vw + " / " + vh;
-    board.dataset.level = mapLevel;
-    el("map-routes").setAttribute("viewBox", view.rect.join(" "));
-    for (const control of document.querySelectorAll("[data-map-level]")) {
-      control.setAttribute("aria-pressed", control.dataset.mapLevel === mapLevel);
-    }
-    const factionName = klassen.fraktionen[view.fraktion]?.name;
-    el("map-title").textContent = "Karte · " + (mapLevel === "welt" ? "Odris" : mapLevel === "fraktion" ? factionName ?? "Odris" :
-      here ? "Gebiet um " + here.name : factionName ?? "Odris");
-
-    mapPlaces.replaceChildren();
     destinations.replaceChildren();
-    const selectDestination = id => {
-      target = id;
-      renderMap();
-      plan.querySelector("button")?.focus();
-    };
-    if (mapLevel === "welt" && factionName) {
-      // Auf der Weltkarte zeigt ein Rahmen das Fraktionsgebiet der zweiten Stufe.
-      const area = element("span");
-      area.className = "map-area";
-      const [ax, ay, aw, ah] = karte.daten.fraktionen[view.fraktion].rect;
-      area.style.left = (ax - vx) / vw * 100 + "%";
-      area.style.top = (ay - vy) / vh * 100 + "%";
-      area.style.width = aw / vw * 100 + "%";
-      area.style.height = ah / vh * 100 + "%";
-      mapPlaces.append(area);
-    }
-    if (node && mapLevel !== "welt" && !state.combat) {
-      // Nachbarknoten als Reiseziele: ein Klick reist sofort (eine Runde).
-      for (const weg of rules.reiseZiele(state)) {
-        const marker = element("button", weg.ziel.name);
-        const x = karte.prozent(view.rect, weg.ziel.punkt)?.[0] ?? 50;
-        marker.type = "button";
-        marker.className = "map-marker map-node map-" + weg.sicherheit + " map-side-" + (x > 70 ? "l" : "r") + (weg.ziel.typ === "dorf" ? " map-village" : "");
-        marker.disabled = Boolean(weg.grund);
-        marker.title = knoten.kantenNamen[weg.kantenTyp] + " · " + knoten.sicherheitNamen[weg.sicherheit] + (weg.grund ? " · " + weg.grund : "");
-        marker.setAttribute("aria-label", "Reise nach " + weg.ziel.name + " · " + marker.title);
-        marker.addEventListener("click", () => update(rules.reise(state, weg.zielId)));
-        placeOnMap(marker, view, weg.ziel.punkt);
-      }
-    }
     for (const [id, location] of Object.entries(node ? {} : world.destinations)) {
-      const reachable = travels.has(id);
-      if (reachable) {
-        const choice = element("button", location.name);
-        choice.type = "button";
-        choice.className = "action";
-        choice.dataset.destination = id;
-        choice.setAttribute("aria-pressed", id === target);
-        choice.addEventListener("click", () => selectDestination(id));
-        destinations.append(choice);
-      }
-      const spot = karte.daten.reise[id];
-      if (!spot || mapLevel === "welt" || (!reachable && current !== id && mapLevel !== "gebiet")) continue;
-      const marker = element(reachable ? "button" : "span", location.name);
-      // Am Kartenrand steht das Namensschild zur Kartenmitte hin, damit es nicht abgeschnitten wird.
-      const x = karte.prozent(view.rect, spot.p)?.[0] ?? 50;
-      const side = x < 22 ? "r" : x > 78 ? "l" : spot.seite;
-      marker.className = "map-marker map-side-" + side + (current === id ? " map-current" : "");
-      marker.title = location.note;
-      if (current === id) marker.setAttribute("aria-current", "location");
-      if (reachable) {
-        marker.type = "button";
-        marker.dataset.destination = id;
-        marker.setAttribute("aria-label", location.name + " als Ziel wählen · " + location.note);
-        marker.setAttribute("aria-pressed", id === target);
-        marker.addEventListener("click", () => selectDestination(id));
-      }
-      placeOnMap(marker, view, spot.p);
-    }
-    if (here) {
-      const pin = element("span");
-      pin.className = "map-pin";
-      pin.setAttribute("aria-hidden", "true");
-      placeOnMap(pin, view, here.punkt);
-      // In der Weltreise stehen Nachbarorte dicht am Standort; dort genügt die Nadel, außer auf der Weltkarte.
-      if ((!here.reise && !node) || mapLevel === "welt") {
-        const label = element("span", "Du bist hier · " + here.name);
-        const right = (karte.prozent(view.rect, here.punkt)?.[0] ?? 0) > 62;
-        label.className = "map-marker map-current map-here" + (right ? " map-side-l" : " map-side-r");
-        label.setAttribute("aria-current", "location");
-        placeOnMap(label, view, here.punkt);
-      }
-    }
-    const homeName = startpunkte.fraktionen[state.faction]?.ort;
-    const home = homeName && karte.daten.orte[homeName];
-    if (home && mapLevel !== "gebiet" && (!here || home.p.join() !== here.punkt.join())) {
-      const label = element("span", "Heimat · " + homeName);
-      const right = (karte.prozent(view.rect, home.p)?.[0] ?? 0) > 62;
-      label.className = "map-marker map-home" + (right ? " map-side-l" : " map-side-r");
-      placeOnMap(label, view, home.p);
+      if (!travels.has(id)) continue;
+      const choice = element("button", location.name);
+      choice.type = "button";
+      choice.className = "action";
+      choice.dataset.destination = id;
+      choice.title = location.note;
+      choice.setAttribute("aria-pressed", id === target);
+      choice.addEventListener("click", () => {
+        target = id;
+        renderMap();
+        plan.querySelector("button")?.focus();
+      });
+      destinations.append(choice);
     }
 
     const location = world.destinations[current]?.name;
     const far = scene.fern;
-    const levelText = "Stufe " + (karte.stufen.indexOf(mapLevel) + 1) + " · " + karte.stufenNamen[mapLevel];
-    el("map-caption").textContent = here ? levelText + " · Du bist in " + here.name +
-      (klassen.fraktionen[here.fraktion] ? ", Land der Fraktion " + klassen.fraktionen[here.fraktion].name : "") + "." : levelText + ".";
     el("map-status").textContent = state.combat ? "Im Kampf kannst du die Karte ansehen. Reiseoptionen öffnen sich nach der Begegnung." :
-      node ? "Standort: " + node.name + " · Wähle einen Nachbarort auf der Karte oder unter „D · Aufbruch“." :
+      node ? "Standort: " + node.name + " · Wähle einen Nachbarort auf der Reisekarte oder unter „D · Aufbruch“." :
       location ? "Standort: " + location + (travels.size ? " · Wähle ein Reiseziel, um die Route zu sehen." : " · Folge den Optionen in der Szene.") :
       far ? "Standort: " + far + " · Folge den Optionen in der Szene." :
       "Deine Reise ist beendet.";
-
-    // Auf schmalen Bildschirmen ist die Karte breiter als der Rahmen: den eigenen Standort in die Mitte rücken.
-    const centerKey = state.scene + "|" + (state.knoten ?? "") + "|" + mapLevel;
-    if (here && mapCentered !== centerKey) {
-      mapCentered = centerKey;
-      const scroller = board.parentElement;
-      requestAnimationFrame(() => {
-        const pos = karte.prozent(view.rect, here.punkt);
-        if (pos && scroller.scrollWidth > scroller.clientWidth) {
-          scroller.scrollLeft = pos[0] / 100 * board.clientWidth - scroller.clientWidth / 2;
-        }
-      });
-    }
   }
+
 
   const slotLabels = { weapon: "Rechte Hand", offhand: "Linke Hand", head: "Kopf", neck: "Hals", armor: "Körper",
     legs: "Beine", ring1: "Ring", ring2: "Ring" };
@@ -1011,15 +856,21 @@
       hub.tab === "bag" ? "Dein Rucksack ist leer." : "Im Zentrallager liegt nichts."));
   }
 
-  // ---- Reisekarte als Pop-up (Gemini, 18. 11. 2026): Menschenlande und Seewege auf einer Seite. ----
-  // Ein Klick auf einen Ort zeigt Weg, Kosten, Gefahr und Gegner. Nachbarorte lassen sich direkt bereisen,
-  // eine Etappe nach der anderen, wie unter „Aufbruch“.
-  const rkZoomStufen = [1, 1.5, 2, 3];
-  // Henry (18. 11. 2026): Alle Ortsnamen sind zu sehen. Die Namen der Städte liegen deckungsgleich mit dem Kartenbild
-  // über den Wegen, Dörfer beschriftet die Reisekarte selbst. Auf dem Handy startet die Karte vergrößert.
-  const rk = { zoom: null, auswahl: null, zeigen: { strasse: true, pass: true, dorfweg: true, seeweg: true, doerfer: true, namen: true } };
+  // ---- Reisekarte als Pop-up: die ganze Weltkarte mit stufenlosem Zoom (Henry, 18. 11. 2026). ----
+  // Mausrad, Ziehen, zwei Finger, Doppelklick und Tasten zoomen und verschieben die Karte. Weit draußen zeigt sie nur
+  // das Kartenbild mit den Städten der Menschen, nah dran Dörfer, Wege und Dorfnamen. Ein Klick auf einen Ort der
+  // Menschen zeigt Weg, Kosten, Gefahr und Gegner, Nachbarorte lassen sich direkt bereisen. Fremde Orte zeigen nur
+  // Typ, Volk und Fraktion.
+  const rk = { ansicht: null, auswahl: null, gezogen: false,
+    zeigen: { strasse: true, pass: true, dorfweg: true, seeweg: true, doerfer: true, namen: true } };
   const rkFilterNamen = { ...reisekarte.wegArtNamen, doerfer: "Dorfnamen", namen: "Stadtnamen" };
   const rkVolkNamen = { orks: "Orks", untote: "Untote", elfen: "Elfen", zwerge: "Zwerge", menschen: "Menschen" };
+  // Kartenpixel je Bildschirmpixel: unter dieser Grenze erscheinen Dörfer und Wege, darunter wird nicht weiter gezoomt.
+  const rkNah = 1.8;
+  const rkNaechster = 0.35;
+  // Ortsmarken: Bildschirmpixel je Markeneinheit (nah dran; in der Weltansicht kleiner).
+  const rkMarkenGroesse = 1.8;
+  let rkMarken = [];
 
   function svgElement(tag, attributes, parent) {
     const node = document.createElementNS(svgNs, tag);
@@ -1032,13 +883,18 @@
     return Math.round(value * 100) + " %";
   }
 
+  function rkWaehlen(id) {
+    rk.auswahl = id;
+    renderReisekarte();
+    el("rk-svg").querySelector('[data-ort="' + id + '"]')?.focus();
+  }
+
   function renderReisekarte() {
     if (!state) return;
     const hier = rules.aktuellerKnoten(state);
     const ziele = new Map(rules.reiseZiele(state).map(weg => [weg.zielId, weg]));
     const hierKnoten = hier ? knoten.get(hier) : null;
-    el("rk-place").textContent = reisekarte.titel + " · " + (!hierKnoten ? "Du bist unterwegs in der Handlung" :
-      reisekarte.hat(hier) ? "Du bist in " + hierKnoten.name : hierKnoten.name + " liegt außerhalb dieser Karte");
+    el("rk-place").textContent = "Odris · " + (hierKnoten ? "Du bist in " + hierKnoten.name : "Du bist unterwegs in der Handlung");
 
     const filter = el("rk-filter");
     filter.replaceChildren();
@@ -1054,111 +910,201 @@
       });
       filter.append(control);
     }
-    el("rk-zoom-label").textContent = Math.round(rkZoomStufen[rk.zoom] * 100) + " %";
-    for (const control of document.querySelectorAll("[data-rk-zoom]")) {
-      const next = rk.zoom + Number(control.dataset.rkZoom);
-      control.disabled = next < 0 || next >= rkZoomStufen.length;
-    }
 
-    const W = reisekarte.breite;
-    const H = reisekarte.hoehe;
+    const [wx, wy, ww, wh] = reisekarte.welt;
     const board = el("rk-svg");
-    board.setAttribute("viewBox", "0 0 " + W + " " + H);
-    board.style.width = rkZoomStufen[rk.zoom] * 100 + "%";
-    // Schrift und Punkte wachsen beim Vergrößern nur halb so stark mit, so rücken die Namen auseinander.
-    board.style.setProperty("--rk-z", Math.sqrt(rkZoomStufen[rk.zoom]));
     board.replaceChildren();
-    board.style.aspectRatio = W + " / " + H;
-    svgElement("rect", { class: "rk-meer", x: 0, y: 0, width: W, height: H }, board);
+    svgElement("rect", { class: "rk-meer", x: wx, y: wy, width: ww, height: wh }, board);
     // Hintergrund ist die verbindliche Weltkarte. Städte und ihre Namen sind dort schon eingezeichnet.
     const land = svgElement("g", { class: "rk-land", "aria-hidden": "true" }, board);
     for (const bild of reisekarte.bilder) {
       svgElement("image", { href: bild.src, x: bild.x, y: bild.y, width: bild.breite, height: bild.hoehe, preserveAspectRatio: "none" }, land);
     }
-    svgElement("rect", { class: "rk-schleier", x: 0, y: 0, width: W, height: H }, land);
 
     const aktivNach = (weg) => hier && (weg.a === hier || weg.b === hier) && ziele.has(weg.a === hier ? weg.b : weg.a);
     const wegGruppe = svgElement("g", { class: "rk-wege", "aria-hidden": "true" }, board);
     for (const weg of reisekarte.wege) {
-      if (!rk.zeigen[weg.art] && !aktivNach(weg)) continue;
+      const aktiv = aktivNach(weg);
+      if (!rk.zeigen[weg.art] && !aktiv) continue;
       const [x1, y1] = reisekarte.lage(weg.a);
       const [x2, y2] = reisekarte.lage(weg.b);
       const linie = svgElement("line", { x1, y1, x2, y2,
-        class: "rk-weg rk-" + weg.art + " rk-" + weg.sicherheit + (aktivNach(weg) ? " rk-aktiv" : "") }, wegGruppe);
+        class: "rk-weg rk-" + weg.art + " rk-" + weg.sicherheit + (aktiv ? " rk-aktiv" : "") }, wegGruppe);
       svgElement("title", {}, linie).textContent = weg.kennung;
     }
 
+    // Dorfnamen wachsen mit der Karte, ihre Lage weicht den gedruckten Namen aus.
+    if (rk.zeigen.doerfer) {
+      const dorfNamen = svgElement("g", { class: "rk-dorfnamen", "aria-hidden": "true" }, board);
+      for (const ort of reisekarte.orte.filter(entry => entry.typ === "dorf")) {
+        const [dx, dy, anker] = reisekarte.beschriftung[ort.id];
+        const name = svgElement("text", { x: ort.x + dx, y: ort.y + dy, "text-anchor": anker, "font-size": reisekarte.dorfSchrift,
+          class: "rk-name-dorf" + (ort.id === hier ? " rk-name-hier" : "") }, dorfNamen);
+        name.textContent = ort.name;
+      }
+    }
+    // Ortsmarken der Menschen und Überseehäfen: feste Größe auf dem Bildschirm, wie Stecknadeln.
     const orteGruppe = svgElement("g", { class: "rk-orte" }, board);
+    rkMarken = [];
     for (const ort of [...reisekarte.orte].reverse()) {
       const weg = ziele.get(ort.id);
       const wichtig = ort.id === hier || weg || ort.id === rk.auswahl;
-      if (ort.typ === "dorf" && !rk.zeigen.dorfweg && !wichtig) continue;
       const klassenListe = ["rk-ort", "rk-typ-" + ort.typ, "rk-volk-" + ort.volk];
       if (ort.hafen) klassenListe.push("rk-hafen");
       if (ort.uebersee) klassenListe.push("rk-uebersee");
+      if (wichtig) klassenListe.push("rk-wichtig");
       if (ort.id === hier) klassenListe.push("rk-hier");
       if (weg) klassenListe.push(weg.grund ? "rk-gesperrt" : "rk-ziel");
       if (ort.id === rk.auswahl) klassenListe.push("rk-gewaehlt");
-      const gruppe = svgElement("g", { class: klassenListe.join(" "), transform: "translate(" + ort.x + " " + ort.y + ")",
-        role: "button", tabindex: ort.typ === "dorf" && !wichtig ? -1 : 0, "data-ort": ort.id,
+      const gruppe = svgElement("g", { class: klassenListe.join(" "), role: "button", tabindex: 0, "data-ort": ort.id,
         "aria-label": ort.name + " · " + knoten.typNamen[ort.typ] + (ort.id === hier ? " · Du bist hier" : weg ? " · erreichbar" : "") }, orteGruppe);
+      gruppe.dataset.x = ort.x;
+      gruppe.dataset.y = ort.y;
       if (ort.id === hier) svgElement("circle", { r: 11, class: "rk-puls" }, gruppe);
       if (ort.id === rk.auswahl) svgElement("circle", { r: 9, class: "rk-ring" }, gruppe);
       if (weg) svgElement("circle", { r: 7.5, class: "rk-zielring" }, gruppe);
       if (ort.uebersee) svgElement("rect", { x: -4, y: -4, width: 8, height: 8, transform: "rotate(45)", class: "rk-punkt" }, gruppe);
-      else svgElement("circle", { r: ort.typ === "dorf" ? 2.2 : ort.typ === "hauptstadt" ? 5 : 3.6, class: "rk-punkt" }, gruppe);
-      if (ort.typ === "hauptstadt") svgElement("circle", { r: 2.2, class: "rk-kern" }, gruppe);
+      else svgElement("circle", { r: ort.typ === "dorf" ? 2.6 : ort.typ === "hauptstadt" ? 5 : 3.8, class: "rk-punkt" }, gruppe);
+      if (ort.typ === "hauptstadt") svgElement("circle", { r: 2, class: "rk-kern" }, gruppe);
       // Größere Trefferfläche für Finger und Maus.
-      svgElement("circle", { r: ort.typ === "dorf" ? 5 : 8, class: "rk-treffer" }, gruppe);
-      // Städte tragen ihren Namen auf der Weltkarte (Ebene unten), Dörfer beschriftet die Reisekarte.
-      if (ort.typ === "dorf" && (rk.zeigen.doerfer || wichtig)) {
-        // Dorfnamen stehen an ihrer freien Lage, die den gedruckten Namen der Weltkarte ausweicht.
-        const [dx, dy, anker] = reisekarte.beschriftung[ort.id];
-        const name = svgElement("text", { x: dx, y: dy, "text-anchor": anker,
-          class: "rk-name rk-name-dorf" }, gruppe);
-        name.textContent = ort.name;
-      }
-      const waehlen = () => {
-        rk.auswahl = ort.id;
-        renderReisekarte();
-        board.querySelector('[data-ort="' + ort.id + '"]')?.focus();
-      };
-      gruppe.addEventListener("click", waehlen);
+      svgElement("circle", { r: ort.typ === "dorf" ? 6 : 9, class: "rk-treffer" }, gruppe);
+      gruppe.addEventListener("click", () => rkWaehlen(ort.id));
       gruppe.addEventListener("keydown", event => {
         if (event.key !== "Enter" && event.key !== " ") return;
         event.preventDefault();
-        waehlen();
+        rkWaehlen(ort.id);
       });
+      rkMarken.push(gruppe);
     }
-    if (rk.zeigen.namen) {
-      const namen = svgElement("g", { class: "rk-gedruckt", "aria-hidden": "true" }, board);
-      for (const [text, x, y, breite, groesse, haupt] of reisekarte.gedruckteNamen) {
-        const name = svgElement("text", { x, y, textLength: breite, lengthAdjust: "spacingAndGlyphs", "font-size": groesse,
-          class: haupt ? "rk-gedruckt-haupt" : "" }, namen);
-        name.textContent = text;
+    // Gedruckte Namen der ganzen Welt deckungsgleich über Wegen und Marken. Orte im Knotennetz sind anklickbar.
+    const namen = svgElement("g", { class: "rk-gedruckt" + (rk.zeigen.namen ? "" : " rk-gedruckt-leer") }, board);
+    for (const [text, x, y, breite, groesse, haupt, id] of reisekarte.gedruckteNamen) {
+      const name = svgElement("text", { x, y, textLength: breite, lengthAdjust: "spacingAndGlyphs", "font-size": groesse,
+        class: (haupt ? "rk-gedruckt-haupt" : "") + (id ? " rk-klickbar" : "") + (id && id === rk.auswahl ? " rk-gewaehlt-name" : "") }, namen);
+      name.textContent = text;
+      if (id && !reisekarte.hat(id)) {
+        name.setAttribute("role", "button");
+        name.setAttribute("tabindex", "0");
+        name.dataset.ort = id;
+        name.addEventListener("click", () => rkWaehlen(id));
+        name.addEventListener("keydown", event => {
+          if (event.key !== "Enter" && event.key !== " ") return;
+          event.preventDefault();
+          rkWaehlen(id);
+        });
       }
     }
+
+    rkAnwenden();
     renderReisekarteInfo(hier, ziele);
+  }
+
+  // ---- Ansicht: Ausschnitt der Welt in Kartenpixeln. Die Höhe folgt dem Seitenverhältnis des Fensters. ----
+  function rkRahmen() {
+    const box = el("rk-scroll");
+    return [Math.max(1, box.clientWidth), Math.max(1, box.clientHeight)];
+  }
+
+  function rkGanzeWelt() {
+    const [cw, ch] = rkRahmen();
+    const [wx, wy, ww, wh] = reisekarte.welt;
+    return Math.max(ww, wh * cw / ch);
+  }
+
+  function rkAnwenden() {
+    if (!rk.ansicht) return;
+    const [cw, ch] = rkRahmen();
+    const [wx, wy, ww, wh] = reisekarte.welt;
+    const ansicht = rk.ansicht;
+    ansicht.w = Math.min(rkGanzeWelt(), Math.max(cw * rkNaechster, ansicht.w));
+    const h = ansicht.w * ch / cw;
+    // Die Welt bleibt im Bild: kleiner als das Fenster wird sie mittig gehalten.
+    ansicht.x = ansicht.w >= ww ? wx + (ww - ansicht.w) / 2 : Math.min(wx + ww - ansicht.w, Math.max(wx, ansicht.x));
+    ansicht.y = h >= wh ? wy + (wh - h) / 2 : Math.min(wy + wh - h, Math.max(wy, ansicht.y));
+    const board = el("rk-svg");
+    board.setAttribute("viewBox", [ansicht.x, ansicht.y, ansicht.w, h].map(v => Math.round(v * 10) / 10).join(" "));
+    const k = ansicht.w / cw;
+    board.classList.toggle("rk-nah", k <= rkNah);
+    for (const marke of rkMarken) {
+      marke.setAttribute("transform", "translate(" + marke.dataset.x + " " + marke.dataset.y + ") scale(" + (k * (k <= rkNah ? rkMarkenGroesse : 1)).toFixed(4) + ")");
+    }
+    for (const control of document.querySelectorAll("[data-rk-zoom]")) {
+      const rein = control.dataset.rkZoom === "1";
+      control.disabled = rein ? ansicht.w <= cw * rkNaechster + 0.5 : ansicht.w >= rkGanzeWelt() - 0.5;
+    }
+  }
+
+  // Um einen Bildschirmpunkt (Pixel im Fenster) zoomen: Der Kartenpunkt darunter bleibt stehen.
+  function rkZoom(faktor, sx, sy) {
+    const [cw, ch] = rkRahmen();
+    const ansicht = rk.ansicht;
+    sx ??= cw / 2;
+    sy ??= ch / 2;
+    const k = ansicht.w / cw;
+    const px = ansicht.x + sx * k;
+    const py = ansicht.y + sy * k;
+    ansicht.w = Math.min(rkGanzeWelt(), Math.max(cw * rkNaechster, ansicht.w / faktor));
+    const k2 = ansicht.w / cw;
+    ansicht.x = px - sx * k2;
+    ansicht.y = py - sy * k2;
+    rkAnwenden();
+  }
+
+  function rkVerschieben(dx, dy) {
+    const [cw] = rkRahmen();
+    const k = rk.ansicht.w / cw;
+    rk.ansicht.x -= dx * k;
+    rk.ansicht.y -= dy * k;
+    rkAnwenden();
+  }
+
+  // Einen Kartenpunkt mit gegebener Breite des Ausschnitts in die Mitte rücken.
+  function rkZeigen([px, py], breite) {
+    const [cw, ch] = rkRahmen();
+    const h = breite * ch / cw;
+    rk.ansicht = { x: px - breite / 2, y: py - h / 2, w: breite };
+    rkAnwenden();
+  }
+
+  function rkZuMir() {
+    const hier = rules.aktuellerKnoten(state);
+    const punkt = hier && reisekarte.lage(hier);
+    const [cw] = rkRahmen();
+    if (punkt) rkZeigen(punkt, cw * 1.1);
+    else rkZeigenGebiet(reisekarte.welt);
+  }
+
+  function rkZeigenGebiet([x, y, w, h]) {
+    const [cw, ch] = rkRahmen();
+    rkZeigen([x + w / 2, y + h / 2], Math.max(w, h * cw / ch) * 1.04);
   }
 
   function renderReisekarteInfo(hier, ziele) {
     const info = el("rk-info");
     info.replaceChildren();
     const reisen = state.scene === "weltknoten" && !state.combat && state.health > 0;
-    const id = rk.auswahl && reisekarte.hat(rk.auswahl) ? rk.auswahl : hier && reisekarte.hat(hier) ? hier : null;
+    const id = rk.auswahl ?? (hier && knoten.alle[hier] ? hier : null);
     if (!id) {
-      info.append(element("p", hier ? "Dein Standort liegt außerhalb dieser Karte. Wähle einen Ort, um seine Wege zu sehen." :
-        "Wähle einen Ort, um seine Wege zu sehen. Reisen kannst du von der Weltreise aus."));
+      info.append(element("p", "Wähle einen Ort auf der Karte. Mit Mausrad oder zwei Fingern zoomst du, durch Ziehen verschiebst du die Karte."));
       return;
     }
     const ort = knoten.get(id);
-    const kartenOrt = reisekarte.orte.find(entry => entry.id === id);
+    const volk = klassen.fraktionen[ort.fraktion]?.volk;
     info.append(element("h3", ort.name));
-    const herkunft = element("p", knoten.typNamen[ort.typ] + (ort.hatHafen && ort.typ !== "hafenstadt" ? " mit Hafen" : "") + " · " +
-      (klassen.fraktionen[ort.fraktion]?.name ?? ort.fraktion) + (kartenOrt.uebersee ? " · " + rkVolkNamen[kartenOrt.volk] + ", Übersee" : ""));
-    herkunft.className = "rk-herkunft";
+    const herkunft = element("dl");
+    herkunft.className = "rk-daten";
+    herkunft.append(element("dt", "Ort"), element("dd", knoten.typNamen[ort.typ] + (ort.hatHafen && ort.typ !== "hafenstadt" ? " mit Hafen" : "")),
+      element("dt", "Volk"), element("dd", klassen.voelker[volk]?.name ?? rkVolkNamen[reisekarte.volkVon[ort.fraktion]] ?? "unbekannt"),
+      element("dt", "Fraktion"), element("dd", klassen.fraktionen[ort.fraktion]?.name ?? ort.fraktion));
     info.append(herkunft);
     if (id === hier) info.append(element("p", "Du bist hier."));
+    // Fremde Völker: nur das Grundlegende, ihr Wegenetz entsteht noch.
+    if (!reisekarte.hat(id)) {
+      const hinweis = element("p", "Die Wege dieses Volkes werden noch ausgearbeitet.");
+      hinweis.className = "rk-herkunft";
+      info.append(hinweis);
+      return;
+    }
 
     const weg = ziele.get(id);
     if (weg) {
@@ -1218,6 +1164,7 @@
         wahl.addEventListener("click", () => {
           rk.auswahl = anderer;
           renderReisekarte();
+          rkZeigen(reisekarte.lage(anderer), rk.ansicht.w);
           el("rk-info").querySelector("h3")?.setAttribute("tabindex", "-1");
           el("rk-info").querySelector("h3")?.focus();
         });
@@ -1233,22 +1180,10 @@
     if (el("inventory-hub").open) el("inventory-hub").close();
     if (el("character-sheet").open) el("character-sheet").close();
     rk.auswahl = null;
-    rk.zoom ??= window.matchMedia("(max-width: 42rem)").matches ? 3 : 1;
-    renderReisekarte();
     el("reisekarte").showModal();
-    rkZentrieren();
+    renderReisekarte();
+    if (!rk.ansicht) rkZuMir();
     el("rk-close").focus();
-  }
-
-  // Den Standort in die Mitte des sichtbaren Ausschnitts rücken.
-  function rkZentrieren() {
-    const hier = rules.aktuellerKnoten(state);
-    const punkt = hier && reisekarte.lage(hier);
-    const scroll = el("rk-scroll");
-    if (!punkt) return;
-    const board = el("rk-svg");
-    scroll.scrollLeft = punkt[0] / reisekarte.breite * board.clientWidth - scroll.clientWidth / 2;
-    scroll.scrollTop = punkt[1] / reisekarte.hoehe * board.clientHeight - scroll.clientHeight / 2;
   }
 
   for (const opener of document.querySelectorAll("[data-reisekarte-open]")) opener.addEventListener("click", openReisekarte);
@@ -1257,10 +1192,84 @@
     if (event.target === event.currentTarget) event.currentTarget.close();
   });
   for (const control of document.querySelectorAll("[data-rk-zoom]")) {
-    control.addEventListener("click", () => {
-      rk.zoom = Math.max(0, Math.min(rkZoomStufen.length - 1, rk.zoom + Number(control.dataset.rkZoom)));
-      renderReisekarte();
-      rkZentrieren();
+    control.addEventListener("click", () => rkZoom(control.dataset.rkZoom === "1" ? 1.6 : 1 / 1.6));
+  }
+  el("rk-zu-mir").addEventListener("click", rkZuMir);
+  el("rk-region").addEventListener("change", event => {
+    const wahl = event.target.value;
+    if (wahl === "welt") rkZeigenGebiet(reisekarte.welt);
+    else if (reisekarte.regionen[wahl]) rkZeigenGebiet(reisekarte.regionen[wahl]);
+    event.target.value = "";
+  });
+
+  // Zoomen und Verschieben mit Maus, Fingern und Tasten.
+  {
+    const box = el("rk-scroll");
+    const zeiger = new Map();
+    let start = null;
+    const punktIm = (event) => {
+      const rect = box.getBoundingClientRect();
+      return [event.clientX - rect.left, event.clientY - rect.top];
+    };
+    box.addEventListener("wheel", event => {
+      if (!rk.ansicht) return;
+      event.preventDefault();
+      const schritt = event.deltaMode === 1 ? 0.05 : event.deltaMode === 2 ? 0.5 : 0.0015;
+      rkZoom(Math.exp(-event.deltaY * schritt), ...punktIm(event));
+    }, { passive: false });
+    box.addEventListener("pointerdown", event => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      zeiger.set(event.pointerId, punktIm(event));
+      start = { weg: 0 };
+      rk.gezogen = false;
+    });
+    window.addEventListener("pointermove", event => {
+      if (!zeiger.has(event.pointerId) || !rk.ansicht) return;
+      const vorher = zeiger.get(event.pointerId);
+      const jetzt = punktIm(event);
+      if (zeiger.size === 1) {
+        start.weg += Math.hypot(jetzt[0] - vorher[0], jetzt[1] - vorher[1]);
+        if (start.weg > 5) rk.gezogen = true;
+        if (rk.gezogen) rkVerschieben(jetzt[0] - vorher[0], jetzt[1] - vorher[1]);
+      } else if (zeiger.size === 2) {
+        // Zwei Finger: Abstand zoomt, die Mitte verschiebt.
+        const [anderer] = [...zeiger.entries()].filter(([id]) => id !== event.pointerId).map(([, p]) => p);
+        const mitteVorher = [(vorher[0] + anderer[0]) / 2, (vorher[1] + anderer[1]) / 2];
+        const mitteJetzt = [(jetzt[0] + anderer[0]) / 2, (jetzt[1] + anderer[1]) / 2];
+        const abstandVorher = Math.hypot(vorher[0] - anderer[0], vorher[1] - anderer[1]);
+        const abstandJetzt = Math.hypot(jetzt[0] - anderer[0], jetzt[1] - anderer[1]);
+        rk.gezogen = true;
+        if (abstandVorher > 0) rkZoom(abstandJetzt / abstandVorher, ...mitteJetzt);
+        rkVerschieben(mitteJetzt[0] - mitteVorher[0], mitteJetzt[1] - mitteVorher[1]);
+      }
+      zeiger.set(event.pointerId, jetzt);
+    });
+    const loslassen = event => zeiger.delete(event.pointerId);
+    window.addEventListener("pointerup", loslassen);
+    window.addEventListener("pointercancel", loslassen);
+    // Nach dem Ziehen löst das Loslassen keinen Klick auf einen Ort aus.
+    box.addEventListener("click", event => {
+      if (!rk.gezogen) return;
+      event.stopPropagation();
+      event.preventDefault();
+      rk.gezogen = false;
+    }, true);
+    box.addEventListener("dblclick", event => {
+      event.preventDefault();
+      rkZoom(2, ...punktIm(event));
+    });
+    box.addEventListener("keydown", event => {
+      if (event.target !== box) return;
+      const [cw, ch] = rkRahmen();
+      const schritte = { ArrowLeft: [cw * 0.15, 0], ArrowRight: [-cw * 0.15, 0], ArrowUp: [0, ch * 0.15], ArrowDown: [0, -ch * 0.15] };
+      if (schritte[event.key]) rkVerschieben(...schritte[event.key]);
+      else if (event.key === "+" || event.key === "=") rkZoom(1.6);
+      else if (event.key === "-") rkZoom(1 / 1.6);
+      else return;
+      event.preventDefault();
+    });
+    window.addEventListener("resize", () => {
+      if (el("reisekarte").open) rkAnwenden();
     });
   }
 

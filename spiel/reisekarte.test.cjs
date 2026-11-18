@@ -20,8 +20,10 @@ test("alle 102 Orte der Menschen und 12 Überseehäfen liegen auf der Karte", ()
   const fremde = reisekarte.orte.filter((ort) => ort.uebersee);
   assert.equal(fremde.length, 12);
   for (const ort of fremde) assert.ok(ort.hafen, ort.name + " hat keinen Hafen");
+  const [wx, wy, ww, wh] = reisekarte.welt;
   for (const ort of reisekarte.orte) {
-    assert.ok(ort.x >= 0 && ort.x <= reisekarte.breite && ort.y >= 0 && ort.y <= reisekarte.hoehe, ort.name);
+    assert.ok(ort.x >= wx && ort.x <= wx + ww && ort.y >= wy && ort.y <= wy + wh, ort.name);
+    assert.deepEqual([ort.x, ort.y], knoten.get(ort.id).punkt, ort.name + " sitzt nicht an seinem Knotenpunkt");
   }
 });
 
@@ -60,4 +62,11 @@ test("alle Ortsnamen sind zu sehen: Städte gedruckt, Dörfer ohne Überdeckung 
     const [, , anker] = reisekarte.beschriftung[ort.id];
     assert.ok(["start", "end", "middle"].includes(anker), ort.name);
   }
+});
+
+test("Weltansicht: alle fünf Völker als Sprungziel, fremde Orte nur über ihre gedruckten Namen", () => {
+  assert.deepEqual(Object.keys(reisekarte.regionen).sort(), ["elfen", "menschen", "orks", "untote", "zwerge"]);
+  const fremde = reisekarte.gedruckteNamen.filter(([, , , , , , id]) => id && !reisekarte.hat(id));
+  assert.ok(fremde.length >= 40, "fremde Orte anklickbar: " + fremde.length);
+  for (const [name, , , , , , id] of fremde) assert.equal(knoten.get(id).name, name);
 });
