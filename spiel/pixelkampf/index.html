@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Aschenkrone · Pixelkampf V3 · Zeitlupe</title>
+    <title>Aschenkrone · Pixelkampf V4 · Geschwindigkeitsregler</title>
     <style>
       :root {
         color-scheme: dark;
@@ -478,13 +478,22 @@
       .enemy[data-defeated="true"] {
         opacity: 0.45;
       }
+      #speed {
+        width: 130px;
+        accent-color: var(--gold);
+      }
+      #speed-value {
+        min-width: 115px;
+        color: var(--gold);
+        font-weight: bold;
+      }
     </style>
   </head>
   <body>
     <main>
       <header>
         <div>
-          <p class="eyebrow">Aschenkrone · Testversion 3 · Zeitlupe</p>
+          <p class="eyebrow">Aschenkrone · Testversion 4 · Pixelkampf</p>
           <h1>Wölfe am Aschenpass</h1>
         </div>
         <a href="../../index.html">Zum Hauptspiel ↗</a>
@@ -501,12 +510,27 @@
           <div class="arena">
             <div class="playback">
               <label
-                >Tempo
-                <select id="speed">
-                  <option value="4">Langsam</option>
-                  <option value="8" selected>Zeitlupe</option>
-                  <option value="12">Extra langsam</option>
-                </select></label
+                >Geschwindigkeit
+                <input
+                  id="speed"
+                  type="range"
+                  min="1"
+                  max="5"
+                  step="1"
+                  value="1"
+                  list="speed-steps"
+                  aria-label="Kampfgeschwindigkeit"
+                />
+                <output id="speed-value" for="speed" aria-live="polite"
+                  >×1 · Standard</output
+                >
+                <datalist id="speed-steps">
+                  <option value="1" label="×1"></option>
+                  <option value="2" label="×2"></option>
+                  <option value="3" label="×3"></option>
+                  <option value="4" label="×4"></option>
+                  <option value="5" label="×5"></option>
+                </datalist> </label
               ><label
                 ><input id="motion" type="checkbox" checked /> Animationen
                 anzeigen</label
@@ -598,6 +622,7 @@
         const $ = (id) => document.getElementById(id),
           canvas = $("stage"),
           ctx = canvas.getContext("2d");
+        const timingScale = () => 8 / Number($("speed").value);
         let party,
           enemies,
           round,
@@ -969,7 +994,7 @@
           r(12, 11, 2, 7, h.color);
           const stride =
             pose && $("motion").checked
-              ? Math.floor(drawingTime / (130 * Number($("speed").value))) % 2
+              ? Math.floor(drawingTime / (130 * timingScale())) % 2
               : 0;
           r(5, 18, 3, 5 + stride, "#394541");
           r(9, 18, 3, 6 - stride, "#394541");
@@ -1046,10 +1071,7 @@
             }
             if (effect?.side === "ally" && effect.index === i) {
               x += effect.move || 0;
-              if (
-                effect.flash &&
-                Math.floor(t / (110 * Number($("speed").value))) % 2
-              )
+              if (effect.flash && Math.floor(t / (110 * timingScale())) % 2)
                 ctx.globalAlpha = 0.3;
             }
             if (i === actor && !busy && !over && h.hp) {
@@ -1069,10 +1091,7 @@
             let { x, y } = foePlaces[i];
             if (effect?.side === "enemy" && effect.index === i) {
               x += effect.move || 0;
-              if (
-                effect.flash &&
-                Math.floor(t / (110 * Number($("speed").value))) % 2
-              )
+              if (effect.flash && Math.floor(t / (110 * timingScale())) % 2)
                 ctx.globalAlpha = 0.25;
             }
             wolf(e, x, y, i);
@@ -1118,10 +1137,7 @@
         }
         const pause = (ms) =>
           new Promise((resolve) =>
-            setTimeout(
-              resolve,
-              $("motion").checked ? ms * Number($("speed").value) : 0,
-            ),
+            setTimeout(resolve, $("motion").checked ? ms * timingScale() : 0),
           );
         function animate(ms, frame) {
           return new Promise((resolve) => {
@@ -1129,7 +1145,7 @@
             function step(t) {
               const n = !$("motion").checked
                 ? 1
-                : Math.min(1, (t - start) / (ms * Number($("speed").value)));
+                : Math.min(1, (t - start) / (ms * timingScale()));
               frame(n);
               draw(t);
               if (n < 1) requestAnimationFrame(step);
@@ -1367,14 +1383,25 @@
         // Der Animationstest startet auf ausdrücklichen Wunsch mit sichtbaren Bewegungen.
         $("motion").checked = true;
         function motionHelp() {
+          const multiplier = Number($("speed").value);
+          $("speed-value").textContent =
+            "×" +
+            multiplier +
+            (multiplier === 1 ? " · Standard" : " · schneller");
+          $("speed").setAttribute(
+            "aria-valuetext",
+            multiplier === 1
+              ? "Standardgeschwindigkeit"
+              : multiplier + "-fache Geschwindigkeit",
+          );
           $("motion-help").textContent = $("motion").checked
             ? "Nahkampf ca. " +
-              (Number($("speed").value) * 0.9).toFixed(1).replace(".", ",") +
+              (timingScale() * 0.9).toFixed(1).replace(".", ",") +
               " Sek. · Ergebnis bleibt bis Weiter stehen."
             : "Animationen aus. Aktiviere das Häkchen, um Bewegungen zu sehen.";
         }
         $("motion").addEventListener("change", motionHelp);
-        $("speed").addEventListener("change", motionHelp);
+        $("speed").addEventListener("input", motionHelp);
         motionHelp();
         ["attack", "skill", "guard", "potion", "revive"].forEach((id) =>
           $(id).addEventListener("click", (event) => {
