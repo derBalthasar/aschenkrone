@@ -196,12 +196,14 @@ const signaturRaenge = lies("klassen-orden-2").specializationRules.signatureSkil
 // ---- Fähigkeiten der Menschen-Klassen im Wortlaut des Kampfdokuments (Patch 2.0.0 Punkt 1, Patch 2.4.0) ----
 // Die Kampfregeln (spiel/kampf.js) lesen Wirkungstexte. Henrys Multiplikatoren werden auf den Grundschaden 6 des
 // Kampfdokuments bezogen (Multiplikator 1,0 = „6 Schaden“). Stufe 1/3/6/10: Klassenfähigkeiten, Stufe 15 und 20:
-// Signaturfähigkeit der gewählten Spezialisierung in Rang 2 und 3 (+25 % je Rang).
+// Signaturfähigkeit der gewählten Spezialisierung in Rang 2 und 3, Rang 4 ab Stufe 25 (Patch 2.1.0).
 const GRUND = 6;
+const signaturSkalierung = lies("klassen-orden-2").specializationRules.signatureSkillRankScaling;
 const dotArt = (typ) => /gift|saeure/.test(typ) ? "Gift" : /brenn|glut/.test(typ) ? "Brand" : /blutung/.test(typ) ? "Blutung" : null;
 function wirkungstext(f, rang = 1) {
   const teile = [];
-  const faktor = 1 + 0.25 * (rang - 1);
+  // Rangfaktor aus Henrys Klassendatei (signatureSkillRankScaling): 1,0 / 1,25 / 1,5 / 1,8 (Rang 4 ab Stufe 25).
+  const faktor = Object.entries(signaturSkalierung).find(([key]) => key.startsWith("rank" + rang + "_"))?.[1].powerMult ?? 1;
   const alleFeinde = ["all_enemies", "front_row", "all_allies_and_enemies", "all_enemies_and_allies"].includes(f.target);
   if (f.hits && f.damageMultPerHit) teile.push(f.hits + " Hiebe, je " + Math.max(1, Math.round(GRUND * f.damageMultPerHit * faktor)) + " Schaden");
   else if (f.damageMult) teile.push(Math.max(1, Math.round(GRUND * f.damageMult * faktor)) + " Schaden" + (alleFeinde ? " an allen Feinden" : ""));
@@ -248,7 +250,7 @@ for (const k of Object.values(klassen)) {
     zahlung: k.mana ? "M" : "A",
     // Stufe 1 ist im Kampf zugleich der Grundangriff: Ohne eigenen Schaden schlägt der Held dabei mit 6 zu.
     liste: k.faehigkeiten.map((f, i) => [f.name, (i === 0 && !f.damageMult && !f.damageMultPerHit ? GRUND + " Schaden, " : "") + wirkungstext(f), zahlung(f)]),
-    signatur: Object.fromEntries([["a", a], ["b", b]].map(([v, o]) => [v, [2, 3].map((rang) =>
+    signatur: Object.fromEntries([["a", a], ["b", b]].map(([v, o]) => [v, [2, 3, 4].map((rang) =>
       [o.signatureSkill.name + " (Rang " + rang + ")", wirkungstext(o.signatureSkill, rang), zahlung(o.signatureSkill)])])),
     lp: Math.max(1, Math.round(k.werte.lp / p240.scaleDivisor)), ruestung: Math.max(1, Math.round(k.werte.ruestung / p240.scaleDivisor)),
   };

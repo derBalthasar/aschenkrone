@@ -2836,6 +2836,10 @@
         panel.append(aushang);
       }
     }
+    const siedlung = weltSiedlung();
+    if (siedlung) panel.append(siedlung);
+    const endgame = weltEndgame();
+    if (endgame) panel.append(endgame);
     panel.append(element("h3", "Hofstaat und Diplomatie"));
     const vertraege = (state.vertraege ?? []).map(id => klassen.fraktionen[id].name);
     panel.append(element("p", "Handelsverträge: " + (vertraege.length ? vertraege.join(", ") : "noch keine") +
@@ -2854,6 +2858,70 @@
     if (!renderCandidates(panel)) {
       panel.append(element("p", "Hier wartet niemand auf Anwerbung. Söldner warten in Kornwik, Heidvang, Eiswacht und Glutberg."));
     }
+  }
+
+  // Siedlung der Menschen (Bau-Datei): Phase, Ausbau, Gebäude, Grenzstraßen, Garnison, Reparatur und Wiederaufbau.
+  function weltSiedlung() {
+    const info = rules.siedlungInfo(state);
+    if (!info) return null;
+    const box = element("details");
+    box.className = "welt-siedlung";
+    box.open = true;
+    box.append(element("summary", "Siedlung und Bau · " + info.name));
+    box.append(element("p", "Phase " + info.phase.nr + ": " + info.phase.titel + ". " + info.phase.text));
+    if (!info.dorf) {
+      box.append(element("p", "Stufe " + info.stufe.stufe + ": " + info.stufe.name + " · Verteidigung " + info.verteidigung +
+        " · Garnison " + info.garnison + " · Bauplätze " + info.stufe.plaetze + "."));
+      if (info.naechste) {
+        button(box, "Ausbauen zu " + info.naechste.name + " · " + rules.systeme.kostenText(info.naechste.kosten) +
+          (info.ausbauGrund ? " · " + info.ausbauGrund : ""), () => update(rules.siedlungAusbauen(state)), { disabled: Boolean(info.ausbauGrund) });
+      }
+      button(box, "Truppe für die Garnison anwerben · " + info.rekrutierenKosten + (info.rekrutierenGrund ? " · " + info.rekrutierenGrund : ""),
+        () => update(rules.garnisonRekrutieren(state)), { disabled: Boolean(info.rekrutierenGrund) });
+    }
+    if (info.beschaedigt) {
+      button(box, "Wieder aufbauen · " + info.reparaturKosten + (info.reparierenGrund ? " · " + info.reparierenGrund : ""),
+        () => update(rules.ortReparieren(state)), { disabled: Boolean(info.reparierenGrund) });
+    }
+    const liste = element("ul");
+    liste.className = "welt-bauten";
+    for (const g of info.gebaeude) {
+      const zeile = element("li");
+      zeile.append(element("strong", g.name), element("span", " · " + g.wirkung));
+      if (g.steht) zeile.append(element("em", " · steht"));
+      else button(zeile, "Bauen · " + rules.systeme.kostenText(g.kosten) + (g.grund ? " · " + g.grund : ""),
+        () => update(rules.gebaeudeBauen(state, g.id)), { disabled: Boolean(g.grund) });
+      liste.append(zeile);
+    }
+    if (info.gebaeude.length) box.append(element("h4", "Gebäude"), liste);
+    if (info.strassen.length) {
+      box.append(element("h4", "Grenzstraßen pflastern · " + info.strassenKosten));
+      for (const w of info.strassen) {
+        if (w.gepflastert) box.append(element("p", "Straße nach " + w.ziel + ": gepflastert."));
+        else button(box, "Straße nach " + w.ziel + " pflastern" + (w.grund ? " · " + w.grund : ""), () => update(rules.strasseBauen(state, w.id)), { disabled: Boolean(w.grund) });
+      }
+    }
+    for (const w of info.wiederaufbau) {
+      box.append(element("h4", "Wiederaufbau: " + w.titel));
+      box.append(element("p", w.wirkung + " Lohn: " + w.silber + " Silber, Ruf +" + w.ruf + "."));
+      if (!w.fertig) button(box, "Wiederaufbau beginnen · " + rules.systeme.kostenText(w.kosten) + (w.grund ? " · " + w.grund : ""),
+        () => update(rules.wiederaufbau(state, w.id)), { disabled: Boolean(w.grund) });
+    }
+    return box;
+  }
+
+  // Endgame der Menschen: wiederholbare Aufgaben mit Abklingzeit in Etappen.
+  function weltEndgame() {
+    const liste = rules.endgameListe(state);
+    if (!liste.length) return null;
+    const box = element("details");
+    box.className = "welt-endgame";
+    box.append(element("summary", "Ruhmestaten (" + liste.filter(e => !e.grund).length + " bereit)"));
+    for (const e of liste) {
+      button(box, e.titel + " · " + e.ep + " EP, " + e.silber[0] + "–" + e.silber[1] + " Silber" + (e.wellen > 1 ? " · " + e.wellen + " Wellen" : "") +
+        (e.grund ? " · " + e.grund : ""), () => update(rules.endgameStarten(state, e.id)), { disabled: Boolean(e.grund) });
+    }
+    return box;
   }
 
   // Händler: Zeugkammer von Eiswacht und Städte mit Zentrallager auf der Weltebene (rules.handelOffen).
@@ -2931,6 +2999,25 @@
     if (rules.meisterBereit(state)) open.push("Meisterklasse");
     panel.append(element("p", open.length ? "Offen: " + open.join(", ") + "." : "Zurzeit ist nichts zu verteilen."));
     button(panel, "Charakterfenster öffnen", () => openSheet(open.length ? "aufstieg" : "werte"));
+    // Menschen: Stufe 30, Signatur-Rang, Meister-Talente (Stufe 22–30) und Blut der Ahnen (je 5000 EP über Stufe 30).
+    const auf = rules.aufstiegInfo(state);
+    if (!auf) return;
+    panel.append(element("p", "Stufe " + auf.stufe + " von " + auf.maxStufe + " · Signatur-Rang " + auf.signaturRang +
+      " · Meister-Talentpunkte frei: " + auf.talentPunkte + " (auf Stufe " + auf.talentStufen.join(", ") + ")."));
+    if (auf.stufe >= auf.talentStufen[0] || Object.keys(state.talente ?? {}).length) {
+      panel.append(element("h4", "Meister-Talente"));
+      for (const t of auf.talente) {
+        button(panel, t.name + " · Rang " + t.rang + "/" + t.max + " · " + t.effectPerRank + (t.grund ? " · " + t.grund : ""),
+          () => update(rules.talentLernen(state, t.id)), { disabled: Boolean(t.grund) });
+      }
+    }
+    if (auf.stufe >= auf.maxStufe) {
+      panel.append(element("h4", "Blut der Ahnen · freie Punkte " + auf.ahnenPunkte));
+      for (const p of auf.ahnen) {
+        button(panel, p.name + " · Rang " + p.rang + "/" + p.max + " · " + p.wirkung + (p.grund ? " · " + p.grund : ""),
+          () => update(rules.ahnenLernen(state, p.id)), { disabled: Boolean(p.grund) });
+      }
+    }
   }
 
   function weltAufbruch(panel, ort) {
