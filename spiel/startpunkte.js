@@ -54,7 +54,8 @@ const startpunkte = (() => {
         place: "Kronhall · Burgtor", title: "Morgengrauen über Kronhall",
         text: "Am Tor von Kronhall erfährst du, dass König Harald IV. im Morgengrauen zusammengebrochen ist. In den Gassen flüstert man, ein Fremder habe ihm vom ewigen Leben erzählt. Im Süden steigt Rauch über der Westmark auf, und vom Eispass treibt graue Asche über das Land.",
       },
-      akte: ["Der Thron wankt", "Feuer an der Westmark", "Die abtrünnigen Häfen", "Der Schwur am Glutberg", "Das Alte Reich ersteht neu"],
+      // Akt 2 und 3 in freier Reihenfolge (Gemini-Aufbau, Entscheidung Henry 18. 11. 2026, lore/quests/KRONREICH.md).
+      akte: ["Der Thron wankt", "Die abtrünnigen Häfen", "Der Schwur am Glutberg", "Das Alte Reich ersteht neu", "Über das Innere Meer"],
     },
     haefen: {
       ort: "Perlvik", volk: "menschen", prolog: "Fracht aus dem Norden", motto: "Jedes Meer ist ein Weg",

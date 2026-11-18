@@ -116,6 +116,9 @@
   ]));
   root.append(element("p", "Anführer und Endgegner sind für 4 Helden gerechnet. Jeder Held mehr oder weniger ändert ihre LP um 25 %. " + kampf.faireKaempfe));
   root.append(table(["Abschnitt", "Queststufe", "Gegnerstufe"], kampf.questStufen, "Gegnerstufen in der Kampagne"));
+  for (const [id, stufen] of Object.entries(kampf.questStufenFraktion ?? {})) {
+    root.append(table(["Abschnitt", "Queststufe", "Gegnerstufe"], stufen, "Abweichende Stufen: " + (K.fraktionen[id]?.name ?? id)));
+  }
 
   const groups = {};
   for (const foe of Object.values(kampf.gegner)) (groups[foe.gruppe] ??= []).push(foe);

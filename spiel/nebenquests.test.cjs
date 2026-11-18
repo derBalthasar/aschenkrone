@@ -58,10 +58,29 @@ test("Auftragskennungen sind eindeutig, gehören zum Ort und alle genannten Wege
   assert.equal(ids.size, 136);
 });
 
-test("Geheimnisse bleiben gewahrt und Bestiariumsnamen folgen dem Kanon", () => {
+test("Stille Feder bleibt geheim, der Skalde wird in Akt 4 entdeckt, Bestiariumsnamen folgen dem Kanon", () => {
   const alles = JSON.stringify(D);
   assert.ok(!alles.includes("Irrglühte"));
-  assert.ok(!/Skalde (ist|war)|Stille Feder (ist|war)/.test(alles));
+  assert.ok(!/Stille Feder (ist|war)/.test(alles));
+  const akt4 = D.kronreich.reihe.akte.find((akt) => akt.nr === "4");
+  assert.ok(akt4.schritte[0].text.includes("Bleichen Skalden selbst"));
+  assert.ok(akt4.schritte[0].vermerk);
+});
+
+test("Fraktionsreihe Kronreich folgt Geminis Aufbau", () => {
+  const reihe = nebenquests.reihe("kronreich");
+  assert.deepEqual(reihe.akte.map((akt) => akt.nr), ["1", "2/3", "2/3", "4", "5"]);
+  assert.deepEqual(reihe.akte.map((akt) => akt.titel), ["Der Thron wankt", "Die abtrünnigen Häfen", "Der Schwur am Glutberg",
+    "Das Alte Reich ersteht neu", "Über das Innere Meer"]);
+  assert.equal(reihe.prolog.titel, "Feuer über Westvik");
+  assert.equal(reihe.spezialisierung.optionen.length, 2);
+  for (const begleiter of reihe.begleiter) {
+    assert.equal(knoten.get(begleiter.ort)?.fraktion, "kronreich", begleiter.name);
+    assert.ok(D.kronreich.orte[begleiter.ort].auftraege.some((q) => q.id === begleiter.auftrag), begleiter.auftrag);
+  }
+  const quelle = fs.readFileSync(path.join(root, "spiel/startpunkte.js"), "utf8");
+  const akte = JSON.parse(quelle.match(/akte: (\["Der Thron wankt"[^\]]*\])/)[1]);
+  assert.deepEqual(akte, reihe.akte.map((akt) => akt.titel));
 });
 
 test("die erzeugte Datei entspricht Quelle und Skript", () => {

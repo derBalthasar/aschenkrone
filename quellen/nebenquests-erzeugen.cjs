@@ -5,7 +5,8 @@
 //
 // Die Texte bleiben wörtlich. Nur eindeutige Schreibfehler bei Bestiariumsnamen werden auf den Kanon
 // zurückgeführt (siehe korrekturen). Prüfvermerke (hinweise) markieren Punkte, die Henry noch entscheiden muss;
-// sie ändern nichts am Text. Die Hauptquest aus teil1 wird bewusst NICHT übernommen (siehe lore/quests/KRONREICH.md).
+// sie ändern nichts am Text. Die Hauptquest aus teil1 übernimmt das Skript nach Geminis Aufbau (Entscheidung Henry,
+// 18. 11. 2026). Einzige inhaltliche Änderung: Der Bleiche Skalde wird in Akt 4 entdeckt (siehe aenderungen).
 const fs = require("node:fs");
 const path = require("node:path");
 
@@ -42,8 +43,6 @@ const hinweise = {
   kronhall_q10: "Begleiterin aus Geminis Hauptquest-Vorschlag, im Spiel noch nicht angelegt.",
   rosshag_q10: "Begleiter aus Geminis Hauptquest-Vorschlag, im Spiel noch nicht angelegt.",
   ulfsborg_q10: "Begleiter aus Geminis Hauptquest-Vorschlag, im Spiel noch nicht angelegt.",
-  haraldstad_q10: "Belohnung verweist auf Geminis Aktfolge (Akt 2/3), die Henry noch festlegt.",
-  hagenfels_q10: "Belohnung verweist auf Geminis Akt 4, die Aktfolge legt Henry noch fest.",
 };
 
 const text = (wert) => korrekturen.reduce((s, [alt, neu]) => s.split(alt).join(neu), wert);
@@ -64,8 +63,51 @@ for (const stadt of quelle.cities) {
   }
 }
 
+// Hauptquest (Fraktionsreihe) nach Geminis Aufbau. Änderung Henry, 18. 11. 2026: Der Bleiche Skalde wird in Akt 4
+// entdeckt, damit die Bedrohung durch die Untoten erklärt ist. Identität laut Henry (18. 11. 2026): Erzpriester Thorvald.
+const skalde = "Erzpriester Thorvald vom Glutberg";
+const aenderungen = {
+  "hum_kronreich_act4/1": {
+    titel: "Entlarvung des Bleichen Skalden",
+    text: "Der stumme Heiler am Krankenbett Harald IV. wird als Grabwächter des Kults der Bleichen Ewigkeit entlarvt und seine " +
+      "8-köpfige Kultzelle in den Katakomben zerschlagen. Seine Briefe führen zum Bleichen Skalden selbst: " + skalde + ". " +
+      "Seit über hundert Jahren hält ihn die Totenmagie des Nordens am Leben. Als Preis dafür schwächt er die Ewige Flamme, " +
+      "und je schwächer sie brennt, desto stärker werden die Untoten im hohen Norden. Der Held stellt ihn in den Katakomben " +
+      "(Endgegner). Untoten-Bedrohung −15.",
+    vermerk: "Änderung Henry (18. 11. 2026): Der Skalde wird hier entdeckt. Gemini ließ ihn unerkannt. Der Skalde ist Erzpriester Thorvald (Henry, 18. 11. 2026).",
+  },
+};
+const teil1 = JSON.parse(fs.readFileSync(path.join(root, "quellen/gemini/kronreich-teil1-hauptquest.json"), "utf8"));
+const ml = teil1.mainQuestline;
+const wahl = (choice) => choice ? Object.values(choice).map((o) => ({ id: o.id, label: o.label, folge: o.effect })) : [];
+const akte = ml.acts.map((a) => ({
+  id: a.id,
+  nr: typeof a.act === "number" ? String(a.act) : "2/3",
+  titel: a.title,
+  stufen: a.levelRange,
+  ...(a.freeOrder ? { freieReihenfolge: true, empfohlen: a.recommendedOrder, schwester: a.sisterFaction } : {}),
+  ort: a.region ?? a.mainLocations.join(", "),
+  ...(a.focus ? { fokus: a.focus } : {}),
+  ...(a.includesFolkQuest ? { volksquest: a.includesFolkQuest } : {}),
+  schritte: a.steps.map((st) => ({ ort: st.location, titel: st.title, text: st.description,
+    ...(aenderungen[a.id + "/" + st.step] ?? {}) })),
+  wahl: wahl(a.keyChoice),
+}));
+const spez = ml.acts.find((a) => a.act3Specialization)?.act3Specialization;
+const reihe = {
+  motto: teil1.meta.motto,
+  kapitel: ml.chapter,
+  prolog: { titel: ml.prolog.title, text: ml.prolog.summary },
+  akte,
+  spezialisierung: { ausloeser: spez.trigger, optionen: spez.options.map((o) => ({ id: o.id, name: o.name, bonus: o.bonus })) },
+  begleiter: teil1.companions.map((c) => ({ id: c.id, name: c.name, rolle: c.role, ort: knoten.nachName[c.recruitLocation],
+    akt: c.recruitAct, auftrag: c.questId, faehigkeit: c.ability })),
+  geheim: ["Identität der Stillen Feder"],
+};
+
 const daten = {
   kronreich: {
+    reihe,
     quelle: "Gemini, 18. 11. 2026, auf Grundlage von „Orte und Wege der Menschen“",
     stand: "Aushang: Aufträge sind lesbar, aber noch nicht spielbar.",
     orte,

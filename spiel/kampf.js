@@ -326,6 +326,12 @@ const kampf = (() => {
     ["Prolog", "1–3", "1–2"], ["Akt 1", "3–5", "3–5"], ["Akt 2", "5–8", "5–8"], ["Akt 3 (Spezialisierung)", "8–11", "8–11"],
     ["Akt 4", "11–14", "11–14"], ["Akt 5", "14–16", "14–16"], ["Volksquest", "16–18", "16–18"], ["Weltquest, Endkampf Morbius", "18–20", "20"],
   ];
+  // Eigene Stufen je Fraktion, wo die Fraktionsreihe davon abweicht (Kronreich nach Gemini, Entscheidung Henry 18. 11. 2026).
+  const questStufenFraktion = {
+    kronreich: [["Prolog", "1–3", "1–2"], ["Akt 1 Der Thron wankt", "1–5", "1–5"], ["Akt 2/3 Die abtrünnigen Häfen", "6–10", "6–10"],
+      ["Akt 2/3 Der Schwur am Glutberg", "11–15", "11–15"], ["Akt 4 Das Alte Reich ersteht neu (mit Volksquest)", "16–18", "16–18"],
+      ["Akt 5 Über das Innere Meer", "19–20", "19–20"]],
+  };
 
   // Gegner für kommende Quests. Werte ergeben sich aus gegnerWerte(rang, stufe).
   const gegner = {
@@ -362,5 +368,5 @@ const kampf = (() => {
   return { maxStufe, epFuer, stufeAus, ep, lpTabelle, lebenspunkte, budget, meisterBudget, machtpunkte, gegenUebermacht,
     alphaWerte, tagschwaeche, tagesWert,
     ressourceVerstaerkung, spezVerstaerkung, maxDiener, schildDauer, lies, klassenFaehigkeiten, meisterFaehigkeiten,
-    raenge, gegnerWerte, faireKaempfe, questStufen, gegner, gebundenRegel, kultText, morbius };
+    raenge, gegnerWerte, faireKaempfe, questStufen, questStufenFraktion, gegner, gebundenRegel, kultText, morbius };
 })();

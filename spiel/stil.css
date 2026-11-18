@@ -556,6 +556,8 @@ button.map-marker[aria-pressed="true"] { background: #694623; }
 .welt-aushang li p { margin: .15rem 0; overflow-wrap: anywhere; }
 .welt-aushang-stand, .welt-aushang-hinweis { font-size: .85rem; color: #69492d; }
 .welt-aushang-hinweis { font-style: italic; }
+.welt-reihe ol { margin: .25rem 0; padding-left: 1.2rem; }
+.welt-reihe ol li { margin-block: .3rem; }
 .welt-tabs { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: 1rem; border-bottom: 1px solid #ad9066; }
 .welt-tabs button { flex: 1 1 8.5rem; min-height: 2.75rem; padding: .3rem .6rem; font: inherit; color: #4b3420; background: #e0caa3;
   border: 1px solid #ad9066; border-bottom: 0; border-radius: 4px 4px 0 0; cursor: pointer; }

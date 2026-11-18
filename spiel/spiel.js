@@ -2096,6 +2096,8 @@
     krise.append(element("h3", "Krise und Aufhänger"));
     const reihe = startpunkte.fraktionen[state.faction];
     if (reihe) krise.append(element("p", "Fraktionsreihe „" + reihe.motto + "“ · Akt 1, „" + reihe.akte[0] + "“ · Die Akte werden noch gebaut."));
+    const plan = weltReihe(state.faction);
+    if (plan) krise.append(plan);
     for (const line of weltKrisen()) {
       const warn = element("p", line);
       warn.className = "welt-alarm";
@@ -2153,6 +2155,47 @@
     panel.setAttribute("aria-labelledby", "welt-tab-" + welt.tab);
     ({ hofstaat: weltHofstaat, lager: weltLager, held: weltHeld, aufbruch: weltAufbruch })[welt.tab](panel, ort);
     content.append(tabs, panel);
+  }
+
+  // Fraktionsreihe als Plan (Gemini-Aufbau, spiel/nebenquests.js). Nur lesbar, die Akte sind noch nicht spielbar.
+  function weltReihe(fraktion) {
+    const reihe = typeof nebenquests !== "undefined" ? nebenquests.reihe(fraktion) : null;
+    if (!reihe) return null;
+    const box = element("details");
+    box.className = "welt-aushang welt-reihe";
+    box.append(element("summary", "Hauptquest · Kapitel " + reihe.kapitel + " · " + reihe.akte.length + " Akte"));
+    box.append(element("p", "Prolog „" + reihe.prolog.titel + "“: " + reihe.prolog.text));
+    const liste = element("ul");
+    for (const akt of reihe.akte) {
+      const item = element("li");
+      const kopf = element("p");
+      kopf.append(element("strong", "Akt " + akt.nr + " · " + akt.titel), " · Stufe " + akt.stufen +
+        (akt.freieReihenfolge ? " · freie Reihenfolge (empfohlen als " + akt.empfohlen + "., mit " + akt.schwester + ")" : ""));
+      item.append(kopf, element("p", akt.ort + (akt.volksquest ? " · enthält " + akt.volksquest : "")));
+      const schritte = element("ol");
+      for (const schritt of akt.schritte) {
+        const zeile = element("li");
+        zeile.append(element("strong", schritt.titel), " (" + schritt.ort + "): " + schritt.text);
+        if (schritt.vermerk) {
+          const vermerk = element("p", schritt.vermerk);
+          vermerk.className = "welt-aushang-hinweis";
+          zeile.append(vermerk);
+        }
+        schritte.append(zeile);
+      }
+      item.append(schritte);
+      for (const option of akt.wahl) item.append(element("p", "Wahl: " + option.label + " → " + option.folge));
+      liste.append(item);
+    }
+    box.append(liste);
+    box.append(element("p", "Fraktions-Spezialisierung (" + reihe.spezialisierung.ausloeser + "): " +
+      reihe.spezialisierung.optionen.map(o => o.name + " – " + o.bonus).join(" · ")));
+    box.append(element("p", "Begleiter: " + reihe.begleiter.map(b => b.name + " (" + b.rolle + ", " + knoten.get(b.ort).name +
+      ", Akt " + b.akt + ")").join(", ")));
+    const stand = element("p", "Plan der Hauptquest. Die Akte werden noch gebaut.");
+    stand.className = "welt-aushang-stand";
+    box.append(stand);
+    return box;
   }
 
   // Aushang: Nebenquests des Ortes (Gemini-Ausarbeitung, spiel/nebenquests.js). Nur lesbar, noch nicht spielbar.

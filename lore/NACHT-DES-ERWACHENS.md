@@ -63,11 +63,13 @@ Der Held stammt aus Westvik, einem Hafendorf der Westmark, und dient in der Land
 
 **Fraktionsreihe**
 
-1. Akt 1, Der Thron wankt: Der Held wird Bote zwischen Prinzessin Astrid und Jarl Ragnvald. Ein Kultist am Krankenbett des Königs wird entlarvt oder entkommt.
-2. Akt 2, Feuer an der Westmark: Rückkehr nach Westvik. Die Rostsegel vertreiben oder mit Kapitän Urgash einen Frieden aushandeln. Der Tribut aus dem Prolog wird hier aufgedeckt oder bleibt geheim.
-3. Akt 3, Die abtrünnigen Häfen: Auf dem Reichsthing oder vor Perlvik die Häfen zurückgewinnen. Spezialisierung wählen.
-4. Akt 4, Der Schwur am Glutberg: Mit Korn über den Eispass zum Orden. Der Held erlebt, wie schwach die Ewige Flamme seit der Nacht brennt.
-5. Akt 5, Das Alte Reich ersteht neu: Treffen der drei Fraktionen auf dem großen Thing in Kronhall. Leitet die Volksquest ein.
+Seit 18. 11. 2026 nach Geminis Aufbau (Entscheidung Henry, Einzelheiten in [quests/KRONREICH.md](quests/KRONREICH.md)):
+
+1. Akt 1, Der Thron wankt (Stufe 1–5): Der Held wird Reichsbote Astrids, am Krankenbett fällt ein stummer Heiler auf. Jarl Ragnvald in Hagenfels fordert einen Beweis der Stärke. Am Ende „Feuer an der Westmark“: Die Rostsegel zurückschlagen oder Waffenstillstand mit Kapitän Urgash.
+2. Akt 2/3, Die abtrünnigen Häfen (Stufe 6–10, freie Reihenfolge): Verhandlung mit Solveig Valsdottir, Schmuggel im Nebel, Vertrag von Perlvik. Reichsthing oder Erpressung des Gildenrats.
+3. Akt 2/3, Der Schwur am Glutberg (Stufe 11–15, freie Reihenfolge): Korntreck über den Eispass, das bedrängte Aschenkloster, Bund mit Ragna Glutherz und Thorvald. Danach Spezialisierung „Eiserne Krone“ oder „Banner der Glut“.
+4. Akt 4, Das Alte Reich ersteht neu (Stufe 16–18, enthält die Volksquest): Der stumme Heiler ist Grabwächter. Seine Spur entlarvt den Bleichen Skalden: Erzpriester Thorvald. Danach das Große Thing, der Held wird Bannerjarl, und die Armada wird gerüstet.
+5. Akt 5, Über das Innere Meer (Stufe 19–20): Die Reichsflotte läuft aus, wehrt Totenschiffe ab und errichtet einen Brückenkopf an fremder Küste. Ende von Kapitel 1.
 
 ### Freie Häfen (mittel): „Jedes Meer ist ein Weg“
 
