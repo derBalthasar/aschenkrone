@@ -18,6 +18,7 @@ const p210 = { ...lies("patch-2.1.0").decisionsPart1, ...lies("patch-2.1.0").dec
 const p220 = lies("patch-2.2.0");
 const p240 = lies("patch-2.4.0").normalizationRule;
 const p251 = lies("patch-2.5.1").armorMitigationFormulaUpdate;
+const p253 = lies("patch-2.5.3");
 const oekonomie = lies("oekonomie-1");
 const katalog = lies("oekonomie-2");
 const ressourcen = lies("ressourcen");
@@ -106,7 +107,9 @@ const wiederaufbau = ruf2.reconstructionProjects.map((w) => ({ id: w.id, ort: or
 const stadtZustand = Object.fromEntries(Object.entries(p210["6_prologCityStates"]).map(([name, z]) => [ortId(name[0] + name.slice(1).toLowerCase()), { status: z.status, text: z.notes }]));
 const kriegskasse = { abAkt: ruf2.armadaGoal.unlockAct, aufbruchAkt: ruf2.armadaGoal.departureAct, titel: ruf2.armadaGoal.title,
   bedarf: kosten(p210["2_armadaMainStoryProgression"].mandatoryForAct5Passage.warChestResources),
-  verstaerkung: p210["2_armadaMainStoryProgression"].optionalFleetUpgrades.effect };
+  verstaerkung: p210["2_armadaMainStoryProgression"].optionalFleetUpgrades.effect,
+  // Patch 2.5.3: Akt 5 ist noch nicht gebaut. Die Kasse lässt sich füllen, die Überfahrt bleibt bis zum Kapitel-Update zu.
+  akt5Gebaut: p253.act5FeatureGate.act5Implemented, vollText: p253.act5FeatureGate.onWarChestComplete.uiStatusLabel };
 
 // ---- Moral (Patch 1.6.0, 1.6.1) ----
 const m = p160a.partyMoraleSystem;
