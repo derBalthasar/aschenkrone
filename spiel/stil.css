@@ -556,6 +556,11 @@ button.map-marker[aria-pressed="true"] { background: #694623; }
 .welt-aushang li p { margin: .15rem 0; overflow-wrap: anywhere; }
 .welt-aushang-stand, .welt-aushang-hinweis { font-size: .85rem; color: #69492d; }
 .welt-aushang-hinweis { font-style: italic; }
+.welt-auftrag-stand { font-weight: 600; color: #3f5a2a; }
+.welt-aushang li button, .welt-hauptquest button { display: block; margin: .35rem 0; max-width: 100%; white-space: normal; text-align: left; }
+.welt-hauptquest { margin: .6rem 0; padding: .6rem .8rem; border: 1px solid #ad9066; border-left: 4px solid #8a3b1c; border-radius: 4px; background: #f3e6cc; }
+.welt-hauptquest h4 { margin: 0 0 .3rem; }
+.welt-hauptquest p { margin: .2rem 0; overflow-wrap: anywhere; }
 .welt-reihe ol { margin: .25rem 0; padding-left: 1.2rem; }
 .welt-reihe ol li { margin-block: .3rem; }
 .welt-tabs { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: 1rem; border-bottom: 1px solid #ad9066; }

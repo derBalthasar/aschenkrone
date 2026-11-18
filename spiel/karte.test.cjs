@@ -10,7 +10,7 @@ const test = require("node:test");
 const root = path.join(__dirname, "..");
 const context = vm.createContext({ structuredClone });
 for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/faehigkeiten.js", "spiel/kampf.js", "spiel/startpunkte.js",
-  "spiel/welt.js", "spiel/knoten-daten.js", "spiel/knoten.js", "spiel/regeln.js", "spiel/karte-daten.js", "spiel/karte.js"]) {
+  "spiel/welt.js", "spiel/knoten-daten.js", "spiel/knoten.js", "spiel/nebenquests-daten.js", "spiel/nebenquests.js", "spiel/regeln.js", "spiel/karte-daten.js", "spiel/karte.js"]) {
   vm.runInContext(fs.readFileSync(path.join(root, file), "utf8"), context, { filename: file });
 }
 const [world, karte, klassen, startpunkte] = ["world", "karte", "klassen", "startpunkte"].map(name => vm.runInContext(name, context));

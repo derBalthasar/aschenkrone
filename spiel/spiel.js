@@ -1918,26 +1918,7 @@
           ? "Das Runentor bleibt als Versorgungsweg erhalten."
           : "Das Tor ist eingestürzt. Die Bewohner müssen ihre Vorräte nun über den unteren Steig tragen."));
       }
-      if (state.scene === "supply-post") {
-        const stock = element("div");
-        stock.className = "actions trade-list";
-        stock.append(element("h3", "Kaufen · " + state.silver + " Silber verfügbar"));
-        for (const [id, price] of Object.entries(world.shop)) {
-          const gear = world.gear[id];
-          const supply = world.supplies[id];
-          const effect = gear?.power ? gear.power + " Grundschaden" : gear?.armor ? gear.armor + " Rüstung" :
-            gear?.magic ? "+" + gear.magic + " Glutschaden" : gear?.travel ? "+" + gear.travel + " auf List unterwegs" :
-            supply?.heal ? "+" + supply.heal + " LP" : "+" + supply.ember + " Glut";
-          button(stock, world.items[id] + " · " + effect + " · " + price + " Silber", () => update(rules.trade(state, id, true)),
-            { disabled: price > state.silver || state.inventory.length >= rules.itemCap - 20 });
-        }
-        const trophies = Object.entries(world.salePrices).filter(([id]) => state.inventory.includes(id));
-        if (trophies.length) stock.append(element("h3", "Trophäen verkaufen"));
-        for (const [id, price] of trophies) {
-          button(stock, world.items[id] + " · +" + price + " Silber", () => update(rules.trade(state, id, false)));
-        }
-        content.append(stock);
-      }
+      if (state.scene === "supply-post") content.append(handelBlock());
       if (state.scene === "arrival") {
         content.append(element("h3", "Folgen deiner Reise"));
         const { field, ford, delivery } = rules.ending(state);
@@ -2095,7 +2076,9 @@
     krise.className = "welt-krise";
     krise.append(element("h3", "Krise und Aufhänger"));
     const reihe = startpunkte.fraktionen[state.faction];
-    if (reihe) krise.append(element("p", "Fraktionsreihe „" + reihe.motto + "“ · Akt 1, „" + reihe.akte[0] + "“ · Die Akte werden noch gebaut."));
+    const haupt = weltHauptquest();
+    if (haupt) krise.append(haupt);
+    else if (reihe) krise.append(element("p", "Fraktionsreihe „" + reihe.motto + "“ · Akt 1, „" + reihe.akte[0] + "“ · Die Akte werden noch gebaut."));
     const plan = weltReihe(state.faction);
     if (plan) krise.append(plan);
     for (const line of weltKrisen()) {
@@ -2121,6 +2104,8 @@
       if (rules.handlungHier(state)) button(krise, "Zur Handlung zurückkehren", () => update(rules.zurHandlung(state)), { story: true });
     }
     content.append(krise);
+    const offen = weltAuftraege();
+    if (offen) content.append(offen);
     const aushang = weltAushang(ort);
     if (aushang) content.append(aushang);
 
@@ -2198,16 +2183,82 @@
     box.append(element("p", "Begleiter: " + reihe.begleiter.map(b => b.name + " (" + b.rolle + ", " +
       (klassen.fraktionen[fraktion]?.klassen[b.klasse]?.name ?? b.klasse) + ", " + knoten.get(b.ort).name +
       ", Akt " + b.akt + ")").join(", ")));
-    const stand = element("p", "Plan der Hauptquest. Die Akte werden noch gebaut.");
+    const stand = element("p", "Plan der Hauptquest. " + (rules.hauptquest(state) ? "Akt 1 ist spielbar, ab Akt 2 folgen die Akte noch." : "Die Akte werden noch gebaut."));
     stand.className = "welt-aushang-stand";
     box.append(stand);
     return box;
   }
 
-  // Aushang: Nebenquests des Ortes (Gemini-Ausarbeitung, spiel/nebenquests.js). Nur lesbar, noch nicht spielbar.
+  // Hauptquest Akt 1 (Kronreich und Orden): aktueller Schritt, Ausführen am richtigen Ort, Wahl am Ende des Akts.
+  function weltHauptquest() {
+    const haupt = rules.hauptquest(state);
+    if (!haupt) return null;
+    const box = element("div");
+    box.className = "welt-hauptquest";
+    box.append(element("h4", "Hauptquest · Akt " + haupt.akt + ", „" + haupt.titel + "“ · Stufe " + haupt.stufen));
+    if (haupt.fertig) {
+      const wahl = nebenquests.reihe(state.faction).akte[0].wahl.find(option => option.id === haupt.wahl);
+      box.append(element("p", "Abgeschlossen" + (wahl ? ": " + wahl.label + "." : ".") + " Akt 2 wird noch gebaut."));
+      return box;
+    }
+    const schritt = haupt.schritt;
+    const kopf = element("p");
+    kopf.append(element("strong", "Schritt " + schritt.nr + " von " + schritt.von + " · " + schritt.titel), " · " + knoten.get(schritt.ort).name);
+    box.append(kopf, element("p", schritt.text));
+    if (schritt.wahl) {
+      if (state.knoten === schritt.ort) box.append(element("p", "Entscheide, wie Akt " + haupt.akt + " endet:"));
+      for (const option of schritt.wahlen) {
+        const grund = rules.hauptGrund(state, option.id);
+        box.append(element("p", option.label + " → " + option.folge));
+        button(box, option.label + (grund ? " · " + grund : ""), () => update(rules.hauptWeiter(state, option.id)),
+          { disabled: Boolean(grund), story: true });
+      }
+    } else {
+      button(box, (schritt.gegner ? "Kämpfen · " : "Weiter · ") + schritt.titel + (haupt.grund ? " · " + haupt.grund : ""),
+        () => update(rules.hauptWeiter(state)), { disabled: Boolean(haupt.grund), story: true });
+    }
+    return box;
+  }
+
+  const lohnText = (auftrag, index) => {
+    const [haupt, oder] = auftrag.lohn.split(/\s*\(oder\s*/);
+    return index ? oder.replace(/\)$/, "") : haupt;
+  };
+  const auftragOrt = (auftrag) => auftrag.spiel.weg ? "unterwegs auf " + auftrag.spiel.weg + " " + nebenquests.wegName(auftrag.spiel.weg)
+    : "in " + knoten.get(auftrag.ort).name;
+
+  // Angenommene Aufträge an allen Orten, mit Ausführen-Knopf am richtigen Ort.
+  function weltAuftraege() {
+    const offen = rules.auftraege(state, "aktiv");
+    const erledigt = rules.auftraege(state, "erledigt");
+    if (!offen.length && !erledigt.length) return null;
+    const box = element("details");
+    box.className = "welt-aushang welt-auftraege";
+    box.open = offen.length > 0;
+    box.append(element("summary", "Deine Aufträge · " + offen.length + " offen · " + erledigt.length + " erledigt"));
+    const liste = element("ul");
+    for (const auftrag of offen) {
+      const item = element("li");
+      const kopf = element("p");
+      kopf.append(element("strong", auftrag.titel), " · " + auftragOrt(auftrag));
+      item.append(kopf, element("p", auftrag.text), element("p", "Lohn: " + lohnText(auftrag, auftrag.wahl)));
+      if (auftrag.spiel.weg) item.append(element("p", "Reise über diesen Weg, dann stellen sich dir die Gegner."));
+      else button(item, (auftrag.spiel.gegner ? "Auftrag ausführen · Kampf" : "Auftrag ausführen") +
+        (auftrag.ausfuehren ? " · " + auftrag.ausfuehren : ""), () => update(rules.auftragAusfuehren(state, auftrag.id)),
+        { disabled: Boolean(auftrag.ausfuehren), story: true });
+      liste.append(item);
+    }
+    if (!offen.length) liste.append(element("li", "Keine offenen Aufträge."));
+    box.append(liste);
+    if (erledigt.length) box.append(element("p", "Erledigt: " + erledigt.map(auftrag => auftrag.titel).join(", ") + "."));
+    return box;
+  }
+
+  // Aushang: Nebenquests des Ortes (Gemini-Ausarbeitung, spiel/nebenquests.js). Kronreich- und Orden-Helden nehmen sie an.
   function weltAushang(ort) {
     const eintrag = typeof nebenquests !== "undefined" ? nebenquests.fuerOrt(ort.id) : null;
     if (!eintrag?.auftraege.length) return null;
+    const spielbar = Object.fromEntries(rules.aushang(state).map(auftrag => [auftrag.id, auftrag]));
     const box = element("details");
     box.className = "welt-aushang";
     const stufen = nebenquests.stufenFuer(ort.id, state.faction);
@@ -2227,6 +2278,17 @@
         const hinweis = element("p", auftrag.hinweis);
         hinweis.className = "welt-aushang-hinweis";
         item.append(hinweis);
+      }
+      const spiel = spielbar[auftrag.id];
+      if (spiel?.status) {
+        const stand = element("p", spiel.status === "erledigt" ? "✓ Erledigt" : "Angenommen · " + auftragOrt(spiel));
+        stand.className = "welt-auftrag-stand";
+        item.append(stand);
+      } else if (spiel && !spiel.grund) {
+        item.append(element("p", (spiel.spiel.gegner ? "Kampf auf Stufe " + (nebenquests.stufenFuer(ort.id, state.faction) ?? "") + " · " : "Ohne Kampf · ") +
+          auftragOrt(spiel) + " · " + rules.auftragEp + " EP"));
+        spiel.spiel.lohn.forEach((_, index) => button(item, "Annehmen" + (spiel.spiel.lohn.length > 1 ? " · " + lohnText(spiel, index) : ""),
+          () => update(rules.auftragAnnehmen(state, auftrag.id, index))));
       }
       liste.append(item);
     }
@@ -2255,6 +2317,28 @@
     }
   }
 
+  // Händler: Zeugkammer von Eiswacht und Städte mit Zentrallager auf der Weltebene (rules.handelOffen).
+  function handelBlock() {
+    const stock = element("div");
+    stock.className = "actions trade-list";
+    stock.append(element("h3", "Kaufen · " + state.silver + " Silber verfügbar"));
+    for (const [id, price] of Object.entries(world.shop)) {
+      const gear = world.gear[id];
+      const supply = world.supplies[id];
+      const effect = gear?.power ? gear.power + " Grundschaden" : gear?.armor ? gear.armor + " Rüstung" :
+        gear?.magic ? "+" + gear.magic + " Glutschaden" : gear?.travel ? "+" + gear.travel + " auf List unterwegs" :
+        supply?.heal ? "+" + supply.heal + " LP" : "+" + supply.ember + " Glut";
+      button(stock, world.items[id] + " · " + effect + " · " + price + " Silber", () => update(rules.trade(state, id, true)),
+        { disabled: price > state.silver || state.inventory.length >= rules.itemCap - 20 });
+    }
+    const trophies = Object.entries(world.salePrices).filter(([id]) => state.inventory.includes(id));
+    if (trophies.length) stock.append(element("h3", "Trophäen verkaufen"));
+    for (const [id, price] of trophies) {
+      button(stock, world.items[id] + " · +" + price + " Silber", () => update(rules.trade(state, id, false)));
+    }
+    return stock;
+  }
+
   function weltLager(panel, ort) {
     panel.append(element("h3", "Rasten"));
     const rastGrund = rules.rastGrund(state);
@@ -2279,6 +2363,7 @@
     panel.append(element("p", lager ? lager + ". Hier kannst du Gegenstände einlagern und den Rucksack ausbauen."
       : "Kein Zentrallager. Es steht in allen Hauptstädten und in den Städten deiner Fraktion."));
     button(panel, lager ? "Zentrallager und Rucksack öffnen" : "Rucksack öffnen", () => openHub());
+    if (rules.handelOffen(state)) panel.append(handelBlock());
     panel.append(element("h3", "Schmied und Heiler"));
     panel.append(element("p", "Handwerk aus Trophäen und Flora folgt mit der Flora-und-Fauna-Ausarbeitung für alle Gebiete."));
   }
@@ -2312,8 +2397,15 @@
       const risiko = weg.sicherheit === "kernland" ? "Risiko gering" : "Risiko hoch";
       const info = element("p", knoten.kantenNamen[weg.kantenTyp] + (weg.pass ? " (" + weg.pass + ")" : "") + " · " +
         knoten.sicherheitNamen[weg.sicherheit] + " · " + risiko + " · " + kosten +
-        (weg.probe ? " · Probe auf Willenskraft oder Intelligenz, Glut +" + weg.glut : ""));
+        (weg.probe ? " · Probe auf Willenskraft oder Intelligenz, Glut +" + weg.glut : "") +
+        (weg.rabatt ? " · 1 Vorrat günstiger dank Auftrag" : ""));
       item.append(head, info);
+      if (weg.auftrag) {
+        const auftrag = rules.auftraege(state).find(entry => entry.id === weg.auftrag);
+        const hinweis = element("p", "Auftrag unterwegs: " + auftrag.titel + ". Auf diesem Weg stellen sich dir die Gegner.");
+        hinweis.className = "welt-aushang-hinweis";
+        item.append(hinweis);
+      }
       if (weg.letzterVorrat && !weg.grund) {
         const warn = element("p", "Achtung: Diese Reise braucht deinen letzten Vorrat. Bei 0 ist das Spiel verloren.");
         warn.className = "welt-alarm";
@@ -2360,6 +2452,9 @@
         } else if (status === "ready") {
           button(candidate, companion.name + " mitnehmen", () => update(rules.recruit(state, id)),
             { disabled: state.party.length >= rules.partyLimit });
+        } else if (status === "auftrag") {
+          candidate.append(element("p", "Erst nach dem Auftrag „" + nebenquests.fuerOrt(companion.knoten).auftraege
+            .find(auftrag => auftrag.id === companion.auftrag).titel + "“ am Aushang von " + knoten.get(companion.knoten).name + "."));
         } else if (status === "promise") {
           candidate.append(element("p", world.recruitmentQuests[id].text + " Frist: " + world.recruitmentQuests[id].turns + " Spielzüge ab Annahme."));
           button(candidate, "Auftrag annehmen · " + world.recruitmentQuests[id].title, () => update(rules.promise(state, id)));

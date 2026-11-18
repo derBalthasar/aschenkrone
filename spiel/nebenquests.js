@@ -1,7 +1,7 @@
 "use strict";
 
 // Nebenquests je Ort (Aushang im Stadt-Hub) und die Fraktionsreihe (Hauptquest-Plan) je Fraktion. Daten: spiel/nebenquests-daten.js, erzeugt aus quellen/gemini/.
-// Liest keinen Spielstand und verändert nichts. Die Aufträge sind bisher nur lesbar, nicht spielbar.
+// Liest keinen Spielstand und verändert nichts. Annehmen, Ausführen und Abgabe der Aufträge regelt spiel/regeln.js.
 const nebenquests = (() => {
   const D = typeof nebenquestDaten !== "undefined" ? nebenquestDaten : require("./nebenquests-daten.js");
   const K = typeof knoten !== "undefined" ? knoten : require("./knoten.js");

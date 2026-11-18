@@ -640,6 +640,16 @@ const startpunkte = (() => {
   };
 
   const scenes = { ankunft };
+  // Kronreich und Orden spielen Akt 1 und die Aufträge am Aushang (Henry, 18. 11. 2026). Ihr Prolog endet in der eigenen
+  // Hauptstadt auf der Weltebene. Die Geschichte um Kornwik bleibt erreichbar, wenn der Held dorthin reist.
+  const weltStart = {
+    kronreich: { knoten: "kronhall", label: "In Kronhall bleiben und Akt 1 beginnen",
+      text: "Kronprinzessin Astrid lässt nach dir rufen. Aushang und Hauptquest findest du im Stadtfenster von Kronhall. Die Geschichte um Kornwik wartet, bis du dorthin reist.",
+      message: "Du gehst durch das Burgtor von Kronhall. Kronprinzessin Astrid erwartet dich am Krankenbett ihres Vaters." },
+    orden: { knoten: "glutberg", label: "Auf dem Glutberg bleiben und Akt 1 beginnen",
+      text: "Hochmeisterin Ragna Glutherz ruft die Ritter zusammen. Aushang und Hauptquest findest du im Stadtfenster von Glutberg. Die Geschichte um Kornwik wartet, bis du dorthin reist.",
+      message: "Du bleibst in der Halle der Ewigen Flamme. Hochmeisterin Ragna Glutherz und Erzpriester Thorvald erwarten dich am Altar." },
+  };
   const storageSites = {};
   const prologe = {};
   const creatures = {};
@@ -693,12 +703,16 @@ const startpunkte = (() => {
         ? { id: "flucht", label: attack.label, fight: "nacht-" + id + "-angriff", to: ids.morgen }
         : { id: "flucht", label: attack.label, message: attack.message, to: ids.morgen }],
     };
+    const start = weltStart[id];
     scenes[ids.morgen] = {
       place: f.morgen.place, title: f.morgen.title, objective: "Prolog abgeschlossen. Als Nächstes: Akt 1, „" + f.akte[0] + "“.",
-      text: f.morgen.text + " Die Fraktionsreihe „" + f.motto + "“ beginnt mit Akt 1, „" + f.akte[0] + "“. Bis dahin führt dich der Weg ins Kronreich, wo am Eispass die Asche fällt.",
+      text: f.morgen.text + " Die Fraktionsreihe „" + f.motto + "“ beginnt mit Akt 1, „" + f.akte[0] + "“. " + (start
+        ? start.text : "Bis dahin führt dich der Weg ins Kronreich, wo am Eispass die Asche fällt."),
       fern: fernOrt(f.morgen.place), lager: ids.morgen,
-      choices: [{ id: "reise", label: "Ins Kronreich reisen", to: "ankunft",
-        message: "Du machst dich auf den Weg ins Kronreich. Nach Tagen erreichst du das Ackerland bei Kornwik." }],
+      choices: [start
+        ? { id: "reise", label: start.label, to: "ankunft", welt: start.knoten, message: start.message }
+        : { id: "reise", label: "Ins Kronreich reisen", to: "ankunft",
+          message: "Du machst dich auf den Weg ins Kronreich. Nach Tagen erreichst du das Ackerland bei Kornwik." }],
     };
     storageSites[ids.heim] = "Zentrallager · " + fernOrt(f.heim.place);
     storageSites[ids.morgen] = "Zentrallager · " + fernOrt(f.morgen.place);

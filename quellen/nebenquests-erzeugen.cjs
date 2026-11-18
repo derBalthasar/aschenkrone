@@ -221,15 +221,107 @@ const orden = {
   stand: "Aushang: Aufträge sind lesbar, aber noch nicht spielbar.",
 };
 
+// ---------- Spielwerte (Henry, 18. 11. 2026: Haupt- und Nebenquests spielbar) ----------
+// Gegnerarten der Aufträge. Gruppen kämpfen als Mitläufer (3 gegen einen Helden, je Begleiter einer mehr),
+// Einzeltiere als Elite, Alphatiere als Anführer auf Gebietsstufe (Kampfdokument, Errata 4). Die Zahlen im
+// Auftragstext („Sieben Kultisten“) bleiben Erzählung.
+const gegnerTypen = {
+  kultisten: { name: "Kultisten", rang: "mitlaeufer", anzahl: 3, leader: "Kultführer", ally: "Kultist" },
+  schmuggler: { name: "Schmuggler", rang: "mitlaeufer", anzahl: 3, leader: "Schmugglerkapitän", ally: "Schmuggler" },
+  spione: { name: "Spione", rang: "mitlaeufer", anzahl: 3, leader: "Spitzel", ally: "Späher" },
+  deserteure: { name: "Deserteure", rang: "mitlaeufer", anzahl: 3, leader: "Wortführer", ally: "Deserteur" },
+  wegelagerer: { name: "Wegelagerer", rang: "mitlaeufer", anzahl: 3, leader: "Bandenführer", ally: "Wegelagerer" },
+  grauwoelfe: { name: "Grauwölfe", rang: "mitlaeufer", anzahl: 3, leader: "Leitwolf", ally: "Grauwolf" },
+  aschenkraehen: { name: "Aschenkrähen", rang: "mitlaeufer", anzahl: 3, leader: "Aschenkrähe", ally: "Weitere Krähe" },
+  galgenkraehen: { name: "Galgenkrähen", rang: "mitlaeufer", anzahl: 3, leader: "Galgenkrähe", ally: "Weitere Krähe" },
+  schneeschleicher: { name: "Schneeschleicher", rang: "mitlaeufer", anzahl: 3, leader: "Schneeschleicher", ally: "Schneeschleicher" },
+  stollenkriecher: { name: "Stollenkriecher", rang: "mitlaeufer", anzahl: 3, leader: "Stollenkriecher", ally: "Stollenkriecher" },
+  glutkaefer: { name: "Glutkäfer", rang: "mitlaeufer", anzahl: 3, leader: "Glutkäfer", ally: "Weiterer Glutkäfer" },
+  wrackkrabben: { name: "Wrackkrabben", rang: "mitlaeufer", anzahl: 3, leader: "Wrackkrabbe", ally: "Wrackkrabbe" },
+  riffhaie: { name: "Riffhaie", rang: "mitlaeufer", anzahl: 3, leader: "Riffhai", ally: "Riffhai" },
+  orkvortrupp: { name: "Ork-Vortrupp", rang: "mitlaeufer", anzahl: 3, leader: "Rostsegel-Plünderer", ally: "Ork-Krieger" },
+  frostbaer: { name: "Frostbär", rang: "elite" }, eishauer: { name: "Eishauer", rang: "elite" },
+  klippenwyrm: { name: "Klippenwyrm", rang: "elite" }, glutwurm: { name: "Glutwurm", rang: "elite" },
+  runenfresser: { name: "Runenfresser", rang: "elite" }, aschenmammut: { name: "Aschenmammut", rang: "elite" },
+  keiler: { name: "Eisenborstenkeiler", rang: "elite" }, flussschnapper: { name: "Flussschnapper", rang: "elite" },
+  netzweberin: { name: "Netzweberin", rang: "elite" }, irrglut: { name: "Irrglut", rang: "elite" },
+  moorschlinger: { name: "Moorschlinger", rang: "elite" }, kulthauptmann: { name: "Kult-Hauptmann", rang: "elite" },
+  skarn: { name: "Skarn der Weiße Bär", rang: "anfuehrer", alpha: true },
+  mutterdertiefen: { name: "Die Mutter der Tiefen", rang: "anfuehrer", alpha: true },
+  letztermammut: { name: "Der Letzte Mammut", rang: "anfuehrer", alpha: true },
+  graufang: { name: "Graufang", rang: "anfuehrer", alpha: true },
+  diealte: { name: "Die Alte vom Moor", rang: "anfuehrer", alpha: true },
+};
+const gegnerNachName = { "Grauwolf": "grauwoelfe", "Grauwölfe": "grauwoelfe", "Kultisten": "kultisten", "Schmuggler": "schmuggler",
+  "Spione": "spione", "Deserteure": "deserteure", "Wegelagerer": "wegelagerer", "Aschenkrähen": "aschenkraehen",
+  "Schneeschleicher": "schneeschleicher", "Stollenkriecher": "stollenkriecher", "Frostbär": "frostbaer", "Eishauer": "eishauer",
+  "Klippenwyrm": "klippenwyrm", "Glutwurm": "glutwurm", "Runenfresser": "runenfresser", "Aschenmammut": "aschenmammut",
+  "Skarn der Weiße Bär": "skarn", "Die Mutter der Tiefen": "mutterdertiefen", "Der Letzte Mammut": "letztermammut" };
+// Das Kronreich hat Gemini ohne Gegnerliste geliefert. Die Gegner folgen hier aus dem Auftragstext (erste Regel gewinnt).
+const gegnerAusText = [
+  [/Graufang/, "graufang"], [/uralten Moorschlinger/, "diealte"], [/Kult-Hauptmann/, "kulthauptmann"],
+  [/Kultist|Kultzirkel|Kult-Plünderer|Kultzelle|Zelle von/, "kultisten"], [/Glutkäfer/, "glutkaefer"],
+  [/Galgenkrähen/, "galgenkraehen"], [/Keiler/, "keiler"], [/Grauw[öo]lf|Wölfe|Rudel/, "grauwoelfe"],
+  [/Netzweberin|Riesenspinne/, "netzweberin"], [/Irrglut/, "irrglut"], [/Moorschlinger/, "moorschlinger"],
+  [/Flussschnapper/, "flussschnapper"], [/Riffhaie/, "riffhaie"], [/Wrackkrabben/, "wrackkrabben"],
+  [/orkischen Vortrupp/, "orkvortrupp"], [/Deserteure|Entlassene Söldner|Entlaufene Soldaten/, "deserteure"],
+  [/Schmuggler|Agenten/, "schmuggler"], [/Spion/, "spione"],
+  [/Banditen|Wegelagerer|Viehdiebe|Lederdiebe|Diebe/, "wegelagerer"],
+];
+
+const gegenstandNachName = { Heilmittel: "harzverband", Heiltrank: "harzverband", Gegenmittel: "gegengift", Gegengift: "gegengift" };
+// Lohnteile, die kein Gegenstand sind, sondern als Vermerk (Wissen, Ruf, spätere Folgen) im Spielstand bleiben.
+const vermerkMuster = /Lore|Ruf|Bonus|bonus|Segen|in Akt|Akt \d|Begleiter|Frühwarnung|Flotte|Schutz vor|Überfallgefahr|kosten? \d Vorrat|Spur|Beweise|Briefe|hält|können/;
+const slug = (t) => t.toLowerCase().replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+const trophaeen = {};
+
+function lohnAus(text, ressource) {
+  const lohn = { silber: 0, vorrat: 0, leisten: {}, gegenstaende: [], vermerke: [] };
+  for (let teil of text.split(/[,;]|\s&\s(?!\d)/).map((t) => t.trim()).filter(Boolean)) {
+    teil = teil.replace(/\s*\((Wert[^)]*|\d\/\d[^)]*)\)?$/, "").trim();
+    // Eine schließende Klammer bleibt nur, wenn sie zu einer öffnenden gehört („Moral-Bonus im Großen Thing (Akt 4)“).
+    if (teil.endsWith(")") && (teil.match(/\(/g) ?? []).length < (teil.match(/\)/g) ?? []).length) teil = teil.slice(0, -1).trim();
+    let m;
+    if ((m = teil.match(/^(\d+) Silber/))) lohn.silber += +m[1];
+    else if ((m = teil.match(/^([+-−]\d+) (Korn|Glaube)$/))) lohn.vorrat += +m[1].replace("−", "-");
+    else if ((m = teil.match(/^Untoten-Bedrohung ([-−]\d+)/))) lohn.leisten.untote = +m[1].replace("−", "-");
+    else if ((m = teil.match(/^Ork-Bedrohung ([-−]\d+)/))) lohn.leisten.orks = +m[1].replace("−", "-");
+    else if ((m = teil.match(/(?:Weg|Reisen auf) ([SPMD]\d\d) koste[nt]? 1 Vorrat weniger/))) { lohn.wegRabatt = m[1]; lohn.vermerke.push(teil); }
+    else if (vermerkMuster.test(teil)) lohn.vermerke.push(teil);
+    else {
+      const [, n, name] = teil.match(/^(?:(\d+)x )?(.+)$/);
+      const id = gegenstandNachName[name] ?? "beute-" + slug(name);
+      if (id.startsWith("beute-")) trophaeen[id] = name;
+      for (let i = 0; i < (+n || 1); i++) lohn.gegenstaende.push(id);
+    }
+  }
+  return lohn;
+}
+
+function spielwerte(q, ortId, fraktionId) {
+  const gegner = (q.gegner?.length ? q.gegner.map((n) => gegnerNachName[n]).filter(Boolean) : null) ??
+    (fraktionId === "kronreich" ? [gegnerAusText.find(([re]) => re.test(q.text))?.[1]].filter(Boolean) : []);
+  for (const n of q.gegner ?? []) if (!gegnerNachName[n]) throw new Error(q.id + ": unbekannter Gegner " + n);
+  const wege = q.wege ?? [...new Set(q.text.match(/\b[SPMD]\d\d\b/g) ?? [])].filter((k) => wegKennungen[k]);
+  // Ein Kampfauftrag auf einem Weg, der am Auftragsort beginnt, wird beim Reisen über diesen Weg ausgelöst.
+  // Alle anderen erledigt der Held am Auftragsort.
+  const weg = gegner.length ? wege.find((k) => wegKennungen[k].includes(ortId)) : undefined;
+  const [haupt, oder] = q.lohn.split(/\s*\(oder\s*/);
+  return { gegner: gegner[0] ?? null, ...(weg ? { weg } : {}), lohn: [lohnAus(haupt), ...(oder ? [lohnAus(oder.replace(/\)$/, ""))] : [])] };
+}
+
 function fraktion(f) {
   const orte = Object.assign({}, ...f.teil2.map((d) => orteAus(lies(d), f.hinweise, f.ersatz)));
   for (const id of Object.keys(f.hinweise)) {
     if (!Object.values(orte).some((o) => o.auftraege.some((q) => q.id === id))) throw new Error("Hinweis ohne Auftrag: " + id);
   }
+  const fraktionId = f === kronreich ? "kronreich" : "orden";
+  for (const [ortId, eintrag] of Object.entries(orte)) for (const q of eintrag.auftraege) q.spiel = spielwerte(q, ortId, fraktionId);
   return { volk: "menschen", reihe: reiheAus(lies(f.teil1), f), quelle: f.quelle, stand: f.stand, ...(f.fehlt ? { fehlt: f.fehlt } : {}), orte };
 }
 
-const daten = { kronreich: fraktion(kronreich), orden: fraktion(orden), wegKennungen };
+const daten = { kronreich: fraktion(kronreich), orden: fraktion(orden), wegKennungen, gegnerTypen };
+daten.trophaeen = trophaeen;
 
 const kopf = `"use strict";
 
