@@ -160,7 +160,7 @@ Nordwacht / Glutvik -> Seewege -> frei wählbarer Kontinent
 ### Firnby (Dorf, D31, Felle, Stufe 1-5 für Orden-Helden)
 - **Schneeschleicher im Stall** (Dorfauftrag): Schütze die Pelzvorräte und Schlittenhunde vor einem Rudel Schneeschleicher. Lohn: 20 Silber, Gefütterte Stiefel. Gegner: Schneeschleicher. Wege: D31 Eiswacht – Firnby.
 
-### Flammenhof (stadt, Stufe 2-5 für Orden-Helden)
+### Flammenhof (stadt, Stufe 1-5 für Orden-Helden)
 - **Die Gaben des Opferhains** (Fraktion): Begleite eine Prozession über D33 zum Opferhain, um den Segen für die Ostgrenze zu erneuern. Lohn: 20 Silber, +8 Glaube. Gegner: Grauwölfe. Wege: D33 Flammenhof – Opferhain.
 - **Die Ziegen der Hochalm** (Dorf-Verbindung): Ein Klippenwyrm bedroht die Herden auf der Ziegenalm (D34). Lohn: 30 Silber, +5 Glaube. Gegner: Klippenwyrm. Wege: D34 Flammenhof – Ziegenalm.
 - **Fisch gegen Feuerholz** (Kaltfrieden (Häfen)): Händler aus Tranvik bieten über die kurze Grenzstraße S34 gesalzenen Fisch gegen geweihtes Feuerholz an – doch ein Zelot will den Handel sprengen. Lohn: 40 Silber, +5 Glaube. Gegner: Deserteure. Wege: S34 Flammenhof – Tranvik.
@@ -172,13 +172,13 @@ Nordwacht / Glutvik -> Seewege -> frei wählbarer Kontinent
 - **Der vermisste Bote nach Wachtfeuer** (Fraktion): Suche einen Ordensboten, der auf der Straße S35 nach Wachtfeuer verschwunden ist. Lohn: 30 Silber, +5 Glaube. Gegner: Grauwölfe. Wege: S35 Flammenhof – Wachtfeuer.
 - **Der Grenzpakt von S34** (Gewichtig): Schließe mit dem Hafenmeister von Tranvik auf S34 ein geheimes Frühwarnabkommen ab, falls untote Segel am Horizont auftauchen. Lohn: Frühwarnung in Akt 3 & 4; Untoten-Bedrohung -3. Gegner: Schmuggler. Wege: S34 Flammenhof – Tranvik.
 
-### Opferhain (Dorf, D33, Glaube, Stufe 2-5 für Orden-Helden)
+### Opferhain (Dorf, D33, Glaube, Stufe 1-5 für Orden-Helden)
 - **Die geschändete Feuerschale** (Dorfauftrag): Reinige den heiligen Hain, nachdem Kultisten die Glut mit kaltem Wasser und Asche gelöscht haben. Lohn: Untoten-Bedrohung -2, +7 Glaube. Gegner: Kultisten. Wege: D33 Flammenhof – Opferhain.
 
-### Ziegenalm (Dorf, D34, Ziegen, Stufe 2-5 für Orden-Helden)
+### Ziegenalm (Dorf, D34, Ziegen, Stufe 1-5 für Orden-Helden)
 - **Frostlilien am Steilhang** (Dorfauftrag): Sammle seltene Frostlilien für die Heiler von Flammenhof und wehre Eishauer ab. Lohn: 25 Silber, 2x Heilmittel. Gegner: Eishauer. Wege: D34 Flammenhof – Ziegenalm.
 
-### Glutvik (hafenstadt, Stufe 2-5 für Orden-Helden)
+### Glutvik (hafenstadt, Stufe 1-5 für Orden-Helden)
 - **Tran für die Leuchtfeuer** (Fraktion): Sichere die Tranfässer aus Walstrand auf D36, damit die Leuchttürme der Nordwestküste nicht verlöschen. Lohn: 30 Silber, +6 Glaube. Gegner: Wegelagerer. Wege: D36 Glutvik – Walstrand.
 - **Die Fischer von Eismeerby** (Dorf-Verbindung): Schütze die Winterfischer auf D35 vor hungrigen Frostbären an der Küste. Lohn: 25 Silber, +5 Glaube. Gegner: Frostbär. Wege: D35 Glutvik – Eismeerby.
 - **Das Handelsschiff aus Sandvik** (Kaltfrieden (Kronreich)): Ein Kapitän aus Sandvik (M01) bringt dringend benötigtes Korn, doch ein harter Ordensvogt will die Ladung ohne Bezahlung beschlagnahmen. Lohn: 35 Silber, +6 Glaube. Wege: M01 Sandvik – Glutvik.
@@ -190,10 +190,10 @@ Nordwacht / Glutvik -> Seewege -> frei wählbarer Kontinent
 - **Eishauer an der Küstenstraße** (Bestiarium): Vertreibe ein Rudel Eishauer, das die Straße S39 nach Nordwacht blockiert. Lohn: 40 Silber, Eishauer-Axt. Gegner: Eishauer. Wege: S39 Glutvik – Nordwacht.
 - **Die Walfänger-Flottille** (Gewichtig): Rüste die robusten Walfängerboote von Glutvik mit Runen-Rammen aus, damit sie in Akt 5 die Überfahrt der Kreuzzugsflotte verstärken. Lohn: Stärkere Flotte in Akt 5. Gegner: Frostbär. Wege: M01 Sandvik – Glutvik, M11 Glutvik – Tranvik.
 
-### Eismeerby (Dorf, D35, Fisch, Stufe 2-5 für Orden-Helden)
+### Eismeerby (Dorf, D35, Fisch, Stufe 1-5 für Orden-Helden)
 - **Die eingefrorenen Boote** (Dorfauftrag): Hilf den Fischern, ihre Boote freizuschlagen und plündernde Deserteure abzuwehren. Lohn: 20 Silber, +5 Glaube. Gegner: Deserteure. Wege: D35 Glutvik – Eismeerby.
 
-### Walstrand (Dorf, D36, Tran, Stufe 2-5 für Orden-Helden)
+### Walstrand (Dorf, D36, Tran, Stufe 1-5 für Orden-Helden)
 - **Die Trankessel von Walstrand** (Dorfauftrag): Besorge Grauweide-Holz zum Befeuern der Trankessel und vertreibe Grauwölfe. Lohn: 25 Silber, Tran-Fackel. Gegner: Grauwölfe. Wege: D36 Glutvik – Walstrand.
 
 ### Lichtheim (stadt, Stufe 1-5 für Orden-Helden)
@@ -232,7 +232,7 @@ Nordwacht / Glutvik -> Seewege -> frei wählbarer Kontinent
 ### Robbenstrand (Dorf, D40, Fisch, Stufe 1-5 für Orden-Helden)
 - **Plünderer am Eisstrand** (Dorfauftrag): Vertreibe Deserteure, die den Wintervorrat an Trockenfisch stehlen wollen. Lohn: 20 Silber, Fischtran-Salbe. Gegner: Deserteure. Wege: D40 Nordwacht – Robbenstrand.
 
-### Sigrunsheim (stadt, Stufe 2-5 für Orden-Helden)
+### Sigrunsheim (stadt, Stufe 1-5 für Orden-Helden)
 - **Das Wasser von Sigrunsquell** (Fraktion): Eskortiere Priesterinnen auf D42 nach Sigrunsquell, um geweihtes Quellwasser für die Kranken im Ordensland zu schöpfen. Lohn: +8 Glaube, 20 Silber, 2x Heilmittel. Gegner: Grauwölfe. Wege: D42 Sigrunsheim – Sigrunsquell.
 - **Gerste aus dem Südtal** (Dorf-Verbindung): Schütze die Bauern von Gerstenhof (D41) vor Wegelagerern aus dem Grenzland. Lohn: 25 Silber, +5 Glaube. Gegner: Wegelagerer. Wege: D41 Sigrunsheim – Gerstenhof.
 - **Zollstreit vor Grenzmarkt** (Kaltfrieden (Häfen)): Auf der Grenzstraße S45 nach Grenzmarkt verlangen bewaffnete Söldner der Freien Häfen Wegezoll von Ordenspilgern. Lohn: 40 Silber, Kaltfrieden-Lore. Gegner: Schmuggler. Wege: S45 Sigrunsheim – Grenzmarkt.
@@ -244,10 +244,10 @@ Nordwacht / Glutvik -> Seewege -> frei wählbarer Kontinent
 - **Ascheregen auf den Gerstenfeldern** (Nacht des Erwachens): Hilf den Bauern von Gerstenhof, die Felder von Vulkanasche zu reinigen und Aschenkrähen zu vertreiben. Lohn: 20 Silber, +5 Glaube. Gegner: Aschenkrähen. Wege: D41 Sigrunsheim – Gerstenhof.
 - **Die gesegneten Banner von Sigrunsheim** (Gewichtig): Weihe die Kriegsbanner des Ordens in Sigrunsquell und entsende Boten über S46 nach Wachtfeuer. Stärkt die Moral der Paladine in Akt 4. Lohn: +10 Glaube; Moral-Bonus im Großen Thing (Akt 4). Gegner: Kultisten. Wege: D42 Sigrunsheim – Sigrunsquell, S46 Sigrunsheim – Wachtfeuer.
 
-### Sigrunsquell (Dorf, D42, Glaube, Stufe 2-5 für Orden-Helden)
+### Sigrunsquell (Dorf, D42, Glaube, Stufe 1-5 für Orden-Helden)
 - **Die stummen Pilger** (Dorfauftrag): Entlarve drei als Pilger verkleidete Spione, die das Quellheiligtum auskundschaften. Lohn: 25 Silber, +5 Glaube. Gegner: Spione. Wege: D42 Sigrunsheim – Sigrunsquell.
 
-### Gerstenhof (Dorf, D41, Gerste, Stufe 2-5 für Orden-Helden)
+### Gerstenhof (Dorf, D41, Gerste, Stufe 1-5 für Orden-Helden)
 - **Wölfe am Mühlbach** (Dorfauftrag): Vertreibe ein Rudel Grauwölfe, das die Kornsäcke am Bachlauf bedroht. Lohn: 20 Silber, +4 Glaube. Gegner: Grauwölfe. Wege: D41 Sigrunsheim – Gerstenhof.
 
 ### Thorvaldsklipp (stadt, Stufe 1-5 für Orden-Helden)
@@ -268,7 +268,7 @@ Nordwacht / Glutvik -> Seewege -> frei wählbarer Kontinent
 ### Kliffhof (Dorf, D44, Schafe, Stufe 1-5 für Orden-Helden)
 - **Die verlorene Herde** (Dorfauftrag): Finde die verirrten Schafe im Nebel und wehre Grauwölfe ab. Lohn: 20 Silber, +4 Glaube. Gegner: Grauwölfe. Wege: D44 Thorvaldsklipp – Kliffhof.
 
-### Wachtfeuer (stadt, Stufe 2-5 für Orden-Helden)
+### Wachtfeuer (stadt, Stufe 1-5 für Orden-Helden)
 - **Bauholz für die Palisaden** (Fraktion): Sichere den Holztransport aus Holzfällerby über D45 für die Befestigungen an der Ostgrenze. Lohn: 25 Silber, +6 Glaube. Gegner: Grauwölfe. Wege: D45 Wachtfeuer – Holzfällerby.
 - **Korn aus dem Wachthof** (Dorf-Verbindung): Schütze die wenigen Kornfelder des Ordens bei Wachthof (D46) vor Plünderern. Lohn: 25 Silber, +6 Glaube. Gegner: Wegelagerer. Wege: D46 Wachtfeuer – Wachthof.
 - **Die Grenze nach Bernsvik** (Kaltfrieden (Häfen)): Auf der Grenzstraße S47 nach Bernsvik überfallen Schmuggler eine Ordenskarawane mit Bernsteintalismanen. Lohn: 45 Silber, Kaltfrieden-Lore. Gegner: Schmuggler. Wege: S47 Wachtfeuer – Bernsvik.
@@ -280,8 +280,8 @@ Nordwacht / Glutvik -> Seewege -> frei wählbarer Kontinent
 - **Aschenregen im Waldtal** (Nacht des Erwachens): Vulkanasche vergiftet die Bäche im Tal; besorge Frostlilien zur Reinigung des Wassers. Lohn: 25 Silber, 2x Heilmittel. Gegner: Schneeschleicher. Wege: D46 Wachtfeuer – Wachthof.
 - **Die Wacht an der Oststraße** (Gewichtig): Errichte einen befestigten Außenposten auf der Grenzstraße S47 nach Bernsvik. Lohn: Reisen auf S47 kosten 1 Vorrat weniger; Verhandlungsbonus in Bernsvik. Gegner: Wegelagerer, Schmuggler. Wege: S47 Wachtfeuer – Bernsvik.
 
-### Holzfällerby (Dorf, D45, Holz, Stufe 2-5 für Orden-Helden)
+### Holzfällerby (Dorf, D45, Holz, Stufe 1-5 für Orden-Helden)
 - **Die umgestürzten Kiefern** (Dorfauftrag): Räume die Straße nach einem Sturm frei und wehre ein Rudel Grauwölfe ab. Lohn: 20 Silber, +5 Glaube. Gegner: Grauwölfe. Wege: D45 Wachtfeuer – Holzfällerby.
 
-### Wachthof (Dorf, D46, Korn, Stufe 2-5 für Orden-Helden)
+### Wachthof (Dorf, D46, Korn, Stufe 1-5 für Orden-Helden)
 - **Aschenkrähen auf der Saat** (Dorfauftrag): Vertreibe einen Schwarm Aschenkrähen von den kostbaren Kornfeldern. Lohn: 20 Silber, +5 Glaube. Gegner: Aschenkrähen. Wege: D46 Wachtfeuer – Wachthof.

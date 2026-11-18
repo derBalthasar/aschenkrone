@@ -160,3 +160,35 @@ test("die erzeugte Datei entspricht Quelle und Skript", () => {
     for (const t of titel) assert.ok(datei.includes(JSON.stringify(t).slice(1, -1)), name + " fehlt: " + t);
   }
 });
+
+// Prüfkriterien der Arbeitsanweisung „Volk der Menschen“ (Henry, 18. 11. 2026).
+test("je Fraktion 11 Städte mit q01 bis q10, 23 Dörfer mit Dorfweg, drei Begleiter verschiedener Klassen", () => {
+  const klassen = { kronreich: ["waechter", "spaeher", "krieger"], orden: ["waechter", "magier", "spaeher"] };
+  const alleIds = new Set();
+  for (const fraktion of Object.keys(klassen)) {
+    const orte = Object.entries(D[fraktion].orte);
+    const staedte = orte.filter(([id]) => knoten.get(id).typ !== "dorf");
+    const doerfer = orte.filter(([id]) => knoten.get(id).typ === "dorf");
+    assert.equal(staedte.length, 11, fraktion);
+    assert.equal(doerfer.length, 23, fraktion);
+    for (const [id, eintrag] of staedte) {
+      assert.deepEqual(eintrag.auftraege.map(q => q.id), Array.from({ length: 10 }, (_, i) => id + "_q" + String(i + 1).padStart(2, "0")), id);
+    }
+    for (const [id, eintrag] of doerfer) {
+      assert.match(eintrag.weg, /^D\d\d$/, id);
+      assert.ok(D.wegKennungen[eintrag.weg].includes(id), id + ": Dorfweg");
+      assert.ok(eintrag.auftraege.length >= 1 && eintrag.auftraege.length <= 2, id);
+    }
+    for (const [, eintrag] of orte) for (const q of eintrag.auftraege) {
+      assert.ok(!alleIds.has(q.id), "doppelte Kennung " + q.id);
+      alleIds.add(q.id);
+    }
+    const begleiter = D[fraktion].reihe.begleiter;
+    assert.deepEqual(begleiter.map(b => b.klasse), klassen[fraktion]);
+    for (const b of begleiter) {
+      assert.match(b.id, new RegExp("^comp_" + (fraktion === "kronreich" ? "kron" : fraktion) + "_"), b.id);
+      assert.match(b.auftrag, /_q10$/);
+    }
+  }
+  assert.deepEqual([...new Set(Object.values(D.orden.orte).map(o => o.stufen))], ["1-5"], "Orden: einheitlich Stufe 1–5");
+});

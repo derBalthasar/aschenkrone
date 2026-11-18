@@ -1,0 +1,259 @@
+{
+  "meta": {
+    "faction": "Freie Häfen",
+    "factionId": "haefen",
+    "motto": "Jedes Meer ist ein Weg",
+    "resourceType": "Gold",
+    "currency": "Silber",
+    "magicAllowed": false,
+    "maxCompanions": 3
+  },
+  "companions": [
+    {
+      "id": "comp_haefen_karen",
+      "name": "Karen Salzklinge",
+      "role": "Seeschütze / Fernkampf",
+      "class": "spaeher",
+      "recruitLocation": "Perlvik",
+      "recruitAct": 1,
+      "questId": "perlvik_q10",
+      "ability": "Harpunensalve der Wellenmutter"
+    },
+    {
+      "id": "comp_haefen_soren",
+      "name": "Sören Nebeltritt",
+      "role": "Schattenklinge / Kundschafter",
+      "class": "schurke",
+      "recruitLocation": "Nebelvik",
+      "recruitAct": 1,
+      "questId": "nebelvik_q10",
+      "ability": "Dolchstoß im Hafenrauch"
+    },
+    {
+      "id": "comp_haefen_halvor",
+      "name": "Halvor Eisentau",
+      "role": "Zollhauptmann / Frontkämpfer",
+      "class": "waechter",
+      "recruitLocation": "Salzwacht",
+      "recruitAct": 1,
+      "questId": "salzwacht_q10",
+      "ability": "Enterhaken & Schildwall"
+    }
+  ],
+  "mainQuestline": {
+    "chapter": 1,
+    "prolog": {
+      "title": "Fracht aus dem Norden",
+      "status": "implemented"
+    },
+    "acts": [
+      {
+        "act": "1",
+        "id": "haefen_act1",
+        "title": "Die Zollinseln",
+        "levelRange": "1-5",
+        "region": "Zollinseln & Ostküste (Zollholm, Möwenstad, Perlvik)",
+        "steps": [
+          {
+            "step": 1,
+            "location": "Zollholm",
+            "title": "Spuren auf den Zollinseln",
+            "description": "Nach der Flucht aus Perlvik organisierst du von Zollholm aus die Sicherung der Seewege. Eine verschwundene Leiche aus dem brennenden Gildenhaus und ein vermisster Seesoldat führen zu einem Schmugglerversteck."
+          },
+          {
+            "step": 2,
+            "location": "Möwenstad / Silberholm",
+            "title": "Verschlüsselte Briefe",
+            "description": "Über Seeweg M31 nach Möwenstad und M30 nach Silberholm fängst du Kuriere ab. Geheime Nachrichten der Stillen Feder (deren Identität im Dunkeln bleibt) warnen vor Kult-Reedern, die Knochen aus dem Norden schmuggeln."
+          },
+          {
+            "step": 3,
+            "location": "Perlvik",
+            "title": "Rückkehr ans Hafenthing",
+            "description": "Über M40 kehrst du nach Perlvik zurück, überführst den korrupten Reeder vor Thingsprecherin Solveig Valsdottir und erhältst das Mandat der Freien Häfen."
+          }
+        ],
+        "keyChoice": [
+          {
+            "id": "haefen_act1_guild",
+            "label": "Den Bund der ehrlichen Kapitäne stärken & Schmuggel offenlegen",
+            "effect": "+10 Gold; bessere Handelspreise in allen Hafenstädten."
+          },
+          {
+            "id": "haefen_act1_shadow",
+            "label": "Die Schmugglerrouten heimlich für die Häfen übernehmen",
+            "effect": "+80 Silber; Spionage- und Kaper-Boni auf Seewegen."
+          }
+        ]
+      },
+      {
+        "act": "2/3",
+        "id": "haefen_branch_kronreich",
+        "title": "Die Kronschuld",
+        "freeOrder": true,
+        "recommendedOrder": 2,
+        "sisterFaction": "Kronreich",
+        "levelRange": "6-10 als erster Zweig, 11-15 als zweiter",
+        "mainLocations": [
+          "Grenzmarkt",
+          "Haraldstad",
+          "Kronhall"
+        ],
+        "steps": [
+          {
+            "step": 1,
+            "location": "Grenzmarkt / Haraldstad",
+            "title": "Korn gegen Schuldscheine",
+            "description": "Über S53 erreichst du Grenzmarkt und über Grenzstraße S10 Haraldstad. Die Häfen brauchen dringend Korn, während Kronhall tief in der Kreide bei Meister Orrin Kupferbarts Bankiers steht."
+          },
+          {
+            "step": 2,
+            "location": "Kronhall",
+            "title": "Verhandlung in der Königshalle",
+            "description": "In Kronhall verhandelst du mit Kronprinzessin Astrid und Kanzler Ulf Grau über die Kronschuld. Jarl Ragnvald droht mit Abzug seiner Banner, falls die Krone den Häfen nachgibt."
+          },
+          {
+            "step": 3,
+            "location": "Skerheim / Salzwacht",
+            "title": "Kornwagen an die Küste",
+            "description": "Sicherung der Kornlieferungen über Grenzstraße S11 nach Skerheim und S57 in die Werften von Salzwacht."
+          }
+        ],
+        "keyChoice": [
+          {
+            "id": "haefen_kron_alliance",
+            "label": "Hälfte der Schuld erlassen gegen feste Korn- und Holzquoten",
+            "effect": "Dauerhafte Kornversorgung; friedlicher Bund mit Astrid."
+          },
+          {
+            "id": "haefen_kron_debt",
+            "label": "Volle Kronschuld eintreiben & Kronsteuern verpfänden",
+            "effect": "+100 Silber und +10 Gold, aber Verbitterung im Kronreich."
+          }
+        ]
+      },
+      {
+        "act": "2/3",
+        "id": "haefen_branch_orden",
+        "title": "Gold und Eisen",
+        "freeOrder": true,
+        "recommendedOrder": 3,
+        "sisterFaction": "Orden der Flamme",
+        "levelRange": "6-10 als erster Zweig, 11-15 als zweiter",
+        "mainLocations": [
+          "Bernsvik",
+          "Wachtfeuer",
+          "Brandstein",
+          "Glutberg"
+        ],
+        "steps": [
+          {
+            "step": 1,
+            "location": "Bernsvik / Wachtfeuer",
+            "title": "Zug ins Hochgebirge",
+            "description": "Über Grenzstraße S47 reist du von Bernsvik nach Wachtfeuer, um mit dem Orden der Flamme über Waffen, Eisen und den Schutz der Nordseewege zu verhandeln."
+          },
+          {
+            "step": 2,
+            "location": "Brandstein",
+            "title": "Schwefel und Schwarzpulver",
+            "description": "In Brandstein verhandelst du über Schwefellieferungen für die Schiffskanonen von Admiral Knut Salzhand, während Erzpriester Thorvald misstrauisch deine Schritte beobachtet."
+          },
+          {
+            "step": 3,
+            "location": "Glutberg",
+            "title": "Der Pakt am Gipfel",
+            "description": "Abschluss mit Hochmeisterin Ragna Glutherz und Seherin Freydis über gemeinsame Kreuzzugs- und Handelsflotten."
+          }
+        ],
+        "keyChoice": [
+          {
+            "id": "haefen_orden_contract",
+            "label": "Gold und Schiffe gegen Ordens-Eskorten stellen (80 Silber)",
+            "effect": "Schwere Ordenspaladine begleiten die Handelsflotte; +10 Gold."
+          },
+          {
+            "id": "haefen_orden_monopoly",
+            "label": "Handelsmonopol auf alle Nachschubwege des Ordens erzwingen",
+            "effect": "+120 Silber, aber geringere Moral bei den Ordenskriegern."
+          }
+        ]
+      },
+      {
+        "act": "4",
+        "id": "haefen_act4",
+        "title": "Das Alte Reich & Der Bleiche Skalde",
+        "levelRange": "16-18",
+        "includesFolkQuest": "Volksquest: Das Alte Reich",
+        "steps": [
+          {
+            "step": 1,
+            "location": "Kronhall / Glutberg",
+            "title": "Entlarvung des Bleichen Skalden",
+            "description": "Durch abgefangene Handelsbriefe und Hinweise von Seherin Freydis wird der Drahtzieher hinter dem Knochenschmuggel entlarvt: Erzpriester Thorvald vom Glutberg ist der Bleiche Skalde. Über hundert Jahre hält ihn die Totenmagie des Nordens am Leben; als Preis dafür schwächt er die Ewige Flamme, damit die Untoten im hohen Norden erstarken. Du stellst ihn zum Kampf (Untoten-Bedrohung -15)."
+          },
+          {
+            "step": 2,
+            "location": "Kronhall",
+            "title": "Das Große Thing",
+            "description": "Thingsprecherin Solveig Valsdottir, Kronprinzessin Astrid und Hochmeisterin Ragna Glutherz besiegeln die Vereinigung der drei Menschenfraktionen; du steigst zum Bannerjarl auf."
+          },
+          {
+            "step": 3,
+            "location": "Salzwacht / Perlvik",
+            "title": "Die Flotte gen Norden",
+            "description": "Admiral Knut Salzhand rüstet in Salzwacht und Perlvik die größte Armada der Menschen für die Überfahrt."
+          }
+        ]
+      },
+      {
+        "act": "5",
+        "id": "haefen_act5",
+        "title": "Die Flotte gen Norden",
+        "levelRange": "19-20",
+        "destinationChoice": [
+          "Elfen",
+          "Orks",
+          "Zwerge",
+          "Untote (extrem schwer)"
+        ],
+        "steps": [
+          {
+            "step": 1,
+            "location": "Salzwacht / Perlvik",
+            "title": "Segel setzen",
+            "description": "Unter dem Kommando von Admiral Knut Salzhand verlässt die vereinte Armada die Ostküste."
+          },
+          {
+            "step": 2,
+            "location": "Inneres Meer",
+            "title": "Kanonendonner im Nebel",
+            "description": "Abwehr eines Angriffs untoter Kriegsschiffe auf hoher See durch die Breitseiten der Bundesflotte."
+          },
+          {
+            "step": 3,
+            "location": "Fremde Küste (frei wählbarer Kontinent)",
+            "title": "Der Brückenkopf",
+            "description": "Landung an der gewählten Küste (Elfen im Osten, Orks im Südwesten, Zwerge im Südosten als Bündnis oder Unterwerfung – oder der extrem schwere Sturm auf den Kontinent der Untoten im hohen Norden). Ende Kapitel 1."
+          }
+        ]
+      }
+    ],
+    "specialization": {
+      "trigger": "Nach Abschluss beider Schwester-Zweige",
+      "additionalToClass": true,
+      "options": [
+        {
+          "id": "spec_schwarzpulver_armada",
+          "name": "Schwarzpulver-Armada",
+          "bonus": "Verstärkte Fernkampf- und Kanonenangriffe, höherer Schaden gegen Schiffe und Befestigungen."
+        },
+        {
+          "id": "spec_goldene_gilde",
+          "name": "Goldene Gilde",
+          "bonus": "+25% Silber aus Handel und Beute, günstigere Söldner und geringere Reisekosten."
+        }
+      ]
+    }
+  }
+}

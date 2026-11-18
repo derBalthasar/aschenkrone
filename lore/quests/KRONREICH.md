@@ -87,15 +87,15 @@ Die Gruppengrenze im Spiel liegt bei 3 Gefährten plus Held (`rules.partyLimit`)
 
 ## Prüfvermerke zu den Nebenquests
 
-Die Texte sind wörtlich übernommen. Korrigiert ist nur ein Bestiariumsname: „Irrglühte“ heißt im Kanon „Irrglut“. Alle Orte, Dörfer, Erträge und Weg-Kennungen S, P, M und D sind gegen das Knotennetz geprüft (`spiel/nebenquests.test.cjs`). Offen und im Spiel als Hinweis am Auftrag markiert:
+Die Texte sind wörtlich übernommen. Korrigiert ist nur ein Bestiariumsname: „Irrglühte“ heißt im Kanon „Irrglut“. Alle Orte, Dörfer, Erträge und Weg-Kennungen S, P, M und D sind gegen das Knotennetz geprüft (`spiel/nebenquests.test.cjs`). Im Spiel als Hinweis am Auftrag markiert:
 
 - hagenfels_q07: Die Glutstahl-Klinge ist eine Glutwaffe und im Kronreich nicht tragbar. Sie taugt nur als Beute zum Verkauf. Runengegenstände (Runen-Dolch, Runentalisman, Runensattel) sind erlaubt. Das Glutpanzer-Wams ist eine Rüstung aus Käferpanzer und keine Waffe.
-- westvik_q03: Von Westvik führt keine Straße direkt nach Kronhall. Der Weg geht über S23 nach Steinwacht.
-- rosshag_q02: Der Titel nennt die Rostsegel (Orkpiraten), der Text Kundschafter der Staubreiter zu Lande.
+- westvik_q03 (geklärt, Henry 18. 11. 2026): Der Salzkarren nimmt den Landweg über S23 nach Steinwacht und weiter über S21 nach Rosshag und S18 nach Kronhall.
+- rosshag_q02 (geklärt, Henry 18. 11. 2026): Der Titel lautet „Pferdediebe der Staubreiter“.
 - Riffhaie, Wrackkrabben und Bären stehen im Bestiarium, aber nicht in der Liste „Kronreich und Eispass“.
 - Gemini schreibt `noTimeLimit`. Das Questlog des Spiels kennt jedoch Fristen in Runden.
 
 ## Nächste Bauschritte
 
-1. Akt 1 „Der Thron wankt“ als spielbare Szenenfolge ab dem Prologende in Kronhall.
+1. Akt 1 „Der Thron wankt“ ist spielbar (Kronhall, Hagenfels, Westvik). Als Nächstes folgen die Akte 2 und 3.
 2. Nebenquests spielbar machen (Annahme, Ablauf, Kampf oder Probe, Lohn, Questlog).

@@ -70,16 +70,16 @@ function auftrag(roh, art, hinweise, ersatz = {}) {
     ...(q.openPoint ? { offen: q.openPoint } : {}), ...(hinweise[q.id] ? { hinweis: hinweise[q.id] } : {}) };
 }
 
-function orteAus(quelle, hinweise, ersatz) {
+function orteAus(quelle, hinweise, ersatz, einheitlicheStufen = null) {
   const orte = {};
   for (const stadt of quelle.cities) {
     const id = knoten.nachName[stadt.city];
     if (!id) throw new Error("Unbekannte Stadt: " + stadt.city);
-    orte[id] = { stufen: stadt.levelRange, auftraege: stadt.sideQuests.map((q) => auftrag(q, undefined, hinweise, ersatz)) };
+    orte[id] = { stufen: einheitlicheStufen ?? stadt.levelRange, auftraege: stadt.sideQuests.map((q) => auftrag(q, undefined, hinweise, ersatz)) };
     for (const dorf of stadt.villages) {
       const id2 = dorfId(dorf.village, id);
       if (!id2) throw new Error("Unbekanntes Dorf: " + dorf.village + " bei " + stadt.city);
-      orte[id2] = { stufen: stadt.levelRange, weg: dorf.road, ertrag: dorf.yield,
+      orte[id2] = { stufen: einheitlicheStufen ?? stadt.levelRange, weg: dorf.road, ertrag: dorf.yield,
         auftraege: dorf.quests.map((q) => auftrag(q, "Dorfauftrag", hinweise, ersatz)) };
     }
   }
@@ -126,7 +126,7 @@ function reiheAus(teil1, f) {
     begleiter: teil1.companions.map((c) => {
       const klasse = f.begleiterKlassen?.[c.id] ?? c.class;
       if (!klasse) throw new Error("Begleiter ohne Klasse: " + c.name);
-      return { id: c.id, name: text(c.name), rolle: c.role, klasse, ort: knoten.nachName[c.recruitLocation],
+      return { id: f.begleiterIds?.[c.id] ?? c.id, name: text(c.name), rolle: c.role, klasse, ort: knoten.nachName[c.recruitLocation],
         akt: c.recruitAct, auftrag: c.questId, faehigkeit: c.ability, ...(f.begleiterVermerke?.[c.id] ? { vermerk: f.begleiterVermerke[c.id] } : {}) };
     }),
     geheim: f.geheim,
@@ -141,10 +141,16 @@ const skalde = "Erzpriester Thorvald vom Glutberg";
 const kronreich = {
   teil1: "kronreich-teil1-hauptquest.json",
   teil2: ["kronreich-teil2-nebenquests.json"],
+  // Henry, 18. 11. 2026 (Arbeitsanweisung Volk der Menschen): Landweg für den Salzkarren, Titel passend zu den Staubreitern.
+  ersatz: {
+    westvik_q03: { description: "Schütze Salzkarren aus Tangstrand auf dem Landweg nach Kronhall: über S23 nach Steinwacht, " +
+      "dann über S21 nach Rosshag und S18 nach Kronhall.", roads: ["S23", "S21", "S18"] },
+    rosshag_q02: { title: "Pferdediebe der Staubreiter" },
+  },
   hinweise: {
     hagenfels_q07: "Glutwaffe: Im Kronreich nicht tragbar (Henry, 18. 11. 2026). Die Glutstahl-Klinge taugt nur als Beute zum Verkauf.",
-    westvik_q03: "Prüfen: Von Westvik führt keine Straße direkt nach Kronhall (S23 nach Steinwacht, dann weiter).",
-    rosshag_q02: "Prüfen: Titel nennt die Rostsegel (Orkpiraten), der Text Kundschafter der Staubreiter zu Lande.",
+    westvik_q03: "Änderung Henry (18. 11. 2026): Bei Gemini direkt nach Kronhall. Der Landweg führt über S23 nach Steinwacht und von dort über Rosshag (S21, S18) nach Kronhall.",
+    rosshag_q02: "Änderung Henry (18. 11. 2026): Bei Gemini „Pferdediebe der Rostsegel“. Die Diebe sind Kundschafter der Staubreiter zu Lande.",
     kronhall_q10: "Begleiterin aus Geminis Hauptquest-Vorschlag, im Spiel noch nicht angelegt.",
     rosshag_q10: "Begleiter aus Geminis Hauptquest-Vorschlag, im Spiel noch nicht angelegt.",
     ulfsborg_q10: "Begleiter aus Geminis Hauptquest-Vorschlag, im Spiel noch nicht angelegt.",
@@ -174,7 +180,7 @@ const kronreich = {
   begleiterKlassen: { comp_kron_sigrid: "waechter", comp_kron_wulfgar: "spaeher", comp_kron_fenris: "krieger" },
   geheim: ["Identität der Stillen Feder"],
   quelle: "Gemini, 18. 11. 2026, auf Grundlage von „Orte und Wege der Menschen“",
-  stand: "Aushang: Aufträge sind lesbar, aber noch nicht spielbar.",
+  stand: "Aushang: Helden des Kronreichs und des Ordens nehmen die Aufträge an. Andere Völker lesen nur mit.",
 };
 
 // ---------- Orden der Flamme ----------
@@ -217,8 +223,12 @@ const orden = {
   prologText: "Herbst 612 n. E., die Nacht des Erwachens: Novizenweihe im Aschenkloster, ein gefallener Bruder steht im Kreuzgang " +
     "wieder auf, Kultisten löschen die Wachfeuer von Nordwacht, und am Glutberg flackert die Ewige Flamme. (Zusammenfassung des Prologs im Spiel.)",
   geheim: [],
+  // Henry, 18. 11. 2026: Alle Startgebiete des Ordens in Akt 1 haben Stufe 1–5. Höhere Stufen greifen über die Akt-Reihenfolge.
+  stufen: "1-5",
+  // Einheitliche Kennungen der Begleiter (Arbeitsanweisung Volk der Menschen, 18. 11. 2026).
+  begleiterIds: { comp_orden_bjarne: "comp_orden_halvar", comp_orden_solveig: "comp_orden_gunhild" },
   quelle: "Gemini, 18. 11. 2026, auf Grundlage von „Orte und Wege der Menschen“",
-  stand: "Aushang: Aufträge sind lesbar, aber noch nicht spielbar.",
+  stand: "Aushang: Helden des Kronreichs und des Ordens nehmen die Aufträge an. Andere Völker lesen nur mit.",
 };
 
 // ---------- Spielwerte (Henry, 18. 11. 2026: Haupt- und Nebenquests spielbar) ----------
@@ -311,7 +321,7 @@ function spielwerte(q, ortId, fraktionId) {
 }
 
 function fraktion(f) {
-  const orte = Object.assign({}, ...f.teil2.map((d) => orteAus(lies(d), f.hinweise, f.ersatz)));
+  const orte = Object.assign({}, ...f.teil2.map((d) => orteAus(lies(d), f.hinweise, f.ersatz ?? {}, f.stufen)));
   for (const id of Object.keys(f.hinweise)) {
     if (!Object.values(orte).some((o) => o.auftraege.some((q) => q.id === id))) throw new Error("Hinweis ohne Auftrag: " + id);
   }
