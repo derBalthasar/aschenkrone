@@ -188,3 +188,22 @@ test("Tränke zeigen Werte in der Spielskala", () => {
   assert.equal(rules.effektText("POT_HEILUNG_2"), "Tier 2 · Stellt im Kampf 24 LP wieder her und entfernt Blutung.");
   assert.match(rules.effektText("POT_MANA_1"), /^Tier 1 · Stellt im Kampf \d+ Mana/);
 });
+
+test("Patch 2.6.17: Gegnerzahl nach Gruppengröße, Gefährtenschutz, Thorvald", () => {
+  const anzahl = (party) => rules.gegnerAufstellung("auftrag-deserteure", party, 10, 10);
+  assert.equal(anzahl(0).length, 2);
+  assert.equal(anzahl(1).length, 2);
+  assert.ok(anzahl(2).length >= 2 && anzahl(2).length <= 3);
+  assert.ok(anzahl(3).length >= 3 && anzahl(3).length <= 4);
+  const zwei = anzahl(1);
+  assert.equal(zwei[1].lp, Math.round(zwei[0].lp * 0.9));
+  const vier = anzahl(3);
+  if (vier.length === 4) assert.equal(vier[3].lp, Math.round(vier[0].lp * 0.75));
+  const t = rules.gegnerAufstellung("auftrag-thorvald", 2, 20, 20);
+  assert.equal(t.length, 3);
+  assert.equal(t[0].lp, 112);
+  assert.equal(t[0].ruestung, 5);
+  assert.ok(t[0].schaden <= 13);
+  assert.equal(t[1].lp, 32);
+  assert.ok(t[1].schaden <= 6);
+});

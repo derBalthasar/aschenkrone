@@ -687,9 +687,9 @@ assert.equal(healedByAlly.combat.bleeding, 0);
 assert.ok(healedByAlly.health > 10);
 
 const patrol = rules.choose(rules.choose(atYard, "toll"), "toll-fight");
-// Drei Deserteure allein, je Gefährte einer mehr, höchstens sechs.
-assert.equal(rules.targets(patrol).length, 6);
-assert.deepEqual(Array.from(rules.targets(reload(patrol)), target => target.id), [0, 1, 2, 3, 4, 5]);
+// Drei Deserteure allein, je Gefährte einer mehr, seit Patch 2.6.17 höchstens vier je Begegnung.
+assert.equal(rules.targets(patrol).length, 4);
+assert.deepEqual(Array.from(rules.targets(reload(patrol)), target => target.id), [0, 1, 2, 3]);
 const aimed = [];
 rules.strike(patrol, "spear", highRoll, undefined, 2, aimed);
 assert.equal(aimed[0].target, 2);

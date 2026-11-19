@@ -2203,6 +2203,9 @@ const rules = (() => {
       victoryText: "Der Kampf ist gewonnen." };
   }
   // Patch 2.5.4: Der Letzte Mammut trampelt über die ganze Gruppe (höchstens 13 Schaden je Treffer) statt zu springen.
+  // Patch 2.6.17: Thorvalds Klagelied trifft alle, höchstens 8, alle 3 Runden.
+  if (world.fights["auftrag-thorvald"]) world.fights["auftrag-thorvald"].special = { name: "Klagelied des Bleichen Skalden",
+    warning: "Thorvald hebt die knöcherne Harfe. Ein kaltes Lied schwillt an.", damage: 0, flaeche: true, deckel: 8, intervall: 3 };
   if (world.fights["auftrag-letztermammut"]) world.fights["auftrag-letztermammut"].special = { name: "Trampeln",
     warning: "Der Letzte Mammut senkt den Kopf und scharrt mit den Füßen.", damage: 2, flaeche: true, deckel: 13 };
 
@@ -3562,6 +3565,14 @@ const rules = (() => {
   // Patch 2.5.5: Anführer treffen auf jeder Stufe höchstens mit max(6, Heldenstufe) je Treffer (kein Sprung von Stufe 9 auf 10).
   const anfuehrerDeckel = (heldStufe) => Math.max(6, heldStufe);
   const bossAnpassung = { "auftrag-skarn": { lp: 0.82 }, "auftrag-letztermammut": { lp: 0.85 } };
+  // Patch 2.6.17 (Henry): Gegnerzahl nach aktiver Gruppengröße (Held + Gefährten), höchstens 4 je Begegnung.
+  // Gruppe 2–3: zusätzliche Gegner mit 90 % LP und Schaden; Gruppe 4: der vierte Gegner mit 75 %.
+  // Szenenkämpfe behalten ihre festgelegte Zahl, aber ebenfalls höchstens 4.
+  const gruppenSkalierung = { hoechstens: 4, stufen: { 1: { min: 1, max: 2, extra: 1 }, 2: { min: 2, max: 2, extra: 0.9 },
+    3: { min: 2, max: 3, extra: 0.9 }, 4: { min: 3, max: 4, extra: 1, vierter: 0.75 } }, gefaehrtenSchutz: 0.15 };
+  // Patch 2.6.17: Thorvald, der Bleiche Skalde (Bezug Stufe 20): feste Werte und höchstens zwei schwache Akolythen.
+  const bossWerte = { "auftrag-thorvald": { lp: 112, ruestung: 5, deckel: 13,
+    adds: { anzahl: 2, name: "Untoter Akolyth", lp: 32, deckel: 6 } } };
 
   function lineup(id, size, stufe = null, heldStufe = null) {
     const fight = world.fights[id];
@@ -3569,11 +3580,26 @@ const rules = (() => {
     const group = world.enemyGroups[id];
     const creature = world.creatures[id];
     const geschick = 8 + (creature.stats[3] ?? 5);
+    const boss = bossWerte[id];
+    if (boss) {
+      const basis = kampf.gegnerWerte(spec.rang, spec.stufe, 1 + size);
+      const add = kampf.gegnerWerte("mitlaeufer", spec.stufe, 1);
+      return [{ name: fight.name ?? creature.name, rang: spec.rang, stufe: spec.stufe, lp: boss.lp, max: boss.lp,
+        schaden: Math.min(basis.schaden, boss.deckel), deckel: boss.deckel, aktionen: basis.aktionen, geschick, tags: spec.tags ?? [],
+        status: {}, ruestung: boss.ruestung },
+      ...Array.from({ length: boss.adds.anzahl }, (_, i) => ({ name: boss.adds.name + " " + (i + 1), rang: "mitlaeufer", stufe: spec.stufe,
+        lp: boss.adds.lp, max: boss.adds.lp, schaden: Math.min(add.schaden, boss.adds.deckel), deckel: boss.adds.deckel, aktionen: 1,
+        geschick, tags: spec.tags ?? [], status: {} }))];
+    }
     let count = (spec.anzahl ?? 1) + (group ? Math.min(size, 6 - (spec.anzahl ?? 1)) : 0);
     // Allein (ohne Gefährten) höchstens 2 Gegner in Begegnungen und Aufträgen. Erzwingt eine Szene einen dritten,
     // kämpft jeder weitere als geschwächter Mitläufer (halbe LP, drei Viertel Schaden).
     const allein = size === 0;
-    if (allein && !szenenKampf(id)) count = Math.min(count, solo.maxGegner);
+    const szene = szenenKampf(id);
+    if (allein && !szene) count = Math.min(count, solo.maxGegner);
+    const skala = gruppenSkalierung.stufen[Math.min(4, size + 1)];
+    if (group && !szene) count = Math.max(skala.min, Math.min(skala.max, count));
+    count = Math.min(count, gruppenSkalierung.hoechstens);
     const anpassung = bossAnpassung[id];
     return Array.from({ length: count }, (_, index) => {
       const values = fight.system ? SY.kampfWerte(fight.system, spec.stufe) : kampf.gegnerWerte(spec.rang, spec.stufe, 1 + size);
@@ -3581,6 +3607,12 @@ const rules = (() => {
       let schaden = values.schaden;
       if (anpassung && index === 0) lp = Math.max(1, Math.round(lp * anpassung.lp));
       if (!fight.system && index === 0 && spec.rang === "anfuehrer") schaden = Math.min(schaden, anfuehrerDeckel(heldStufe ?? spec.stufe));
+      // Patch 2.6.17: Zusatzgegner je Gruppengröße schwächer.
+      const faktor = szene || index === 0 ? 1 : index === 3 && skala.vierter ? skala.vierter : skala.extra;
+      if (faktor !== 1) {
+        lp = Math.max(1, Math.round(lp * faktor));
+        schaden = Math.max(1, Math.round(schaden * faktor));
+      }
       const geschwaecht = allein && index >= solo.maxGegner;
       if (geschwaecht) {
         lp = Math.max(1, Math.round(lp * solo.mitlaeuferLp));
@@ -4192,7 +4224,7 @@ const rules = (() => {
     let heroGuarded = false;
     let victimCursor = Math.max(0, turn.round - 1);
     const leader = turn.feinde[0];
-    const special = leader.lp > 0 && turn.round > 0 && turn.round % 2 === 0 && !leader.status.schweigen && !leader.status.betaeubt &&
+    const special = leader.lp > 0 && turn.round > 0 && turn.round % (result.special?.intervall ?? 2) === 0 && !leader.status.schweigen && !leader.status.betaeubt &&
       !leader.status.furcht ? result.special : null;
     let lost = 0;
     let sparedByStealth = false;
@@ -4233,6 +4265,7 @@ const rules = (() => {
           const sonder = index === 0 && action === 0 ? special : null;
           let damage = foe.schaden - (status.langsam ? 1 : 0) - (status.schwach?.wert ?? 0) + (sonder?.damage ?? 0);
           if (sonder?.deckel) damage = Math.min(damage, sonder.deckel);
+          else if (foe.deckel) damage = Math.min(damage, foe.deckel);
           // Relikte der Gruppe: Schutz vor Feuer- und Kälteangriffen.
           if (gegnerElement[turn.id] === "feuer") damage -= reliktWert(state, "fireResistance");
           if (gegnerElement[turn.id] === "kaelte") damage = Math.round(damage * (1 - reliktWert(state, "coldDamageReduction")));
@@ -4280,6 +4313,8 @@ const rules = (() => {
               const reduction = Math.floor(((heroTarget ? protection(state) : 2) + armor) / 2);
               hit = Math.max(guarding ? 0 : 1, damage - reduction - defense);
             }
+            // Patch 2.6.17: Gefährten nehmen 15 % weniger Schaden.
+            if (!heroTarget && hit > 0) hit = Math.max(1, Math.round(hit * (1 - gruppenSkalierung.gefaehrtenSchutz)));
             if (heroTarget) {
               if (index === 0 && action === 0) { heroHit = true; heroGuarded = guarding; }
               if (hit > 0 && magierSchutz(state) && treffer++ > 0) hit = Math.round(hit * magierSchutzWerte.weitererTreffer);

@@ -2730,7 +2730,7 @@
       content.append(line);
       if (combat.stunned) content.append(element("p", "Benommen · Dein nächster Angriff ist schwächer."));
       const special = world.fights[combat.id].special;
-      if (combat.feinde[0].lp > 0 && combat.round % 2 === 1) content.append(element("p", special.warning + " Deckung schützt vor dem Zusatzeffekt."));
+      if (combat.feinde[0].lp > 0 && (combat.round + 1) % (special.intervall ?? 2) === 0) content.append(element("p", special.warning + " Deckung schützt vor dem Zusatzeffekt."));
       if (combat.bleeding > 0) content.append(element("p", "Blutung · " + combat.bleeding + " Runden"));
       // Eine Aktion pro Runde: Grundangriff oder eine freigeschaltete Fähigkeit.
       const canBoost = values.ressource >= 2;
