@@ -1,0 +1,2654 @@
+[
+ {
+  "module_id": "ASCHENKRONE_ACT2_ACT3_FRAMEWORK",
+  "version": "2.6.0",
+  "target_files": [
+   "spiel/regeln.js",
+   "spiel/handlung_akte.js"
+  ],
+  "unlock_conditions": {
+   "requires_act_1_completed": true,
+   "min_hero_level": 5
+  },
+  "branch_selection_rules": {
+   "available_branches_filter": "ALL_HUMAN_FACTIONS_EXCEPT_START_FACTION",
+   "total_sister_branches_to_complete": 2,
+   "free_order_selection": true,
+   "first_chosen_branch_act": {
+    "act_number": 2,
+    "target_level_range": {
+     "min": 6,
+     "max": 10
+    },
+    "enemy_tier_offset": 0,
+    "city_upgrade_unlock": {
+     "target_tier": 1,
+     "required_reputation": 40
+    }
+   },
+   "second_chosen_branch_act": {
+    "act_number": 3,
+    "target_level_range": {
+     "min": 11,
+     "max": 15
+    },
+    "enemy_tier_offset": 5,
+    "city_upgrade_unlock": {
+     "target_tier": 2,
+     "required_reputation": 45
+    }
+   }
+  },
+  "outlaw_run_compatibility": {
+   "allow_mercenary_bypass_if_reputation_below": -24,
+   "mercenary_entry_silver_cost": 150,
+   "note": "Verhindert Softlocks in Akt 2 und 3 bei Geaechtet-Laeufen."
+  },
+  "completion_reward_both_branches": {
+   "unlock_second_specialization": true,
+   "specialization_type": "FACTION_SPECIALIZATION",
+   "stacks_simultaneously_with_class_spec": true,
+   "unlock_act_4_trigger": "VOLKSQUEST_DAS_ALTE_REICH"
+  }
+ },
+ {
+  "module_id": "ASCHENKRONE_ACT2_ACT3_BRANCH_DATA",
+  "version": "2.6.0",
+  "sister_branches": [
+   {
+    "branch_id": "BRANCH_KRONREICH",
+    "faction_id": "KRONREICH",
+    "title": "Eisernes Banner und alte Schwüre",
+    "hub_city": "Kronhall",
+    "summary": "Im Kernland drohen Erbfolgestreit und Grenzbrüche. Du sicherst die Nachschublinien, befriedest abtrünnige Bannerherren und öffnest die Ahnen-Rüstkammern.",
+    "stages": [
+     {
+      "stage_id": "KR_B1_GRENZWACHT",
+      "title": "Stahl an der Mark",
+      "objective": "Sichere den Pass nach Kronhall und löse die Blockade der Grenzwehr.",
+      "three_way_options": {
+       "good": {
+        "reputation_delta": 12,
+        "unlocks_protectorate": true
+       },
+       "mercenary": {
+        "reputation_delta": 3,
+        "silver_bonus_pct": 15,
+        "unlocks_protectorate": true
+       },
+       "evil": {
+        "reputation_delta": -18,
+        "silver_bonus_pct": 75,
+        "bonus_resources": 3
+       }
+      }
+     },
+     {
+      "stage_id": "KR_B2_SCHMIEDEPACKT",
+      "title": "Das Recht des Ambosses",
+      "objective": "Stelle die Roheisen-Lieferungen für die Stadtschmiede von Kronhall wieder her.",
+      "reward_resources": {
+       "RES_EISEN": 8,
+       "RES_STEIN": 5
+      }
+     },
+     {
+      "stage_id": "KR_B3_SCHWUR_DER_KRONE",
+      "title": "Der Schwur von Kronhall",
+      "objective": "Zerschlag den Hinterhalt der Ascheriss-Kultisten vor den Toren der Zitadelle.",
+      "boss_template": "BOSS_KRONREICH_ABTRUENNIGER_FELDHERR",
+      "thorvald_cameo_allowed": true,
+      "thorvald_must_remain_incognito": true
+     }
+    ],
+    "faction_specialization_unlock": {
+     "spec_id": "FSPEC_SCHILDWALL_DER_KRONE",
+     "name": "Schildwall der Krone",
+     "passive_bonus": {
+      "armor_bonus": 2,
+      "group_moral_loss_reduction_pct": 20
+     }
+    }
+   },
+   {
+    "branch_id": "BRANCH_ORDEN",
+    "faction_id": "ORDEN_DER_FLAMME",
+    "title": "Asche, Eid und läuterndes Feuer",
+    "hub_city": "Glutberg",
+    "summary": "Am Glutberg flackern die ewigen Leuchtfeuer. Du hilfst den Eidwächtern, Risse im Permafrost zu versiegeln und verborgene Runenschriften zu bergen.",
+    "stages": [
+     {
+      "stage_id": "OR_B1_ASCHENPFAD",
+      "title": "Wächter der Asche",
+      "objective": "Entzünde die erloschenen Höhen-Signalfeuer auf dem Weg zum Glutberg.",
+      "three_way_options": {
+       "good": {
+        "reputation_delta": 12,
+        "unlocks_protectorate": true
+       },
+       "mercenary": {
+        "reputation_delta": 3,
+        "silver_bonus_pct": 15,
+        "unlocks_protectorate": true
+       },
+       "evil": {
+        "reputation_delta": -18,
+        "silver_bonus_pct": 75,
+        "bonus_resources": 3
+       }
+      }
+     },
+     {
+      "stage_id": "OR_B2_GLUTKRYPTA",
+      "title": "Siegel unter dem Berg",
+      "objective": "Birg Ascheriss-Runensplitter aus den unteren Gewölben und schütze die Novizen.",
+      "reward_resources": {
+       "RES_RUNENSPLITTER": 4,
+       "RES_STEIN": 6
+      }
+     },
+     {
+      "stage_id": "OR_B3_FEUERPROBE",
+      "title": "Läuterung am Glutberg",
+      "objective": "Halte den Ansturm der Aschewiedergänger am Hauptschrein zurück.",
+      "boss_template": "BOSS_ORDEN_VERDERBTER_ZELOT",
+      "thorvald_cameo_allowed": true,
+      "thorvald_must_remain_incognito": true
+     }
+    ],
+    "faction_specialization_unlock": {
+     "spec_id": "FSPEC_EID_DER_EWIGEN_GLUT",
+     "name": "Eid der Ewigen Glut",
+     "passive_bonus": {
+      "damage_vs_undead_and_rift_pct": 15,
+      "heal_and_mana_regen_bonus_pct": 10
+     }
+    }
+   },
+   {
+    "branch_id": "BRANCH_HAEFEN",
+    "faction_id": "FREIE_HAEFEN",
+    "title": "Salz, Nebel und gekreuzte Klingen",
+    "hub_city": "Perlvik",
+    "summary": "An den Küsten der Freien Häfen blockieren Kaperer und Seeungeheuer die Handelsrouten. Du sicherst die Werften für die kommende Armada.",
+    "stages": [
+     {
+      "stage_id": "FH_B1_NEBELBUCHT",
+      "title": "Sturm über den Klippen",
+      "objective": "Befreie die blockierte Hafenmole von Perlvik und sichere die Seekarten.",
+      "three_way_options": {
+       "good": {
+        "reputation_delta": 12,
+        "unlocks_protectorate": true
+       },
+       "mercenary": {
+        "reputation_delta": 3,
+        "silver_bonus_pct": 15,
+        "unlocks_protectorate": true
+       },
+       "evil": {
+        "reputation_delta": -18,
+        "silver_bonus_pct": 75,
+        "bonus_resources": 3
+       }
+      }
+     },
+     {
+      "stage_id": "FH_B2_WERFTKONTOR",
+      "title": "Kiel und Schwarzpulver",
+      "objective": "Beschaffe Asch-Bauholz und Schwarzpulver für den Ausbau der Werften.",
+      "reward_resources": {
+       "RES_HOLZ": 8,
+       "RES_NAHRUNG": 6
+      }
+     },
+     {
+      "stage_id": "FH_B3_FLUTBRUCH",
+      "title": "Herr der schwarzen Flut",
+      "objective": "Stelle den Kaperkapitän und seine Tiefenkreaturen auf offener Reede.",
+      "boss_template": "BOSS_HAEFEN_ABTRUENNIGER_KAPITAEN",
+      "thorvald_cameo_allowed": true,
+      "thorvald_must_remain_incognito": true
+     }
+    ],
+    "faction_specialization_unlock": {
+     "spec_id": "FSPEC_MEISTER_DER_STURMFLUT",
+     "name": "Meister der Sturmflut",
+     "passive_bonus": {
+      "sea_travel_cost_reduction_pct": 50,
+      "evasion_interval_bonus": -1
+     }
+    }
+   }
+  ]
+ },
+ {
+  "module_id": "ASCHENKRONE_ACT4_MAIN_STORY",
+  "version": "2.6.1",
+  "target_files": [
+   "spiel/regeln.js",
+   "spiel/handlung_akte.js"
+  ],
+  "unlock_conditions": {
+   "requires_both_sister_branches_completed": true,
+   "recommended_level_range": {
+    "min": 16,
+    "max": 22
+   },
+   "city_tier_3_reputation_requirement": 60
+  },
+  "act4_questline": [
+   {
+    "quest_id": "ACT4_Q1_DAS_ALTE_REICH",
+    "title": "Das Alte Reich",
+    "summary": "In den versiegelten Archiven von Kronhall, Glutberg und Perlvik tauchen Bruchstücke der alten Reichskrone auf. Jemand fälscht seit Jahren die Chroniken, um die drei Menschenreiche gegeneinander auszuspielen.",
+    "objectives": [
+     "Sammle die drei Reichssiegel in den Hauptstädten des Menschenreichs.",
+     "Überlebe den Hinterhalt der Ascheriss-Schatten auf der Reichsstraße."
+    ],
+    "rewards": {
+     "xp": 3200,
+     "silver": 350,
+     "resources": {
+      "RES_RUNENSPLITTER": 5
+     }
+    }
+   },
+   {
+    "quest_id": "ACT4_Q2_DER_BLEICHE_SKALDE",
+    "title": "Die Maske des Bleichen Skalden",
+    "summary": "Die Spur der gefälschten Chroniken führt zurück zum Glutberg. Hinter dem flüsternden Barden, der die Untoten-Scharen lenkt, verbirgt sich Erzpriester Thorvald.",
+    "reveal_rules": {
+     "antagonist_id": "NPC_ERZPRIESTER_THORVALD",
+     "secret_identity": "DER_BLEICHE_SKALDE",
+     "unmask_in_this_quest": true,
+     "stille_feder_identity_remains_hidden": true
+    },
+    "boss_encounter": {
+     "boss_id": "BOSS_THORVALD_BLEICHER_SKALDE",
+     "reference_level": 20,
+     "requires_full_party_recommended": true
+    },
+    "three_way_resolution": {
+     "good_public_trial": {
+      "label": "Thorvald lebend vor das Thing schleifen und seine Lügen verlesen",
+      "reputation_delta_all_human_factions": 15,
+      "undead_threat_delta": -15
+     },
+     "mercenary_ransom_archives": {
+      "label": "Sein Geheimsiegel gegen die Kriegskasse der Kultisten eintauschen",
+      "reputation_delta_all_human_factions": 5,
+      "silver_bonus": 500,
+      "undead_threat_delta": -15
+     },
+     "evil_execute_and_seize": {
+      "label": "Thorvald im Schrein erschlagen und seine verbotenen Runen an sich reißen",
+      "reputation_delta_all_human_factions": -18,
+      "bonus_resources": {
+       "RES_RUNENSPLITTER": 6
+      },
+      "undead_threat_delta": -15
+     }
+    }
+   },
+   {
+    "quest_id": "ACT4_Q3_GROSSES_THING",
+    "title": "Das Große Thing",
+    "summary": "Nach Thorvalds Fall treten die Abgesandten von Kronreich, Orden der Flamme und Freien Häfen zusammen. Nur unter einem gemeinsamen Banner übersteht die Menschheit den Sturm jenseits der See.",
+    "outlaw_compatibility": {
+     "allow_if_reputation_below": -24,
+     "alternate_path_label": "Als gefürchteter Kriegsherr den Blutzoll der Häuptlinge erzwingen",
+     "prevents_softlock": true
+    },
+    "rewards": {
+     "title_granted": "BANNERJARL",
+     "unites_human_factions": true,
+     "xp": 4800,
+     "unlocks_armada_war_chest": true
+    }
+   }
+  ]
+ },
+ {
+  "module_id": "ASCHENKRONE_ARMADA_AND_ACT5_GATE",
+  "version": "2.6.1",
+  "target_files": [
+   "spiel/regeln.js",
+   "spiel/kontor_und_bau.js"
+  ],
+  "armada_war_chest": {
+   "mandatory_for_act5_departure": true,
+   "shared_across_human_kontor": true,
+   "allow_deposit_even_when_outlaw": true,
+   "required_resources": {
+    "RES_NAHRUNG": 30,
+    "RES_HOLZ": 25,
+    "RES_EISEN": 25,
+    "RES_STEIN": 20
+   },
+   "optional_preparations": [
+    {
+     "building_id": "BLD_HOCHZITADELLE_TIER_3",
+     "required": false,
+     "required_reputation_to_build": 60,
+     "effect_on_act5_crossing": "Reduziert Seegefechte auf der Überfahrt um 1 Begegnung und gewährt +10 Start-Moral."
+    },
+    {
+     "building_id": "BLD_GROSSE_KRIEGSWERFT",
+     "required": false,
+     "effect_on_act5_crossing": "Reduziert Seegefechte auf der Überfahrt um 1 weitere Begegnung und schaltet Hafen-Musketen frei."
+    }
+   ]
+  },
+  "act5_feature_gate": {
+   "implemented": false,
+   "trigger_when_war_chest_full": true,
+   "gate_ui_title": "Die Segel der Armada sind gesetzt",
+   "gate_ui_message": "Die Kriegskasse ist gefüllt und die Schiffe liegen bereit. Die Überfahrt zu den Zielkontinenten (Elfen, Orks, Zwerge und der Hohe Norden) wird im nächsten großen Update freigeschaltet.",
+   "planned_continents_preview": [
+    {
+     "region_id": "CONT_ELFEN_ORKS_ZWERGE",
+     "recommended_level": {
+      "min": 20,
+      "max": 26
+     },
+     "paths": [
+      "BUENDNIS",
+      "UNTERWERFUNG"
+     ]
+    },
+    {
+     "region_id": "CONT_UNTOTE_HOHER_NORDEN",
+     "recommended_level": {
+      "min": 25,
+      "max": 30
+     },
+     "difficulty": "EXTREM_SCHWER"
+    }
+   ]
+  }
+ },
+ {
+  "module_id": "ASCHENKRONE_MASTER_TALENT_TREES",
+  "version": "2.6.2",
+  "target_files": [
+   "spiel/regeln.js",
+   "ui/charakter_aufstieg.js"
+  ],
+  "unlock_rules": {
+   "applies_to_race": "MENSCHEN",
+   "available_from_level": 21,
+   "max_level": 30,
+   "points_per_level": 1,
+   "total_points_available": 10,
+   "max_rank_per_tree": 3
+  },
+  "talent_trees": [
+   {
+    "tree_id": "TREE_EISERNE_VORHUT",
+    "name": "Pfad der Eisernen Vorhut",
+    "archetype_focus": "OFFENSIVE_WAFFEN",
+    "ranks": [
+     {
+      "rank": 1,
+      "cost": 1,
+      "description": "+6 % Schaden mit allen Waffen und physischen Techniken.",
+      "effects": {
+       "damage_bonus_pct": 6
+      }
+     },
+     {
+      "rank": 2,
+      "cost": 1,
+      "description": "Kritischer Schadensmultiplikator steigt von 1,5 auf 1,65.",
+      "effects": {
+       "crit_multiplier_override": 1.65
+      }
+     },
+     {
+      "rank": 3,
+      "cost": 1,
+      "description": "Der erste Angriff in jedem Kampf ignoriert 3 effektive Rüstung.",
+      "effects": {
+       "first_strike_armor_penetration": 3
+      }
+     }
+    ]
+   },
+   {
+    "tree_id": "TREE_UNGEBROCHENER_SCHILDWALL",
+    "name": "Pfad des Ungebrochenen Schildwalls",
+    "archetype_focus": "VERTEIDIGUNG_UEBERLEBEN",
+    "ranks": [
+     {
+      "rank": 1,
+      "cost": 1,
+      "description": "+2 effektive Rüstung und +8 maximale LP.",
+      "effects": {
+       "armor_bonus": 2,
+       "max_hp_bonus": 8
+      }
+     },
+     {
+      "rank": 2,
+      "cost": 1,
+      "description": "Deterministisches Ausweich-Intervall verkürzt sich um 1 Schlag.",
+      "effects": {
+       "evasion_interval_delta": -1
+      }
+     },
+     {
+      "rank": 3,
+      "cost": 1,
+      "description": "Einmal pro Kampf überlebst du einen tödlichen Schlag mit 1 LP und erhältst einen 20-%-LP-Schild.",
+      "effects": {
+       "cheat_death_once_per_combat": true,
+       "cheat_death_shield_hp_ratio": 0.2
+      }
+     }
+    ]
+   },
+   {
+    "tree_id": "TREE_RUNEN_UND_GLUTRESONANZ",
+    "name": "Pfad der Runen- & Glutresonanz",
+    "archetype_focus": "MAGIE_RUNEN_GLUT",
+    "preserves_v252_fallback": true,
+    "ranks": [
+     {
+      "rank": 1,
+      "cost": 1,
+      "description": "+10 % Heil-/Manaregen und +6 % Schaden beim Tragen von RUNEN_ITEM oder GLUT_ITEM.",
+      "effects": {
+       "requires_tag_in": [
+        "RUNEN_ITEM",
+        "GLUT_ITEM"
+       ],
+       "heal_and_mana_regen_pct": 10,
+       "damage_bonus_pct": 6
+      }
+     },
+     {
+      "rank": 2,
+      "cost": 1,
+      "description": "+4 maximales Mana/Ausdauer und +1 Regeneration pro Zug.",
+      "effects": {
+       "max_resource_bonus": 4,
+       "resource_regen_per_turn_bonus": 1
+      }
+     },
+     {
+      "rank": 3,
+      "cost": 1,
+      "description": "Fertigkeiten heilen dich beim Wirken um 10 % ihrer Ressourcenkosten.",
+      "effects": {
+       "heal_on_skill_cast_cost_ratio": 0.1
+      }
+     }
+    ]
+   },
+   {
+    "tree_id": "TREE_SCHATTENPFAD_UND_LIST",
+    "name": "Pfad des Schattenpfades & der List",
+    "archetype_focus": "KRIT_AGILITAET_JAGD",
+    "ranks": [
+     {
+      "rank": 1,
+      "cost": 1,
+      "description": "+10 % kritische Trefferchance und -15 % Hinterhaltsgefahr auf Reisen.",
+      "effects": {
+       "crit_chance_bonus_pct": 10,
+       "ambush_risk_reduction_pct": 15
+      }
+     },
+     {
+      "rank": 2,
+      "cost": 1,
+      "description": "+15 % Schaden gegen Ziele unter 50 % LP.",
+      "effects": {
+       "execute_threshold_hp_ratio": 0.5,
+       "execute_damage_bonus_pct": 15
+      }
+     },
+     {
+      "rank": 3,
+      "cost": 1,
+      "description": "Nach jedem eigenen Ausweichen richtet dein nächster Angriff +25 % Schaden an.",
+      "effects": {
+       "post_evasion_next_attack_bonus_pct": 25
+      }
+     }
+    ]
+   },
+   {
+    "tree_id": "TREE_BANNERJARL",
+    "name": "Pfad des Bannerjarls",
+    "archetype_focus": "GRUPPE_MORAL_LOGISTIK",
+    "ranks": [
+     {
+      "rank": 1,
+      "cost": 1,
+      "description": "Alle Begleiter erhalten +5 % Schaden und +5 maximale LP.",
+      "effects": {
+       "companion_damage_bonus_pct": 5,
+       "companion_max_hp_bonus": 5
+      }
+     },
+     {
+      "rank": 2,
+      "cost": 1,
+      "description": "-25 % Moralverlust auf Reisen und +1 Ressource beim Etappen-Zehnt befreiter Dörfer.",
+      "effects": {
+       "moral_loss_reduction_pct": 25,
+       "village_tithe_bonus_resources": 1
+      }
+     },
+     {
+      "rank": 3,
+      "cost": 1,
+      "description": "Begleiter erhalten in den ersten 3 Kampfrunden +8 % auf alle Grundwerte.",
+      "effects": {
+       "companion_opening_rounds": 3,
+       "companion_all_stats_bonus_pct": 8
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "module_id": "ASCHENKRONE_E2E_SIMULATION_ACT1_TO_ACT4",
+  "version": "2.6.3",
+  "target_files": [
+   "sim/simulator.js",
+   "spiel/regeln.js"
+  ],
+  "simulation_profiles": [
+   {
+    "profile_id": "E2E_STANDARD_PARTY_RUN",
+    "description": "Vollstaendiger Kampagnendurchlauf mit Begleiter-Anwerbung (q10), stufengerechter Ausruestung und automatischer Punktevergabe.",
+    "factions": [
+     "KRONREICH",
+     "ORDEN_DER_FLAMME",
+     "FREIE_HAEFEN"
+    ],
+    "classes_per_faction": 6,
+    "prolog_variants": [
+     "WAHL_A",
+     "WAHL_B"
+    ],
+    "campaign_phases": [
+     {
+      "phase": "PROLOG_AND_ACT_1",
+      "level_target": {
+       "min": 1,
+       "max": 5
+      },
+      "recruit_companions_via_q10": true,
+      "target_party_size": {
+       "min": 2,
+       "max": 4
+      },
+      "equip_upgrade_tier": 0
+     },
+     {
+      "phase": "ACT_2_FIRST_SISTER_BRANCH",
+      "level_target": {
+       "min": 6,
+       "max": 10
+      },
+      "unlock_class_specialization_at_level": 10,
+      "equip_upgrade_tier": 1,
+      "city_tier_target": 1
+     },
+     {
+      "phase": "ACT_3_SECOND_SISTER_BRANCH",
+      "level_target": {
+       "min": 11,
+       "max": 15
+      },
+      "unlock_faction_specialization_on_completion": true,
+      "verify_dual_specialization_active": true,
+      "equip_upgrade_tier": 2,
+      "city_tier_target": 2
+     },
+     {
+      "phase": "ACT_4_ALTE_REICH_AND_THING",
+      "level_target": {
+       "min": 16,
+       "max": 22
+      },
+      "equip_upgrade_tier": 3,
+      "mandatory_milestones": [
+       "ACT4_Q1_DAS_ALTE_REICH",
+       "ACT4_Q2_DER_BLEICHE_SKALDE",
+       "ACT4_Q3_GROSSES_THING"
+      ],
+      "verify_thorvald_unmasked": true,
+      "verify_undead_threat_delta": -15,
+      "verify_stille_feder_still_hidden": true,
+      "fill_armada_war_chest": {
+       "RES_NAHRUNG": 30,
+       "RES_HOLZ": 25,
+       "RES_EISEN": 25,
+       "RES_STEIN": 20
+      },
+      "verify_act5_feature_gate_triggers_cleanly": true
+     }
+    ]
+   },
+   {
+    "profile_id": "E2E_OUTLAW_SOFTLOCK_CHECK",
+    "description": "Prueft Geaechtet-Lauf (Ruf <= -25) auf Softlock-Freiheit bis zur Befuellung der Armada-Kriegskasse.",
+    "force_evil_choices": true,
+    "verify_no_softlock_in_act2_act3_mercenary_bypass": true,
+    "verify_kontor_deposit_allowed_when_outlaw": true,
+    "verify_act5_gate_reachable": true
+   }
+  ],
+  "global_assertions": {
+   "zero_crashes_or_nan": true,
+   "ember_strictly_zero_for_non_orden": true,
+   "defeat_never_overwrites_save_with_dead_state": true,
+   "all_skill_and_master_talent_points_spent": true
+  }
+ },
+ {
+  "module_id": "ASCHENKRONE_V265_TIER3_TIER4_MERCHANT_RULES",
+  "version": "2.6.5",
+  "target_files": [
+   "spiel/regeln.js",
+   "spiel/handel_und_schmiede.js"
+  ],
+  "merchant_tier_unlocks": [
+   {
+    "item_tier": 3,
+    "recommended_hero_level": {
+     "min": 12,
+     "max": 17
+    },
+    "required_city_tier": 1,
+    "required_building_for_crafting": "BLD_MEISTERSCHMIEDE",
+    "price_range_silver": {
+     "min": 280,
+     "max": 520
+    },
+    "crafting_material_cost": {
+     "RES_EISEN": 4,
+     "RES_HOLZ": 3,
+     "RES_RUNENSPLITTER": 1
+    }
+   },
+   {
+    "item_tier": 4,
+    "recommended_hero_level": {
+     "min": 18,
+     "max": 30
+    },
+    "required_city_tier": 2,
+    "required_building_for_crafting": "BLD_AHNEN_RUNENSCHMIEDE",
+    "price_range_silver": {
+     "min": 650,
+     "max": 1250
+    },
+    "crafting_material_cost": {
+     "RES_EISEN": 6,
+     "RES_HOLZ": 4,
+     "RES_RUNENSPLITTER": 3
+    }
+   }
+  ],
+  "class_coverage_guarantee": {
+   "ensure_every_human_class_has_tier3_and_tier4_set": true,
+   "item_tag_eligibility": {
+    "ORDEN_DER_FLAMME": [
+     "NORMAL_ITEM",
+     "GLUT_ITEM"
+    ],
+    "KRONREICH": [
+     "NORMAL_ITEM",
+     "RUNEN_ITEM"
+    ],
+    "FREIE_HAEFEN": [
+     "NORMAL_ITEM",
+     "RUNEN_ITEM"
+    ]
+   },
+   "reputation_price_multipliers": {
+    "GEAECHTET": 1.35,
+    "FREMDER": 1.0,
+    "SCHUTZHERR": 0.9,
+    "BANNERJARL": 0.8
+   }
+  }
+ },
+ {
+  "module_id": "ASCHENKRONE_V265_TIER3_TIER4_ITEMS",
+  "version": "2.6.5",
+  "target_files": [
+   "spiel/ausruestung.js",
+   "spiel/handel_und_schmiede.js"
+  ],
+  "items": [
+   {
+    "item_id": "WPN_T3_SCHATTENKLINGE",
+    "name": "Gekehlter Nachtstahl-Dolch",
+    "tier": 3,
+    "slot": "MAIN_HAND",
+    "tag": "NORMAL_ITEM",
+    "weapon_type": "DOLCH_KURZSCHWERT",
+    "eligible_classes": [
+     "NACHTKLINGE",
+     "SCHATTEN_VOLLSTRECKER",
+     "SCHATTENFREIBEUTER"
+    ],
+    "stats": {
+     "weapon_attack": 11,
+     "crit_chance_pct": 12,
+     "evasion_interval_bonus": -1
+    },
+    "buy_price_silver": 340
+   },
+   {
+    "item_id": "WPN_T4_RUNEN_REISSER",
+    "name": "Runengeätzter Ascheriss-Fangzahn",
+    "tier": 4,
+    "slot": "MAIN_HAND",
+    "tag": "RUNEN_ITEM",
+    "weapon_type": "DOLCH_KURZSCHWERT",
+    "eligible_classes": [
+     "NACHTKLINGE",
+     "SCHATTENFREIBEUTER"
+    ],
+    "stats": {
+     "weapon_attack": 15,
+     "crit_chance_pct": 16,
+     "armor_penetration": 3
+    },
+    "buy_price_silver": 820
+   },
+   {
+    "item_id": "ARM_T4_NACHTLEDER_HARNISCH",
+    "name": "Gehärteter Schattenpirscher-Wams",
+    "tier": 4,
+    "slot": "ARMOR_CHEST",
+    "tag": "RUNEN_ITEM",
+    "armor_class": "LEICHT",
+    "eligible_classes": [
+     "NACHTKLINGE",
+     "SCHATTEN_VOLLSTRECKER",
+     "SCHATTENFREIBEUTER",
+     "DAEMMERUNGSJAEGER",
+     "SCHWARZSCHUETZE"
+    ],
+    "stats": {
+     "armor": 6,
+     "max_hp": 14,
+     "geschick": 2
+    },
+    "buy_price_silver": 760
+   },
+   {
+    "item_id": "WPN_T3_GLUTZEPTER",
+    "name": "Eschenstab der Geweihten Glut",
+    "tier": 3,
+    "slot": "MAIN_HAND",
+    "tag": "GLUT_ITEM",
+    "weapon_type": "ZAUBERFOKUS",
+    "eligible_classes": [
+     "PYROMANT",
+     "KLERIKER_DER_FLAMME",
+     "INQUISITOR"
+    ],
+    "stats": {
+     "weapon_attack": 10,
+     "intelligenz": 2,
+     "max_mana": 4
+    },
+    "buy_price_silver": 360
+   },
+   {
+    "item_id": "WPN_T4_SONNENKERN_STAB",
+    "name": "Erzpriester-Reliquienstab von Glutberg",
+    "tier": 4,
+    "slot": "MAIN_HAND",
+    "tag": "GLUT_ITEM",
+    "weapon_type": "ZAUBERFOKUS",
+    "eligible_classes": [
+     "PYROMANT",
+     "KLERIKER_DER_FLAMME",
+     "INQUISITOR"
+    ],
+    "stats": {
+     "weapon_attack": 14,
+     "intelligenz": 3,
+     "starting_ember_shield_pct": 10
+    },
+    "buy_price_silver": 890
+   },
+   {
+    "item_id": "ARM_T4_ASCHESTAHL_PLATTE",
+    "name": "Runengeschmiedeter Kronwall-Harnisch",
+    "tier": 4,
+    "slot": "ARMOR_CHEST",
+    "tag": "RUNEN_ITEM",
+    "armor_class": "SCHWER",
+    "eligible_classes": [
+     "BLUTRITTER_DER_KRONE",
+     "EISERNER_BASTIONAER",
+     "GLUTPALADIN",
+     "EIDWAECHTER",
+     "TIEFENWAECHTER"
+    ],
+    "stats": {
+     "armor": 10,
+     "max_hp": 20,
+     "staerke": 2
+    },
+    "buy_price_silver": 950
+   },
+   {
+    "item_id": "WPN_T4_KRONBRECHER_SCHWERT",
+    "name": "Ahnenklinge des Alten Reiches",
+    "tier": 4,
+    "slot": "MAIN_HAND",
+    "tag": "RUNEN_ITEM",
+    "weapon_type": "SCHWERT_AXT",
+    "eligible_classes": [
+     "BLUTRITTER_DER_KRONE",
+     "EISERNER_BASTIONAER",
+     "STURMKORSAR",
+     "TIEFENWAECHTER"
+    ],
+    "stats": {
+     "weapon_attack": 16,
+     "staerke": 2,
+     "armor_penetration": 2
+    },
+    "buy_price_silver": 920
+   },
+   {
+    "item_id": "REL_T4_BANNER_DER_EINIGUNG",
+    "name": "Kriegshorn des Großen Things",
+    "tier": 4,
+    "slot": "GROUP_RELIC",
+    "tag": "RUNEN_ITEM",
+    "eligible_classes": "ALL_HUMAN_CLASSES",
+    "stats": {
+     "party_damage_bonus_pct": 8,
+     "party_armor_bonus": 1,
+     "moral_loss_reduction_pct": 15
+    },
+    "buy_price_silver": 1150
+   }
+  ]
+ },
+ {
+  "module_id": "ASCHENKRONE_V265_TIER3_TIER4_RANGED_OFFHAND",
+  "version": "2.6.5",
+  "target_files": [
+   "spiel/ausruestung.js",
+   "spiel/handel_und_schmiede.js"
+  ],
+  "items": [
+   {
+    "item_id": "WPN_T3_STURMARMBRUST",
+    "name": "Verstärkte Hafen-Repitierarmbrust",
+    "tier": 3,
+    "slot": "MAIN_HAND",
+    "tag": "NORMAL_ITEM",
+    "weapon_type": "BOGEN_ARMBRUST",
+    "eligible_classes": [
+     "DAEMMERUNGSJAEGER",
+     "SCHWARZSCHUETZE",
+     "INQUISITOR"
+    ],
+    "stats": {
+     "weapon_attack": 12,
+     "geschick": 2,
+     "armor_penetration": 2
+    },
+    "buy_price_silver": 370
+   },
+   {
+    "item_id": "WPN_T4_DONNERROHR_MUSKETE",
+    "name": "Runengravierte Werft-Arkebuse",
+    "tier": 4,
+    "slot": "MAIN_HAND",
+    "tag": "RUNEN_ITEM",
+    "weapon_type": "SCHWARZPULVER_FERNKAMPF",
+    "requires_building_optional": "BLD_GROSSE_KRIEGSWERFT",
+    "eligible_classes": [
+     "SCHWARZSCHUETZE",
+     "DAEMMERUNGSJAEGER",
+     "STURMKORSAR"
+    ],
+    "stats": {
+     "weapon_attack": 17,
+     "crit_chance_pct": 14,
+     "armor_penetration": 4
+    },
+    "buy_price_silver": 940
+   },
+   {
+    "item_id": "WPN_T4_SEUCHEN_KOLBEN",
+    "name": "Ascheriss-Destillierkolben & Spritze",
+    "tier": 4,
+    "slot": "MAIN_HAND",
+    "tag": "RUNEN_ITEM",
+    "weapon_type": "ALCHEMIE_WERKZEUG",
+    "eligible_classes": [
+     "PULVER_ALCHEMIST",
+     "SEUCHENMEDIKUS",
+     "WUNDMEISTER"
+    ],
+    "stats": {
+     "weapon_attack": 13,
+     "intelligenz": 3,
+     "heal_and_dot_bonus_pct": 15
+    },
+    "buy_price_silver": 810
+   },
+   {
+    "item_id": "OFF_T3_TURMSCHILD",
+    "name": "Eisenbeschlagener Kronwall-Schild",
+    "tier": 3,
+    "slot": "OFF_HAND",
+    "tag": "NORMAL_ITEM",
+    "eligible_classes": [
+     "BLUTRITTER_DER_KRONE",
+     "EISERNER_BASTIONAER",
+     "GLUTPALADIN",
+     "EIDWAECHTER",
+     "TIEFENWAECHTER"
+    ],
+    "stats": {
+     "armor": 4,
+     "max_hp": 10
+    },
+    "buy_price_silver": 310
+   },
+   {
+    "item_id": "OFF_T4_GLUT_KODEX",
+    "name": "Gesiegelter Kodex der Ewigen Flamme",
+    "tier": 4,
+    "slot": "OFF_HAND",
+    "tag": "GLUT_ITEM",
+    "eligible_classes": [
+     "PYROMANT",
+     "KLERIKER_DER_FLAMME",
+     "INQUISITOR",
+     "GLUTPALADIN"
+    ],
+    "stats": {
+     "willenskraft": 3,
+     "max_mana": 5,
+     "heal_and_fire_bonus_pct": 12
+    },
+    "buy_price_silver": 780
+   },
+   {
+    "item_id": "OFF_T4_PARIERDOLCH",
+    "name": "Runen-Fangbrecher für die Linkhand",
+    "tier": 4,
+    "slot": "OFF_HAND",
+    "tag": "RUNEN_ITEM",
+    "eligible_classes": [
+     "NACHTKLINGE",
+     "SCHATTEN_VOLLSTRECKER",
+     "SCHATTENFREIBEUTER",
+     "STURMKORSAR"
+    ],
+    "stats": {
+     "weapon_attack": 5,
+     "crit_chance_pct": 10,
+     "evasion_interval_bonus": -1
+    },
+    "buy_price_silver": 740
+   }
+  ]
+ },
+ {
+  "module_id": "ASCHENKRONE_V265_TIER3_TIER4_SUBSLOTS",
+  "version": "2.6.5",
+  "target_files": [
+   "spiel/ausruestung.js",
+   "spiel/handel_und_schmiede.js"
+  ],
+  "items": [
+   {
+    "item_id": "HLM_T3_STAHLKAPPE",
+    "name": "Grenzwehr-Spangenhelm",
+    "tier": 3,
+    "slot": "HELMET",
+    "tag": "NORMAL_ITEM",
+    "eligible_classes": "ALL_HUMAN_CLASSES",
+    "stats": {
+     "armor": 2,
+     "max_hp": 6
+    },
+    "buy_price_silver": 240
+   },
+   {
+    "item_id": "HLM_T4_AHNENKRONE_VISIER",
+    "name": "Runengeschmiedeter Visierhelm der Mark",
+    "tier": 4,
+    "slot": "HELMET",
+    "tag": "RUNEN_ITEM",
+    "eligible_classes": "ALL_HUMAN_CLASSES",
+    "stats": {
+     "armor": 3,
+     "willenskraft": 2,
+     "max_hp": 10
+    },
+    "buy_price_silver": 580
+   },
+   {
+    "item_id": "BTS_T3_MARSCHSTIEFEL",
+    "name": "Eispass-Stiefel mit Stollenbeschlag",
+    "tier": 3,
+    "slot": "BOOTS",
+    "tag": "NORMAL_ITEM",
+    "eligible_classes": "ALL_HUMAN_CLASSES",
+    "stats": {
+     "armor": 1,
+     "geschick": 1,
+     "travel_ambush_reduction_pct": 10
+    },
+    "buy_price_silver": 220
+   },
+   {
+    "item_id": "BTS_T4_STURMSCHRITT_STIEFEL",
+    "name": "Runenbestickte Sturmschritt-Stiefel",
+    "tier": 4,
+    "slot": "BOOTS",
+    "tag": "RUNEN_ITEM",
+    "eligible_classes": "ALL_HUMAN_CLASSES",
+    "stats": {
+     "armor": 2,
+     "geschick": 2,
+     "max_stamina": 2
+    },
+    "buy_price_silver": 540
+   },
+   {
+    "item_id": "GLV_T3_SCHMIEDE_STULPEN",
+    "name": "Genietete Meister-Kampfstulpen",
+    "tier": 3,
+    "slot": "GLOVES",
+    "tag": "NORMAL_ITEM",
+    "eligible_classes": "ALL_HUMAN_CLASSES",
+    "stats": {
+     "armor": 1,
+     "crit_chance_pct": 6
+    },
+    "buy_price_silver": 210
+   },
+   {
+    "item_id": "GLV_T4_RUNENGRIFF_HANDSCHUHE",
+    "name": "Ascheriss-Runenstulpen",
+    "tier": 4,
+    "slot": "GLOVES",
+    "tag": "RUNEN_ITEM",
+    "eligible_classes": "ALL_HUMAN_CLASSES",
+    "stats": {
+     "armor": 2,
+     "crit_chance_pct": 10,
+     "damage_bonus_pct": 5
+    },
+    "buy_price_silver": 520
+   },
+   {
+    "item_id": "JWL_T3_SIEGELRING",
+    "name": "Alter Reichssiegel-Ring",
+    "tier": 3,
+    "slot": "RING_OR_AMULET",
+    "tag": "RUNEN_ITEM",
+    "eligible_classes": "ALL_HUMAN_CLASSES",
+    "stats": {
+     "charisma": 2,
+     "willenskraft": 1,
+     "max_hp": 6
+    },
+    "buy_price_silver": 320
+   },
+   {
+    "item_id": "JWL_T4_ASCHERISS_AMULETT",
+    "name": "Herzsplitter-Amulett von Odris",
+    "tier": 4,
+    "slot": "RING_OR_AMULET",
+    "tag": "RUNEN_ITEM",
+    "eligible_classes": "ALL_HUMAN_CLASSES",
+    "stats": {
+     "all_attributes_bonus": 1,
+     "damage_bonus_pct": 6,
+     "max_hp": 12
+    },
+    "buy_price_silver": 790
+   }
+  ]
+ },
+ {
+  "patch_id": "ASCHENKRONE_V266_TRADE_UI_POLISH",
+  "version": "2.6.6",
+  "target_files": [
+   "ui/inventar_und_handel.js",
+   "style/handel.css"
+  ],
+  "ui_fixes": {
+   "left_panel_stats_box": {
+    "fix_label_overlap": "AUSWEICHEN_KRIT_COLLISION",
+    "layout_mode": "GRID_2X2",
+    "cells": [
+     "ANGRIFF",
+     "RUESTUNG",
+     "AUSWEICHEN",
+     "KRIT"
+    ],
+    "remove_duplicate_silver_display_below_stats": true
+   },
+   "kontor_commodities_table": {
+    "layout_mode": "FIXED_GRID_COLUMNS",
+    "column_widths_pct": [
+     34,
+     18,
+     18,
+     30
+    ],
+    "prevent_name_wrap": true,
+    "short_labels": {
+     "RES_NAHRUNG": "Pökelfleisch & Brot",
+     "RES_HOLZ": "Asch-Bauholz",
+     "RES_EISEN": "Roheisenbarren",
+     "RES_STEIN": "Bruchstein",
+     "RES_RUNENSPLITTER": "Runensplitter"
+    },
+    "align_stock_badge_in_column_2": true,
+    "align_price_pair_in_column_3": true
+   },
+   "merchant_catalog_section": {
+    "add_filter_bar": [
+     "ALLE",
+     "FUER_KLASSE_TRAGBAR",
+     "WAFFEN",
+     "RUESTUNG",
+     "TRAENKE_GUERTEL"
+    ],
+    "default_filter": "FUER_KLASSE_TRAGBAR",
+    "show_equipped_stat_diff_preview": true,
+    "update_potion_descriptions_to_3_5_scale": [
+     {
+      "item_id": "POT_HEAL_1",
+      "new_description": "Tier 1 · Stellt im Kampf 10 LP wieder her."
+     },
+     {
+      "item_id": "POT_HEAL_2",
+      "new_description": "Tier 2 · Stellt im Kampf 24 LP wieder her und entfernt Blutung."
+     },
+     {
+      "item_id": "POT_HEAL_3",
+      "new_description": "Tier 3 · Stellt im Kampf 51 LP wieder her und heilt alle körperlichen Gebrechen."
+     },
+     {
+      "item_id": "POT_FOCUS_1",
+      "new_description": "Tier 1 · Stellt 7 Ausdauer bzw. Mana/Glut-Fokus wieder her."
+     }
+    ]
+   }
+  }
+ },
+ {
+  "module_id": "ASCHENKRONE_V267_DYNAMIC_NPC_DIALOGUES",
+  "version": "2.6.7",
+  "target_files": [
+   "spiel/dialoge_und_quests.js",
+   "ui/dialog_fenster.js"
+  ],
+  "dialogue_assembly_pipeline": {
+   "structure_order": [
+    "STAGE_DIRECTION",
+    "REPUTATION_AND_FACTION_GREETING",
+    "CORE_QUEST_HOOK",
+    "COMPANION_INTERJECTION_OPTIONAL",
+    "LORE_RUMOR_QUESTIONS_OPTIONAL",
+    "THREE_WAY_ACTION_CHOICES"
+   ],
+   "stage_directions_by_npc_role": {
+    "SCHMIED": [
+     "Funken stieben vom Amboss, als er den Hammer sinken lässt und dich mustert.",
+     "Er kühlt eine glühende Klinge im Zuber; dampfender Rauch steigt zwischen euch auf."
+    ],
+    "HAUPTMANN_WACHE": [
+     "Sie legt die Hand auf den Knauf ihres Kurzschwerts und blickt misstrauisch zur Straße.",
+     "Mit müden Augen deutet sie auf eine zerkratzte Karte der Umgebung."
+    ],
+    "KONTOR_VERWALTER": [
+     "Er klappt das schwere Hauptbuch zu und schiebt sein Tintenfass beiseite.",
+     "Der Verwalter reibt sich die kalten Hände und zählt leise Münzen ab."
+    ],
+    "PRIESTER_GELEHRTER": [
+     "Der Geruch von altem Pergament und kaltem Rauch hängt schwer in der Luft.",
+     "Er senkt die Stimme, als fürchte er, selbst die Wände könnten lauschen."
+    ]
+   },
+   "greetings_by_reputation_tier": {
+    "GEAECHTET": [
+     "„Mach keine falsche Bewegung. Dein Name hat hier einen dunklen Klang.“",
+     "„Silber macht vieles vergessen, aber meine Männer behalten dich im Auge.“"
+    ],
+    "FREMDER": [
+     "„Ein neues Gesicht auf den Straßen von Odris. Was führt dich her?“",
+     "„Wenn du Arbeit suchst, bist du zur rechten Stunde gekommen.“"
+    ],
+    "SCHUTZHERR": [
+     "„Man spricht gut von deinen Taten in den Dörfern, Schutzherr.“",
+     "„Gut, dass du hier bist. Auf dein Wort ist Verlass.“"
+    ],
+    "BANNERJARL": [
+     "„Bannerjarl! Das Volk blickt auf dein Zeichen. Sprich, was brauchst du?“",
+     "„Dass du selbst hier erscheinst, gibt den Leuten neuen Mut.“"
+    ]
+   },
+   "companion_interjections": {
+    "trigger_chance_pct": 35,
+    "requires_active_companion": true,
+    "templates_by_companion_archetype": {
+     "KRIEGER_WAECHTER": "„Wenn es dort draußen nach Hinterhalt riecht, gehe ich voran.“",
+     "SPAEHER_SCHURKE": "„Achte auf seine Hände, nicht auf seine Worte. Da steckt mehr dahinter.“",
+     "MAGIER_HEILER": "„Diese Unruhe hat tiefere Wurzeln als bloße Wegelagerei.“"
+    }
+   },
+   "optional_lore_questions": {
+    "max_questions_per_dialogue": 2,
+    "do_not_close_dialogue_on_ask": true,
+    "topics_by_act": {
+     "ACT_1": [
+      {
+       "question": "„Wie steht es um die Lage in eurer Siedlung?“",
+       "answer_uses_city_state": true
+      }
+     ],
+     "ACT_2_3": [
+      {
+       "question": "„Was weiß man hier über die anderen Reiche der Menschen?“",
+       "answer_pool": [
+        "„Solange der Frost stärker wird, streiten die Herren lieber über alte Grenzen, statt zusammenzustehen.“"
+       ]
+      }
+     ],
+     "ACT_4": [
+      {
+       "question": "„Was flüstert man sich über den Bleichen Skalden?“",
+       "answer_pool": [
+        "„Seine Lieder tragen Gift in die Hallen – und niemand weiß, wer ihm die Tore öffnet.“"
+       ]
+      }
+     ]
+    }
+   }
+  }
+ },
+ {
+  "module_id": "ASCHENKRONE_V268_CAMP_COMPANION_DIALOGUES",
+  "version": "2.6.8",
+  "target_files": [
+   "spiel/rast_und_lager.js",
+   "spiel/dialoge_und_quests.js",
+   "ui/rast_modal.js"
+  ],
+  "camp_event_rules": {
+   "trigger_on_rest": true,
+   "requires_active_companion_min": 1,
+   "trigger_chance_pct": 65,
+   "no_repeat_until_pool_exhausted": true,
+   "preserves_canonical_secrets": {
+    "thorvald_remains_incognito_before_act4": true,
+    "stille_feder_identity_never_revealed": true
+   }
+  },
+  "camp_scenes_by_companion_archetype": [
+   {
+    "archetype": "KRIEGER_WAECHTER",
+    "scene_id": "CAMP_WARRIOR_WHETSTONE",
+    "stage_direction": "Der Schleifstein kreischt leise über die Scharten der Klinge, während die Glut des Lagerfeuers knackt.",
+    "dialogue": "„Wir haben heute Glück gehabt, dass die Linie gehalten hat. Aber die Nächte auf Odris werden kälter – und die Gegner zahlenmäßig stärker. Sag mir ehrlich: Wohin führt uns dieser Marsch am Ende?“",
+    "player_responses": [
+     {
+      "response_id": "RESP_WARRIOR_DUTY",
+      "label": "„Solange noch ein Dorf brennt, halten wir den Schild hoch.“",
+      "effects": {
+       "moral_delta": 5,
+       "next_combat_buff": {
+        "buff_id": "BUFF_EISERNE_ENTSCHLOSSENHEIT",
+        "armor_bonus": 1,
+        "duration_combats": 1
+       }
+      }
+     },
+     {
+      "response_id": "RESP_WARRIOR_COIN",
+      "label": "„Solange das Silber stimmt und die Klinge scharf bleibt, frag nicht zu viel.“",
+      "effects": {
+       "moral_delta": 2,
+       "next_combat_buff": {
+        "buff_id": "BUFF_SOELDNER_BLUTDURST",
+        "damage_bonus_pct": 8,
+        "duration_combats": 1
+       }
+      }
+     },
+     {
+      "response_id": "RESP_WARRIOR_REST",
+      "label": "„Leg den Stein weg und schlaf. Morgen brauchen wir deine Kraft.“",
+      "effects": {
+       "companion_heal_bonus_hp": 6,
+       "moral_delta": 3
+      }
+     }
+    ]
+   },
+   {
+    "archetype": "SPAEHER_SCHURKE",
+    "scene_id": "CAMP_SCOUT_NIGHTWATCH",
+    "stage_direction": "Aus dem Schatten am Rand des Lichtscheins schnitzt dein Gefährte schweigend neue Pfeilschäfte.",
+    "dialogue": "„Ich habe mir die Spuren auf der letzten Etappe angesehen. Jemand beobachtet die Hauptstraßen – keine gewöhnlichen Wegelagerer, sondern Späher mit System. Wie gehen wir weiter vor?“",
+    "player_responses": [
+     {
+      "response_id": "RESP_SCOUT_CAUTIOUS",
+      "label": "„Du übernimmst die Vorhut. Wir meiden offene Hinterhalte.“",
+      "effects": {
+       "next_stages_ambush_reduction_pct": 20,
+       "duration_stages": 3
+      }
+     },
+     {
+      "response_id": "RESP_SCOUT_STRIKE_FIRST",
+      "label": "„Wenn sie uns suchen, drehen wir den Spieß um und schlagen zuerst zu.“",
+      "effects": {
+       "next_combat_buff": {
+        "buff_id": "BUFF_ERSTSCHLAG_LAUER",
+        "crit_chance_bonus_pct": 12,
+        "duration_combats": 1
+       }
+      }
+     },
+     {
+      "response_id": "RESP_SCOUT_SHARE_RATIONS",
+      "label": "„Hier, nimm den letzten Becher Gewürzwein. Du hattest die längste Wache.“",
+      "effects": {
+       "moral_delta": 6
+      }
+     }
+    ]
+   },
+   {
+    "archetype": "MAGIER_HEILER",
+    "scene_id": "CAMP_MAGE_ASH_OBSERVATION",
+    "stage_direction": "Blaue Funken tanzen kurz über seinen Fingern, als er eine Handvoll kalter Asche vom Boden aufhebt.",
+    "dialogue": "„Spürst du das Zittern im Boden? Der Ascheriss frisst sich tiefer in das Land, als die Herren in den Hallen zugeben wollen. Was denkst du – lässt sich das noch aufhalten?“",
+    "player_responses": [
+     {
+      "response_id": "RESP_MAGE_HOPE",
+      "label": "„Jedes Signalfeuer, das wir entzünden, drängt die Dunkelheit zurück.“",
+      "effects": {
+       "moral_delta": 5,
+       "party_mana_and_stamina_restore": 3
+      }
+     },
+     {
+      "response_id": "RESP_MAGE_POWER",
+      "label": "„Dann lernen wir, diese Kraft selbst als Waffe zu nutzen.“",
+      "effects": {
+       "next_combat_buff": {
+        "buff_id": "BUFF_ASCHERISS_FOKUS",
+        "skill_damage_bonus_pct": 10,
+        "duration_combats": 1
+       }
+      }
+     },
+     {
+      "response_id": "RESP_MAGE_TEND_WOUNDS",
+      "label": "„Spar deine Kräfte für unsere Wunden, nicht für düstere Gedanken.“",
+      "effects": {
+       "party_heal_bonus_hp": 5,
+       "moral_delta": 3
+      }
+     }
+    ]
+   }
+  ],
+  "act_specific_camp_milestones": [
+   {
+    "trigger_after_act": 2,
+    "scene_id": "CAMP_MILESTONE_SISTER_REALMS",
+    "dialogue": "„Vor Wochen waren wir nur Fremde aus einer einzigen Mark. Jetzt hören zwei Reiche der Menschen auf deinen Namen.“",
+    "effects": {
+     "moral_delta": 8
+    }
+   },
+   {
+    "trigger_after_act": 4,
+    "scene_id": "CAMP_MILESTONE_BANNERJARL",
+    "dialogue": "„Thorvalds Maske ist gefallen und das Thing hat gesprochen. Wohin die Segel der Armada auch setzen – wir folgen dir bis ans Ende von Odris.“",
+    "effects": {
+     "moral_delta": 12,
+     "party_all_stats_next_combat_pct": 8
+    }
+   }
+  ]
+ },
+ {
+  "module_id": "ASCHENKRONE_V269_COMPANION_SCENES_KRONREICH",
+  "version": "2.6.9",
+  "faction_id": "KRONREICH",
+  "target_files": [
+   "spiel/rast_und_lager.js",
+   "spiel/begleiter.js"
+  ],
+  "companion_personal_scenes": [
+   {
+    "companion_slot": "KR_COMP_1_WARRIOR",
+    "archetype": "KRIEGER_WAECHTER",
+    "scene_id": "PSCENE_KR_BROKEN_BANNER",
+    "trigger_condition": {
+     "requires_companion_recruited_via_q10": true,
+     "min_stages_together": 4
+    },
+    "stage_direction": "Er poliert ein zerbeultes Wappenschild, dessen einst goldener Greif fast vollständig von Ruß und Kratzern überdeckt ist.",
+    "dialogue": "„Mein alter Bannerherr fiel an der Grenzmark, weil seine eigenen Nachbarn die Tore schlossen. Seitdem trage ich dieses Schild ohne Wappen. Sag mir – wofür kämpfen wir hier wirklich?“",
+    "choices": [
+     {
+      "choice_id": "KR_C1_HONOR",
+      "label": "„Für ein Reich, in dem kein Dorf mehr allein gelassen wird.“",
+      "effects": {
+       "moral_delta": 6,
+       "unlock_companion_perk": {
+        "perk_id": "PERK_KR_SCHILDTREUE",
+        "name": "Schildtreue der Mark",
+        "bonus": "+1 Rüstung für die gesamte Gruppe."
+       }
+      }
+     },
+     {
+      "choice_id": "KR_C1_PRAGMATIC",
+      "label": "„Für uns selbst und die, die ihre Schulden in Stahl und Silber zahlen.“",
+      "effects": {
+       "moral_delta": 3,
+       "unlock_companion_perk": {
+        "perk_id": "PERK_KR_SOELDNERSTAHL",
+        "name": "Gestählter Veteran",
+        "bonus": "+8 % Begleiter-Schaden."
+       }
+      }
+     }
+    ]
+   },
+   {
+    "companion_slot": "KR_COMP_2_SCOUT",
+    "archetype": "SPAEHER_SCHURKE",
+    "scene_id": "PSCENE_KR_FROST_TRAILS",
+    "trigger_condition": {
+     "requires_companion_recruited_via_q10": true,
+     "min_stages_together": 4
+    },
+    "stage_direction": "Sie breitet ein Stück Birkenrinde am Feuer aus, auf dem mit Holzkohle verblasste Wildwechsel und verschüttete Pässe eingezeichnet sind.",
+    "dialogue": "„Ich habe drei Winter lang für die Grenzjäger Spuren gelesen. Die Wölfe ziehen nach Süden – nicht wegen des Schnees, sondern weil tief im Norden etwas aus dem Eis kriecht.“",
+    "choices": [
+     {
+      "choice_id": "KR_C2_MAP_ROUTES",
+      "label": "„Zeichne deine Schleichwege in unsere Reisekarte ein.“",
+      "effects": {
+       "moral_delta": 4,
+       "unlock_companion_perk": {
+        "perk_id": "PERK_KR_GRENZPFAD",
+        "name": "Kundschafter der Mark",
+        "bonus": "-10 % Begegnungsgefahr auf allen Landwegen."
+       }
+      }
+     },
+     {
+      "choice_id": "KR_C2_HUNT_DRILL",
+      "label": "„Zeig uns, wie man im Dunkeln den ersten tödlichen Schuss setzt.“",
+      "effects": {
+       "moral_delta": 4,
+       "unlock_companion_perk": {
+        "perk_id": "PERK_KR_WINTERJAEGER",
+        "name": "Auge des Winterjägers",
+        "bonus": "+6 % kritische Trefferchance für den Helden."
+       }
+      }
+     }
+    ]
+   },
+   {
+    "companion_slot": "KR_COMP_3_RUNE_SUPPORT",
+    "archetype": "RUNENSKALDE_WUNDMEISTER",
+    "scene_id": "PSCENE_KR_OLD_TONGUE",
+    "trigger_condition": {
+     "requires_companion_recruited_via_q10": true,
+     "min_stages_together": 4
+    },
+    "stage_direction": "Mit einem kleinen Stichel ritzt er alte Schutzzeichen in einen Streifen Eschenholz und murmelt eine halb vergessene Strophe.",
+    "dialogue": "„Unsere Vorfahren brauchten keine flammenden Gebete wie der Orden. Sie kannten die Namen von Eisen, Stein und Blut. Wenn du willst, lehre ich dich das alte Schutzlied.“",
+    "choices": [
+     {
+      "choice_id": "KR_C3_HEALING_CHANT",
+      "label": "„Lehre uns das Lied der Wundheilung.“",
+      "effects": {
+       "moral_delta": 5,
+       "unlock_companion_perk": {
+        "perk_id": "PERK_KR_AHNENLIED",
+        "name": "Lied der Wundheilung",
+        "bonus": "+4 LP Heilung für die Gruppe nach jeder Rast."
+       }
+      }
+     },
+     {
+      "choice_id": "KR_C3_WAR_DRUM",
+      "label": "„Schlag den Takt der alten Schildbrecher!“",
+      "effects": {
+       "moral_delta": 5,
+       "unlock_companion_perk": {
+        "perk_id": "PERK_KR_SCHILDBRECHER_TAKT",
+        "name": "Takt der Schildbrecher",
+        "bonus": "+1 Ausdauer-Regeneration für den Helden zu Kampfbeginn."
+       }
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "module_id": "ASCHENKRONE_V269_COMPANION_SCENES_ORDEN",
+  "version": "2.6.9",
+  "faction_id": "ORDEN_DER_FLAMME",
+  "target_files": [
+   "spiel/rast_und_lager.js",
+   "spiel/begleiter.js"
+  ],
+  "companion_personal_scenes": [
+   {
+    "companion_slot": "OR_COMP_1_PALADIN_GUARD",
+    "archetype": "GLUTPALADIN_EIDWAECHTER",
+    "scene_id": "PSCENE_OR_ASHEN_OATH",
+    "trigger_condition": {
+     "requires_companion_recruited_via_q10": true,
+     "min_stages_together": 4
+    },
+    "stage_direction": "Er kniet vor dem Lagerfeuer, die Stirn an den Pariergriff seines Schwertes gelehnt, während Asche auf seine Schulterplatten rieselt.",
+    "dialogue": "„Im Kloster lehrte man uns, dass Zweifel der erste Riss im Schild sei. Doch draußen im Frost sehe ich, wie schwer das Licht zu halten ist. Woran hältst du dich fest?“",
+    "choices": [
+     {
+      "choice_id": "OR_C1_LIGHT",
+      "label": "„An den Menschen, die wir heute vor der Kälte retten.“",
+      "effects": {
+       "moral_delta": 6,
+       "unlock_companion_perk": {
+        "perk_id": "PERK_OR_LEBENDIGE_FLAMME",
+        "name": "Lebendige Flamme",
+        "bonus": "+10 % Heilwirkung für alle Fähigkeiten."
+       }
+      }
+     },
+     {
+      "choice_id": "OR_C1_ZEAL",
+      "label": "„An der Klinge, die jedes Geschöpf des Ascherisses zu Asche brennt.“",
+      "effects": {
+       "moral_delta": 4,
+       "unlock_companion_perk": {
+        "perk_id": "PERK_OR_LAEUTERUNG",
+        "name": "Zorn der Läuterung",
+        "bonus": "+10 % Schaden gegen Untote und Ascheriss-Gegner."
+       }
+      }
+     }
+    ]
+   },
+   {
+    "companion_slot": "OR_COMP_2_INQUISITOR_SHADOW",
+    "archetype": "INQUISITOR_SCHATTENVOLLSTRECKER",
+    "scene_id": "PSCENE_OR_WHISPERS_IN_ASH",
+    "trigger_condition": {
+     "requires_companion_recruited_via_q10": true,
+     "min_stages_together": 4
+    },
+    "stage_direction": "Sie verbrennt einen versiegelten Brief in den Flammen, ohne eine Miene zu verziehen, und blickt erst auf, als nur noch schwarze Flocken übrig sind.",
+    "dialogue": "„Nicht jeder Feind trägt Klauen und Frosthaut. Manche sitzen in warmen Hallen und flüstern den falschen Rat ins Ohr der Mächtigen. Wem vertraust du im Orden noch?“",
+    "choices": [
+     {
+      "choice_id": "OR_C2_VIGILANCE",
+      "label": "„Niemandem blind – wir prüfen Taten, keine Roben.“",
+      "effects": {
+       "moral_delta": 5,
+       "unlock_companion_perk": {
+        "perk_id": "PERK_OR_WACHSAMES_AUGE",
+        "name": "Auge der Inquisition",
+        "bonus": "+8 % Schaden gegen menschliche Anführer und Kultisten."
+       }
+      }
+     },
+     {
+      "choice_id": "OR_C2_SHADOW_STRIKE",
+      "label": "„Solange wir im Schatten schneller zuschlagen als sie, spielt es keine Rolle.“",
+      "effects": {
+       "moral_delta": 3,
+       "unlock_companion_perk": {
+        "perk_id": "PERK_OR_SCHATTENURTEIL",
+        "name": "Schattenurteil",
+        "bonus": "+12 % Schaden im ersten Kampfzug."
+       }
+      }
+     }
+    ]
+   },
+   {
+    "companion_slot": "OR_COMP_3_PYRO_CLERIC",
+    "archetype": "PYROMANT_KLERIKER",
+    "scene_id": "PSCENE_OR_EMBER_SPARK",
+    "trigger_condition": {
+     "requires_companion_recruited_via_q10": true,
+     "min_stages_together": 4
+    },
+    "stage_direction": "Zwischen seinen Handflächen schwebt ein kleiner, ruhiger Funke, der das Gesicht deines Gefährten in warmes Kupferlicht taucht.",
+    "dialogue": "„Die Glut ist kein zahmes Werkzeug – sie frisst an dem, der sie ruft, wenn sein Geist unruhig wird. Lass uns heute Nacht die Atmung üben, bevor der nächste Sturm losbricht.“",
+    "choices": [
+     {
+      "choice_id": "OR_C3_MEDITATE",
+      "label": "„Gemeinsam am Feuer meditieren und den Geist sammeln.“",
+      "effects": {
+       "moral_delta": 5,
+       "unlock_companion_perk": {
+        "perk_id": "PERK_OR_RUHIGE_GLUT",
+        "name": "Innere Glut",
+        "bonus": "+3 maximales Mana für den Helden."
+       }
+      }
+     },
+     {
+      "choice_id": "OR_C3_KINDLE",
+      "label": "„Schüre die Flamme – wir brauchen mehr Hitze gegen den Frost.“",
+      "effects": {
+       "moral_delta": 4,
+       "unlock_companion_perk": {
+        "perk_id": "PERK_OR_FEUERATEM",
+        "name": "Geschürter Funke",
+        "bonus": "+6 % Schaden mit Feuer- und Glut-Fähigkeiten."
+       }
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "module_id": "ASCHENKRONE_V269_COMPANION_SCENES_HAEFEN",
+  "version": "2.6.9",
+  "faction_id": "FREIE_HAEFEN",
+  "target_files": [
+   "spiel/rast_und_lager.js",
+   "spiel/begleiter.js"
+  ],
+  "companion_personal_scenes": [
+   {
+    "companion_slot": "FH_COMP_1_CORSAIR_WARDEN",
+    "archetype": "STURMKORSAR_TIEFENWAECHTER",
+    "scene_id": "PSCENE_FH_SALT_AND_IRON",
+    "trigger_condition": {
+     "requires_companion_recruited_via_q10": true,
+     "min_stages_together": 4
+    },
+    "stage_direction": "Er zieht ein salzverkrustetes Entermesser aus der Scheide und betrachtet eine tiefe Kerbe nahe der Spitze.",
+    "dialogue": "„Auf See weißt du wenigstens, woher der Sturm kommt. Hier an Land riecht jeder Handschlag nach Verrat – und doch stehe ich noch an deiner Seite. Weißt du auch warum?“",
+    "choices": [
+     {
+      "choice_id": "FH_C1_CREW",
+      "label": "„Weil wir auf demselben Deck stehen und keiner den anderen über Bord wirft.“",
+      "effects": {
+       "moral_delta": 6,
+       "unlock_companion_perk": {
+        "perk_id": "PERK_FH_SCHWUR_DER_PLANK",
+        "name": "Schwur der Planke",
+        "bonus": "-15 % Moralverlust für die gesamte Gruppe."
+       }
+      }
+     },
+     {
+      "choice_id": "FH_C1_PLUNDER",
+      "label": "„Weil die fetteste Beute von Odris noch vor uns liegt.“",
+      "effects": {
+       "moral_delta": 4,
+       "unlock_companion_perk": {
+        "perk_id": "PERK_FH_KAPERBEUTE",
+        "name": "Spürnase für Beute",
+        "bonus": "+10 % Silber aus besiegten Gegnern."
+       }
+      }
+     }
+    ]
+   },
+   {
+    "companion_slot": "FH_COMP_2_MARKSMAN_ROGUE",
+    "archetype": "SCHWARZSCHUETZE_SCHATTENFREIBEUTER",
+    "scene_id": "PSCENE_FH_POWDER_AND_FOG",
+    "trigger_condition": {
+     "requires_companion_recruited_via_q10": true,
+     "min_stages_together": 4
+    },
+    "stage_direction": "Vorsichtig füllt sie trockenes Schwarzpulver in ein geöltes Horn um und hält es weit weg von den fliegenden Funken.",
+    "dialogue": "„Feuchtes Pulver und geschwätzige Kapitäne bringen dich schneller unter die Wellen als jedes Riff. Man munkelt viel über geheime Auftraggeber in den Häfen – aber ich halte mich an klare Ziele.“",
+    "choices": [
+     {
+      "choice_id": "FH_C2_CLEAN_SHOT",
+      "label": "„Ein sauberer Schuss aus dem Nebel spart uns drei Narben im Nahkampf.“",
+      "effects": {
+       "moral_delta": 4,
+       "unlock_companion_perk": {
+        "perk_id": "PERK_FH_NEBELSCHUETZE",
+        "name": "Nebelschütze",
+        "bonus": "+2 Rüstungsdurchdringung für den ersten Angriff im Kampf."
+       }
+      }
+     },
+     {
+      "choice_id": "FH_C2_SEA_ROUTES",
+      "label": "„Nutze deine Kontakte an den Kais, damit wir günstiger übersetzen.“",
+      "effects": {
+       "moral_delta": 4,
+       "unlock_companion_perk": {
+        "perk_id": "PERK_FH_SCHMUGGLERPASSAGE",
+        "name": "Schmugglerpassage",
+        "bonus": "-5 Silber Kosten auf allen Seewegen."
+       }
+      }
+     }
+    ]
+   },
+   {
+    "companion_slot": "FH_COMP_3_ALCHEMIST_MEDIC",
+    "archetype": "PULVERALCHEMIST_SEUCHENMEDIKUS",
+    "scene_id": "PSCENE_FH_BITTER_TONIC",
+    "trigger_condition": {
+     "requires_companion_recruited_via_q10": true,
+     "min_stages_together": 4
+    },
+    "stage_direction": "Er schwenkt eine trübe grüne Phiole gegen das Feuerlicht, bis sich darin kleine metallische Schlieren auflösen.",
+    "dialogue": "„Die Gelehrten im Binnenland rümpfen die Nase über Hafen-Alchemie. Aber wenn das Sumpffieber oder eine vergiftete Klinge zuschlägt, betteln sie alle um meine Tinkturen. Probier einen Tropfen.“",
+    "choices": [
+     {
+      "choice_id": "FH_C3_ANTIDOTE",
+      "label": "„Braue uns Gegengifte und stärkende Sud-Mischungen für die Reise.“",
+      "effects": {
+       "moral_delta": 4,
+       "unlock_companion_perk": {
+        "perk_id": "PERK_FH_HAFEN_TINKTUR",
+        "name": "Meister der Tinkturen",
+        "bonus": "+15 % Wirkung aller Heil- und Fokustrank-Ladungen im Gürtel."
+       }
+      }
+     },
+     {
+      "choice_id": "FH_C3_ACID_VIAL",
+      "label": "„Misch mehr Schwefel hinein – unsere Feinde sollen brennen.“",
+      "effects": {
+       "moral_delta": 4,
+       "unlock_companion_perk": {
+        "perk_id": "PERK_FH_AETZPULVER",
+        "name": "Ätzendes Schwarzpulver",
+        "bonus": "+8 % Schaden mit Alchemie- und Schwarzpulver-Fähigkeiten."
+       }
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "patch_id": "ASCHENKRONE_V2610_SIDEBAR_SETTINGS_TAB",
+  "version": "2.6.10",
+  "target_files": [
+   "ui/seitenleiste.js",
+   "spiel/speichern_und_laden.js",
+   "style/layout.css"
+  ],
+  "sidebar_navigation_update": {
+   "tabs_order": [
+    {
+     "tab_id": "TAB_KARTE",
+     "label": "Karte",
+     "icon": "map"
+    },
+    {
+     "tab_id": "TAB_BEUTEL",
+     "label": "Beutel",
+     "icon": "bag",
+     "show_capacity_counter": true
+    },
+    {
+     "tab_id": "TAB_CHRONIK",
+     "label": "Chronik",
+     "icon": "book"
+    },
+    {
+     "tab_id": "TAB_GEFAEHRTEN",
+     "label": "Gefährten",
+     "icon": "users"
+    },
+    {
+     "tab_id": "TAB_EINSTELLUNGEN",
+     "label": "Einstellungen",
+     "icon": "gear",
+     "compact_label_on_narrow_sidebar": "⚙"
+    }
+   ],
+   "cleanup_gefaehrten_tab": {
+    "remove_buttons": [
+     "Spielstand exportieren",
+     "Hauptmenü"
+    ],
+    "move_save_status_badge_to_settings_tab": true
+   },
+   "settings_tab_sections": [
+    {
+     "order": 1,
+     "item_id": "BTN_SAVE_GAME",
+     "label": "Spielstand speichern",
+     "sub_actions": [
+      {
+       "action_id": "SAVE_LOCAL",
+       "label": "Lokal speichern",
+       "show_last_saved_timestamp": true
+      },
+      {
+       "action_id": "EXPORT_SAVE_FILE",
+       "label": "Spielstand als Datei exportieren"
+      }
+     ]
+    },
+    {
+     "order": 2,
+     "item_id": "BTN_LOAD_GAME",
+     "label": "Spielstand laden",
+     "sub_actions": [
+      {
+       "action_id": "LOAD_LOCAL_SAVE",
+       "label": "Letzten lokalen Spielstand laden"
+      },
+      {
+       "action_id": "LOAD_PRE_COMBAT_CHECKPOINT",
+       "label": "Wegpunkt vor letzter Schlacht laden"
+      },
+      {
+       "action_id": "IMPORT_SAVE_FILE",
+       "label": "Spielstand-Datei importieren"
+      }
+     ]
+    },
+    {
+     "order": 3,
+     "item_id": "SEC_OPTIONS",
+     "label": "Optionen",
+     "settings": [
+      {
+       "option_id": "OPT_WARN_UNSPENT_LEVEL_POINTS",
+       "label": "Vor Bosskämpfen an ungenutzte Aufstiegspunkte erinnern",
+       "type": "TOGGLE",
+       "default": true
+      },
+      {
+       "option_id": "OPT_COMPANION_BANTER_FREQUENCY",
+       "label": "Begleiter-Einwürfe in Dialogen & am Lagerfeuer",
+       "type": "SELECT",
+       "options": [
+        "HÄUFIG",
+        "NORMAL",
+        "SELTEN"
+       ],
+       "default": "NORMAL"
+      },
+      {
+       "option_id": "OPT_COMBAT_LOG_DETAIL",
+       "label": "Kampflog-Anzeige",
+       "type": "SELECT",
+       "options": [
+        "KOMPAKT",
+        "AUSFÜHRLICH"
+       ],
+       "default": "AUSFÜHRLICH"
+      }
+     ]
+    },
+    {
+     "order": 4,
+     "item_id": "BTN_MAIN_MENU",
+     "label": "Hauptmenü",
+     "require_confirmation_dialog": true,
+     "confirmation_text": "Möchtest du wirklich zum Hauptmenü zurückkehren? Nicht gespeicherter Fortschritt geht verloren."
+    }
+   ]
+  }
+ },
+ {
+  "patch_id": "ASCHENKRONE_V2611_KONTOR_STORAGE_UI_POLISH",
+  "version": "2.6.11",
+  "target_files": [
+   "ui/inventar_und_handel.js",
+   "style/handel.css"
+  ],
+  "kontor_tab_improvements": {
+   "resource_cards_grid": {
+    "layout_mode": "EQUAL_5_COLUMN_CARDS",
+    "card_structure": "BIG_NUMBER_TOP_SHORT_LABEL_BOTTOM",
+    "resources": [
+     {
+      "id": "RES_NAHRUNG",
+      "short_label": "Nahrung"
+     },
+     {
+      "id": "RES_HOLZ",
+      "short_label": "Bauholz"
+     },
+     {
+      "id": "RES_EISEN",
+      "short_label": "Roheisen"
+     },
+     {
+      "id": "RES_STEIN",
+      "short_label": "Bruchstein"
+     },
+     {
+      "id": "RES_RUNENSPLITTER",
+      "short_label": "Splitter"
+     }
+    ]
+   },
+   "rations_transfer_bar": {
+    "layout_mode": "SINGLE_HORIZONTAL_ACTION_ROW",
+    "left_status_text": "Proviant im Gepäck: {pack_rations} Nahrung",
+    "right_buttons_grouped": [
+     {
+      "id": "BTN_TAKE_1_RATION",
+      "label": "−1"
+     },
+     {
+      "id": "BTN_TAKE_5_RATIONS",
+      "label": "−5 ins Gepäck"
+     },
+     {
+      "id": "BTN_STORE_5_RATIONS",
+      "label": "+5 ins Kontor"
+     }
+    ]
+   },
+   "armada_war_chest_tracker": {
+    "visible_from_act": 2,
+    "collapsible": true,
+    "default_expanded_in_act_4": true,
+    "title": "Armada-Kriegskasse (Überfahrt)",
+    "targets": {
+     "RES_NAHRUNG": 30,
+     "RES_HOLZ": 25,
+     "RES_EISEN": 25,
+     "RES_STEIN": 20
+    }
+   },
+   "item_storage_section": {
+    "empty_state_style": "COMPACT_DASHED_BOX",
+    "empty_state_text": "Keine eingelagerten Gegenstände in Kronhall.",
+    "backpack_deposit_list": {
+     "show_equipped_badge": true,
+     "confirm_before_storing_equipped_item": true,
+     "note": "Verhindert versehentliches Einlagern der aktuell angelegten Hauptwaffe (z. B. Axt) oder Rüstung (Lederwams)."
+    }
+   }
+  }
+ },
+ {
+  "patch_id": "ASCHENKRONE_V2612_CHRONIK_UI_AND_QUEST_SYNC",
+  "version": "2.6.12",
+  "target_files": [
+   "spiel/dialoge_und_quests.js",
+   "ui/chronik_tab.js",
+   "style/layout.css"
+  ],
+  "quest_state_sync_fixes": {
+   "fix_completed_quest_counter_bug": true,
+   "on_quest_completed_or_failed": {
+    "move_from_active_to_history_array": true,
+    "preserve_chosen_moral_path_tag": [
+     "GUTE_TAT",
+     "SOELDNER_WEG",
+     "SCHLECHTE_TAT"
+    ],
+    "force_rerender_chronik_counters": true
+   },
+   "replace_legacy_step_label": {
+    "old_label": "Fristenuhr · Schritt {step}",
+    "new_label": "Reisestand · Etappe {stage}"
+   }
+  },
+  "chronik_ui_redesign": {
+   "top_banner_active_main_quest": {
+    "style": "COMPACT_GOLD_BORDER_CARD",
+    "show_current_act_and_objective": true
+   },
+   "quest_filter_bar": {
+    "layout_mode": "SINGLE_ROW_4_PILL_TABS",
+    "show_active_contract_cap": true,
+    "tabs": [
+     {
+      "id": "FILTER_OPEN",
+      "label": "Offen ({open_count}/5)"
+     },
+     {
+      "id": "FILTER_COMPLETED",
+      "label": "Erfüllt ({completed_count})"
+     },
+     {
+      "id": "FILTER_FAILED",
+      "label": "Gescheitert ({failed_count})"
+     },
+     {
+      "id": "FILTER_ALL",
+      "label": "Alle ({total_count})"
+     }
+    ]
+   },
+   "quest_card_design": {
+    "show_location_and_reward_preview": true,
+    "show_completion_outcome_badge": true,
+    "empty_state_compact_text": "Keine Einträge in dieser Kategorie."
+   },
+   "travel_journal_redesign": {
+    "remove_numbered_list_format": true,
+    "layout_mode": "TIMELINE_FEED_NEWEST_FIRST",
+    "entry_structure": {
+     "header": "Etappe {stage} · {location_name}",
+     "body": "Kurzer atmosphärischer Chronik-Satz",
+     "inline_delta_pills": [
+      "EP",
+      "Silber",
+      "Nahrung",
+      "Ruf",
+      "Moral"
+     ]
+    },
+    "max_visible_entries_before_scroll": 8
+   }
+  }
+ },
+ {
+  "patch_id": "ASCHENKRONE_V2613_HIDE_EMBER_STATUS_FOR_NON_ORDEN",
+  "version": "2.6.13",
+  "target_files": [
+   "spiel/regeln.js",
+   "ui/charakter_fenster.js"
+  ],
+  "fix_rule": {
+   "status_id": "STATUS_GLUT_ERSCHOEPFT",
+   "trigger_condition": "hero.has_glutgabe === true && hero.glut <= 0",
+   "suppress_when_no_glutgabe": true,
+   "note": "Verhindert, dass Kronreich und Freie Haefen den roten Debuff 'Glut erschoepft' im Effekte-Reiter erhalten, weil ihre Glut auf 0 steht."
+  }
+ },
+ {
+  "patch_id": "ASCHENKRONE_V2614_AUFSTIEG_TAB_REDESIGN",
+  "version": "2.6.14",
+  "target_files": [
+   "ui/charakter_fenster.js",
+   "spiel/klassen_und_fertigkeiten.js",
+   "style/charakter.css"
+  ],
+  "aufstieg_tab_layout": {
+   "header_points_bar": {
+    "show_badges": [
+     {
+      "id": "BADGE_AP",
+      "label": "Grundwertpunkte",
+      "value_key": "unspent_attribute_points",
+      "highlight_when_positive": true
+     },
+     {
+      "id": "BADGE_FP",
+      "label": "Fertigkeits- / Talentpunkte",
+      "value_key": "unspent_skill_or_talent_points",
+      "highlight_when_positive": true
+     }
+    ],
+    "move_rules_explanation_to_tooltip": true,
+    "tooltip_text": "Jede Stufe gewährt +2 Grundwertpunkte und +1 Fertigkeitspunkt (ab Stufe 21 Meister-Talentpunkte). Jeder Fertigkeitsrang erhöht Schaden oder Heilung um +12 %; Rang 4 senkt zusätzlich die Kosten um 1."
+   },
+   "attribute_allocation_panel": {
+    "show_when_points_available_or_collapsible": true,
+    "display_current_cap": true,
+    "attributes": [
+     "STAERKE",
+     "GESCHICK",
+     "INTELLIGENZ",
+     "WILLENSKRAFT",
+     "CHARISMA"
+    ]
+   },
+   "skill_cards_grid": {
+    "layout_mode": "GRID_2_COLUMNS",
+    "remove_dashed_placeholder_borders": true,
+    "card_style": "SOLID_DARK_CARD_WITH_GOLD_ACCENT",
+    "card_elements": {
+     "title_row": {
+      "skill_name": true,
+      "rank_pip_bar": "4_SEGMENTS_FILLED_BY_RANK",
+      "resource_cost_pill": true
+     },
+     "skill_description_section": {
+      "show_full_combat_description": true,
+      "fallback_auto_description_if_missing": "Verursacht {multiplier_pct} % Waffenschaden basierend auf {scaling_stat}."
+     },
+     "progression_footer": {
+      "current_rank_bonus_label": "Aktuell (Rang {rank}/4): +{bonus_pct} % Wirkung",
+      "next_rank_requirement_label": "Rang {next_rank}: +{next_bonus_pct} % Wirkung (freigeschaltet ab Stufe {unlock_level})",
+      "upgrade_button_label": "Rang steigern (1 Punkt)"
+     }
+    }
+   },
+   "upcoming_milestones_strip": {
+    "style": "COMPACT_HORIZONTAL_STEPPER",
+    "milestones": [
+     {
+      "level": 6,
+      "label": "3. Grundfähigkeit"
+     },
+     {
+      "level": 10,
+      "label": "4. Grundfähigkeit & Klassen-Spezialisierung"
+     },
+     {
+      "level": 15,
+      "label": "Signaturfähigkeit & Rang 4"
+     },
+     {
+      "level": 21,
+      "label": "Meister-Talente (5 Bäume)"
+     }
+    ]
+   }
+  }
+ },
+ {
+  "module_id": "ASCHENKRONE_V2615_DYNAMIC_FACTION_THEMES",
+  "version": "2.6.15",
+  "target_files": [
+   "ui/theme_manager.js",
+   "style/themes.css",
+   "index.html"
+  ],
+  "theme_engine_rules": {
+   "apply_root_attribute": "data-faction-theme",
+   "switch_automatically_on": [
+    "NEW_GAME_FACTION_SELECTED",
+    "SAVE_GAME_LOADED"
+   ],
+   "fallback_theme": "THEME_KRONREICH",
+   "header_emblem_badge": {
+    "show_faction_crest_in_sidebar_and_modals": true,
+    "show_subtle_watermark_texture": true
+   }
+  },
+  "themes": [
+   {
+    "theme_id": "THEME_KRONREICH",
+    "faction_ids": [
+     "KRONREICH"
+    ],
+    "display_name": "Kronreich · Stahl & Krone",
+    "atmosphere_keywords": [
+     "Eichenholz",
+     "Geschmiedetes Eisen",
+     "Kronengold"
+    ],
+    "css_variables": {
+     "--bg-primary": "#171513",
+     "--bg-panel": "#211d1a",
+     "--bg-card": "#292420",
+     "--border-subtle": "#3d352e",
+     "--border-accent": "#c89d54",
+     "--text-primary": "#ede6dc",
+     "--text-muted": "#a3988b",
+     "--accent-primary": "#c89d54",
+     "--accent-secondary": "#7d8894",
+     "--hp-bar-fill": "#9e2a2b",
+     "--resource-bar-fill": "#c89d54"
+    },
+    "border_motif": "SHIELD_RIVETS"
+   },
+   {
+    "theme_id": "THEME_ORDEN_DER_FLAMME",
+    "faction_ids": [
+     "ORDEN_DER_FLAMME"
+    ],
+    "display_name": "Orden der Flamme · Basalt & Glut",
+    "atmosphere_keywords": [
+     "Vulkanbasalt",
+     "Asche",
+     "Ewige Glut"
+    ],
+    "css_variables": {
+     "--bg-primary": "#161110",
+     "--bg-panel": "#211816",
+     "--bg-card": "#2b1e1b",
+     "--border-subtle": "#452d27",
+     "--border-accent": "#e06328",
+     "--text-primary": "#f2e6df",
+     "--text-muted": "#ad958c",
+     "--accent-primary": "#e06328",
+     "--accent-secondary": "#f0a848",
+     "--hp-bar-fill": "#b52b27",
+     "--resource-bar-fill": "#e06328"
+    },
+    "border_motif": "EMBER_RUNES"
+   },
+   {
+    "theme_id": "THEME_FREIE_HAEFEN",
+    "faction_ids": [
+     "FREIE_HAEFEN"
+    ],
+    "display_name": "Freie Häfen · Sturmflut & Messing",
+    "atmosphere_keywords": [
+     "Tiefsee-Schiefer",
+     "Treibholz",
+     "Kompass-Messing"
+    ],
+    "css_variables": {
+     "--bg-primary": "#10171c",
+     "--bg-panel": "#172229",
+     "--bg-card": "#1f2d36",
+     "--border-subtle": "#2f434f",
+     "--border-accent": "#4ea396",
+     "--text-primary": "#e4edf0",
+     "--text-muted": "#8fa4ad",
+     "--accent-primary": "#4ea396",
+     "--accent-secondary": "#c7a658",
+     "--hp-bar-fill": "#a33333",
+     "--resource-bar-fill": "#4ea396"
+    },
+    "border_motif": "COMPASS_AND_ROPE"
+   },
+   {
+    "theme_id": "THEME_ELFEN_PLACEHOLDER",
+    "faction_ids": [
+     "ELFEN_ALL"
+    ],
+    "display_name": "Elfen · Silberbirke & Moos",
+    "css_variables": {
+     "--bg-primary": "#111714",
+     "--bg-panel": "#18211c",
+     "--bg-card": "#202b25",
+     "--border-subtle": "#324239",
+     "--border-accent": "#6aa87e",
+     "--text-primary": "#e6efe9",
+     "--text-muted": "#92a699",
+     "--accent-primary": "#6aa87e",
+     "--accent-secondary": "#c2d1d9",
+     "--hp-bar-fill": "#9e333b",
+     "--resource-bar-fill": "#6aa87e"
+    },
+    "border_motif": "LEAF_FILIGREE"
+   },
+   {
+    "theme_id": "THEME_ORKS_PLACEHOLDER",
+    "faction_ids": [
+     "ORKS_ALL"
+    ],
+    "display_name": "Orks · Blutrost & Knochen",
+    "css_variables": {
+     "--bg-primary": "#171211",
+     "--bg-panel": "#221917",
+     "--bg-card": "#2c201d",
+     "--border-subtle": "#47332e",
+     "--border-accent": "#b8432e",
+     "--text-primary": "#ede3dc",
+     "--text-muted": "#a69288",
+     "--accent-primary": "#b8432e",
+     "--accent-secondary": "#c4b49f",
+     "--hp-bar-fill": "#a82424",
+     "--resource-bar-fill": "#b8432e"
+    },
+    "border_motif": "IRON_SPIKES"
+   },
+   {
+    "theme_id": "THEME_ZWERGE_PLACEHOLDER",
+    "faction_ids": [
+     "ZWERGE_ALL"
+    ],
+    "display_name": "Zwerge · Tiefenstein & Runenbronze",
+    "css_variables": {
+     "--bg-primary": "#141517",
+     "--bg-panel": "#1d1f22",
+     "--bg-card": "#26292d",
+     "--border-subtle": "#3b4047",
+     "--border-accent": "#c47d3b",
+     "--text-primary": "#eaecf0",
+     "--text-muted": "#969ca6",
+     "--accent-primary": "#c47d3b",
+     "--accent-secondary": "#7c8999",
+     "--hp-bar-fill": "#a12d2d",
+     "--resource-bar-fill": "#c47d3b"
+    },
+    "border_motif": "DWARVEN_GEOMETRY"
+   },
+   {
+    "theme_id": "THEME_UNTOTE_PLACEHOLDER",
+    "faction_ids": [
+     "UNTOTE_ALL"
+    ],
+    "display_name": "Untote · Permafrost & Geisterlicht",
+    "css_variables": {
+     "--bg-primary": "#0f1417",
+     "--bg-panel": "#161d21",
+     "--bg-card": "#1d262b",
+     "--border-subtle": "#2d3b42",
+     "--border-accent": "#66a3bd",
+     "--text-primary": "#e1eaed",
+     "--text-muted": "#899ba3",
+     "--accent-primary": "#66a3bd",
+     "--accent-secondary": "#9eb0b8",
+     "--hp-bar-fill": "#4b7b94",
+     "--resource-bar-fill": "#66a3bd"
+    },
+    "border_motif": "FROST_CRACKS"
+   }
+  ]
+ },
+ {
+  "patch_id": "ASCHENKRONE_V2616_CHARACTER_CREATION_REDESIGN",
+  "version": "2.6.16",
+  "target_files": [
+   "ui/charakter_erstellung.js",
+   "spiel/klassen_und_fertigkeiten.js",
+   "style/charakter_erstellung.css"
+  ],
+  "visual_and_layout_overhaul": {
+   "apply_live_faction_theme_on_dropdown_change": true,
+   "replace_light_parchment_with_dark_fantasy_panel": true,
+   "layout_mode": "TWO_COLUMN_COCKPIT",
+   "left_column": {
+    "sections": [
+     "NAME_VOLK_FRAKTION_KLASSE",
+     "GRUNDWERTE_UND_FERTIGKEITEN_SIDE_BY_SIDE"
+    ],
+    "compact_stepper_buttons": {
+     "style": "INLINE_MINUS_VALUE_PLUS_PILL",
+     "align_max_labels_single_line": true
+    }
+   },
+   "right_column_sticky_preview": {
+    "portrait_card": {
+     "image_with_faction_frame": true,
+     "inline_portrait_controls_below_image": [
+      "PORTRAIT_GENDER_SELECTOR",
+      "PORTRAIT_VARIANT_SELECTOR"
+     ]
+    },
+    "summary_card": {
+     "show_faction_bonuses_and_start_city": true,
+     "show_class_passive_and_level10_spec_preview": true
+    },
+    "sticky_action_footer": [
+     "BTN_PROLOG_STARTEN",
+     "BTN_ZURUECK"
+    ]
+   }
+  },
+  "legacy_text_cleanups": {
+   "remove_old_vorrat_resource_tag_in_faction_dropdown": true,
+   "fix_kronreich_blutritter_ember_text": {
+    "class_id": "BLUTRITTER_DER_KRONE",
+    "old_text": "Im Kampf: Setzt auf Nahkampf und einen schweren Gluthieb. Standglut hält dich beim Gegenangriff auf den Beinen.",
+    "new_text": "Im Kampf: Setzt auf Nahkampf und einen schweren Wuchthieb. Eiserner Stand hält dich beim Gegenangriff auf den Beinen."
+   }
+  }
+ },
+ {
+  "bundle_id": "ASCHENKRONE_UI_MASTER_V2616_PART_1",
+  "version": "2.6.16",
+  "target_files": [
+   "ui/theme_manager.js",
+   "ui/seitenleiste.js",
+   "ui/chronik_tab.js",
+   "spiel/dialoge_und_quests.js",
+   "style/themes.css",
+   "style/layout.css"
+  ],
+  "dynamic_faction_themes": {
+   "root_attribute": "data-faction-theme",
+   "live_preview_in_character_creation": true,
+   "themes": [
+    {
+     "theme_id": "THEME_KRONREICH",
+     "factions": [
+      "KRONREICH"
+     ],
+     "css_vars": {
+      "--bg-primary": "#171513",
+      "--bg-panel": "#211d1a",
+      "--bg-card": "#292420",
+      "--border-subtle": "#3d352e",
+      "--border-accent": "#c89d54",
+      "--text-primary": "#ede6dc",
+      "--text-muted": "#a3988b",
+      "--accent-primary": "#c89d54",
+      "--accent-secondary": "#7d8894"
+     }
+    },
+    {
+     "theme_id": "THEME_ORDEN_DER_FLAMME",
+     "factions": [
+      "ORDEN_DER_FLAMME"
+     ],
+     "css_vars": {
+      "--bg-primary": "#161110",
+      "--bg-panel": "#211816",
+      "--bg-card": "#2b1e1b",
+      "--border-subtle": "#452d27",
+      "--border-accent": "#e06328",
+      "--text-primary": "#f2e6df",
+      "--text-muted": "#ad958c",
+      "--accent-primary": "#e06328",
+      "--accent-secondary": "#f0a848"
+     }
+    },
+    {
+     "theme_id": "THEME_FREIE_HAEFEN",
+     "factions": [
+      "FREIE_HAEFEN"
+     ],
+     "css_vars": {
+      "--bg-primary": "#10171c",
+      "--bg-panel": "#172229",
+      "--bg-card": "#1f2d36",
+      "--border-subtle": "#2f434f",
+      "--border-accent": "#4ea396",
+      "--text-primary": "#e4edf0",
+      "--text-muted": "#8fa4ad",
+      "--accent-primary": "#4ea396",
+      "--accent-secondary": "#c7a658"
+     }
+    }
+   ]
+  },
+  "sidebar_settings_tab": {
+   "add_fifth_tab": {
+    "tab_id": "TAB_EINSTELLUNGEN",
+    "icon": "gear",
+    "label": "Einstellungen",
+    "compact_label": "⚙"
+   },
+   "remove_from_gefaehrten_tab": [
+    "Spielstand exportieren",
+    "Hauptmenü",
+    "Lokal gespeichert."
+   ],
+   "settings_items": [
+    {
+     "order": 1,
+     "id": "SAVE_GAME",
+     "label": "Spielstand speichern",
+     "actions": [
+      "Lokal speichern",
+      "Spielstand exportieren"
+     ]
+    },
+    {
+     "order": 2,
+     "id": "LOAD_GAME",
+     "label": "Spielstand laden",
+     "actions": [
+      "Letzten lokalen Spielstand laden",
+      "Wegpunkt vor letzter Schlacht laden",
+      "Spielstand-Datei importieren"
+     ]
+    },
+    {
+     "order": 3,
+     "id": "OPTIONS",
+     "label": "Optionen",
+     "toggles": [
+      "Vor Bosskämpfen an ungenutzte Aufstiegspunkte erinnern",
+      "Begleiter-Einwürfe in Dialogen & am Lagerfeuer",
+      "Kampflog-Detailstufe"
+     ]
+    },
+    {
+     "order": 4,
+     "id": "MAIN_MENU",
+     "label": "Hauptmenü",
+     "confirm_dialog": true
+    }
+   ]
+  },
+  "chronik_tab_fix": {
+   "fix_completed_quests_not_incrementing_counter": true,
+   "replace_step_label_with_etappe": "Reisestand · Etappe {stage}",
+   "single_row_filter_tabs": [
+    "Offen ({open}/5)",
+    "Erfüllt ({completed})",
+    "Gescheitert ({failed})",
+    "Alle ({total})"
+   ],
+   "journal_style": "TIMELINE_FEED_WITHOUT_NUMBERING"
+  }
+ },
+ {
+  "bundle_id": "ASCHENKRONE_UI_MASTER_V2616_PART_2",
+  "version": "2.6.16",
+  "target_files": [
+   "ui/charakter_erstellung.js",
+   "ui/charakter_fenster.js",
+   "spiel/klassen_und_fertigkeiten.js",
+   "spiel/regeln.js",
+   "style/charakter_erstellung.css",
+   "style/charakter.css"
+  ],
+  "character_creation_overhaul": {
+   "use_dark_faction_theme_instead_of_light_beige": true,
+   "layout_mode": "TWO_COLUMN_COCKPIT",
+   "left_column": [
+    "NAME_VOLK_FRAKTION_KLASSE",
+    "GRUNDWERTE_AND_FERTIGKEITEN_SIDE_BY_SIDE"
+   ],
+   "right_column_sticky": [
+    "PORTRAIT_WITH_INLINE_GENDER_AND_VARIANT_STEPPERS",
+    "FACTION_AND_CLASS_BONUS_SUMMARY",
+    "STICKY_BUTTONS_PROLOG_STARTEN_AND_ZURUECK"
+   ],
+   "text_cleanups": {
+    "remove_legacy_vorrat_tag_in_faction_dropdown": true,
+    "fix_blutritter_text": {
+     "class_id": "BLUTRITTER_DER_KRONE",
+     "old": "Setzt auf Nahkampf und einen schweren Gluthieb. Standglut hält dich beim Gegenangriff auf den Beinen.",
+     "new": "Setzt auf Nahkampf und einen schweren Wuchthieb. Eiserner Stand hält dich beim Gegenangriff auf den Beinen."
+    }
+   }
+  },
+  "character_sheet_fixes": {
+   "effekte_tab": {
+    "suppress_glut_erschoepft_when_no_glutgabe": true,
+    "condition": "hero.has_glutgabe === true && hero.glut <= 0"
+   },
+   "aufstieg_tab": {
+    "top_badges": [
+     "Grundwertpunkte",
+     "Fertigkeits- / Talentpunkte"
+    ],
+    "move_rules_explanation_to_info_tooltip": true,
+    "skill_cards_grid": {
+     "columns": 2,
+     "remove_dashed_borders": true,
+     "show_4_segment_rank_bar": true,
+     "show_resource_cost_pill": true,
+     "show_full_skill_description": true,
+     "show_current_and_next_rank_bonus": true
+    }
+   }
+  }
+ },
+ {
+  "bundle_id": "ASCHENKRONE_UI_MASTER_V2616_PART_3",
+  "version": "2.6.16",
+  "target_files": [
+   "ui/inventar_und_handel.js",
+   "style/handel.css"
+  ],
+  "shared_left_panel_fixes": {
+   "stats_box_layout": "GRID_2X2",
+   "stats_cells": [
+    "ANGRIFF",
+    "RUESTUNG",
+    "AUSWEICHEN",
+    "KRIT"
+   ],
+   "fix_ausweichen_krit_overlap": true,
+   "remove_duplicate_silver_below_stats": true
+  },
+  "trade_tab_fixes": {
+   "commodities_fixed_4_column_grid": true,
+   "prevent_resource_name_wrapping": true,
+   "merchant_filter_bar": [
+    "ALLE",
+    "FUER_KLASSE_TRAGBAR",
+    "WAFFEN",
+    "RUESTUNG",
+    "TRAENKE_GUERTEL"
+   ],
+   "show_equipped_item_stat_diff": true,
+   "potion_descriptions_3_5_scale": {
+    "POT_HEAL_1": "Tier 1 · Stellt im Kampf 10 LP wieder her.",
+    "POT_HEAL_2": "Tier 2 · Stellt im Kampf 24 LP wieder her und entfernt Blutung.",
+    "POT_HEAL_3": "Tier 3 · Stellt im Kampf 51 LP wieder her und heilt Gebrechen.",
+    "POT_FOCUS_1": "Tier 1 · Stellt 7 Ausdauer bzw. Mana/Glut-Fokus wieder her."
+   }
+  },
+  "kontor_tab_fixes": {
+   "equal_5_column_resource_cards": [
+    "Nahrung",
+    "Bauholz",
+    "Roheisen",
+    "Bruchstein",
+    "Splitter"
+   ],
+   "single_row_rations_transfer_bar": [
+    "−1",
+    "−5 ins Gepäck",
+    "+5 ins Kontor"
+   ],
+   "armada_war_chest_progress_widget": {
+    "visible_from_act": 2,
+    "targets": {
+     "RES_NAHRUNG": 30,
+     "RES_HOLZ": 25,
+     "RES_EISEN": 25,
+     "RES_STEIN": 20
+    }
+   },
+   "warn_before_depositing_equipped_gear": true
+  }
+ }
+]

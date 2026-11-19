@@ -26,6 +26,8 @@ const world = (() => {
       name: "Krieger", weapon: "axt", attack: { name: "Gluthieb", power: 10, skill: "nahkampf" },
       restore: { name: "Standglut", guard: 8 },
       description: "Setzt auf Nahkampf und einen schweren Gluthieb. Standglut hält dich beim Gegenangriff auf den Beinen.",
+      // Patch 2.6.16: Text für Fraktionen ohne Glutgabe (Blutritter der Krone, Kronreich).
+      descriptionOhneGlut: "Setzt auf Nahkampf und einen schweren Wuchthieb. Eiserner Stand hält dich beim Gegenangriff auf den Beinen.",
     },
     waechter: {
       name: "Wächter", weapon: "speer", attack: { name: "Glutklinge", power: 8, skill: "nahkampf" },

@@ -254,7 +254,7 @@ assert.equal(migrated.balance, 0);
 assert.equal(migrated.scene, "start");
 assert.equal(migrated.umschulung, true);
 assert.equal(migrated.allocation, undefined);
-assert.deepEqual(Object.keys(migrated.equipment).sort(), ["armor", "head", "legs", "neck", "offhand", "ring1", "ring2", "weapon"]);
+assert.deepEqual(Object.keys(migrated.equipment).sort(), ["armor", "hands", "head", "legs", "neck", "offhand", "ring1", "ring2", "weapon"]);
 assert.deepEqual(Array.from(migrated.storage), []);
 assert.equal(rules.weapon(migrated), "speer");
 assert.equal(migrated.health, rules.healthLimit(migrated));
@@ -781,7 +781,7 @@ console.log("Gefährtenaufträge, Beziehungsfolgen, Geschenke, Romanze, Fraktion
   assert.equal(loaded.equipment.ring2, null);
   assert.equal(loaded.equipment.armor, "glutpanzer");
   assert.equal(hero().storage.length, 0);
-  assert.equal(Object.keys(hero().equipment).join(), "weapon,offhand,head,neck,armor,legs,ring1,ring2");
+  assert.equal(Object.keys(hero().equipment).join(), "weapon,offhand,head,neck,armor,hands,legs,ring1,ring2");
 
   // Zentrallager nur in Städten und nicht im Kampf
   assert.equal(world.scenes[armored.scene].map, "hochwacht");
@@ -1947,14 +1947,14 @@ console.log("Aufträge am Aushang, Wegaufträge, Wegrabatt, Trophäen, Begleiter
   assert.equal(rules.progression(imOrt("kronreich", "kronhall", { xp: 57250 })).level, 30);
   assert.equal(rules.progression(imOrt("kronreich", "kronhall", { xp: 19000 })).level, 20);
   assert.equal(rules.progression(imOrt("kronreich", "kronhall", { xp: 21250 })).level, 21);
-  // Meister-Talente: Patch 2.5.5 ein Punkt je Stufe 21–30. Schildwall +10 % LP je Rang.
+  // Meister-Talente: Patch 2.5.5 ein Punkt je Stufe 21–30. Patch 2.6.2: Ungebrochener Schildwall Rang 1 +8 LP.
   let meister = imOrt("kronreich", "kronhall", { xp: 57250 });
   meister.health = rules.healthLimit(meister);
   assert.equal(rules.aufstiegInfo(meister).talentPunkte, 10);
   const lp = rules.healthLimit(meister);
-  meister = reload(rules.talentLernen(meister, "MT_EISENWALL"));
-  assert.equal(meister.talente.MT_EISENWALL, 1);
-  assert.equal(rules.healthLimit(meister), Math.round(lp * 1.1));
+  meister = reload(rules.talentLernen(meister, "TREE_UNGEBROCHENER_SCHILDWALL"));
+  assert.equal(meister.talente.TREE_UNGEBROCHENER_SCHILDWALL, 1);
+  assert.equal(rules.healthLimit(meister), lp + 8);
   // Ahnen: je 5000 EP über Stufe 30 ein Punkt.
   assert.equal(rules.aufstiegInfo(meister).ahnenPunkte, 0);
   meister = reload(rules.ahnenLernen({ ...meister, xp: 62250 }, "perk_iron_blood"));

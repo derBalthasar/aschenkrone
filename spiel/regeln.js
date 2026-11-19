@@ -5,8 +5,9 @@ const rules = (() => {
   const K = klassen;
   // Ausrüstungsplätze: rechte Hand (weapon), linke Hand (offhand), Kopf, Hals, Körper (armor), Beine, zwei Ringe.
   // Die Schlüssel weapon und armor bleiben wegen bestehender Spielstände erhalten.
-  const equipmentSlots = ["weapon", "offhand", "head", "neck", "armor", "legs", "ring1", "ring2"];
-  const slotKinds = { weapon: "weapon", offhand: "offhand", head: "head", neck: "neck", armor: "armor", legs: "legs",
+  // Patch 2.6.5: neuer Platz „Hände“ für Handschuhe (alte Spielstände bekommen ihn leer dazu).
+  const equipmentSlots = ["weapon", "offhand", "head", "neck", "armor", "hands", "legs", "ring1", "ring2"];
+  const slotKinds = { weapon: "weapon", offhand: "offhand", head: "head", neck: "neck", armor: "armor", hands: "hands", legs: "legs",
     ring1: "ring", ring2: "ring" };
   const emptyEquipment = () => Object.fromEntries(equipmentSlots.map(slot => [slot, null]));
   const partyLimit = 3;
@@ -355,6 +356,21 @@ const rules = (() => {
     state.befreit ??= [];
     state.tatOffen ??= null;
     state.aufwertung ??= {};
+    // Patch 2.6.0: Akte 2 bis 4 (Schwester-Zweige, Fraktions-Spezialisierung, Akt 4), Lagerfeuer und Gefährten-Szenen.
+    state.akte ??= null;
+    state.lagerBuff ??= null;
+    state.lagerMeilenstein ??= null;
+    state.gefaehrtenPerks ??= [];
+    state.lagerGesehen ??= [];
+    state.vorhut ??= null;
+    // Patch 2.6.2: Die fünf alten Meister-Talente werden zu den neuen Talentbäumen (gleicher Rang).
+    if (isRecord(state.talente)) {
+      for (const [alt, neu] of Object.entries(SY.daten.aufstieg.talentAlt ?? {})) {
+        if (state.talente[alt] === undefined) continue;
+        state.talente[neu] = Math.min(SY.daten.aufstieg.talentMaxRang, (state.talente[neu] ?? 0) + state.talente[alt]);
+        delete state.talente[alt];
+      }
+    }
     // Spielstände vor der Weltebene: Fraktionsressource und Kampfressource werden ein Vorrat von 0 bis 100.
     // Der alte Kampfvorrat (Start 3) kommt auf den neuen Startwert 42 obendrauf.
     if (!isRecord(state.weltLeisten)) {
@@ -808,10 +824,13 @@ const rules = (() => {
   const healthLimit = (state) => {
     const neu = SY.istMensch(state.faction) && SY.daten.menschenKlassen[state.faction]?.[state.role];
     if (!neu) return kampf.lebenspunkte(profile(state.faction, state.role), kampf.stufeAus(state.xp ?? 0));
-    // Meister-Talent Schildwall +10 % je Rang, Eisernes Ahnenblut +25 LP je Rang (÷ 3,5).
+    // Patch 2.6.2: Ungebrochener Schildwall Rang 1 +8 LP. Eisernes Ahnenblut +25 LP je Rang (÷ 3,5). Patch 2.6.5: LP der Ausrüstung.
     const grund = neu.lp + kampf.lpTabelle[profile(state.faction, state.role)][1] * (SY.stufeAus(state.xp ?? 0) - 1);
-    return Math.round(grund * (1 + 0.1 * SY.talentRang(state, "MT_EISENWALL"))) + SY.skaliert(25) * (state.ahnen?.perk_iron_blood ?? 0);
+    return grund + SY.talentWirkung(state, "TREE_UNGEBROCHENER_SCHILDWALL", "max_hp_bonus") + SY.skaliert(25) * (state.ahnen?.perk_iron_blood ?? 0) +
+      gearStat(state, "maxHp");
   };
+  // Summe eines Werts der neuen Ausrüstung (Patch 2.6.5) über alle angelegten Plätze.
+  const gearStat = (state, key) => equipmentSlots.reduce((s, slot) => s + (world.gear[state.equipment?.[slot]]?.v260?.[key] ?? 0), 0);
   const legacyHealthLimit = (state) => 18 + heroAttributes(state).strength + 2 * state.build.fertigkeiten.verteidigung;
   // Patch 2.5.4: Unter den Menschen hat nur der Orden der Flamme die Glutgabe (Start 5, höchstens 10).
   // Kronreich und Freie Häfen haben keine Glut (0) und kein Gleichgewicht.
@@ -909,9 +928,8 @@ const rules = (() => {
     if (once && state.rewards.includes(id)) return;
     const previousLevel = progression(state).level;
     if (once) state.rewards.push(id);
-    // Menschen: Veteran von Odris +10 % EP je Rang, Erbe der Baumeister +15 % Silber je Rang.
+    // Menschen: Erbe der Baumeister +15 % Silber je Rang (Veteran von Odris entfällt mit Patch 2.6.2).
     if (menschen(state)) {
-      xp = Math.round(xp * (1 + 0.1 * SY.talentRang(state, "MT_SCHLACHTFUEHRER")));
       silver = Math.round(silver * (1 + 0.15 * (state.ahnen?.perk_master_steward ?? 0)));
     }
     state.xp += xp;
@@ -1746,6 +1764,9 @@ const rules = (() => {
     return ort.hatHafen && (ort.fraktion === state.faction || (state.vertraege ?? []).includes(ort.fraktion));
   }
 
+  // Patch 2.6.0/2.6.9: Meister der Sturmflut halbiert die Kosten auf Seewegen, die Schmugglerpassage spart 5 Silber.
+  const seeKosten = (state, weg) => weg.kantenTyp !== "seeweg" ? (weg.kostenGold ?? 0) : Math.max(0, Math.round((weg.kostenGold ?? 0) *
+    (state.akte?.fspez === "FSPEC_MEISTER_DER_STURMFLUT" ? 0.5 : 1)) - (state.gefaehrtenPerks?.includes("PERK_FH_SCHMUGGLERPASSAGE") ? 5 : 0));
   function reiseGrund(state, zielId) {
     if (state.scene !== "weltknoten" || state.combat || !state.health) return "nur in der Weltreise";
     if (state.tatOffen) return "erst über den Ausgang des Auftrags entscheiden";
@@ -1756,7 +1777,7 @@ const rules = (() => {
       if (!schiffBereit(state, ort)) {
         return ort.hatHafen ? "kein Schiff: Handelsvertrag mit " + K.fraktionen[ort.fraktion].name + " nötig" : "kein Hafen";
       }
-      if (state.silver < weg.kostenGold) return "zu wenig Silber";
+      if (state.silver < seeKosten(state, weg)) return "zu wenig Silber";
       // Henry, 18. 11. 2026 (Wegenetz der Menschen): Akt 5 öffnet das nächste Kapitel und endet mit der Möglichkeit,
       // die Welt zu bereisen. Freie Übersee-Fahrten zu fremden Völkern gibt es erst danach.
       const ziel = N.get(zielId);
@@ -1861,8 +1882,8 @@ const rules = (() => {
     const kosten = wegKosten(state, von, weg);
     if (menschen(state)) nahrungVerbrauchen(state, kosten);
     else state.ressource -= kosten;
-    state.silver -= weg.kostenGold;
-    if (weg.kostenGold) note(state, "Überfahrt nach " + ziel.name + " · " + weg.kostenGold + " Silber.");
+    state.silver -= seeKosten(state, weg);
+    if (weg.kostenGold) note(state, "Überfahrt nach " + ziel.name + " · " + seeKosten(previous, weg) + " Silber.");
     if (weg.probe) {
       // Tiefer Stollen: Probe auf den besseren von Willenskraft und Intelligenz (W20 unter dem Grundwert).
       const werte = heroAttributes(state);
@@ -2047,6 +2068,12 @@ const rules = (() => {
   // alle anderen verkaufen das Relikt.
   const reliktSystem = NQ?.daten.relikte?.system ?? { factionPermissions: {} };
   const relikte = Object.fromEntries((NQ?.daten.relikte?.gegenstaende ?? []).map(relikt => [relikt.id, relikt]));
+  // Patch 2.6.5: Kriegshorn des Großen Things als Gruppenrelikt der Runen (Wirkung in dealDamage, Rüstung und Moral).
+  {
+    const horn = SY.daten.gegenstaende.REL_T4_BANNER_DER_EINIGUNG;
+    if (horn) relikte[horn.id] = { id: horn.id, name: horn.name, relicType: "rune", sellValue: horn.baseSellPrice,
+      partyBuff: { label: "+8 % Schaden und +1 Rüstung für die ganze Gruppe, −15 % Moralverlust", partyDamage: 0.08, partyArmor: 1, moralLoss: 0.15 } };
+  }
   for (const relikt of Object.values(relikte)) {
     world.items[relikt.id] = relikt.name;
     world.salePrices[relikt.id] = relikt.sellValue;
@@ -2076,6 +2103,9 @@ const rules = (() => {
     nightAmbushImmunity: () => ["Schutz vor nächtlichen Hinterhalten (wirkt, sobald es Tag und Nacht gibt)", false],
     fireResistance: (v) => ["Feuerangriffe −" + v + " Schaden", true],
     coldDamageReduction: (v) => ["Kälteangriffe −" + Math.round(v * 100) + " % Schaden", true],
+    partyDamage: (v) => ["Schaden der ganzen Gruppe +" + Math.round(v * 100) + " %", true],
+    partyArmor: (v) => ["Rüstung der ganzen Gruppe +" + v, true],
+    moralLoss: (v) => ["Moralverlust −" + Math.round(v * 100) + " %", true],
   };
   const reliktTexte = (id) => Object.entries(relikte[id].partyBuff).filter(([key]) => key !== "label")
     .map(([key, value]) => reliktWirkungen[key]?.(value) ?? [key + " " + value, false]);
@@ -2126,14 +2156,21 @@ const rules = (() => {
     flussschnapper: "schnapper", netzweberin: "netzweberin", irrglut: "irrglut", moorschlinger: "moorschlinger",
     diealte: "moorschlinger", graufang: "grauwolf", frostbaer: "frostbaer", deserteure: "deserteure" };
   const aehnlicherGegner = { wegelagerer: "deserteure", schmuggler: "deserteure", spione: "deserteure", kultisten: "deserteure",
-    kulthauptmann: "deserteure", orkvortrupp: "nacht-kronreich", urgash: "nacht-kronreich", aschenkraehen: "galgenkraehe",
+    kulthauptmann: "deserteure", orkvortrupp: "nacht-kronreich", urgash: "nacht-kronreich",
+    feldherr: "nacht-kronreich", zelot: "deserteure", kaperkapitaen: "nacht-kronreich", thorvald: "nacht-kronreich", aschenschatten: "deserteure", aschenkraehen: "galgenkraehe",
     skarn: "frostbaer", aschenmammut: "keiler", letztermammut: "keiler", orkpiraten: "nacht-kronreich" };
   const menschenGegner = new Set(["kultisten", "schmuggler", "spione", "deserteure", "wegelagerer", "orkvortrupp", "kulthauptmann", "urgash",
-    "orkpiraten"]);
+    "orkpiraten", "feldherr", "zelot", "kaperkapitaen", "thorvald", "aschenschatten"]);
   // Kapitän Urgash führt nur die Vorhut der Rostsegel. Er kämpft als Elite, damit Akt 1 auch allein fair bleibt
   // (Kampfdokument: ein einzelner Held schafft 1 Elite, ein Anführer braucht eine Gruppe).
   const auftragGegner = { ...(NQ?.daten.gegnerTypen ?? {}),
-    urgash: { name: "Kapitän Urgash", rang: "elite" } };
+    urgash: { name: "Kapitän Urgash", rang: "elite" },
+    // Patch 2.6.0/2.6.1: Bosse der Schwester-Zweige und von Akt 4.
+    feldherr: { name: "Abtrünniger Feldherr", rang: "anfuehrer" },
+    zelot: { name: "Verderbter Zelot", rang: "anfuehrer", tags: ["untot", "ascheriss"] },
+    kaperkapitaen: { name: "Abtrünniger Kaperkapitän", rang: "anfuehrer" },
+    thorvald: { name: "Erzpriester Thorvald, der Bleiche Skalde", rang: "anfuehrer", tags: ["untot"] },
+    aschenschatten: { name: "Ascheriss-Schatten", rang: "mitlaeufer", anzahl: 3, leader: "Schattenführer", ally: "Schatten", tags: ["ascheriss"] } };
   for (const [typ, gegner] of Object.entries(auftragGegner)) {
     const id = auftragKampf(typ);
     const gleich = gleicherGegner[typ];
@@ -2144,7 +2181,7 @@ const rules = (() => {
     const special = (gleich && world.fights[gleich]?.special) ?? (menschenGegner.has(typ)
       ? { name: "Wuchtschlag", warning: (gegner.leader ?? gegner.name) + " holt zu einem schweren Schlag aus.", damage: 1 }
       : { name: "Ansprung", warning: (gegner.leader ?? gegner.name) + " duckt sich zum Sprung.", damage: 1, bleeds: true });
-    world.fights[id] = { gegner: { rang: gegner.rang, stufe: 1, ...(gegner.anzahl ? { anzahl: gegner.anzahl } : {}) },
+    world.fights[id] = { gegner: { rang: gegner.rang, stufe: 1, ...(gegner.anzahl ? { anzahl: gegner.anzahl } : {}), ...(gegner.tags ? { tags: gegner.tags } : {}) },
       name: gegner.name, loot: [], random: true, special: { ...special }, alpha: Boolean(gegner.alpha),
       victoryText: "Der Kampf ist gewonnen." };
   }
@@ -2155,7 +2192,8 @@ const rules = (() => {
   // ---- Gegner, Beute und Ausrüstung der Menschenlande (Henry, 18. 11. 2026, Gegner- und Ökonomie-Datei) ----
   // Patch 2.4.0: Henrys Werte rechnen 3,5-mal größer als das Kampfdokument vom 17. 11. Angriff, Rüstung und Heilwerte
   // werden durch 3,5 geteilt, damit alle 15 Fraktionen und die Gefährten ein Kampfsystem teilen.
-  const sysSlots = { RECHTE_HAND: "weapon", LINKE_HAND: "offhand", KOPF: "head", HALS: "neck", KOERPER: "armor", BEINE: "legs", RING: "ring" };
+  const sysSlots = { RECHTE_HAND: "weapon", LINKE_HAND: "offhand", KOPF: "head", HALS: "neck", KOERPER: "armor", HAENDE: "hands", BEINE: "legs",
+    RING: "ring" };
   const sysSeltenheit = { 2: "Ungewöhnlich", 3: "Selten", 4: "Episch" };
   const sysWert = (wert, teiler) => Math.round((wert ?? 0) / teiler);
   const resonanzTag = (g) => ["RUNEN_ITEM", "GLUT_ITEM"].includes(g.magicTag);
@@ -2164,6 +2202,15 @@ const rules = (() => {
     if (sysSeltenheit[g.tier] && g.slot) world.rarity[g.id] = sysSeltenheit[g.tier];
     const slot = sysSlots[g.slot];
     const w = g.stats ?? {};
+    // Patch 2.6.5: Tier-3/4-Ausrüstung aus Henrys Datei steht schon in der Spielskala (nicht durch 3,5 geteilt).
+    if (g.spielskala && slot) {
+      world.gear[g.id] = { slot, ...(slot === "weapon" ? { stat: /FOKUS/.test(g.equipCategory) ? "mind" : /FERNKAMPF|SCHWARZPULVER|DOLCH/.test(g.equipCategory)
+        ? "agility" : "strength", ...(g.equipCategory === "DOLCH_KLINGE" ? { skill: "nahkampf" } : {}), power: w.attack ?? 0,
+        ...(/BOGEN|GEWEHR|STAB/.test(g.equipCategory) ? { twoHanded: true } : {}) } : { armor: w.armor ?? 0, ...(w.attack ? { power: w.attack } : {}) }),
+        ...(resonanzTag(g) ? { resonanz: true } : {}), ...(w.critChance ? { krit: w.critChance } : {}),
+        magic: sysWert(w.willpower, 3) + sysWert(w.healPct, 15), v260: w };
+      continue;
+    }
     if (slot === "weapon") {
       const fern = /FERNKAMPF|SCHWARZPULVER/.test(g.equipCategory);
       const fokus = /FOKUS/.test(g.equipCategory);
@@ -2664,6 +2711,36 @@ const rules = (() => {
   const einsamerWolfWerte = { rollen: ["spaeher", "schurke", "heiler"], schaden: 0.15, schadenDeckel: 3, ausweichen: 15,
     ausweichenSchurke: 20 };
   const einsamerWolf = (state) => state.party.length === 0 && einsamerWolfWerte.rollen.includes(state.role);
+  // Ausweich-Intervall des Helden (jeder n-te Angriff geht ins Leere). Einsamer Wolf: jeder 7., Schurken jeder 5.
+  // Patch 2.6.x: Ungebrochener Schildwall Rang 2, Ausrüstung mit Ausweich-Bonus und Meister der Sturmflut verkürzen es um je 1.
+  // Auslegung: Ohne Einsamen Wolf beginnt das Intervall bei 10, sobald etwas es verkürzt. Kürzestes Intervall 2.
+  function ausweichIntervall(state) {
+    const basis = einsamerWolf(state) ? Math.round(100 / (state.role === "schurke" ? einsamerWolfWerte.ausweichenSchurke : einsamerWolfWerte.ausweichen)) : 0;
+    if (!menschen(state)) return basis;
+    const kuerzer = -SY.talentWirkung(state, "TREE_UNGEBROCHENER_SCHILDWALL", "evasion_interval_delta") - gearStat(state, "evasionInterval") +
+      (state.akte?.fspez === "FSPEC_MEISTER_DER_STURMFLUT" ? 1 : 0);
+    if (!basis && !kuerzer) return 0;
+    return Math.max(2, (basis || 10) - kuerzer);
+  }
+  // Kritchance in Prozentpunkten (Zähler ohne Zufall): alle angelegten Stücke, Schattenpfad Rang 1, Lagerfeuer und Gefährten.
+  const kritChance = (state) => equipmentSlots.reduce((s, slot) => s + (world.gear[state.equipment?.[slot]]?.krit ?? 0), 0) +
+    SY.talentWirkung(state, "TREE_SCHATTENPFAD_UND_LIST", "crit_chance_bonus_pct") + (state.combat?.held?.lagerBuff?.crit_chance_bonus_pct ?? 0) +
+    (state.gefaehrtenPerks?.includes("PERK_KR_WINTERJAEGER") ? 6 : 0);
+  // Weitere Schadensboni des Helden aus Spezialisierung, Relikt, Lagerfeuer und Gefährten-Szenen (Patch 2.6.0–2.6.9).
+  function v260Bonus(state, foe) {
+    const held = state.combat?.held ?? {};
+    const untot = foe.tags.includes("untot") || foe.tags.includes("ascheriss");
+    return (state.akte?.fspez === "FSPEC_EID_DER_EWIGEN_GLUT" && untot ? 0.15 : 0) + v260GruppenBonus(state) +
+      (held.lagerBuff?.damage_bonus_pct ?? 0) / 100 + (held.lagerBuff?.skill_damage_bonus_pct ?? 0) / 100 +
+      (held.lagerBuff?.party_all_stats_pct ?? 0) / 100 +
+      (state.gefaehrtenPerks?.includes("PERK_OR_LAEUTERUNG") && untot ? 0.1 : 0) +
+      (state.gefaehrtenPerks?.includes("PERK_OR_SCHATTENURTEIL") && (state.combat?.round ?? 0) <= 1 ? 0.12 : 0) +
+      (state.gefaehrtenPerks?.includes("PERK_OR_WACHSAMES_AUGE") && /Kult|Anführer|Hauptmann|Kapitän|Feldherr|Zelot/.test(foe.name) ? 0.08 : 0) +
+      (state.gefaehrtenPerks?.includes("PERK_OR_FEUERATEM") && state.faction === "orden" ? 0.06 : 0) +
+      (state.gefaehrtenPerks?.includes("PERK_FH_AETZPULVER") && ["PULVER_ALCHEMIST", "SCHWARZSCHUETZE", "SEUCHENMEDIKUS"].includes(menschenKlasse(state)?.id) ? 0.08 : 0);
+  }
+  // Kriegshorn des Großen Things (Gruppenrelikt, Patch 2.6.5): +8 % Schaden für die ganze Gruppe.
+  const v260GruppenBonus = (state) => state.relikt === "REL_T4_BANNER_DER_EINIGUNG" ? SY.daten.gegenstaende.REL_T4_BANNER_DER_EINIGUNG.stats.partyDamagePct / 100 : 0;
   // Patch 2.5.5: Schutz für Pyromant und Kleriker der Flamme ohne Gefährten (LP der Klasse bleiben gleich):
   // Glutschild 25 % der LP zu Kampfbeginn, jeder weitere Treffer derselben Gegnerphase halbiert.
   const magierSchutzWerte = { faction: "orden", rollen: ["magier", "heiler"], schild: 0.25, weitererTreffer: 0.5 };
@@ -2695,6 +2772,9 @@ const rules = (() => {
     if (!SY.rufRang(SY.ruf(state, fraktion)).handel) return "geächtet: kein Handel";
     const preis = SY.gegenstandPreis(state, state.knoten, id, kaufen);
     if (!preis) return "nicht im Handel";
+    // Patch 2.6.5: Tier 3 ab Befestigter Marktstadt (Stadtstufe 1), Tier 4 ab Bollwerksstadt (Stadtstufe 2).
+    const stadtStufe = SY.daten.gegenstaende[id]?.stadtStufe;
+    if (kaufen && stadtStufe && SY.siedlungsStufe(state, state.knoten) < stadtStufe) return "erst ab Stadtstufe " + stadtStufe;
     if (kaufen) return state.silver < preis ? "zu wenig Silber" : state.inventory.length >= itemCap - 20 ? "Rucksack voll" : null;
     return assigned(state, id) >= state.inventory.filter((x) => x === id).length ? "angelegt" : null;
   }
@@ -2869,13 +2949,312 @@ const rules = (() => {
     if (!state.marks.includes(stand.wahl)) state.marks.push(stand.wahl);
     stand.schritt = hauptPlan[state.faction].length;
     state.questStufe = Math.max(state.questStufe, 1);
-    note(state, "Akt " + hauptAkt(state.faction).nr + ", „" + hauptAkt(state.faction).titel + "“, ist abgeschlossen. Akt 2 wird noch gebaut.");
+    note(state, "Akt " + hauptAkt(state.faction).nr + ", „" + hauptAkt(state.faction).titel + "“, ist abgeschlossen. Ab Stufe " +
+      V260.rahmen.unlock_conditions.min_hero_level + " öffnen die Schwester-Zweige (Akt 2 und 3).");
     grant(state, "akt1-" + state.faction, kampf.ep.questakt);
+  }
+
+  // ---- Akt 2 bis 4 und Armada (Henry, Spezifikation 2.6.0/2.6.1, 19. 11. 2026) ----
+  // Nach Akt 1 und ab Stufe 5 wählt der Held frei einen der zwei Schwester-Zweige der anderen Menschen-Fraktionen (Akt 2,
+  // Stufe 6–10), danach den zweiten (Akt 3, 11–15). Jeder Zweig hat drei Stufen in der Hauptstadt des Gastgebers: Stufe 1
+  // mit Wahl (gut, Söldner, böse) und Kampf, Stufe 2 mit Kampf und Rohstoffen fürs Kontor, Stufe 3 mit dem Boss des Zweigs.
+  // Geächtete (Ruf ≤ −25 beim Gastgeber) kommen für 150 Silber als Söldner hinein. Nach beiden Zweigen wählt der Held eine
+  // der zwei Fraktions-Spezialisierungen der besuchten Fraktionen (Henry: Rückfrage 1 und 2). Akt 4 (16–22): Das Alte Reich,
+  // Die Maske des Bleichen Skalden, Das Große Thing. Das Thing öffnet die Armada-Kriegskasse, die volle Kasse das Tor zu Akt 5.
+  const V260 = {
+    rahmen: SY.daten.v260.ASCHENKRONE_ACT2_ACT3_FRAMEWORK,
+    zweige: SY.daten.v260.ASCHENKRONE_ACT2_ACT3_BRANCH_DATA.sister_branches,
+    akt4: SY.daten.v260.ASCHENKRONE_ACT4_MAIN_STORY,
+    armada: SY.daten.v260.ASCHENKRONE_ARMADA_AND_ACT5_GATE,
+  };
+  const zweigFraktion = { KRONREICH: "kronreich", ORDEN_DER_FLAMME: "orden", FREIE_HAEFEN: "haefen" };
+  const zweigHub = { kronreich: "kronhall", orden: "glutberg", haefen: "perlvik" };
+  const zweigGegner = { kronreich: ["deserteure", "wegelagerer", "feldherr"], orden: ["kultisten", "kultisten", "zelot"],
+    haefen: ["orkpiraten", "schmuggler", "kaperkapitaen"] };
+  // EP je Stufe des Zweigs (Vorschlag, damit der erste Zweig von 6 auf etwa 10 und der zweite auf etwa 15 führt).
+  const zweigEp = { 2: [500, 600, 900], 3: [800, 900, 1400] };
+  const zweigSilber = { 2: 60, 3: 100 };
+  const rohstoffKey = { RES_NAHRUNG: "nahrung", RES_HOLZ: "holz", RES_EISEN: "eisen", RES_STEIN: "stein", RES_RUNENSPLITTER: "runensplitter" };
+  const zweigDaten = (fraktion) => V260.zweige.find((z) => zweigFraktion[z.faction_id] === fraktion);
+  const akteStand = (state) => state.akte ?? { zweige: {}, fspez: null, akt4: { schritt: 0, siegel: [], wahlOffen: false, wahl: null } };
+  const zweigeFertig = (state) => Object.values(akteStand(state).zweige).filter((z) => z.stufe >= 3).length;
+  const akt1Fertig = (state) => Boolean(hauptPlan[state.faction] && hauptStand(state).schritt >= hauptPlan[state.faction].length);
+  const geaechtetBei = (state, fraktion) => SY.ruf(state, fraktion) <= V260.rahmen.outlaw_run_compatibility.allow_mercenary_bypass_if_reputation_below - 1;
+  function zweigStufen(akt) {
+    const r = V260.rahmen.branch_selection_rules[akt === 2 ? "first_chosen_branch_act" : "second_chosen_branch_act"].target_level_range;
+    return [r.min, r.max];
+  }
+  const klemme = (wert, [min, max]) => Math.max(min, Math.min(max, wert));
+  function akteGrund(state) {
+    if (!menschen(state) || !hauptPlan[state.faction]) return "nur für die Menschen";
+    if (!akt1Fertig(state)) return "erst Akt 1 abschließen";
+    if (level(state) < V260.rahmen.unlock_conditions.min_hero_level) return "ab Stufe " + V260.rahmen.unlock_conditions.min_hero_level;
+    return null;
+  }
+  function zweigGrund(state, fraktion, wahl = null) {
+    const grund = akteGrund(state);
+    if (grund) return grund;
+    if (!imHub(state)) return "nur in der Weltreise";
+    if (fraktion === state.faction || !zweigDaten(fraktion)) return "kein Schwester-Zweig";
+    const stand = akteStand(state);
+    const zweig = stand.zweige[fraktion];
+    if (zweig?.stufe >= 3) return "abgeschlossen";
+    const anderer = Object.entries(stand.zweige).find(([id, z]) => id !== fraktion && z.stufe > 0 && z.stufe < 3);
+    if (anderer) return "erst den Zweig „" + zweigDaten(anderer[0]).title + "“ beenden";
+    if (state.knoten !== zweigHub[fraktion]) return "weiter in " + N.get(zweigHub[fraktion]).name;
+    const stufe = zweig?.stufe ?? 0;
+    if (stufe === 0) {
+      if (!["good", "mercenary", "evil"].includes(wahl)) return "Weg wählen";
+      if (geaechtetBei(state, fraktion) && !zweig?.soeldner && state.silver < V260.rahmen.outlaw_run_compatibility.mercenary_entry_silver_cost) {
+        return "geächtet: " + V260.rahmen.outlaw_run_compatibility.mercenary_entry_silver_cost + " Silber Söldnergeld nötig";
+      }
+    }
+    return null;
+  }
+  function zweigInfo(state, fraktion) {
+    const daten = zweigDaten(fraktion);
+    const zweig = akteStand(state).zweige[fraktion] ?? { stufe: 0 };
+    const akt = zweig.akt ?? (zweigeFertig(state) + 1 + (Object.values(akteStand(state).zweige).some((z) => z.stufe > 0 && z.stufe < 3) ? 1 : 0));
+    const stufe = daten.stages[Math.min(2, zweig.stufe)];
+    return { fraktion, id: daten.branch_id, titel: daten.title, hub: zweigHub[fraktion], text: daten.summary, akt: Math.min(3, akt),
+      stufen: zweigStufen(Math.min(3, akt)).join("-"), fortschritt: zweig.stufe, fertig: zweig.stufe >= 3, wahl: zweig.wahl ?? null,
+      soeldner: Boolean(zweig.soeldner), geaechtet: geaechtetBei(state, fraktion),
+      schritt: zweig.stufe >= 3 ? null : { nr: zweig.stufe + 1, id: stufe.stage_id, titel: stufe.title, text: stufe.objective,
+        wahlen: stufe.three_way_options ? Object.entries(stufe.three_way_options).map(([id, o]) => ({ id, label: zweigWahlLabel[id], folge: zweigWahlText(o) })) : [],
+        boss: Boolean(stufe.boss_template), rohstoffe: stufe.reward_resources ?? null },
+      spez: daten.faction_specialization_unlock, grund: zweigGrund(state, fraktion, zweig.stufe === 0 ? "good" : null) };
+  }
+  const zweigWahlLabel = { good: "Gute Tat: im Namen der Krone und der Dörfer", mercenary: "Söldnerweg: gegen Silber", evil: "Schlechte Tat: plündern und erpressen" };
+  const zweigWahlText = (o) => [o.reputation_delta ? "Ruf " + (o.reputation_delta > 0 ? "+" : "") + o.reputation_delta : "",
+    o.silver_bonus_pct ? "+" + o.silver_bonus_pct + " % Silber" : "", o.bonus_resources ? "+" + o.bonus_resources + " Rohstoffe" : "",
+    o.unlocks_protectorate ? "Schutzbund" : ""].filter(Boolean).join(", ");
+  function akteInfo(state) {
+    if (!menschen(state) || !hauptPlan[state.faction]) return null;
+    const stand = akteStand(state);
+    const zweige = Object.values(zweigFraktion).filter((f) => f !== state.faction).map((f) => zweigInfo(state, f));
+    const fspezOffen = zweigeFertig(state) >= 2 && !stand.fspez;
+    return { grund: akteGrund(state), zweige, fspez: stand.fspez, fspezOffen,
+      fspezOptionen: zweige.map((z) => z.spez), akt4: akt4Info(state), armada: armadaInfo(state) };
+  }
+  function zweigWeiter(previous, fraktion, wahl = null) {
+    const stufe = akteStand(previous).zweige[fraktion]?.stufe ?? 0;
+    if (zweigGrund(previous, fraktion, stufe === 0 ? wahl : null)) return previous;
+    const state = structuredClone(previous);
+    state.akte = akteStand(state);
+    const zweig = state.akte.zweige[fraktion] ??= { stufe: 0, akt: zweigeFertig(state) + 2, wahl: null, soeldner: false };
+    const daten = zweigDaten(fraktion);
+    const schritt = daten.stages[zweig.stufe];
+    if (zweig.stufe === 0) {
+      zweig.wahl = wahl;
+      if (geaechtetBei(state, fraktion) && !zweig.soeldner) {
+        state.silver -= V260.rahmen.outlaw_run_compatibility.mercenary_entry_silver_cost;
+        zweig.soeldner = true;
+        note(state, "Als Geächteter kaufst du dich für " + V260.rahmen.outlaw_run_compatibility.mercenary_entry_silver_cost +
+          " Silber als Söldner in den Zweig ein.");
+      }
+      note(state, "Akt " + zweig.akt + " · „" + daten.title + "“ beginnt. " + daten.summary);
+    }
+    note(state, "Stufe " + (zweig.stufe + 1) + " · " + schritt.title + ": " + schritt.objective);
+    if (schritt.boss_template && schritt.thorvald_cameo_allowed) {
+      note(state, "Am Rand der Menge steht ein hagerer Pilger in grauer Kutte. Er beobachtet dich und ist verschwunden, bevor du ihn ansprechen kannst.");
+    }
+    const typ = zweigGegner[fraktion][zweig.stufe];
+    const stufeGegner = klemme(level(state), zweigStufen(zweig.akt));
+    note(state, schritt.title + ": " + world.fights[auftragKampf(typ)].name + " stellen sich dir · Stufe " + stufeGegner + ".");
+    startFight(state, auftragKampf(typ), true, stufeGegner);
+    if (state.combat) Object.assign(state.combat, { weiter: "weltknoten", auftrag: "zweig:" + fraktion, gegnerStufe: stufeGegner });
+    else if (!state.health) arrive(state, "defeat");
+    return state;
+  }
+  function kontorGeben(state, rohstoffe) {
+    const k = SY.kontor(state, state.faction);
+    for (const [id, n] of Object.entries(rohstoffe)) if (rohstoffKey[id]) k[rohstoffKey[id]] += n;
+    return Object.entries(rohstoffe).map(([id, n]) => n + " " + (SY.daten.rohstoffe[rohstoffKey[id]]?.name ?? id)).join(", ");
+  }
+  function aktSieg(state, auftrag) {
+    const [art, fraktion] = auftrag.split(":");
+    if (art === "akt4") return akt4Sieg(state);
+    const zweig = state.akte.zweige[fraktion];
+    const daten = zweigDaten(fraktion);
+    const schritt = daten.stages[zweig.stufe];
+    const ep = zweigEp[zweig.akt][zweig.stufe];
+    if (zweig.stufe === 0) {
+      const o = schritt.three_way_options[zweig.wahl];
+      const silber = Math.round(zweigSilber[zweig.akt] * (1 + (o.silver_bonus_pct ?? 0) / 100));
+      SY.rufAendern(state, fraktion, o.reputation_delta);
+      state.silver += silber;
+      let text = zweigWahlLabel[zweig.wahl] + ": Ruf bei " + K.fraktionen[fraktion].name + " " + (o.reputation_delta > 0 ? "+" : "") +
+        o.reputation_delta + ", +" + silber + " Silber";
+      if (o.bonus_resources) text += ", +" + kontorGeben(state, { RES_EISEN: o.bonus_resources }) + " ins Kontor";
+      if (o.unlocks_protectorate && !state.marks.includes("schutzbund-" + fraktion)) {
+        state.marks.push("schutzbund-" + fraktion);
+        text += ". " + K.fraktionen[fraktion].name + " nimmt dich in den Schutzbund auf";
+      }
+      SY.moralAendern(state, zweig.wahl === "good" ? "gut" : zweig.wahl === "evil" ? "boese" : "keins");
+      note(state, text + ".");
+    } else if (schritt.reward_resources) {
+      note(state, schritt.title + " geschafft: " + kontorGeben(state, schritt.reward_resources) + " ins Kontor.");
+    }
+    grant(state, "zweig-" + fraktion + "-" + zweig.stufe, ep);
+    zweig.stufe++;
+    if (zweig.stufe < 3) {
+      note(state, "Nächste Stufe des Zweigs: " + daten.stages[zweig.stufe].title + " in " + N.get(zweigHub[fraktion]).name + ".");
+      return;
+    }
+    const upgrade = V260.rahmen.branch_selection_rules[zweig.akt === 2 ? "first_chosen_branch_act" : "second_chosen_branch_act"].city_upgrade_unlock;
+    state.questStufe = Math.max(state.questStufe, zweig.akt);
+    note(state, "Akt " + zweig.akt + ", „" + daten.title + "“, ist abgeschlossen. Städte können jetzt bis Stufe " + upgrade.target_tier +
+      " ausgebaut werden (ab Ruf " + upgrade.required_reputation + ").");
+    if (zweigeFertig(state) >= 2) {
+      note(state, "Beide Schwester-Zweige sind abgeschlossen. Wähle deine Fraktions-Spezialisierung; danach beginnt Akt 4, „" +
+        V260.akt4.act4_questline[0].title + "“.");
+      if (!state.marks.includes("lager-schwesterreiche")) state.lagerMeilenstein = "CAMP_MILESTONE_SISTER_REALMS";
+    }
+  }
+  function fspezGrund(state, id) {
+    const stand = akteStand(state);
+    if (stand.fspez) return "schon gewählt";
+    if (zweigeFertig(state) < 2) return "erst beide Schwester-Zweige abschließen";
+    const erlaubt = Object.keys(stand.zweige).map((f) => zweigDaten(f).faction_specialization_unlock.spec_id);
+    return erlaubt.includes(id) ? null : "nicht freigeschaltet";
+  }
+  function fspezWaehlen(previous, id) {
+    if (fspezGrund(previous, id)) return previous;
+    const state = structuredClone(previous);
+    state.akte.fspez = id;
+    const spez = V260.zweige.map((z) => z.faction_specialization_unlock).find((x) => x.spec_id === id);
+    note(state, "Fraktions-Spezialisierung „" + spez.name + "“ gewählt. Sie wirkt zusätzlich zur Spezialisierung der Klasse.");
+    return state;
+  }
+  const fspezText = {
+    FSPEC_SCHILDWALL_DER_KRONE: "+2 Rüstung, −20 % Moralverlust der Gruppe",
+    FSPEC_EID_DER_EWIGEN_GLUT: "+15 % Schaden gegen Untote und Ascheriss, +10 % Heilung und Manaregeneration",
+    FSPEC_MEISTER_DER_STURMFLUT: "−50 % Kosten auf Seewegen, Ausweich-Intervall −1",
+  };
+
+  // Akt 4: Schritt 0 Reichssiegel in Kronhall, Glutberg und Perlvik, danach Hinterhalt; Schritt 1 Thorvald in Glutberg, danach
+  // Urteil; Schritt 2 das Große Thing in Kronhall; Schritt 3 fertig.
+  const akt4Orte = { siegel: ["kronhall", "glutberg", "perlvik"], thorvald: "glutberg", thing: "kronhall" };
+  const akt4Stufen = () => [V260.akt4.unlock_conditions.recommended_level_range.min, V260.akt4.unlock_conditions.recommended_level_range.max];
+  const akt4Wahlen = () => V260.akt4.act4_questline[1].three_way_resolution;
+  function akt4Grund(state, wahl = null) {
+    const grund = akteGrund(state);
+    if (grund) return grund;
+    const stand = akteStand(state);
+    if (zweigeFertig(state) < 2) return "erst beide Schwester-Zweige abschließen";
+    if (!stand.fspez) return "erst die Fraktions-Spezialisierung wählen";
+    if (!imHub(state)) return "nur in der Weltreise";
+    const a = stand.akt4;
+    if (a.schritt >= 3) return "abgeschlossen";
+    if (a.schritt === 0) {
+      if (a.siegel.length < 3) return akt4Orte.siegel.includes(state.knoten) && !a.siegel.includes(state.knoten) ? null
+        : "Siegel in " + akt4Orte.siegel.filter((o) => !a.siegel.includes(o)).map((o) => N.get(o).name).join(", ");
+      return SY.kontorAm(state.knoten) ? null : "in einer Stadt der Menschen";
+    }
+    if (a.schritt === 1) {
+      if (state.knoten !== akt4Orte.thorvald) return "weiter in " + N.get(akt4Orte.thorvald).name;
+      if (a.wahlOffen) return own(akt4Wahlen(), wahl) ? null : "Urteil wählen";
+      return null;
+    }
+    return state.knoten === akt4Orte.thing ? null : "weiter in " + N.get(akt4Orte.thing).name;
+  }
+  function akt4Info(state) {
+    const stand = akteStand(state);
+    const a = stand.akt4;
+    const q = V260.akt4.act4_questline[Math.min(2, a.schritt)];
+    const outlaw = geaechtetBei(state, state.faction);
+    return { offen: zweigeFertig(state) >= 2 && Boolean(stand.fspez), stufen: akt4Stufen().join("-"), schritt: a.schritt, fertig: a.schritt >= 3,
+      siegel: a.siegel, wahlOffen: a.wahlOffen, wahl: a.wahl, titel: q.title, text: q.summary, ziele: q.objectives ?? [],
+      wahlen: a.schritt === 1 && a.wahlOffen ? Object.entries(akt4Wahlen()).map(([id, w]) => ({ id, label: w.label, folge: akt4WahlText(w) })) : [],
+      thingLabel: a.schritt === 2 ? (outlaw ? q.outlaw_compatibility.alternate_path_label : "Vor das Große Thing treten") : null,
+      grund: akt4Grund(state, a.wahlOffen ? Object.keys(akt4Wahlen())[0] : null) };
+  }
+  const akt4WahlText = (w) => ["Ruf aller Menschen " + (w.reputation_delta_all_human_factions > 0 ? "+" : "") + w.reputation_delta_all_human_factions,
+    w.silver_bonus ? "+" + w.silver_bonus + " Silber" : "", w.bonus_resources ? "+" + w.bonus_resources.RES_RUNENSPLITTER + " Runensplitter" : "",
+    "Untoten-Bedrohung " + w.undead_threat_delta].filter(Boolean).join(", ");
+  function akt4Kampf(state, typ, stufe, titel) {
+    note(state, titel + ": " + world.fights[auftragKampf(typ)].name + " stellen sich dir · Stufe " + stufe + ".");
+    startFight(state, auftragKampf(typ), true, stufe);
+    if (state.combat) Object.assign(state.combat, { weiter: "weltknoten", auftrag: "akt4:" + state.akte.akt4.schritt, gegnerStufe: stufe });
+    else if (!state.health) arrive(state, "defeat");
+  }
+  function akt4Weiter(previous, wahl = null) {
+    if (akt4Grund(previous, wahl)) return previous;
+    const state = structuredClone(previous);
+    const a = state.akte.akt4;
+    const quests = V260.akt4.act4_questline;
+    const stufe = klemme(level(state), akt4Stufen());
+    if (a.schritt === 0 && a.siegel.length < 3) {
+      if (!a.siegel.length) note(state, "Akt 4 · „" + quests[0].title + "“: " + quests[0].summary);
+      a.siegel.push(state.knoten);
+      note(state, "Reichssiegel von " + N.get(state.knoten).name + " geborgen (" + a.siegel.length + " von 3).");
+      return state;
+    }
+    if (a.schritt === 0) {
+      akt4Kampf(state, "aschenschatten", stufe, "Hinterhalt auf der Reichsstraße");
+      return state;
+    }
+    if (a.schritt === 1 && !a.wahlOffen) {
+      note(state, "Akt 4 · „" + quests[1].title + "“: " + quests[1].summary);
+      akt4Kampf(state, "thorvald", Math.max(stufe, quests[1].boss_encounter.reference_level), "Die Maske fällt");
+      return state;
+    }
+    if (a.schritt === 1) {
+      const w = akt4Wahlen()[wahl];
+      a.wahl = wahl;
+      a.wahlOffen = false;
+      for (const f of Object.values(zweigFraktion)) SY.rufAendern(state, f, w.reputation_delta_all_human_factions);
+      if (w.silver_bonus) state.silver += w.silver_bonus;
+      if (w.bonus_resources) kontorGeben(state, w.bonus_resources);
+      setzeLeiste(state, "untote", leiste(state, "untote") + w.undead_threat_delta);
+      if (!state.marks.includes("thorvald-entlarvt")) state.marks.push("thorvald-entlarvt");
+      note(state, w.label + ": " + akt4WahlText(w) + ".");
+      a.schritt = 2;
+      note(state, "Nächster Schritt: „" + quests[2].title + "“ in " + N.get(akt4Orte.thing).name + ".");
+      return state;
+    }
+    // Das Große Thing
+    const q = quests[2];
+    note(state, "Akt 4 · „" + q.title + "“: " + q.summary);
+    if (geaechtetBei(state, state.faction)) note(state, q.outlaw_compatibility.alternate_path_label + ".");
+    if (!state.marks.includes("bannerjarl")) state.marks.push("bannerjarl");
+    if (!state.marks.includes("grosses-thing")) state.marks.push("grosses-thing");
+    a.schritt = 3;
+    state.questStufe = Math.max(state.questStufe, 4);
+    grant(state, "akt4-thing", q.rewards.xp);
+    note(state, "Du trägst jetzt den Titel Bannerjarl. Die Menschenreiche stehen unter einem Banner, und die Armada-Kriegskasse ist geöffnet.");
+    state.lagerMeilenstein = "CAMP_MILESTONE_BANNERJARL";
+    return state;
+  }
+  function akt4Sieg(state) {
+    const a = state.akte.akt4;
+    const quests = V260.akt4.act4_questline;
+    if (a.schritt === 0) {
+      const r = quests[0].rewards;
+      state.silver += r.silver;
+      note(state, "„" + quests[0].title + "“ abgeschlossen: +" + r.silver + " Silber, " + kontorGeben(state, r.resources) + " ins Kontor.");
+      grant(state, "akt4-altes-reich", r.xp);
+      a.schritt = 1;
+      note(state, "Nächster Schritt: „" + quests[1].title + "“ in " + N.get(akt4Orte.thorvald).name + ".");
+    } else if (a.schritt === 1) {
+      a.wahlOffen = true;
+      grant(state, "akt4-thorvald", 3500);
+      note(state, "Thorvald liegt besiegt vor der Ewigen Flamme. Entscheide, was mit ihm geschieht.");
+    }
+  }
+  // Armada-Kriegskasse und Tor zu Akt 5 (2.6.1): Die Kasse öffnet mit dem Großen Thing, die volle Kasse zeigt das Tor.
+  const kasseOffen = (state) => state.marks?.includes("grosses-thing") ?? false;
+  function armadaInfo(state) {
+    const gate = V260.armada.act5_feature_gate;
+    return { offen: kasseOffen(state), voll: SY.kasseVoll(state), bedarf: SY.daten.kriegskasse.bedarf, kasse: SY.kasse(state),
+      tor: kasseOffen(state) && SY.kasseVoll(state) ? { titel: gate.gate_ui_title, text: gate.gate_ui_message,
+        ziele: gate.planned_continents_preview } : null };
   }
 
   // Sieg in einem Auftrags- oder Hauptquestkampf.
   function auftragSieg(state, auftrag) {
-    if (auftrag === "haupt") {
+    if (/^(?:zweig|akt4):/.test(auftrag)) aktSieg(state, auftrag);
+    else if (auftrag === "haupt") {
       const stand = state.hauptquest;
       if (hauptPlan[state.faction]?.[stand.schritt]?.wahl) aktAbschliessen(state);
       else hauptVoran(state);
@@ -2924,7 +3303,11 @@ const rules = (() => {
     const klasse = menschenKlasse(state);
     if (klasse) {
       const werte = heroAttributes(state);
-      return { ausdauer: ausdauerMenschen + SY.skaliert(10) * (state.ahnen?.perk_iron_blood ?? 0), mana: klasse.mana ? SY.maxMana(werte.will, werte.mind) : 0 };
+      // Patch 2.6.2: Resonanz Rang 2 +4 Mana bzw. Ausdauer. Patch 2.6.5: Mana und Ausdauer der Ausrüstung.
+      const extraRes = SY.talentWirkung(state, "TREE_RUNEN_UND_GLUTRESONANZ", "max_resource_bonus");
+      return { ausdauer: ausdauerMenschen + SY.skaliert(10) * (state.ahnen?.perk_iron_blood ?? 0) + extraRes + gearStat(state, "maxStamina"),
+        mana: klasse.mana ? SY.maxMana(werte.will, werte.mind) + extraRes + gearStat(state, "maxMana") +
+          (state.gefaehrtenPerks?.includes("PERK_OR_RUHIGE_GLUT") ? 3 : 0) : 0 };
     }
     return { ausdauer: 10 + extra, mana: magie > 0 ? 2 * magie + extra : 0 };
   };
@@ -3057,6 +3440,18 @@ const rules = (() => {
     if (magierSchutz(state)) {
       combat.held.schild = Math.round(healthLimit(state) * magierSchutzWerte.schild);
       combat.held.magierSchutz = true;
+    }
+    // Patch 2.6.2: Ungebrochener Schildwall Rang 3: einmal je Kampf mit 1 LP überleben und 20 % LP als Schild erhalten.
+    if (menschen(state) && SY.talentRang(state, "TREE_UNGEBROCHENER_SCHILDWALL") >= 3 && !combat.held.todesschutz) {
+      combat.held.todesschutz = { lp: 1, runden: 99, schild: 0.2 };
+    }
+    // Patch 2.6.5: Reliquienstab von Glutberg: Glutschild von 10 % der LP zu Kampfbeginn.
+    if (gearStat(state, "emberShieldPct")) combat.held.schild += Math.round(healthLimit(state) * gearStat(state, "emberShieldPct") / 100);
+    // Patch 2.6.8: Stärkung vom Lagerfeuer für den nächsten Kampf.
+    if (state.lagerBuff) {
+      combat.held.lagerBuff = state.lagerBuff;
+      note(state, "Vom Lagerfeuer gestärkt: " + state.lagerBuff.name + ".");
+      state.lagerBuff = null;
     }
     // Wer das höhere Geschick hat, handelt zuerst.
     const fastest = Math.max(...combat.feinde.map((foe) => foe.geschick));
@@ -3225,23 +3620,49 @@ const rules = (() => {
     // Patch 2.2.0/2.5.1: Kritische Treffer (×1,5) nach Kritchance der Waffe, ohne Zufall über einen Zähler,
     // und Rüstung der Systemgegner als prozentuale Minderung mit Konstante 14, gesenkt durch Durchschlag.
     if (actor === "hero" && menschen(state)) {
-      // Meister-Talent Klinge & Wucht +8 % je Rang, Zorn der Alten Könige +5 % je Rang.
-      const plus = 0.08 * SY.talentRang(state, "MT_KLINGENSTURM") + 0.05 * (state.ahnen?.perk_ancestral_might ?? 0) +
-        (resonanz(state) ? 0.06 * SY.talentRang(state, "MT_RUNENRESONANZ") + 0.04 * (state.ahnen?.perk_relic_resonance ?? 0) : 0);
+      // Patch 2.6.2: Eiserne Vorhut Rang 1 +6 %, Runen- & Glutresonanz Rang 1 +6 % (mit Runen- oder Glutausrüstung),
+      // Schattenpfad Rang 2 +15 % gegen Ziele unter halben LP, Rang 3 +25 % nach eigenem Ausweichen. Zorn der Alten Könige +5 % je Rang.
+      // Patch 2.6.5: Schadensboni der Ausrüstung. Fraktions-Spezialisierung Eid der Ewigen Glut +15 % gegen Untote und Ascheriss.
+      const held = state.combat.held;
+      const plus = SY.talentWirkung(state, "TREE_EISERNE_VORHUT", "damage_bonus_pct") / 100 + 0.05 * (state.ahnen?.perk_ancestral_might ?? 0) +
+        (resonanz(state) ? SY.talentWirkung(state, "TREE_RUNEN_UND_GLUTRESONANZ", "damage_bonus_pct") / 100 + 0.04 * (state.ahnen?.perk_relic_resonance ?? 0) : 0) +
+        (foe.lp * 2 < foe.max ? SY.talentWirkung(state, "TREE_SCHATTENPFAD_UND_LIST", "execute_damage_bonus_pct") / 100 : 0) +
+        (held.nachAusweichen ? SY.talentWirkung(state, "TREE_SCHATTENPFAD_UND_LIST", "post_evasion_next_attack_bonus_pct") / 100 : 0) +
+        gearStat(state, "damagePct") / 100 + v260Bonus(state, foe);
+      held.nachAusweichen = false;
       if (plus) amount = Math.round(amount * (1 + plus));
-      const gear = world.gear[weapon(state)] ?? {};
-      if (gear.krit) {
-        const held = state.combat.held;
-        held.kritZaehler = (held.kritZaehler ?? 0) + gear.krit;
+      // Kritische Treffer: Zähler aus der Kritchance aller angelegten Stücke, Schattenpfad Rang 1 und Lagerfeuer-Stärkung.
+      const krit = kritChance(state);
+      if (krit) {
+        held.kritZaehler = (held.kritZaehler ?? 0) + krit;
         if (held.kritZaehler >= 100) {
           held.kritZaehler -= 100;
-          amount = Math.floor(amount * SY.daten.kampf.krit);
-          note(state, "Kritischer Treffer gegen " + foe.name + " (×" + String(SY.daten.kampf.krit).replace(".", ",") + ").");
+          const mult = SY.talentRang(state, "TREE_EISERNE_VORHUT") >= 2 ? 1.65 : SY.daten.kampf.krit;
+          amount = Math.floor(amount * mult);
+          note(state, "Kritischer Treffer gegen " + foe.name + " (×" + String(mult).replace(".", ",") + ").");
         }
       }
     }
+    if (own(world.companions, actor) && menschen(state)) {
+      // Patch 2.6.2: Bannerjarl Rang 1 +5 %, Rang 3 +8 % in den ersten 3 Runden; Kriegshorn des Großen Things +8 % (alle).
+      const runde = state.combat.round ?? 0;
+      const plus = SY.talentWirkung(state, "TREE_BANNERJARL", "companion_damage_bonus_pct") / 100 +
+        (runde <= 3 ? SY.talentWirkung(state, "TREE_BANNERJARL", "companion_all_stats_bonus_pct") / 100 : 0) + v260GruppenBonus(state) +
+        (state.gefaehrtenPerks?.includes("PERK_KR_SOELDNERSTAHL") ? 0.08 : 0);
+      if (plus) amount = Math.round(amount * (1 + plus));
+    }
     if (actor === "hero" && einsamerWolf(state)) amount += Math.min(einsamerWolfWerte.schadenDeckel, Math.round(amount * einsamerWolfWerte.schaden));
-    if (foe.ruestung) amount = SY.schaden(amount, foe.ruestung, actor === "hero" ? world.gear[weapon(state)]?.durchdringung ?? 0 : 0);
+    if (foe.ruestung) {
+      // Patch 2.6.2/2.6.5: Rüstungsdurchdringung der neuen Ausrüstung (feste Punkte), Eiserne Vorhut Rang 3 −3 Rüstung beim ersten Angriff.
+      let flach = 0;
+      if (actor === "hero") {
+        flach = gearStat(state, "armorPenFlat");
+        if (!state.combat.held.ersterAngriff) flach += SY.talentWirkung(state, "TREE_EISERNE_VORHUT", "first_strike_armor_penetration") +
+          (state.gefaehrtenPerks?.includes("PERK_FH_NEBELSCHUETZE") ? 2 : 0);
+      }
+      amount = SY.schaden(amount, Math.max(0, foe.ruestung - flach), actor === "hero" ? world.gear[weapon(state)]?.durchdringung ?? 0 : 0);
+    }
+    if (actor === "hero" && state.combat) state.combat.held.ersterAngriff = true;
     const value = Math.min(foe.lp, amount + (foe.status.verwundbar?.wert ?? 0));
     foe.lp -= value;
     if (fire && round) round.usedFire = true;
@@ -3268,8 +3689,10 @@ const rules = (() => {
   }
 
   function healHero(state, amount, events, actor = "hero") {
-    // Patch 2.5.3: Runen- & Glutresonanz +10 % Heilung je Rang beim Tragen von Runen- oder Glutausrüstung.
-    if (menschen(state) && resonanz(state)) amount = Math.round(amount * (1 + 0.1 * SY.talentRang(state, "MT_RUNENRESONANZ")));
+    // Patch 2.6.2: Runen- & Glutresonanz Rang 1 +10 % Heilung beim Tragen von Runen- oder Glutausrüstung; Patch 2.6.5 Heilboni der Ausrüstung.
+    if (menschen(state)) amount = Math.round(amount * (1 + (resonanz(state) ? SY.talentWirkung(state, "TREE_RUNEN_UND_GLUTRESONANZ", "heal_and_mana_regen_pct") / 100 : 0) +
+      gearStat(state, "healPct") / 100 + (state.akte?.fspez === "FSPEC_EID_DER_EWIGEN_GLUT" ? 0.1 : 0) +
+      (state.gefaehrtenPerks?.includes("PERK_OR_LEBENDIGE_FLAMME") ? 0.1 : 0)));
     const healing = Math.max(0, Math.min(amount, healthLimit(state) - state.health));
     state.health += healing;
     if (healing) events.push({ kind: "heal", actor, value: healing });
@@ -3298,6 +3721,10 @@ const rules = (() => {
     // Bezahlen: Ausdauer oder Mana, Stufe 20 und Meister II zusätzlich Fraktionsressource, Verstärkung 1 Ressource.
     if (ability.zahlung === "M") held.mana -= ability.kostenWert;
     else held.ausdauer -= ability.kostenWert;
+    // Patch 2.6.2: Runen- & Glutresonanz Rang 3: Fertigkeiten heilen beim Wirken um 10 % ihrer Kosten (mindestens 1).
+    if (menschen(state) && SY.talentRang(state, "TREE_RUNEN_UND_GLUTRESONANZ") >= 3 && ability.kostenWert) {
+      healHero(state, Math.max(1, Math.round(ability.kostenWert * 0.1)), events);
+    }
     const resourceCost = (ability.ressource ?? 0) + (boosted ? 1 : 0);
     state.ressource = (state.ressource ?? 0) - resourceCost;
     if (ability.einmal) held.genutzt.push(ability.id);
@@ -3650,10 +4077,14 @@ const rules = (() => {
           // Flächenangriffe (Trampeln) treffen alle, sonst einer nach dem anderen.
           for (const victim of sonder?.flaeche ? active : [active[victimCursor++ % active.length]]) {
             const heroTarget = victim.id === "hero";
-            if (heroTarget && damage > 0 && einsamerWolf(state)) {
-              held.ausweichen = (held.ausweichen ?? 0) + (state.role === "schurke" ? einsamerWolfWerte.ausweichenSchurke : einsamerWolfWerte.ausweichen);
-              if (held.ausweichen >= 100) {
-                held.ausweichen -= 100;
+            const intervall = heroTarget && damage > 0 ? ausweichIntervall(state) : 0;
+            if (intervall) {
+              // Ausweichen ohne Zufall: jeder n-te Angriff auf den Helden geht ins Leere (Einsamer Wolf jeder 7., Schurken jeder 5.,
+              // Patch 2.6.x: Talente, Ausrüstung und Spezialisierung verkürzen das Intervall).
+              held.ausweichSchlaege = (held.ausweichSchlaege ?? 0) + 1;
+              if (held.ausweichSchlaege >= intervall) {
+                held.ausweichSchlaege = 0;
+                held.nachAusweichen = true;
                 dodged++;
                 events.push({ kind: "retaliate", actor: index, ally: "hero", value: 0 });
                 continue;
@@ -3665,8 +4096,11 @@ const rules = (() => {
             let hit;
             if (menschen(state)) {
               // Patch 2.2.0/2.5.1: Rüstung mindert prozentual (Konstante 14); Klassenrüstung zählt beim Helden mit.
-              const klassenRuestung = heroTarget ? (SY.daten.menschenKlassen[state.faction]?.[state.role]?.ruestung ?? 0) +
-                SY.skaliert(4) * SY.talentRang(state, "MT_EISENWALL") : 2;
+              // Patch 2.6.2: Ungebrochener Schildwall Rang 1 +2 Rüstung; Schildwall der Krone +2; Kriegshorn des Großen Things +1 (alle).
+              const klassenRuestung = (heroTarget ? (SY.daten.menschenKlassen[state.faction]?.[state.role]?.ruestung ?? 0) +
+                SY.talentWirkung(state, "TREE_UNGEBROCHENER_SCHILDWALL", "armor_bonus") + (state.akte?.fspez === "FSPEC_SCHILDWALL_DER_KRONE" ? 2 : 0) +
+                (held.lagerBuff?.armor_bonus ?? 0) : 2) + (state.relikt === "REL_T4_BANNER_DER_EINIGUNG" ? 1 : 0) +
+                (state.gefaehrtenPerks?.includes("PERK_KR_SCHILDTREUE") ? 1 : 0);
               // Patch 2.5.3: Runen-Resonanz der Ahnen +4 % Rüstung je Rang beim Tragen von Runen- oder Glutausrüstung.
               const gesamt = (klassenRuestung + armor) * (heroTarget && resonanz(state) ? 1 + 0.04 * (state.ahnen?.perk_relic_resonance ?? 0) : 1);
               hit = damage > 0 ? Math.max(guarding ? 0 : 1, SY.schaden(damage, gesamt) - defense) : 0;
@@ -3681,6 +4115,8 @@ const rules = (() => {
               held.schild -= absorbed; hit -= absorbed;
               if (hit >= state.health && held.todesschutz) {
                 hit = Math.max(0, state.health - Math.max(1, held.todesschutz.lp));
+                // Patch 2.6.2: Ungebrochener Schildwall Rang 3 gibt danach einen Schild von 20 % der LP.
+                if (held.todesschutz.schild) held.schild += Math.round(healthLimit(state) * held.todesschutz.schild);
                 held.todesschutz = null;
                 note(state, "Todesschutz bewahrt dich vor dem tödlichen Treffer.");
               }
@@ -3741,7 +4177,11 @@ const rules = (() => {
     held.ausdauer = Math.min(max.ausdauer, held.ausdauer + 2);
     if (menschen(state)) {
       // Patch 2.5.3: Runen- & Glutresonanz +10 % Manaregeneration je Rang; Bruchteile sammeln sich über die Züge.
-      const regen = SY.daten.kampf.mana.jeZug * (1 + (resonanz(state) ? 0.1 * SY.talentRang(state, "MT_RUNENRESONANZ") : 0)) + (held.manaRest ?? 0);
+      // Patch 2.6.2: Resonanz Rang 1 +10 % (mit Runen-/Glutausrüstung), Rang 2 +1 je Zug; Eid der Ewigen Glut +10 %.
+      held.ausdauer = Math.min(max.ausdauer, held.ausdauer + SY.talentWirkung(state, "TREE_RUNEN_UND_GLUTRESONANZ", "resource_regen_per_turn_bonus"));
+      const regen = SY.daten.kampf.mana.jeZug * (1 + (resonanz(state) ? SY.talentWirkung(state, "TREE_RUNEN_UND_GLUTRESONANZ", "heal_and_mana_regen_pct") / 100 : 0) +
+        (state.akte?.fspez === "FSPEC_EID_DER_EWIGEN_GLUT" ? 0.1 : 0)) +
+        SY.talentWirkung(state, "TREE_RUNEN_UND_GLUTRESONANZ", "resource_regen_per_turn_bonus") + (held.manaRest ?? 0);
       held.manaRest = Math.round((regen - Math.floor(regen)) * 100) / 100;
       held.mana = Math.min(max.mana, held.mana + Math.floor(regen));
     } else held.mana = Math.min(max.mana, held.mana + 2);
@@ -3766,8 +4206,9 @@ const rules = (() => {
     const ambush = fight?.random && own(world.scenes, combat.weiter) && typeof (combat.hinterhalt ?? false) === "boolean";
     if (!fight || (!ambush && world.scenes[state.scene].creature !== combat.id)) return false;
     if (combat.auftrag !== undefined && !(combat.auftrag === "haupt" ? state.hauptquest
+      : /^(?:zweig|akt4):/.test(combat.auftrag) ? isRecord(state.akte)
       : state.weltAuftraege?.[combat.auftrag]?.status === "aktiv")) return false;
-    if (combat.gegnerStufe !== undefined && !intBetween(combat.gegnerStufe, 1, 20)) return false;
+    if (combat.gegnerStufe !== undefined && !intBetween(combat.gegnerStufe, 1, 30)) return false;
     const held = combat.held;
     const max = kraft(state);
     const status = (value) => isRecord(value);
@@ -3777,7 +4218,7 @@ const rules = (() => {
       new Set(combat.supportUsed).size === combat.supportUsed.length &&
       Array.isArray(combat.feinde) && combat.feinde.length >= 1 && combat.feinde.length <= 6 &&
       combat.feinde.every((foe) => isRecord(foe) && typeof foe.name === "string" && own(kampf.raenge, foe.rang) &&
-        intBetween(foe.stufe, 1, 20) && intBetween(foe.max, 1, 10000) && intBetween(foe.lp, 0, foe.max) &&
+        intBetween(foe.stufe, 1, 30) && intBetween(foe.max, 1, 10000) && intBetween(foe.lp, 0, foe.max) &&
         intBetween(foe.schaden, 0, 100) && intBetween(foe.aktionen, 1, 3) && Array.isArray(foe.tags) && status(foe.status)) &&
       combat.feinde.some((foe) => foe.lp > 0) &&
       Array.isArray(combat.diener) && combat.diener.length <= kampf.maxDiener &&
@@ -3885,7 +4326,8 @@ const rules = (() => {
       add("glut-unruhig", "Unruhige Glut", "schlecht", "Der nächste Zauber Richtung " + richtung + " löst einen Rückstoß aus. Deckung beruhigt die Glut.",
         "Bis die Glut zur Mitte findet");
     }
-    if (state.ember < 1) add("glut-erschoepft", "Glut erschöpft", "schlecht", "Ohne Glut sind keine Glutfähigkeiten möglich. Glutfunken und Glutampullen füllen sie auf.", "Bis zur Auffüllung");
+    // Patch 2.6.13: „Glut erschöpft“ nur für Helden mit Glutgabe (Kronreich und Freie Häfen haben Glut 0, aber keine Gabe).
+    if (glutgabe(state) && state.ember < 1) add("glut-erschoepft", "Glut erschöpft", "schlecht", "Ohne Glut sind keine Glutfähigkeiten möglich. Glutfunken und Glutampullen füllen sie auf.", "Bis zur Auffüllung");
     if (state.marks.includes("steinrhythmus")) {
       add("steinrhythmus", "Rhythmus der Glut", "gut", "Ein Rückstoß der Glut kostet nur 3 statt 6 LP.", "Dauerhaft");
     }
@@ -3932,6 +4374,7 @@ const rules = (() => {
     spezBereit, spezHinweis, meisterBereit, taten, tatWaehlen, ausruester, ausruesterHandel, ausruestungGrund, handwerkListe, handwerk, schmiedeInfo, schmieden, kontorInfo, kontorHandel, nahrungTragen, spenden, lage, systeme: SY, glutgabe, resonanz, kasseVollText,
     siedlungInfo, siedlungAusbauen, gebaeudeBauen, strasseBauen, garnisonRekrutieren, ortReparieren, wiederaufbau,
     endgameListe, endgameStarten, aufstiegInfo, talentLernen, ahnenLernen,
+    akteInfo, zweigWeiter, zweigGrund, fspezWaehlen, fspezGrund, fspezText, akt4Weiter, akt4Grund, armadaInfo, ausweichIntervall, kritChance,
     auftragGrund, auftragAnnehmen, ausfuehrenGrund, auftragAusfuehren, aushang, auftraege, hauptquest, hauptGrund, hauptWeiter, auftragEp, rast, ertragGrund, ertragEinholen, vertragGrund, vertragSchliessen, entwurf,
     levelThresholds: Array.from({ length: kampf.maxStufe }, (_, index) => kampf.epFuer(index + 1)) };
 })();

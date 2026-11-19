@@ -4001,7 +4001,8 @@
       (!editingLegacy || rules.originOf(id) === state.origin));
     const previous = origin.value;
     origin.replaceChildren(...allowed.map(([id, data]) =>
-      new Option(data.name + " · " + data.schwierigkeit + " · " + data.ressource, id)));
+      // Patch 2.6.16: Kein alter Vorrats-Hinweis mehr in der Fraktionsauswahl.
+      new Option(data.name + " · " + data.schwierigkeit, id)));
     if (allowed.some(([id]) => id === previous)) origin.value = previous;
     const people = klassen.voelker[volk.value];
     el("volk-description").textContent = people.text;
@@ -4035,7 +4036,8 @@
       element("p", "Grundwerte " + bonusText(profile.bonus) + " · Hauptfertigkeiten " +
         profile.haupt.map((id) => klassen.fertigkeiten[id].name).join(" und ") + "."),
       element("p", "Nutzt " + klassen.fraktionen[origin.value].ressource + ": " + data.ressource + "."),
-      element("p", "Im Kampf: " + kit.description),
+      element("p", "Im Kampf: " + (kit.descriptionOhneGlut && !["orden"].includes(origin.value) && klassen.fraktionen[origin.value].volk === "menschen"
+        ? kit.descriptionOhneGlut : kit.description)),
     );
     // UI-Überarbeitung 19. 11. 2026: Die Spezialisierungen stehen eingeklappt unter der Klassenbeschreibung.
     // Menschen spezialisieren sich ab Erfahrungsstufe 10 (Patch 2.0.0), die anderen Völker ab Quest-Stufe 3.

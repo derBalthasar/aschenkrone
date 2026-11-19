@@ -72,8 +72,9 @@ const g = S.gegnerListe[0];
 assert.equal(S.gegnerWerte(g.id, g.minStufe).lp, g.werte.hp);
 assert.ok(S.gegnerWerte(g.id, 30).lp > S.gegnerWerte(g.id, 20).lp);
 
-// Kriegskasse: Spenden ab Akt 4, voll mit 30/25/25/20.
-const k = { faction: "kronreich", questStufe: 3, factionRuf: {}, ressource: 50, kontor: { kronreich: { nahrung: 0, holz: 30, eisen: 30, stein: 30, runensplitter: 0 } } };
+// Kriegskasse: Spenden nach dem Großen Thing (Patch 2.6.1), voll mit 30/25/25/20.
+assert.match(S.spendenGrund({ faction: "kronreich", questStufe: 3, marks: [], kontor: {} }, "kronhall", "holz", 1), /Großen Thing/);
+const k = { faction: "kronreich", questStufe: 3, marks: ["grosses-thing"], factionRuf: {}, ressource: 50, kontor: { kronreich: { nahrung: 0, holz: 30, eisen: 30, stein: 30, runensplitter: 0 } } };
 assert.equal(S.spenden(k, "kronhall", "holz", 25), true);
 assert.equal(k.factionRuf.groves, 50);
 assert.equal(S.kasseVoll(k), false);

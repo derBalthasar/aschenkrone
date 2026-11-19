@@ -48,3 +48,4 @@ jobs:
           node --test spiel/npcs.test.cjs
           node --test spiel/patch254.test.cjs
           node --test spiel/patch255.test.cjs
+          node --test spiel/patch260.test.cjs

@@ -44,7 +44,7 @@ const FRAKTIONEN = { kronreich: "kronhall", orden: "glutberg", haefen: "zollholm
 const ROLLEN = ["krieger", "waechter", "spaeher", "magier", "heiler", "schurke"];
 const STUFEN = [5, 10, 15, 20, 25, 30];
 const GEGNER = [["auftrag-kultisten", "Gruppe"], ["auftrag-urgash", "Elite"], ["auftrag-skarn", "Skarn"], ["auftrag-letztermammut", "Mammut"]];
-const TALENTE = ["MT_KLINGENSTURM", "MT_RUNENRESONANZ", "MT_EISENWALL", "MT_SCHLACHTFUEHRER", "MT_GRENZLAEUFER"];
+const TALENTE = ["TREE_EISERNE_VORHUT", "TREE_RUNEN_UND_GLUTRESONANZ", "TREE_UNGEBROCHENER_SCHILDWALL", "TREE_SCHATTENPFAD_UND_LIST", "TREE_BANNERJARL"];
 const AHNEN = ["perk_ancestral_might", "perk_iron_blood"];
 
 const auswahl = process.argv[2] ? [process.argv[2].toUpperCase()] : ["A", "B", "C"];

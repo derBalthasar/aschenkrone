@@ -33,6 +33,13 @@ const systeme = (() => {
   const talentStufen = Array.from({ length: 10 }, (_, i) => 21 + i);
   const talentPunkte = (stufe) => talentStufen.filter((s) => stufe >= s).length;
   const talentRang = (state, id) => state.talente?.[id] ?? 0;
+  // Patch 2.6.2: Wirkung eines Talentbaums bis zum erreichten Rang (Rang 1 bis 3, jede Stufe mit eigener Wirkung).
+  const talentWirkung = (state, id, key) => (D.aufstieg.talente.find((t) => t.id === id)?.raenge ?? [])
+    .filter((r) => r.rang <= talentRang(state, id)).reduce((s, r) => s + (typeof r.wirkung[key] === "number" ? r.wirkung[key] : 0), 0);
+  // Hinterhaltsrisiko auf Reisen: Schattenpfad Rang 1, Stiefel (Patch 2.6.5) und Lagerfeuer-Vorhut (Patch 2.6.8).
+  const hinterhaltMinderung = (state) => Math.min(0.9, (talentWirkung(state, "TREE_SCHATTENPFAD_UND_LIST", "ambush_risk_reduction_pct") +
+    Object.values(state.equipment ?? {}).reduce((s, id) => s + (D.gegenstaende[id]?.stats?.ambushReductionPct ?? 0), 0) +
+    (state.vorhut?.etappen > 0 ? state.vorhut.prozent : 0) + (state.gefaehrtenPerks?.includes("PERK_KR_GRENZPFAD") ? 10 : 0)) / 100);
   function talentGrund(state, id, stufe) {
     if (!D.aufstieg.talente.some((t) => t.id === id)) return "unbekanntes Talent";
     const vergeben = Object.values(state.talente ?? {}).reduce((s, n) => s + n, 0);
@@ -74,15 +81,22 @@ const systeme = (() => {
   // ---- Moral 0–100 (Patch 1.6.0, 1.6.1) ----
   const tragt = (state, id) => Object.values(state.equipment ?? {}).includes(id);
   // Basiswert-Boni aus Ausrüstung und Talent heben die wirksame Moral (Kriegshorn +10, Runenharfe +20, Veteran +5 je Rang).
-  const moralBonus = (state) => Object.entries(D.moral.ausruestung).reduce((s, [id, b]) => s + (tragt(state, id) ? b.basis : 0), 0) +
-    5 * talentRang(state, "MT_SCHLACHTFUEHRER");
+  // Patch 2.6.2: Die Meister-Talentbäume geben keinen Moral-Basiswert mehr (Bannerjarl Rang 2 senkt stattdessen den Moralverlust).
+  const moralBonus = (state) => Object.entries(D.moral.ausruestung).reduce((s, [id, b]) => s + (tragt(state, id) ? b.basis : 0), 0);
   const moral = (state) => zwischen((state.moral ?? D.moral.start) + moralBonus(state), D.moral.min, D.moral.max);
   const moralStufe = (state) => D.moral.stufen.find((s) => moral(state) >= s.min && moral(state) <= s.max);
+  const moralSchutz = (state) => Math.min(0.6, (talentWirkung(state, "TREE_BANNERJARL", "moral_loss_reduction_pct") +
+    (state.relikt === "REL_T4_BANNER_DER_EINIGUNG" ? D.gegenstaende.REL_T4_BANNER_DER_EINIGUNG.stats.moralLossReductionPct : 0) +
+    (state.gefaehrtenPerks?.includes("PERK_FH_SCHWUR_DER_PLANK") ? 15 : 0) +
+    (state.akte?.fspez === "FSPEC_SCHILDWALL_DER_KRONE" ? 20 : 0)) / 100);
   function moralAendern(state, ausloeser) {
     let delta = D.moral.ausloeser[ausloeser] ?? 0;
     if (geaechtet(state) && D.moral.geaechtet[ausloeser] !== undefined) delta = D.moral.geaechtet[ausloeser];
     if (ausloeser === "hunger" && tragt(state, "OFF_AHNENHARFE_T4")) delta = Math.round(delta * D.moral.ausruestung.OFF_AHNENHARFE_T4.hunger);
     if ((ausloeser === "sieg" || ausloeser === "bossSieg") && tragt(state, "OFF_SKALDENHORN_T2")) delta += D.moral.ausruestung.OFF_SKALDENHORN_T2.jeSieg;
+    // Patch 2.6.x: Moralverlust sinkt durch Bannerjarl Rang 2 (−25 %), Kriegshorn des Großen Things (−15 %),
+    // Schwur der Planke (−15 %) und Schildwall der Krone (−20 %), zusammen höchstens −60 %.
+    if (delta < 0) delta = Math.round(delta * (1 - moralSchutz(state)));
     let wert = zwischen((state.moral ?? D.moral.start) + delta, D.moral.min, D.moral.max);
     // Kriegshorn des Alten Reiches: im Kampf fällt die Moral nie unter 40.
     if (state.combat && state.relikt === "RELIC_HORN_ALTES_REICH") wert = Math.max(wert, D.moral.reliktUntergrenze.RELIC_HORN_ALTES_REICH);
@@ -181,7 +195,8 @@ const systeme = (() => {
     const d = D.doerfer[dorfId];
     const rang = rufRang(ruf(state, d.fraktion));
     if (!rang.zehnt || state.pausiert?.[dorfId] > (state.etappen ?? 0) || state.gepluendert?.includes(dorfId)) return 0;
-    let menge = d.ertrag + rang.zehntBonus;
+    // Patch 2.6.2: Bannerjarl Rang 2 bringt +1 Ressource je Zehnt befreiter Dörfer.
+    let menge = d.ertrag + rang.zehntBonus + talentWirkung(state, "TREE_BANNERJARL", "village_tithe_bonus_resources");
     if (siedlungsStufe(state, d.stadt) >= 3) menge = Math.floor(menge * 1.5);
     return menge;
   }
@@ -227,7 +242,8 @@ const systeme = (() => {
     if (wegId && state.strassen?.includes(wegId)) gefahr = Math.min(gefahr, D.reise.grenzstrasseGefahr);
     if (wegId && state.signalfeuer?.includes(wegId)) gefahr += D.reise.signalfeuer;
     if (istMensch(state.faction)) gefahr += moralStufe(state).hinterhalt;
-    gefahr -= 0.15 * talentRang(state, "MT_GRENZLAEUFER");
+    // Patch 2.6.2/2.6.5: Schattenpfad Rang 1 −15 %, Marschstiefel −10 % (anteilig vom Wert).
+    gefahr *= 1 - hinterhaltMinderung(state);
     return zwischen(Math.round(gefahr * 100) / 100, 0, 1);
   }
 
@@ -280,12 +296,11 @@ const systeme = (() => {
     const g = gegnerNach[id];
     if (!g) return null;
     const b = g.beute;
-    const silberBonus = 1 + 0.1 * talentRang(state, "MT_GRENZLAEUFER");
+    const silberBonus = 1;
     const gegenstaende = [];
     const pool = D.beutePools[b.materialPoolRef] ?? [];
     for (let i = 0; i < (b.materialRolls ?? 0); i++) {
       const z = ziehePool(pool, dice);
-      if (dice() < 0.15 * talentRang(state, "MT_GRENZLAEUFER")) z.anzahl *= 2;
       gegenstaende.push(z);
     }
     if (b.guaranteedMaterial) gegenstaende.push({ id: b.guaranteedMaterial.id, anzahl: b.guaranteedMaterial.count });
@@ -312,6 +327,8 @@ const systeme = (() => {
     if (g.magicTag === "RUNEN_ITEM" && f && !f.runen) return false;
     const k = D.klassen[klasseId];
     if (!k) return true;
+    // Patch 2.6.5: Tier-3/4-Stücke aus Henrys Datei nennen ihre Klassen selbst.
+    if (g.klassen) return g.klassen.includes(k.rechte);
     const rechte = D.ausruestungsRechte[k.rechte];
     if (["SCHWER", "LEICHT", "STOFF"].includes(g.equipCategory)) return rechte.ruestung.includes(g.equipCategory);
     if (g.equipCategory === "SCHMUCK") return true;
@@ -525,7 +542,8 @@ const systeme = (() => {
   function spendenGrund(state, ortId, rohstoff, menge) {
     const fraktion = kontorAm(ortId);
     if (!fraktion) return "nur in Städten der Menschen";
-    if (akt(state) < D.kriegskasse.abAkt) return "die Kriegskasse öffnet in Akt " + D.kriegskasse.abAkt;
+    // Patch 2.6.1: Die Armada-Kriegskasse öffnet mit dem Großen Thing (Akt 4); Geächtete dürfen einzahlen.
+    if (!state.marks?.includes("grosses-thing")) return "die Kriegskasse öffnet mit dem Großen Thing (Akt 4)";
     if (!D.kriegskasse.bedarf[rohstoff]) return "wird nicht gebraucht";
     if (!Number.isInteger(menge) || menge < 1) return "ungültige Menge";
     const vorrat = rohstoff === "nahrung" ? (state.ressource ?? 0) - 1 + kontor(state, fraktion).nahrung : kontor(state, fraktion)[rohstoff];
@@ -591,7 +609,7 @@ const systeme = (() => {
     const a = D.endgame[id];
     (state.endgame ??= {})[id] = state.etappen ?? 0;
     if (id === "kaperfahrt") state.silver -= a.kosten;
-    const silber = Math.round(wuerfel(dice, a.silber[0], a.silber[1]) * (1 + 0.1 * talentRang(state, "MT_GRENZLAEUFER")));
+    const silber = Math.round(wuerfel(dice, a.silber[0], a.silber[1]));
     state.silver += silber;
     const fraktion = kontorAm(ortId) ?? N.get(ortId)?.fraktion;
     const k = istMensch(fraktion) ? kontor(state, fraktion) : null;
@@ -634,9 +652,9 @@ const systeme = (() => {
 
   return {
     daten: D, MENSCHEN, ROHSTOFFE, rufSchluessel, istMensch,
-    maxStufe, epFuer, stufeAus, ahnenPunkte, talentPunkte, talentStufen, talentRang, talentGrund, talentLernen, ahnenGrund, ahnenLernen, signaturRang,
+    maxStufe, epFuer, stufeAus, ahnenPunkte, talentPunkte, talentStufen, talentRang, talentWirkung, hinterhaltMinderung, talentGrund, talentLernen, ahnenGrund, ahnenLernen, signaturRang,
     ruf, rufRang, rufAendern, geaechtet,
-    moral, moralBonus, moralStufe, moralAendern,
+    moral, moralBonus, moralStufe, moralAendern, moralSchutz,
     kontor, kontorAm, preisFaktor, rohstoffPreis, handelGrund, handeln, nahrungGrund, nahrungTragen, bezahlbar, bezahle, kostenText,
     tatAnwenden, doerferVon, befreie, befreiteDoerfer, zehntErtrag, etappe,
     wegTyp, reiseNahrung, reiseGefahr,
