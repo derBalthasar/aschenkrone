@@ -25,13 +25,15 @@ const fightOut = (state, action = "spear") => {
   for (let turn = 0; turn < 40 && state.combat; turn++) state = rules.strike(state, action, highRoll);
   return state;
 };
-// Burgvögtin des Kronreichs mit festen Werten, damit die Kampf- und Probenwerte nachvollziehbar bleiben.
+// Wächterin mit festen Werten, damit die Kampf- und Probenwerte nachvollziehbar bleiben.
 const heroBuild = { frei: { strength: 2, presence: 2, will: 1 }, wahl: "presence", spez: null, meister: null,
   fertigkeiten: { nahkampf: 3, fernkampf: 2, magie: 0, verteidigung: 4, list: 2, fuehrung: 4, mut: 3 } };
 // Neue Helden des Kronreichs beginnen im Prolog in Westvik. Diese Tests laufen ab dem Erwachen bei Kornwik,
 // das für bestehende Spielstände erhalten bleibt.
 assert.equal(rules.create("Tala", "kronreich", "frau", 2, "waechter", heroBuild).scene, "heim-kronreich");
-const hero = () => ({ ...rules.create("Tala", "kronreich", "frau", 2, "waechter", heroBuild), scene: "wake" });
+// Patch 2.5.4: Die Geschichte um Kornwik nutzt Glut und Gleichgewicht, deshalb spielt sie hier eine Ritterin des Ordens.
+const hero = () => ({ ...rules.create("Tala", "orden", "frau", 2, "waechter", heroBuild), scene: "wake" });
+const heroKronreich = () => ({ ...rules.create("Tala", "kronreich", "frau", 2, "waechter", heroBuild), scene: "wake" });
 assert.equal(rules.read(JSON.stringify(hero())).scene, "wake");
 const start = () => rules.choose(rules.choose(hero(), "lantern"), "move");
 assert.equal(start().scene, "start");
@@ -411,7 +413,8 @@ assert.ok(ids(ropeShelter).includes("rescue-rope"));
 const ropeRescue = rules.choose(ropeShelter, "rescue-rope");
 assert.ok(ropeRescue.marks.includes("joren-gerettet"));
 assert.equal(ropeRescue.ember, ropeShelter.ember);
-const failedRescue = rules.choose({ ...ropeShelter, balance: -2 }, "rescue-ember");
+// Patch 2.5.4: Geweihte Flamme verschiebt das Gleichgewicht um +1; bei +3 schlägt die Glut zurück.
+const failedRescue = rules.choose({ ...ropeShelter, balance: 3 }, "rescue-ember");
 assert.equal(failedRescue.scene, "pass-shelter");
 assert.ok(!failedRescue.marks.includes("joren-gerettet"));
 assert.equal(rules.choose(failedRescue, "rescue-balance").balance, 0);
@@ -532,9 +535,9 @@ const armored = rules.equip(lootArmor, "glutpanzer");
 assert.equal(reload(armored).equipment.armor, "glutpanzer");
 const woundedNew = { ...armored, health: 8, ember: 0 };
 assert.equal(rules.use(woundedNew, "galgenwurz").health, 18);
-assert.equal(rules.use(woundedNew, "glutfunke").ember, 2);
-assert.equal(rules.use(woundedNew, "glutfunke").inventory.filter(id => id === "glutfunke").length,
-  woundedNew.inventory.filter(id => id === "glutfunke").length - 1);
+// Patch 2.5.4: Die Freien Häfen haben keine Glut. Der Glutfunke bleibt im Rucksack.
+assert.equal(rules.emberLimit(woundedNew), 0);
+assert.equal(rules.use(woundedNew, "glutfunke"), woundedNew);
 assert.throws(() => reload({ ...armored, equipment: { weapon: "schwert", armor: "glutpanzer" } }));
 // Ausrüstungstests starten mit vollen Helden-LP, unabhängig von Verletzungen früherer Questkämpfe.
 const trial = state => rules.choose(rules.choose({ ...state, health: rules.healthLimit(state) }, "ridge-trail"), "ridge-fight");
@@ -587,7 +590,9 @@ assert.equal(reload(trained).training.strength, 1);
 // LP hängen jetzt an Rolle und Erfahrungsstufe, nicht mehr an Stärke.
 assert.equal(rules.healthLimit(trained), rules.healthLimit(apprentice));
 assert.equal(rules.heroAttributes(trained).strength, rules.heroAttributes(apprentice).strength + 1);
-const strongest = { ...apprentice, training: { strength: 1 }, xp: 410, stufenpunkte: 3, build: { ...heroBuild, frei: { strength: 5 } } };
+// Kronreich (+1 Stärke), damit die Grenze von 20 erreicht wird.
+const strongest = { ...apprentice, faction: "kronreich", origin: rules.create("Tala", "kronreich", "frau", 2, "waechter", heroBuild).origin,
+  training: { strength: 1 }, xp: 410, stufenpunkte: 3, build: { ...heroBuild, frei: { strength: 5 } } };
 assert.equal(rules.heroAttributes(strongest).strength, 18);
 const peak = rules.train(rules.train(strongest, "strength"), "strength");
 assert.equal(rules.heroAttributes(peak).strength, 20);
@@ -743,7 +748,7 @@ assert.equal(rules.relationship(failingRescue, "knight").oath, "broken");
 assert.equal(rules.reputation(failingRescue, "watch"), -35);
 const keptRescue = rules.choose({ ...withIven, scene: "pass-shelter" }, "rescue-ember");
 assert.equal(rules.relationship(keptRescue, "knight").oath, "fulfilled");
-assert.equal(rules.reputation(keptRescue, "watch"), 30);
+assert.equal(rules.reputation(keptRescue, "watch"), 30 + 12); // Patch 2.5.4: geweihte Flamme +12 Ansehen
 assert.ok(ids({ ...keptRescue, scene: "watch-yard" }).includes("watch-trust"));
 assert.ok(!ids({ ...failingRescue, scene: "watch-yard" }).includes("watch-trust"));
 const earlyBond = rules.bondWith(withIven, "knight", "talk");
@@ -1387,7 +1392,7 @@ console.log("Reisebegegnungen (ruhig, scheu, Jäger, Alphatier, Ausweichen) gepr
   assert.equal(fresh.knoten, null);
 
   // Aus der Handlung in Kornwik in die Weltreise und zurück.
-  const atField = { ...hero(), scene: "return-field" };
+  const atField = { ...heroKronreich(), scene: "return-field" };
   assert.equal(rules.aktuellerKnoten(atField), "kornwik");
   const hub = rules.betreteWelt(atField);
   assert.equal(hub.scene, "weltknoten");
@@ -1638,7 +1643,7 @@ console.log("Charakter-Entwurf geprüft.");
   assert.equal(s.combat.auftrag, "kronhall_q04");
   assert.equal(s.combat.gegnerStufe, rules.level(held), "Gebietsstufe 1–6 folgt der Heldenstufe");
   assert.ok(s.combat.feinde.every(feind => feind.stufe === rules.level(held)));
-  assert.equal(s.combat.feinde.length, 3);
+  assert.equal(s.combat.feinde.length, 2, "Patch 2.5.4: allein höchstens 2 Gegner");
   assert.equal(reload(s).combat.auftrag, "kronhall_q04");
   assert.throws(() => reload({ ...s, combat: { ...s.combat, auftrag: "kronhall_q05" } }), /beschädigt/);
   const untote = s.weltLeisten.untote;

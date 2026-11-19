@@ -83,7 +83,8 @@ const startpunkte = (() => {
         place: "Perlvik · Laderaum", title: "Gold vom Reeder",
         text: "Du befreist die Elfenhändler. Da steht der Reeder auf der Planke und hält dir einen Beutel hin. Wenn du schweigst, gehört das Gold dir, und die Schriften bleiben an Bord.",
         a: pick("Das Gold nehmen", "nacht-haefen-gold", "Du nimmst den Beutel. Die Spur zu den Schriften wird sich verlieren.", { loot: "reedergold" }),
-        b: pick("Alles der Stillen Feder melden", "nacht-haefen-gemeldet", "Du lässt das Schiff versiegeln und schickst einen Boten zur Stillen Feder."),
+        // Patch 2.5.4: Wer das Gold nicht nimmt, bekommt von der Stillen Feder Fährgeld, damit er Zollholm verlassen kann (mindestens 15 Silber).
+        b: pick("Alles der Stillen Feder melden", "nacht-haefen-gemeldet", "Du lässt das Schiff versiegeln und schickst einen Boten zur Stillen Feder. Der Bote bringt dir Fährgeld zurück.", { silberMin: 15 }),
       },
       angriff: {
         place: "Perlvik · Gildenhaus", title: "Feuer im Gildenhaus", label: "Mit den befreiten Elfen auf die Zollinseln fliehen",

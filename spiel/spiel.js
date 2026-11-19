@@ -197,7 +197,30 @@
     skillControls.set(id, { ...controls, label: controls.name, limit });
   }
 
+  // Patch 2.5.4: Beim Kampfbeginn wird der Stand unmittelbar davor in einem eigenen Platz gesichert.
+  // In der Niederlage-Szene speichert das Spiel nicht automatisch; der Stand vor dem letzten Treffer bleibt erhalten.
+  const vorKampfKey = key + ".vorKampf";
+  function vorKampfSichern(vorher) {
+    try {
+      localStorage.setItem(vorKampfKey, JSON.stringify(vorher));
+    } catch {
+      // Ohne lokalen Speicher gibt es keinen Wegpunkt vor der Schlacht.
+    }
+  }
+  function vorKampfStand() {
+    try {
+      const gespeichert = localStorage.getItem(vorKampfKey);
+      return gespeichert === null ? null : rules.read(gespeichert);
+    } catch {
+      return null;
+    }
+  }
+
   function save() {
+    if (state?.scene === "defeat") {
+      el("save-status").textContent = "Nicht gespeichert: Du bist gefallen.";
+      return;
+    }
     try {
       localStorage.setItem(key, JSON.stringify(state));
       el("save-status").textContent = "Lokal gespeichert.";
@@ -222,6 +245,7 @@
     if (next === state) return;
     const previous = state;
     const changedScene = !previous || next.scene !== previous.scene || Boolean(next.combat) !== Boolean(previous.combat);
+    if (previous && !previous.combat && next.combat) vorKampfSichern(previous);
     state = next;
     save();
     render();
@@ -343,7 +367,7 @@
       node ? "Standort: " + node.name + " · Nachbarorte, ein Klick bricht auf:" :
       location ? "Standort: " + location + (travels.size ? " · Wähle ein Reiseziel, um die Route zu sehen." : " · Folge den Optionen in der Szene.") :
       far ? "Standort: " + far + " · Folge den Optionen in der Szene." :
-      "Deine Reise ist beendet.";
+      state.scene === "defeat" ? "Du liegst am Boden. Wähle in der Szene, wie es weitergeht." : "Deine Reise ist beendet.";
   }
 
 
@@ -2648,11 +2672,35 @@
         }
       } else if (!gespraech.laeuft) gespraech.auto = null;
       for (const choice of choices) {
-        const attribute = choice.check ? klassen.fertigkeiten[choice.check[0]].name : "";
+        // Grundwert-Proben (Patch 2.5.4) nennen den Wert schon in eckigen Klammern im Text.
+        const attribute = choice.check && klassen.fertigkeiten[choice.check[0]] ? klassen.fertigkeiten[choice.check[0]].name : "";
         const risk = choice.emberRescue && state.balance <= -2 ? " · Rückschlag" : "";
         const wer = !sprecher && npcs.fuerWahl(state.scene, choice);
-        button(actions, choice.label + (attribute ? " · Probe auf " + attribute : "") + risk,
+        const knopf = button(actions, choice.label + (attribute ? " · Probe auf " + attribute : "") + risk,
           wer ? () => wahlGespraech(wer, choice.id) : () => update(rules.choose(state, choice.id)), { story: true });
+        if (choice.hint) knopf.title = choice.hint;
+      }
+      // Patch 2.5.4: Niederlage. Wegpunkt vor der Schlacht laden (nur wenn gesichert) oder die Chronik beenden.
+      if (state.scene === "defeat") {
+        const wegpunkt = vorKampfStand();
+        if (wegpunkt) {
+          const laden = button(actions, "Letzten Wegpunkt vor der Schlacht laden", () => {
+            const stand = vorKampfStand();
+            if (stand) showPlay(stand);
+          }, { story: true });
+          laden.title = "Kehrt zum Moment unmittelbar vor dem Gefecht zurück.";
+        }
+        const ende = button(actions, "Den Run beenden (Neues Spiel)", () => {
+          try {
+            localStorage.removeItem(key);
+            localStorage.removeItem(vorKampfKey);
+          } catch {
+            // Ohne lokalen Speicher gibt es nichts zu löschen.
+          }
+          state = null;
+          showHome("Diese Chronik ist beendet. Beginne ein neues Spiel.");
+        }, { story: true });
+        ende.title = "Akzeptiere das Ende dieser Chronik.";
       }
       renderCandidates(content);
       if (rules.weltOffen(state)) {

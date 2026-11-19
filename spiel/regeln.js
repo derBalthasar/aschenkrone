@@ -191,13 +191,14 @@ const rules = (() => {
       weltLeisten: { ...leistenStart }, runde: 0, knoten: null, handlung: null, vertraege: [], ertraege: {}, niederlage: null,
       weltAuftraege: {}, hauptquest: null,
       moral: SY.daten.moral.start, entkraeftet: false, etappen: 0, kontor: {}, befreit: [], tatOffen: null,
+      zuflucht: null, gefallenIn: null,
       party: [], companionEquipment: {}, partyVitals: {}, heroStatus: {}, companionXp: {},
       rucksack: 0, guertel: Array(beltSize).fill(null), relikt: null,
       relationships: {}, factionRuf: {}, companionQuests: {}, crafted: [], questClock: 0, questLog: {},
       marks: [], journal: [], combat: null,
     };
     state.health = healthLimit(state);
-    state.ember = emberLimit(state);
+    state.ember = faction === "orden" ? glutOrden.start : emberLimit(state);
     return state;
   }
 
@@ -368,6 +369,13 @@ const rules = (() => {
     state.niederlage ??= null;
     state.weltAuftraege ??= {};
     state.hauptquest ??= null;
+    // Patch 2.5.4: Glut nur für den Orden (alte Stände werden gekürzt), Zuflucht und Ort der letzten Niederlage.
+    if (SY.istMensch(state.faction)) {
+      if (Number.isInteger(state.ember) && state.ember >= 0) state.ember = Math.min(state.ember, emberLimit(state));
+      if (state.faction !== "orden" && intBetween(state.balance, -3, 3)) state.balance = 0;
+    }
+    state.zuflucht ??= null;
+    state.gefallenIn ??= null;
     create(state.name, state.faction, state.appearance, state.variant, state.role, state.build);
     const combat = state.combat;
     const validList = (value, check, limit) => Array.isArray(value) && value.length <= limit && value.every(check);
@@ -393,6 +401,8 @@ const rules = (() => {
         new Set(state.vertraege).size !== state.vertraege.length ||
         !isRecord(state.ertraege) || !Object.entries(state.ertraege).every(([id, runde]) => N.get(id)?.typ === "dorf" && intBetween(runde, 0, state.runde)) ||
         (state.niederlage !== null && !own(niederlagen, state.niederlage)) ||
+        (state.zuflucht !== null && !N.get(state.zuflucht)) ||
+        (state.gefallenIn !== null && !(own(world.scenes, state.gefallenIn) && !["defeat", "weltende"].includes(state.gefallenIn))) ||
         !validRecord(state.weltAuftraege, auftragIndex, entry => isRecord(entry) && ["aktiv", "erledigt"].includes(entry.status) &&
           intBetween(entry.wahl, 0, 1)) ||
         !Object.entries(state.weltAuftraege).every(([id, entry]) => entry.wahl < auftragIndex[id].spiel.lohn.length) ||
@@ -782,7 +792,11 @@ const rules = (() => {
     return Math.round(grund * (1 + 0.1 * SY.talentRang(state, "MT_EISENWALL"))) + SY.skaliert(25) * (state.ahnen?.perk_iron_blood ?? 0);
   };
   const legacyHealthLimit = (state) => 18 + heroAttributes(state).strength + 2 * state.build.fertigkeiten.verteidigung;
-  const emberLimit = (state) => 1 + Math.floor(heroAttributes(state).will / 3);
+  // Patch 2.5.4: Unter den Menschen hat nur der Orden der Flamme die Glutgabe (Start 5, höchstens 10).
+  // Kronreich und Freie Häfen haben keine Glut (0) und kein Gleichgewicht.
+  const glutOrden = { start: 5, max: 10 };
+  const emberLimit = (state) => SY.istMensch(state.faction)
+    ? (state.faction === "orden" ? glutOrden.max : 0) : 1 + Math.floor(heroAttributes(state).will / 3);
   // Halten und Blocken über Verteidigung, Ausweichen über Geschick.
   const protection = (state) => Math.floor(state.build.fertigkeiten.verteidigung / 2) + modifier(heroAttributes(state).agility);
 
@@ -1312,6 +1326,8 @@ const rules = (() => {
   }
 
   function cast(state, shift) {
+    // Patch 2.5.4: Ohne Glutgabe gibt es weder Glut noch eine verdeckte Verschiebung des Gleichgewichts.
+    if (!glutgabe(state)) return false;
     state.ember--;
     const balance = state.balance + shift;
     if (Math.abs(balance) < 4) {
@@ -1337,6 +1353,8 @@ const rules = (() => {
 
   function arrive(state, scene) {
     const changed = state.scene !== scene;
+    // Patch 2.5.4: Die Niederlage merkt sich, wo der Held gefallen ist, damit er von dort weitermachen kann.
+    if (scene === "defeat" && changed) state.gefallenIn = state.scene === "weltende" ? null : state.scene;
     state.scene = scene;
     state.combat = null;
     if (scene === "arrival") state.inventory.push("flusssiegel");
@@ -1370,37 +1388,92 @@ const rules = (() => {
   function choices(state) {
     if (state.combat) return [];
     const options = world.scenes[state.scene].choices ?? [];
+    const gabe = glutgabe(state);
     return options.filter((choice) =>
       (!choice.origin || choice.origin === state.origin) &&
-      (!choice.emberCost || state.ember >= choice.emberCost) &&
+      // Patch 2.5.4: Glutkosten nur mit Glutgabe (Orden), Ersatzwahlen nur ohne sie (Kronreich, Freie Häfen).
+      (!choice.emberCost || (gabe && state.ember >= choice.emberCost)) &&
+      (!choice.glutlos || !gabe) &&
       (!choice.requires || hasMarks(state, choice.requires, "every")) &&
       !hasMarks(state, choice.excludes, "some") &&
       (!choice.requiresItem || state.inventory.includes(choice.requiresItem)) &&
       (!choice.faction || reputation(state, choice.faction[0]) >= choice.faction[1]) &&
       conditionMet(state, choice.condition)
-    );
+    ).map((choice) => (choice.ohneGlut && !gabe ? { ...choice, ...choice.ohneGlut } : choice));
+  }
+
+  function rufGeben(state, ruf) {
+    for (const [id, delta] of Object.entries(ruf ?? {})) state.factionRuf[id] = clampRuf(reputation(state, id) + delta);
+  }
+
+  // Patch 2.5.4: Die letzte sichere Stadt (keine Siedlung, eigene Fraktion oder Vertragspartner), sonst die eigene Hauptstadt.
+  const sichererOrt = (state, ort) => Boolean(ort && ort.typ !== "dorf" &&
+    (ort.fraktion === state.faction || (state.vertraege ?? []).includes(ort.fraktion)));
+  function zuflucht(state) {
+    if (state.zuflucht && N.get(state.zuflucht)) return state.zuflucht;
+    const haupt = Object.values(N.alle).find((ort) => ort.typ === "hauptstadt" && ort.fraktion === state.faction);
+    return haupt?.id ?? state.knoten ?? null;
+  }
+  const niederlageFolgen = { silber: 0.75, moral: -20, lp: 1 };
+  // Aus dem Staub kriechen: 1 LP, drei Viertel des Silbers, Moral −20, kein Kampf mehr. Wer in der Weltreise fiel,
+  // erwacht in der letzten Zuflucht. Wer in einer Geschichte fiel, erwacht dort ebenfalls, und die Geschichte wartet
+  // an ihrem Ort. Ohne Weltort (Prolog) erwacht der Held in der Szene, in der er gefallen ist.
+  function ueberleben(state) {
+    const von = state.gefallenIn;
+    state.gefallenIn = null;
+    state.combat = null;
+    state.health = niederlageFolgen.lp;
+    ensureVitals(state);
+    for (const id of state.party) if (memberVitals(state, id).health <= 0) changeHealth(state, id, 1);
+    const verlust = state.silver - Math.floor(state.silver * niederlageFolgen.silber);
+    state.silver -= verlust;
+    if (menschen(state)) state.moral = Math.max(SY.daten.moral.min, (state.moral ?? SY.daten.moral.start) + niederlageFolgen.moral);
+    const ziel = zuflucht(state);
+    const geschichte = von && von !== "weltknoten" ? von : null;
+    const geschichtsOrt = geschichte ? aktuellerKnoten({ ...state, scene: geschichte }) : null;
+    if (ziel && (!geschichte || geschichtsOrt)) {
+      if (geschichte) state.handlung = { szene: geschichte, knoten: geschichtsOrt };
+      state.knoten = ziel;
+      state.scene = "weltknoten";
+      note(state, "Du schleppst dich schwer verwundet nach " + N.get(ziel).name + "." +
+        (verlust ? " " + verlust + " Silber sind verloren." : "") + (menschen(state) ? " Die Moral sinkt um 20." : ""));
+    } else {
+      state.scene = geschichte ?? startpunkte.szene(state.faction);
+      note(state, "Du kommst im Dreck wieder zu dir, schwer verwundet." +
+        (verlust ? " " + verlust + " Silber sind verloren." : "") + (menschen(state) ? " Die Moral sinkt um 20." : ""));
+    }
   }
 
   function chooseStep(previous, id, dice = Math.random) {
     const choice = choices(previous).find((item) => item.id === id);
     if (!choice) return previous;
     const state = structuredClone(previous);
+    if (choice.survive) {
+      ueberleben(state);
+      return state;
+    }
     if (choice.check) {
       const [key, target] = choice.check;
-      const bonus = skillValue(state, key) + (state.marks.includes(choice.advantage) ? 2 : 0) +
-        (key === "list" ? gearBonus(state, "travel") : 0);
+      // Patch 2.5.4: Proben auf einen Grundwert (Stärke, Geschick, Intelligenz …) nutzen dessen Modifikator.
+      const grundwert = own(K.grundwerte, key);
+      const bonus = (grundwert ? modifier(heroAttributes(state)[key]) : skillValue(state, key)) +
+        (state.marks.includes(choice.advantage) ? 2 : 0) + (key === "list" ? gearBonus(state, "travel") : 0);
       const roll = 1 + Math.floor(dice() * 20);
       const passed = roll + bonus >= target;
-      note(state, K.fertigkeiten[key].name + " " + roll + " + " + bonus + " gegen " + target + ". " +
+      note(state, (grundwert ? K.grundwerte[key] : K.fertigkeiten[key].name) + " " + roll + " + " + bonus + " gegen " + target + ". " +
         (passed ? choice.pass : choice.fail));
       if (passed && choice.item) receive(state, [choice.item]);
       if (passed && choice.mark) markDeed(state, choice.mark);
+      if (passed) rufGeben(state, choice.ruf);
+      if (!passed && choice.failMark) markDeed(state, choice.failMark);
       if (passed || !choice.fight) {
-        arrive(state, choice.to);
+        arrive(state, passed ? choice.to : choice.failTo ?? choice.to);
         return state;
       }
     } else {
       if (choice.mark) markDeed(state, choice.mark);
+      if (choice.ruf && !choice.emberRescue) rufGeben(state, choice.ruf);
+      if (choice.silberMin) state.silver = Math.max(state.silver, choice.silberMin);
       // Glutkosten ohne eigene Glutwirkung (Prologe, spend): die Glut wird einfach verbraucht.
       if (choice.spend) state.ember -= choice.emberCost;
       if (choice.item) receive(state, [choice.item]);
@@ -1416,8 +1489,9 @@ const rules = (() => {
       if (choice.center || (choice.id === "rest" && state.scene === "arrival")) state.balance = 0;
       if (choice.soil) affectSoil(state, choice.soil);
       if (choice.emberRescue) {
-        if (cast(state, -2)) {
+        if (cast(state, choice.balanceShift ?? -2)) {
           markDeed(state, choice.emberRescue === true ? "joren-gerettet" : choice.emberRescue);
+          rufGeben(state, choice.ruf);
           note(state, choice.message);
         } else if (state.health > 0) {
           note(state, choice.emberRescue === true
@@ -1755,6 +1829,7 @@ const rules = (() => {
       setzeLeiste(state, "glut", leiste(state, "glut") + (weg.glut ?? 1));
     }
     state.knoten = zielId;
+    if (sichererOrt(state, ziel)) state.zuflucht = zielId;
     weltRunde(state);
     if (menschen(state)) for (const meldung of SY.etappe(state, travelDice)) note(state, meldung);
     if (pruefeNiederlage(state)) return state;
@@ -2025,6 +2100,9 @@ const rules = (() => {
       name: gegner.name, loot: [], random: true, special: { ...special }, alpha: Boolean(gegner.alpha),
       victoryText: "Der Kampf ist gewonnen." };
   }
+  // Patch 2.5.4: Der Letzte Mammut trampelt über die ganze Gruppe (höchstens 13 Schaden je Treffer) statt zu springen.
+  if (world.fights["auftrag-letztermammut"]) world.fights["auftrag-letztermammut"].special = { name: "Trampeln",
+    warning: "Der Letzte Mammut senkt den Kopf und scharrt mit den Füßen.", damage: 2, flaeche: true, deckel: 13 };
 
   // ---- Gegner, Beute und Ausrüstung der Menschenlande (Henry, 18. 11. 2026, Gegner- und Ökonomie-Datei) ----
   // Patch 2.4.0: Henrys Werte rechnen 3,5-mal größer als das Kampfdokument vom 17. 11. Angriff, Rüstung und Heilwerte
@@ -2200,8 +2278,18 @@ const rules = (() => {
     const eintrag = state.weltAuftraege?.[id];
     if (eintrag) return eintrag.status === "erledigt" ? "erledigt" : "angenommen";
     if (!intBetween(wahl, 0, auftrag.spiel.lohn.length - 1)) return "unbekannte Belohnung";
+    if (offeneAuftraege(state) >= auftragsBuch.max) return auftragsBuch.voll;
     return null;
   }
+
+  // Patch 2.5.4: Höchstens 5 offene Aushänge. Nach 10 erfüllten Aufträgen sinkt das Silber je weiterem Auftrag um 3 %,
+  // bis auf die Hälfte. Vorrat über der Obergrenze geht ins Kontor der eigenen Fraktion statt verloren.
+  const auftragsBuch = { max: 5, voll: "Dein Auftragsbuch ist voll (max. 5 offene Aushänge). Schließe erst laufende Aufträge ab.",
+    vollerLohnBis: 10, abschlag: 0.03, boden: 0.5 };
+  const offeneAuftraege = (state) => Object.values(state.weltAuftraege ?? {}).filter((entry) => entry.status === "aktiv").length;
+  const erfuellteAuftraege = (state) => Object.values(state.weltAuftraege ?? {}).filter((entry) => entry.status === "erledigt").length;
+  // Anteil des Silbers für den nächsten Auftrag, wenn bereits `erfuellt` Aufträge erledigt sind.
+  const lohnAnteil = (erfuellt) => Math.max(auftragsBuch.boden, 1 - auftragsBuch.abschlag * Math.max(0, erfuellt + 1 - auftragsBuch.vollerLohnBis));
 
   function auftragAnnehmen(previous, id, wahl = 0) {
     if (auftragGrund(previous, id, wahl)) return previous;
@@ -2241,20 +2329,28 @@ const rules = (() => {
   function auftragAbschliessen(state, id) {
     const auftrag = auftragIndex[id];
     const lohn = auftragsLohn(state, id);
+    const anteil = lohnAnteil(erfuellteAuftraege(state));
+    const silber = Math.round(lohn.silber * anteil);
     state.weltAuftraege[id].status = "erledigt";
     note(state, "Auftrag erfüllt: " + auftrag.titel + ".");
     const folgen = [];
     if (lohn.vorrat) {
+      const ueberschuss = menschen(state) ? Math.max(0, state.ressource + lohn.vorrat - vorratMax) : 0;
       state.ressource = Math.max(1, Math.min(vorratMax, state.ressource + lohn.vorrat));
       folgen.push((lohn.vorrat > 0 ? "+" : "") + lohn.vorrat + " " + resourceName(state));
+      if (ueberschuss) {
+        SY.kontor(state, state.faction).nahrung += ueberschuss;
+        folgen.push(ueberschuss + " davon ins Kontor von " + K.fraktionen[state.faction].name);
+      }
     }
+    if (silber < lohn.silber) folgen.push("Lohn " + Math.round(anteil * 100) + " % (" + silber + " statt " + lohn.silber + " Silber)");
     for (const [leisteId, wert] of Object.entries(lohn.leisten)) {
       setzeLeiste(state, leisteId, leiste(state, leisteId) + wert);
       folgen.push(leistenNamen[leisteId] + " " + (wert > 0 ? "+" : "") + wert);
     }
     if (lohn.vermerke.length) folgen.push("vermerkt: " + lohn.vermerke.join(", "));
     if (folgen.length) note(state, folgen.join(" · ") + ".");
-    grant(state, "auftrag-" + id, auftragEp, lohn.silber, lohn.gegenstaende, false);
+    grant(state, "auftrag-" + id, auftragEp, silber, lohn.gegenstaende, false);
     // Ruf-Datei 2.0: Aufträge der Menschen enden mit einer Wahl: gute Tat, Söldner-Weg oder schlechte Tat.
     if (menschen(state) && SY.istMensch(auftrag.fraktion)) {
       state.tatOffen = id;
@@ -2272,9 +2368,11 @@ const rules = (() => {
 
   // Ausgang eines Auftrags (Ruf-Datei 2.0, Patch 2.1.0 Punkt 4): Ruf, Lohnfaktor, Moral. Gute Tat oder Söldner-Weg
   // bei q01 einer Stadt befreit alle Dörfer dieser Stadt.
+  // Der Lohn der Tat folgt demselben Anteil wie der Auftrag selbst (Patch 2.5.4); der Auftrag zählt schon als erfüllt.
+  const tatLohn = (state, id) => Math.round((auftragsLohn(state, id).silber ?? 0) * lohnAnteil(Math.max(0, erfuellteAuftraege(state) - 1)));
   function taten(state) {
     if (!state.tatOffen) return [];
-    const lohn = auftragsLohn(state, state.tatOffen).silber ?? 0;
+    const lohn = tatLohn(state, state.tatOffen);
     return Object.entries(SY.daten.taten).map(([id, t]) => ({ id, name: t.name, text: t.text, ruf: t.ruf,
       silber: Math.round(lohn * (t.silber - 1)), nahrung: t.rohstoffe, befreit: t.befreit && /_q01$/.test(state.tatOffen) }));
   }
@@ -2283,13 +2381,17 @@ const rules = (() => {
     const state = structuredClone(previous);
     const id = state.tatOffen;
     const auftrag = auftragIndex[id];
-    const lohn = auftragsLohn(state, id).silber ?? 0;
+    const lohn = tatLohn(state, id);
     const t = SY.daten.taten[tat];
     const vorher = SY.ruf(state, auftrag.fraktion);
     SY.rufAendern(state, auftrag.fraktion, t.ruf);
     const extra = Math.round(lohn * (t.silber - 1));
     state.silver += extra;
-    if (t.rohstoffe) state.ressource = Math.min(vorratMax, (state.ressource ?? 0) + t.rohstoffe);
+    if (t.rohstoffe) {
+      const ueberschuss = Math.max(0, (state.ressource ?? 0) + t.rohstoffe - vorratMax);
+      state.ressource = Math.min(vorratMax, (state.ressource ?? 0) + t.rohstoffe);
+      if (ueberschuss) SY.kontor(state, state.faction).nahrung += ueberschuss;
+    }
     const moral = SY.moralAendern(state, tat === "pragmatisch" ? "keins" : tat);
     state.tatOffen = null;
     const folgen = ["Ruf bei " + K.fraktionen[auftrag.fraktion].name + " " + (t.ruf > 0 ? "+" : "") + t.ruf + " (jetzt " + SY.ruf(state, auftrag.fraktion) + ")"];
@@ -2506,6 +2608,10 @@ const rules = (() => {
   const resonanz = (state) => equipmentSlots.some((slot) => world.gear[state.equipment?.[slot]]?.resonanz);
   // Patch 2.5.3: Glutgabe im Kampf unter den Menschen nur für den Orden der Flamme (Glut-Leiste).
   const glutgabe = (state) => !menschen(state) || state.faction === "orden";
+  // Patch 2.5.4: Einsamer Wolf. Späher, Schurken und Heiler ohne Gefährten: +15 % Schaden, 15 % Ausweichen
+  // (ohne Zufall: ein Zähler steigt je Angriff um 15, bei 100 geht der Angriff ins Leere).
+  const einsamerWolfWerte = { rollen: ["spaeher", "schurke", "heiler"], schaden: 0.15, ausweichen: 15 };
+  const einsamerWolf = (state) => state.party.length === 0 && einsamerWolfWerte.rollen.includes(state.role);
   // Waffen- und Rüstungsrechte der Klasse, Glut- und Runengegenstände je Fraktion.
   function ausruestungGrund(state, id) {
     const klasse = menschenKlasse(state);
@@ -2753,13 +2859,15 @@ const rules = (() => {
   const kraft = (state) => {
     const stufe = level(state);
     const extra = Math.floor((stufe - 1) / 2);
+    // Patch 2.5.4: Ausdauer der Menschen 15, ab Stufe 6 alle 3 Stufen +1 (6, 9, 12 …).
+    const ausdauerMenschen = 15 + (stufe >= 6 ? Math.floor((stufe - 6) / 3) + 1 : 0);
     const magie = K.fraktionen[state.faction].magie ? state.build.fertigkeiten.magie : 0;
     // Menschen (Patch 2.1.0 Punkt 10, 2.4.0): Mana nur für Pyromant, Kleriker der Flamme, Glutpaladin und Inquisitor,
     // 12 + Willenskraft + Intelligenz/2.
     const klasse = menschenKlasse(state);
     if (klasse) {
       const werte = heroAttributes(state);
-      return { ausdauer: 10 + extra + SY.skaliert(10) * (state.ahnen?.perk_iron_blood ?? 0), mana: klasse.mana ? SY.maxMana(werte.will, werte.mind) : 0 };
+      return { ausdauer: ausdauerMenschen + SY.skaliert(10) * (state.ahnen?.perk_iron_blood ?? 0), mana: klasse.mana ? SY.maxMana(werte.will, werte.mind) : 0 };
     }
     return { ausdauer: 10 + extra, mana: magie > 0 ? 2 * magie + extra : 0 };
   };
@@ -2839,18 +2947,40 @@ const rules = (() => {
 
   // Gegnerstufe und Rang einer Begegnung. Gruppen erhalten je Gefährte einen Mitläufer mehr,
   // Einzelgegner 25 % mehr LP je Gefährte.
+  // Patch 2.5.4 (Solo und Bosse): Kämpfe aus Szenen der Geschichte (Wahl mit fight) gelten als gesetzt.
+  let szenenKaempfe = null;
+  const szenenKampf = (id) => (szenenKaempfe ??= new Set(Object.values(world.scenes)
+    .flatMap((scene) => (scene.choices ?? []).map((choice) => choice.fight).filter(Boolean)))).has(id);
+  const solo = { maxGegner: 2, mitlaeuferLp: 0.5, mitlaeuferSchaden: 0.75 };
+  // Anführer ab Stufe 10 treffen höchstens mit ihrer Stufe (Stufe 11: 11 Schaden je Treffer).
+  const anfuehrerDeckel = { abStufe: 10 };
+  const bossAnpassung = { "auftrag-skarn": { lp: 0.82 }, "auftrag-letztermammut": { lp: 0.85 } };
+
   function lineup(id, size, stufe = null) {
     const fight = world.fights[id];
     const spec = stufe ? { ...fight.gegner, stufe } : fight.gegner;
     const group = world.enemyGroups[id];
     const creature = world.creatures[id];
     const geschick = 8 + (creature.stats[3] ?? 5);
-    const count = (spec.anzahl ?? 1) + (group ? Math.min(size, 6 - (spec.anzahl ?? 1)) : 0);
+    let count = (spec.anzahl ?? 1) + (group ? Math.min(size, 6 - (spec.anzahl ?? 1)) : 0);
+    // Allein (ohne Gefährten) höchstens 2 Gegner in Begegnungen und Aufträgen. Erzwingt eine Szene einen dritten,
+    // kämpft jeder weitere als geschwächter Mitläufer (halbe LP, drei Viertel Schaden).
+    const allein = size === 0;
+    if (allein && !szenenKampf(id)) count = Math.min(count, solo.maxGegner);
+    const anpassung = bossAnpassung[id];
     return Array.from({ length: count }, (_, index) => {
       const values = fight.system ? SY.kampfWerte(fight.system, spec.stufe) : kampf.gegnerWerte(spec.rang, spec.stufe, 1 + size);
-      const lp = group ? values.lp : Math.round(values.lp * (1 + 0.25 * size));
-      const name = index === 0 ? (group?.leader ?? fight.name ?? creature.name) : group.ally + " " + index;
-      return { name, rang: spec.rang, stufe: spec.stufe, lp, max: lp, schaden: values.schaden, aktionen: values.aktionen,
+      let lp = group ? values.lp : Math.round(values.lp * (1 + 0.25 * size));
+      let schaden = values.schaden;
+      if (anpassung && index === 0) lp = Math.max(1, Math.round(lp * anpassung.lp));
+      if (!fight.system && index === 0 && spec.rang === "anfuehrer" && spec.stufe >= anfuehrerDeckel.abStufe) schaden = Math.min(schaden, spec.stufe);
+      const geschwaecht = allein && index >= solo.maxGegner;
+      if (geschwaecht) {
+        lp = Math.max(1, Math.round(lp * solo.mitlaeuferLp));
+        schaden = Math.max(1, Math.round(schaden * solo.mitlaeuferSchaden));
+      }
+      const name = (index === 0 ? (group?.leader ?? fight.name ?? creature.name) : group.ally + " " + index) + (geschwaecht ? " (geschwächt)" : "");
+      return { name, rang: spec.rang, stufe: spec.stufe, lp, max: lp, schaden, aktionen: values.aktionen,
         geschick, tags: spec.tags ?? [], status: {}, ...(fight.system && values.ruestung ? { ruestung: values.ruestung } : {}) };
     });
   }
@@ -3046,6 +3176,7 @@ const rules = (() => {
         }
       }
     }
+    if (actor === "hero" && einsamerWolf(state)) amount = Math.round(amount * (1 + einsamerWolfWerte.schaden));
     if (foe.ruestung) amount = SY.schaden(amount, foe.ruestung, actor === "hero" ? world.gear[weapon(state)]?.durchdringung ?? 0 : 0);
     const value = Math.min(foe.lp, amount + (foe.status.verwundbar?.wert ?? 0));
     foe.lp -= value;
@@ -3395,6 +3526,7 @@ const rules = (() => {
       !leader.status.furcht ? result.special : null;
     let lost = 0;
     let sparedByStealth = false;
+    let dodged = 0;
     let bleedingNow = turn.bleeding > 0 ? 1 : 0;
     turn.bleeding = Math.max(0, (turn.bleeding ?? 0) - 1);
     for (const [index, foe] of turn.feinde.entries()) {
@@ -3427,8 +3559,9 @@ const rules = (() => {
       }
       if (!skip) {
         for (let action = 0; action < foe.aktionen; action++) {
-          let damage = foe.schaden - (status.langsam ? 1 : 0) - (status.schwach?.wert ?? 0) +
-            (index === 0 && action === 0 ? special?.damage ?? 0 : 0);
+          const sonder = index === 0 && action === 0 ? special : null;
+          let damage = foe.schaden - (status.langsam ? 1 : 0) - (status.schwach?.wert ?? 0) + (sonder?.damage ?? 0);
+          if (sonder?.deckel) damage = Math.min(damage, sonder.deckel);
           // Relikte der Gruppe: Schutz vor Feuer- und Kälteangriffen.
           if (gegnerElement[turn.id] === "feuer") damage -= reliktWert(state, "fireResistance");
           if (gegnerElement[turn.id] === "kaelte") damage = Math.round(damage * (1 - reliktWert(state, "coldDamageReduction")));
@@ -3442,42 +3575,54 @@ const rules = (() => {
           }
           const active = allies(state).filter(ally => ally.health > 0 && (ally.id !== "hero" || held.unsichtbar <= 0));
           if (!active.length) { sparedByStealth = true; continue; }
-          const victim = active[victimCursor++ % active.length];
-          const heroTarget = victim.id === "hero";
-          const armor = (heroTarget ? gearBonus(state, "armor") : memberGearBonus(state, victim.id, "armor")) + reliktWert(state, "partyResistance");
-          const defense = heroTarget && round.guarding ? Math.max(6, round.ward) : round.ward;
-          const guarding = defense > 0;
-          let hit;
-          if (menschen(state)) {
-            // Patch 2.2.0/2.5.1: Rüstung mindert prozentual (Konstante 14); Klassenrüstung zählt beim Helden mit.
-            const klassenRuestung = heroTarget ? (SY.daten.menschenKlassen[state.faction]?.[state.role]?.ruestung ?? 0) +
-              SY.skaliert(4) * SY.talentRang(state, "MT_EISENWALL") : 2;
-            // Patch 2.5.3: Runen-Resonanz der Ahnen +4 % Rüstung je Rang beim Tragen von Runen- oder Glutausrüstung.
-            const gesamt = (klassenRuestung + armor) * (heroTarget && resonanz(state) ? 1 + 0.04 * (state.ahnen?.perk_relic_resonance ?? 0) : 1);
-            hit = damage > 0 ? Math.max(guarding ? 0 : 1, SY.schaden(damage, gesamt) - defense) : 0;
-          } else {
-            const reduction = Math.floor(((heroTarget ? protection(state) : 2) + armor) / 2);
-            hit = Math.max(guarding ? 0 : 1, damage - reduction - defense);
-          }
-          if (heroTarget) {
-            if (index === 0 && action === 0) { heroHit = true; heroGuarded = guarding; }
-            const absorbed = Math.min(held.schild, hit);
-            held.schild -= absorbed; hit -= absorbed;
-            if (hit >= state.health && held.todesschutz) {
-              hit = Math.max(0, state.health - Math.max(1, held.todesschutz.lp));
-              held.todesschutz = null;
-              note(state, "Todesschutz bewahrt dich vor dem tödlichen Treffer.");
+          // Flächenangriffe (Trampeln) treffen alle, sonst einer nach dem anderen.
+          for (const victim of sonder?.flaeche ? active : [active[victimCursor++ % active.length]]) {
+            const heroTarget = victim.id === "hero";
+            if (heroTarget && damage > 0 && einsamerWolf(state)) {
+              held.ausweichen = (held.ausweichen ?? 0) + einsamerWolfWerte.ausweichen;
+              if (held.ausweichen >= 100) {
+                held.ausweichen -= 100;
+                dodged++;
+                events.push({ kind: "retaliate", actor: index, ally: "hero", value: 0 });
+                continue;
+              }
             }
-          }
-          const loss = Math.min(victim.health, hit);
-          changeHealth(state, victim.id, victim.health - loss);
-          lost += loss;
-          events.push({ kind: "retaliate", actor: index, ally: victim.id, value: loss });
-          const ailment = world.enemyAilments[turn.id];
-          if (ailment && !round.previousStatuses?.[victim.id]?.[ailment] && index === 0 && action === 0 && turn.round > 0 && turn.round % 2 === 0 && !guarding && victim.health - loss > 0) {
-            const effects = heroTarget ? state.heroStatus : state.partyVitals[victim.id].status;
-            effects[ailment] = ailment === "confused" ? 2 : 3;
-            events.push({ kind: "afflict", actor: index, ally: victim.id, effect: ailment });
+            const armor = (heroTarget ? gearBonus(state, "armor") : memberGearBonus(state, victim.id, "armor")) + reliktWert(state, "partyResistance");
+            const defense = heroTarget && round.guarding ? Math.max(6, round.ward) : round.ward;
+            const guarding = defense > 0;
+            let hit;
+            if (menschen(state)) {
+              // Patch 2.2.0/2.5.1: Rüstung mindert prozentual (Konstante 14); Klassenrüstung zählt beim Helden mit.
+              const klassenRuestung = heroTarget ? (SY.daten.menschenKlassen[state.faction]?.[state.role]?.ruestung ?? 0) +
+                SY.skaliert(4) * SY.talentRang(state, "MT_EISENWALL") : 2;
+              // Patch 2.5.3: Runen-Resonanz der Ahnen +4 % Rüstung je Rang beim Tragen von Runen- oder Glutausrüstung.
+              const gesamt = (klassenRuestung + armor) * (heroTarget && resonanz(state) ? 1 + 0.04 * (state.ahnen?.perk_relic_resonance ?? 0) : 1);
+              hit = damage > 0 ? Math.max(guarding ? 0 : 1, SY.schaden(damage, gesamt) - defense) : 0;
+            } else {
+              const reduction = Math.floor(((heroTarget ? protection(state) : 2) + armor) / 2);
+              hit = Math.max(guarding ? 0 : 1, damage - reduction - defense);
+            }
+            if (heroTarget) {
+              if (index === 0 && action === 0) { heroHit = true; heroGuarded = guarding; }
+              const absorbed = Math.min(held.schild, hit);
+              held.schild -= absorbed; hit -= absorbed;
+              if (hit >= state.health && held.todesschutz) {
+                hit = Math.max(0, state.health - Math.max(1, held.todesschutz.lp));
+                held.todesschutz = null;
+                note(state, "Todesschutz bewahrt dich vor dem tödlichen Treffer.");
+              }
+            }
+            const loss = Math.min(victim.health, hit);
+            changeHealth(state, victim.id, victim.health - loss);
+            lost += loss;
+            events.push({ kind: "retaliate", actor: index, ally: victim.id, value: loss });
+            const ailment = world.enemyAilments[turn.id];
+            if (ailment && !round.previousStatuses?.[victim.id]?.[ailment] && index === 0 && action === 0 && turn.round > 0 && turn.round % 2 === 0 && !guarding && victim.health - loss > 0) {
+              const effects = heroTarget ? state.heroStatus : state.partyVitals[victim.id].status;
+              effects[ailment] = ailment === "confused" ? 2 : 3;
+              events.push({ kind: "afflict", actor: index, ally: victim.id, effect: ailment });
+            }
+            if (!state.health) break;
           }
           if (!state.health) break;
         }
@@ -3504,7 +3649,8 @@ const rules = (() => {
     if (bleedingLoss) events.push({ kind: "status", actor: "hero", ally: "hero", value: bleedingLoss });
     const loss = lost + bleedingLoss;
     note(state, (special?.name ?? "Gegenangriff") + " · " + loss + " LP verloren." +
-      (sparedByStealth ? " Unsichtbar entgehst du den Angriffen." : "") +
+      (sparedByStealth ? " Unsichtbar entgehst du einem Angriff." : "") +
+      (dodged ? " Einsamer Wolf: Du weichst " + (dodged === 1 ? "einem Angriff" : dodged + " Angriffen") + " aus." : "") +
       (stuns ? " Du bist benommen. Dein nächster Angriff ist schwächer." : "") +
       (startsBleeding ? " Die Wunde blutet zwei Runden lang." : "") +
       (stolenEmber ? " Die Irrglut entzieht dir 1 Glut." : "") +
@@ -3698,6 +3844,7 @@ const rules = (() => {
   }
 
   return { awardXp, abilities, abilityState: (state, id) => state.combat ? abilityState(state, id).reason : "nur im Kampf", kampfwerte, kraft,
+    gegnerAufstellung: lineup,
     level, resourceName, combatSkill, create, read, setRelikt, reliktGrund, reliktStand, preis, choices, unequip, wegwerfen, wegwerfGrund, equipmentSlots, slotKinds, targetSlot, gearStats, equipPreview, gearBonus, bagSlots, category, slotsUsed, fits, storageSite, storageOpen, canStore, canRetrieve,
     store, retrieve, isQuestItem: id => questItems.has(id), bagLimit, bagUpgrade, upgradeBag, belt, setBelt, quickUse, beltSize,
     stackLimit, itemCap, hire, hireCost, compatible, memberLevel, setTravelDice, canEvade, travelEncounter, choose, route, retrain, specialize, ascend, weapon, equip, use, canUse, strike,
