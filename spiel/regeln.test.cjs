@@ -1517,7 +1517,7 @@ console.log("Reisebegegnungen (ruhig, scheu, Jäger, Alphatier, Ausweichen) gepr
   assert.equal(rules.ertragGrund(zwergHub), null);
   const harvested = rules.ertragEinholen(zwergHub);
   assert.equal(harvested.ressource, zwergHub.ressource + 5);
-  assert.match(rules.ertragGrund(harvested), /wieder bereit in 10 Runden/);
+  assert.match(rules.ertragGrund(harvested), /wieder bereit in 10 Etappen/);
   assert.equal(rules.read(JSON.stringify(harvested)).ertraege[zwergDorf.id], 0);
   assert.equal(rules.ertragGrund({ ...zwergHub, knoten: "perlstrand" }), "nur in Dörfern der eigenen Fraktion");
   // Zentrallager: Hauptstädte und eigene Städte, keine Dörfer.

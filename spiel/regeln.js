@@ -1824,7 +1824,7 @@ const rules = (() => {
     if (ort.fraktion !== state.faction) return "nur in Dörfern der eigenen Fraktion";
     if (menschen(state)) return "befreite Dörfer liefern ihren Zehnt alle " + SY.daten.zehnt.etappen + " Etappen ins Kontor";
     const zuletzt = state.ertraege?.[ort.id];
-    if (zuletzt !== undefined && state.runde - zuletzt < ertragPause) return "wieder bereit in " + (ertragPause - (state.runde - zuletzt)) + " Runden";
+    if (zuletzt !== undefined && state.runde - zuletzt < ertragPause) return "wieder bereit in " + (ertragPause - (state.runde - zuletzt)) + " Etappen";
     if ((state.ressource ?? 0) >= vorratMax) return "Vorrat ist voll";
     return null;
   }

@@ -993,3 +993,112 @@ h1, h2 { font-family: var(--font-title); letter-spacing: .01em; }
 .welt-bauten { list-style: none; padding: 0; margin: .5rem 0; display: grid; gap: .5rem; }
 .welt-bauten li { display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem .5rem; }
 .welt-bauten li .action { flex-basis: 100%; }
+
+/* UI-Überarbeitung 19. 11. 2026 (v2.5.3): Ressourcen-Leiste, Weltlage-Akkordeon, Wegweiser-Zeilen, Proviant,
+   EP-Balken im Charakterfenster, Heilziel im Inventar und zweispaltige Werte in der Charaktererstellung. */
+.welt-status { gap: .5rem; }
+.welt-facts { display: flex; flex-wrap: wrap; gap: .25rem 1.6rem; }
+.welt-rohstoffe { margin: 0; gap: .3rem; padding: .35rem; }
+.welt-rohstoffe li { gap: .3rem; padding: .15rem .5rem; border: 1px solid rgba(140, 109, 63, .45); border-radius: 3px;
+  background: rgba(255, 248, 232, .55); font-size: .85rem; white-space: nowrap; }
+.welt-rohstoffe strong { font-variant-numeric: tabular-nums; }
+.welt-rohstoffe small { font-size: .74rem; color: #6b4f33; }
+.welt-lage { border: 1px solid #ad9066; border-radius: 3px; background: rgba(255, 248, 232, .45); }
+.welt-lage > summary { display: flex; flex-wrap: wrap; gap: .3rem; align-items: baseline; padding: .4rem .6rem; cursor: pointer; font-size: .9rem; }
+.welt-lage > summary span { color: #6b4f33; }
+.welt-lage.welt-warn > summary strong { color: #8a4b0b; }
+.welt-lage.welt-danger > summary strong { color: #8e2414; }
+.welt-lage[open] > summary { border-bottom: 1px solid rgba(140, 109, 63, .45); }
+.welt-lage .welt-meters { padding: .5rem .6rem .6rem; }
+
+.wegweiser-liste { display: grid; grid-template-columns: minmax(0, 1fr); gap: .4rem; margin: .5rem 0 0; padding: 0; list-style: none; }
+.wegweiser { min-width: 0; padding: 0; border: 1px solid #ad9066; border-left: 4px solid #6f8f4e; border-radius: 4px; background: #f4e8d0; }
+.wegweiser.welt-grenzland { border-left-color: #c27a1f; }
+.wegweiser-knopf { display: grid; grid-template-columns: minmax(8rem, 1.1fr) minmax(0, 1.6fr) auto; gap: .2rem .9rem; align-items: center;
+  width: 100%; margin: 0; padding: .45rem .65rem; font: inherit; color: var(--ink); text-align: left; background: transparent; border: 0;
+  border-radius: 3px; cursor: pointer; transition: background-color .15s ease, box-shadow .15s ease; }
+.wegweiser-knopf:not(:disabled):hover, .wegweiser-knopf:focus-visible { background: rgba(30, 25, 20, .07);
+  box-shadow: 0 0 0 1px rgba(212, 168, 87, .5), 0 0 12px rgba(212, 168, 87, .35); outline: none; }
+.wegweiser-knopf:disabled { cursor: not-allowed; opacity: .6; }
+.wegweiser-ziel, .wegweiser-weg { display: grid; min-width: 0; }
+.wegweiser-ziel strong { overflow-wrap: anywhere; }
+.wegweiser-ziel small, .wegweiser-gegner { font-size: .78rem; color: #69492d; overflow-wrap: anywhere; }
+.wegweiser-weg { display: block; font-size: .86rem; }
+.wegweiser-weg em { font-style: normal; white-space: nowrap; }
+.wegweiser-gefahr .wegweiser-weg em { padding: 0 .3rem; color: #7d2a14; background: rgba(184, 67, 47, .14); border-radius: 2px; font-weight: 600; }
+.wegweiser-gegner { display: block; }
+.wegweiser-kosten { display: flex; flex-direction: column; gap: .2rem; align-items: flex-end; }
+.wegweiser-kosten span { padding: .12rem .5rem; font-size: .8rem; font-weight: 600; white-space: nowrap; color: #fff0d5; background: #4c3120;
+  border-radius: 999px; font-variant-numeric: tabular-nums; }
+.wegweiser-zusatz { margin: 0 .65rem .45rem; font-size: .82rem; }
+.wegweiser-zusatz.welt-alarm { padding: .25rem .45rem; }
+.wegweiser-grund { color: #8e2414; }
+.wegweiser-frage { padding: .25rem .45rem; color: #fff0d5; background: #8a3b1c; border-radius: 3px; font-weight: 600; }
+.wegweiser-bestaetigen { border-color: #8a3b1c; box-shadow: 0 0 0 1px #8a3b1c; }
+@media (max-width: 42rem) {
+  .wegweiser-knopf { grid-template-columns: minmax(0, 1fr) auto; }
+  .wegweiser-weg { grid-column: 1 / -1; grid-row: 2; }
+  .wegweiser-kosten { grid-column: 2; grid-row: 1; }
+}
+@media (prefers-reduced-motion: reduce) { .wegweiser-knopf { transition: none; } }
+
+/* Kartenreiter: Nachbarorte als kompakte Wegweiser auf Eisen */
+.map-destinations:has(.wegweiser-liste) { display: grid; gap: .5rem; }
+.wegweiser-kompakt { margin: 0; gap: .3rem; }
+.wegweiser-kompakt .wegweiser { background: #2a221a; border-color: var(--line); }
+.wegweiser-kompakt .wegweiser.welt-grenzland { border-left-color: #c27a1f; }
+.wegweiser-kompakt .wegweiser-knopf { grid-template-columns: minmax(0, 1fr) auto; padding: .35rem .5rem; color: var(--ivory); }
+.wegweiser-kompakt .wegweiser-weg { grid-column: 1 / -1; grid-row: 2; font-size: .78rem; color: var(--muted); }
+.wegweiser-kompakt .wegweiser-kosten { grid-column: 2; grid-row: 1; }
+.wegweiser-kompakt .wegweiser-ziel small { color: var(--muted); }
+.wegweiser-kompakt .wegweiser-kosten span { color: #1d1813; background: var(--accent); }
+.wegweiser-kompakt .wegweiser-gefahr .wegweiser-weg em, .wegweiser-kompakt .wegweiser-gefahr em { color: #ffb59f; background: rgba(184, 67, 47, .3); }
+.wegweiser-kompakt .wegweiser-knopf:not(:disabled):hover, .wegweiser-kompakt .wegweiser-knopf:focus-visible { background: #3a2e22; }
+.wegweiser-kompakt .wegweiser-zusatz { color: var(--ivory); }
+.wegweiser-kompakt .welt-aushang-hinweis { color: var(--muted); }
+.wegweiser-kompakt .welt-alarm { color: #1d1813; }
+.wegweiser-kompakt .wegweiser-grund { color: #ff9b85; }
+
+/* Rechte Leiste: Proviant und Glutgleichgewicht bzw. Rüstungsschutz als saubere Zeilen über die ganze Breite */
+.vital-line { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .1rem .6rem; min-width: 0; }
+.vital-line dt { font-size: .75rem; letter-spacing: .04em; color: var(--muted); }
+.vital-line dd { margin: 0; font-size: .88rem; color: var(--ivory); font-variant-numeric: tabular-nums; text-align: right; }
+.vital-line .balance-scale { flex-basis: 100%; }
+.vital-line-low dd { color: #ff9b85; font-weight: 600; }
+
+/* Charakterfenster: EP-Balken statt Stufenraster */
+.sheet-vitals.sheet-vitals-zwei { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.sheet-xp-line .sheet-big { margin-bottom: .35rem; }
+.inventory-hub progress.sheet-xp-bar { display: block; width: 100%; height: .6rem; appearance: none; -webkit-appearance: none; border: 0;
+  border-radius: 2px; background: #2b241d; overflow: hidden; }
+.inventory-hub progress.sheet-xp-bar::-webkit-progress-bar { background: #2b241d; }
+.inventory-hub progress.sheet-xp-bar::-webkit-progress-value { background: linear-gradient(90deg, #8c6d3f, var(--accent)); }
+.inventory-hub progress.sheet-xp-bar::-moz-progress-bar { background: linear-gradient(90deg, #8c6d3f, var(--accent)); }
+.sheet-xp-line .sheet-note { margin: .3rem 0 0; }
+.sheet-ladder-box { margin-top: .5rem; }
+.sheet-ladder-box > summary { cursor: pointer; font-size: .85rem; color: var(--muted); }
+.sheet-ladder-box[open] > summary { margin-bottom: .4rem; }
+
+/* Inventar: Heilziel erst nach Auswahl eines Verbrauchsguts */
+.hub-ziel { margin: 0 .6rem .4rem; color: #eddbb9; }
+.hub-ziel-wahl { box-shadow: 0 0 0 1px var(--accent); }
+
+/* Charaktererstellung: Spezialisierungen einklappbar, Grundwerte und Fertigkeiten nebeneinander */
+.class-spez { margin: .4rem 0 0; padding: .35rem .55rem; border: 1px solid rgba(140, 109, 63, .55); border-radius: 3px; font-size: .92rem; }
+.class-spez > summary { cursor: pointer; font-weight: 600; }
+.class-spez p { margin: .35rem 0 0; }
+.creation-werte { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 1rem; align-items: start; }
+@media (min-width: 64rem) {
+  .creation { max-width: 1180px; }
+  .creation-werte { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.encounter #scene-content .wegweiser-zusatz { font-size: .82rem; line-height: 1.4; }
+/* Gleich breite Spalten, damit Minus, Wert und Plus in allen Zeilen untereinander stehen */
+@media (min-width: 42.0625rem) {
+  #point-controls .point-row { grid-template-columns: minmax(0, 1fr) 2.2rem 2.4rem 2rem 2.4rem minmax(4.5rem, auto); }
+  #skill-controls .point-row { grid-template-columns: minmax(6.4rem, 1fr) 2.4rem 2rem 2.4rem minmax(0, 7.5rem); }
+  #skill-controls .point-row > span:empty { display: none; }
+  #skill-controls .point-row small { overflow-wrap: anywhere; line-height: 1.25; }
+  .point-row .action { justify-content: center; min-width: 0; padding-inline: 0; }
+}
+.side-panel .wegweiser-liste, .encounter .wegweiser-liste { padding: 0; }

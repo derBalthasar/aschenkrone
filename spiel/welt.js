@@ -751,7 +751,7 @@ const world = (() => {
     },
     // Weltebene (Technische Spezifikation): Ort, Text und Aktionen liefert der Stadt-Hub des aktuellen Knotens.
     weltknoten: {
-      place: "Weltreise", title: "Unterwegs in Odris", objective: "Reise von Knoten zu Knoten. Jede Reise ist eine Runde der Weltleisten.",
+      place: "Weltreise", title: "Unterwegs in Odris", objective: "Reise von Knoten zu Knoten. Jede Reise ist eine Etappe der Weltleisten.",
       text: "",
     },
     weltende: {

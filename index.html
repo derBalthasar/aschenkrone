@@ -88,6 +88,7 @@
         <select id="appearance"><option value="mann">Männlich</option><option value="frau">Weiblich</option></select>
         <label for="variant">Variante</label>
         <select id="variant"></select>
+        <div class="creation-werte">
         <fieldset id="point-buy"><legend>Grundwerte</legend>
           <p id="points-left" aria-live="polite"></p>
           <div id="point-controls"></div>
@@ -97,6 +98,7 @@
           <div id="skill-controls"></div>
           <button id="skill-suggest" class="action" type="button">Vorschlag übernehmen</button>
         </fieldset>
+        </div>
         <dl id="preview-stats" class="stat-line"></dl>
         <p id="creation-status" role="status"></p>
         <div class="actions">
@@ -191,7 +193,7 @@
             <details open><summary id="questlog-summary">Questlog</summary>
               <div class="quest-clock-row"><p id="quest-clock" class="quest-clock"></p>
                 <details class="help-tip"><summary aria-label="Wie Fristen zählen" title="Wie Fristen zählen">?</summary>
-                <p class="quest-help">Fristen laufen in Spielzügen: Entscheidungen, Reisen, Kampfrunden, Herstellung und Auftragsaktionen. Lesen, Ausrüsten, Handel und Pausen kosten keine Zeit. Begleiteraufträge müssen vor Ablauf am Treffpunkt abgegeben werden.</p></details>
+                <p class="quest-help">Fristen laufen in Schritten: Entscheidungen, Reise-Etappen, Kampfrunden, Herstellung und Auftragsaktionen. Lesen, Ausrüsten, Handel und Pausen kosten keine Zeit. Begleiteraufträge müssen vor Ablauf am Treffpunkt abgegeben werden.</p></details>
               </div>
               <div id="quest-filters" class="actions" role="group" aria-label="Aufträge filtern"></div>
               <ul id="companion-quests" class="inventory-list"></ul></details>
