@@ -1019,6 +1019,23 @@ const rules = (() => {
     return state;
   }
 
+  // Wegwerfen (UI-Überarbeitung 19. 11. 2026): ein Stück aus dem Rucksack entfernen. Nicht im Kampf, keine
+  // Questgegenstände und keine Stücke, die gerade der Held oder ein Begleiter trägt.
+  function wegwerfGrund(state, id) {
+    if (state.combat || !state.health) return "nicht im Kampf";
+    if (!state.inventory.includes(id)) return "nicht im Rucksack";
+    if (questItems.has(id)) return "Questgegenstand";
+    if (assigned(state, id) >= state.inventory.filter(entry => entry === id).length) return "angelegt";
+    return null;
+  }
+  function wegwerfen(previous, id) {
+    if (wegwerfGrund(previous, id)) return previous;
+    const state = structuredClone(previous);
+    state.inventory.splice(state.inventory.lastIndexOf(id), 1);
+    note(state, world.items[id] + " weggeworfen.");
+    return state;
+  }
+
   // Werte des Helden mit der aktuellen oder einer probeweise geänderten Ausrüstung.
   function gearStats(state, equipment = state.equipment) {
     const preview = { ...state, equipment };
@@ -3681,7 +3698,7 @@ const rules = (() => {
   }
 
   return { awardXp, abilities, abilityState: (state, id) => state.combat ? abilityState(state, id).reason : "nur im Kampf", kampfwerte, kraft,
-    level, resourceName, combatSkill, create, read, setRelikt, reliktGrund, reliktStand, preis, choices, unequip, equipmentSlots, slotKinds, targetSlot, gearStats, equipPreview, gearBonus, bagSlots, category, slotsUsed, fits, storageSite, storageOpen, canStore, canRetrieve,
+    level, resourceName, combatSkill, create, read, setRelikt, reliktGrund, reliktStand, preis, choices, unequip, wegwerfen, wegwerfGrund, equipmentSlots, slotKinds, targetSlot, gearStats, equipPreview, gearBonus, bagSlots, category, slotsUsed, fits, storageSite, storageOpen, canStore, canRetrieve,
     store, retrieve, isQuestItem: id => questItems.has(id), bagLimit, bagUpgrade, upgradeBag, belt, setBelt, quickUse, beltSize,
     stackLimit, itemCap, hire, hireCost, compatible, memberLevel, setTravelDice, canEvade, travelEncounter, choose, route, retrain, specialize, ascend, weapon, equip, use, canUse, strike,
     attributes, baseAttributes, defaultBuild, suggestSkills, buildProblem, skillLimits, skillPoints, cap, modifier, originOf, profile,

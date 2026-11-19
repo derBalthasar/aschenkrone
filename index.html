@@ -220,33 +220,34 @@
       </div>
     </div>
   </main>
-  <dialog id="inventory-hub" class="inventory-hub" aria-labelledby="hub-title">
+  <dialog id="inventory-hub" class="inventory-hub inv-hub" aria-labelledby="hub-title">
     <div class="hub-head">
       <div><p class="overline" id="hub-place"></p><h2 id="hub-title">Inventar</h2></div>
       <button type="button" id="hub-close" class="action">Schließen</button>
     </div>
-    <section class="hub-gear" aria-labelledby="hub-gear-title">
-      <h3 id="hub-gear-title" class="hub-section-title">Ausrüstung</h3>
-      <div class="hub-gear-body">
-        <div id="hub-doll" class="hub-doll"></div>
-        <div class="hub-stats-box">
-          <dl id="hub-stats" class="hub-stats"></dl>
-          <p id="hub-compare" class="hub-compare" aria-live="polite"></p>
+    <div class="inv-body">
+      <section class="inv-links hub-gear" aria-labelledby="hub-gear-title">
+        <h3 id="hub-gear-title" class="hub-section-title">Ausrüstung</h3>
+        <div id="hub-member" class="inv-member" role="group" aria-label="Gruppenmitglied wählen" hidden></div>
+        <ul id="hub-slots" class="inv-slots" aria-label="Ausrüstungsplätze"></ul>
+        <dl id="hub-stats" class="hub-stats inv-stats"></dl>
+        <p id="hub-compare" class="hub-compare" aria-live="polite"></p>
+        <div class="inv-links-fuss">
           <button type="button" id="hub-unequip-all" class="action hub-unequip-all">Alles ablegen</button>
           <p id="hub-silver" class="hub-silver"></p>
-          <div id="hub-belt" class="hub-belt" aria-label="Gürtel"></div>
-          <div id="hub-relikt" class="hub-relikt" aria-label="Gruppen-Relikt" hidden></div>
         </div>
-      </div>
-    </section>
-    <div class="hub-tabs" role="tablist" aria-label="Aufbewahrung">
-      <button type="button" role="tab" id="hub-tab-bag" aria-controls="hub-items" data-tab="bag"></button>
-      <button type="button" role="tab" id="hub-tab-storage" aria-controls="hub-items" data-tab="storage"></button>
+        <div id="hub-belt" class="hub-belt" aria-label="Gürtel"></div>
+        <div id="hub-relikt" class="hub-relikt" aria-label="Gruppen-Relikt" hidden></div>
+      </section>
+      <section class="inv-rechts" aria-label="Rucksack, Kontor-Lager und Handel">
+        <div class="hub-tabs" role="tablist" aria-label="Inventar">
+          <button type="button" role="tab" id="hub-tab-bag" aria-controls="hub-items" data-tab="bag"></button>
+          <button type="button" role="tab" id="hub-tab-storage" aria-controls="hub-items" data-tab="storage"></button>
+          <button type="button" role="tab" id="hub-tab-trade" aria-controls="hub-items" data-tab="trade"></button>
+        </div>
+        <div id="hub-items" class="hub-items" role="tabpanel" aria-label="Gegenstände"></div>
+      </section>
     </div>
-    <div class="hub-bar"><progress id="hub-capacity" max="20" value="0" aria-label="Belegte Rucksackplätze"></progress><p id="hub-hint" class="hub-hint"></p></div>
-    <div id="hub-bag-upgrade" class="hub-bag-upgrade" hidden></div>
-    <div id="hub-slot-filter" class="hub-slot-filter" hidden></div>
-    <div id="hub-items" class="hub-items" role="tabpanel" aria-label="Gegenstände"></div>
     <p id="hub-status" class="hub-status" role="status"></p>
   </dialog>
   <dialog id="character-sheet" class="inventory-hub character-sheet" aria-labelledby="sheet-title">

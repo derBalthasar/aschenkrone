@@ -807,6 +807,12 @@ console.log("Gefährtenaufträge, Beziehungsfolgen, Geschenke, Romanze, Fraktion
   assert.ok(!allStored.inventory.includes("harzverband"));
   assert.equal(rules.retrieve(allStored, "harzverband", 3).inventory.filter(id => id === "harzverband").length, 3);
 
+  // Wegwerfen: ein Stück, nie Questgegenstände oder angelegte Stücke (UI-Überarbeitung 19. 11. 2026)
+  assert.equal(rules.wegwerfen(stack, "harzverband").inventory.filter(id => id === "harzverband").length, 2);
+  assert.equal(rules.wegwerfGrund(armored, "glutpanzer"), "angelegt");
+  assert.equal(rules.wegwerfen(armored, "glutpanzer"), armored);
+  assert.equal(rules.wegwerfen({ ...armored, inventory: [...armored.inventory, "flusssiegel"] }, "flusssiegel").inventory.includes("flusssiegel"), true);
+
   // Questgegenstände bleiben im Rucksack und belegen keinen Platz
   assert.ok(rules.isQuestItem("flusssiegel"));
   assert.ok(rules.isQuestItem("forstbuch"));
