@@ -82,7 +82,7 @@ const rules = (() => {
   }
 
   // Liefert eine Fehlermeldung oder null.
-  function buildProblem(faction, role, build, training = {}) {
+  function buildProblem(faction, role, build, training = {}, grenze = K.regeln.grundwertMax) {
     if (!own(K.fraktionen, faction)) return "Wähle eine Fraktion.";
     if (!K.klassenFolge.includes(role)) return "Wähle eine Klasse.";
     if (!isRecord(build) || !isRecord(build.frei) || !isRecord(build.fertigkeiten)) return "Verteile Grundwerte und Fertigkeiten.";
@@ -100,7 +100,7 @@ const rules = (() => {
       return "Die Meisterklasse ist ungültig.";
     }
     const values = attributes(faction, role, build, training);
-    if (Object.values(values).some((value) => value > K.regeln.grundwertMax)) return "Kein Grundwert darf über 20 steigen.";
+    if (Object.values(values).some((value) => value > grenze)) return "Kein Grundwert darf über " + grenze + " steigen.";
     const limits = skillLimits(faction, values);
     const skills = build.fertigkeiten;
     if (!Object.keys(skills).every((id) => own(K.fertigkeiten, id)) ||
@@ -191,7 +191,7 @@ const rules = (() => {
       weltLeisten: { ...leistenStart }, runde: 0, knoten: null, handlung: null, vertraege: [], ertraege: {}, niederlage: null,
       weltAuftraege: {}, hauptquest: null,
       moral: SY.daten.moral.start, entkraeftet: false, etappen: 0, kontor: {}, befreit: [], tatOffen: null,
-      zuflucht: null, gefallenIn: null,
+      zuflucht: null, gefallenIn: null, grundwertAlt: 0, faehigkeitRaenge: {},
       party: [], companionEquipment: {}, partyVitals: {}, heroStatus: {}, companionXp: {},
       rucksack: 0, guertel: Array(beltSize).fill(null), relikt: null,
       relationships: {}, factionRuf: {}, companionQuests: {}, crafted: [], questClock: 0, questLog: {},
@@ -376,13 +376,20 @@ const rules = (() => {
     }
     state.zuflucht ??= null;
     state.gefallenIn ??= null;
+    // Patch 2.5.5: Bisher trainierte Grundwerte stammen aus alten Punkten und zählen nicht gegen die neuen Stufenpunkte.
+    state.grundwertAlt ??= isRecord(state.training) ? total(state.training) : 0;
+    state.faehigkeitRaenge ??= {};
     create(state.name, state.faction, state.appearance, state.variant, state.role, state.build);
     const combat = state.combat;
     const validList = (value, check, limit) => Array.isArray(value) && value.length <= limit && value.every(check);
     if (state.origin !== originOf(state.faction) ||
         !isRecord(state.training) ||
-        !Object.entries(state.training).every(([id, value]) => own(K.grundwerte, id) && intBetween(value, 0, 5)) ||
-        buildProblem(state.faction, state.role, state.build, state.training) ||
+        !Object.entries(state.training).every(([id, value]) => own(K.grundwerte, id) && intBetween(value, 0, 30)) ||
+        !intBetween(state.grundwertAlt, 0, 100) ||
+        (!SY.istMensch(state.faction) && !Object.values(state.training).every((value) => value <= 5)) ||
+        buildProblem(state.faction, state.role, state.build, state.training, grundwertGrenze(state)) ||
+        !isRecord(state.faehigkeitRaenge) || !Object.entries(state.faehigkeitRaenge).every(([id, rang]) =>
+          /^[a-z0-9]{1,12}$/.test(id) && intBetween(rang, 2, aufstieg.rangMax)) ||
         !intBetween(state.questStufe, 0, 10) ||
         ![state.vereinigt, state.umschulung, state.rausch].every((flag) => typeof flag === "boolean") ||
         !own(world.scenes, state.scene) ||
@@ -456,7 +463,7 @@ const rules = (() => {
       for (const id of waiting) if (state.companionEquipment) delete state.companionEquipment[id];
       if (state.combat) {
         // Die Gegnerreihe schrumpft auf die kleinere Gruppe, verlorene LP bleiben verloren.
-        const fresh = lineup(state.combat.id, state.party.length, state.combat.gegnerStufe ?? null);
+        const fresh = lineup(state.combat.id, state.party.length, state.combat.gegnerStufe ?? null, level(state));
         state.combat.feinde = state.combat.feinde.slice(0, fresh.length).map((foe, index) =>
           ({ ...foe, max: fresh[index].max, lp: Math.min(foe.lp, fresh[index].max) }));
         // Ein entfallender Gegnerplatz darf einen laufenden Kampf nicht ohne Ziel lassen.
@@ -767,7 +774,21 @@ const rules = (() => {
     return { level: stufe, xp: state.xp, next: stufe < max ? ep(stufe + 1) : null,
       floor: ep(stufe), points: trainingLeft(state) };
   }
-  const trainingLeft = (state) => state.stufenpunkte ?? 0;
+  // Patch 2.5.5 (Menschen): Jede Stufe von 2 bis 30 bringt 2 Grundwertpunkte und 1 Fertigkeits- oder Talentpunkt.
+  // Stufe 2–20: Ränge der Klassen- und Spezialisierungsfähigkeiten (bis Rang 4, +12 % Schaden/Heilung je Rang,
+  // Rang 4 kostet 1 Ausdauer/Mana weniger). Stufe 21–30: Meister-Talente. Jeder Ahnenrang: +1 Grundwertpunkt.
+  // Grundwerte höchstens 20, nach Stufe 30 (Blut der Ahnen) höchstens 25.
+  const aufstieg = { grundwertJeStufe: 2, rangMax: 4, rangStufen: { 2: 3, 3: 8, 4: 15 }, rangBonus: 0.12, rangRabatt: 1,
+    faehigkeitBis: 20, grenzeAhnen: 25 };
+  const grundwertPunkteGesamt = (state) => aufstieg.grundwertJeStufe * (stufeVon(state) - 1) + SY.ahnenPunkte(state.xp ?? 0) +
+    (state.grundwertAlt ?? 0) + (state.stufenpunkte ?? 0);
+  const trainingLeft = (state) => menschen(state)
+    ? Math.max(0, grundwertPunkteGesamt(state) - total(state.training ?? {})) : state.stufenpunkte ?? 0;
+  const grundwertGrenze = (state) => SY.istMensch(state.faction) && SY.stufeAus(state.xp ?? 0) >= SY.maxStufe
+    ? aufstieg.grenzeAhnen : K.regeln.grundwertMax;
+  const faehigkeitRang = (state, id) => state.faehigkeitRaenge?.[id] ?? 1;
+  const faehigkeitPunkte = (state) => menschen(state) ? Math.max(0, Math.min(stufeVon(state), aufstieg.faehigkeitBis) - 1 -
+    Object.values(state.faehigkeitRaenge ?? {}).reduce((sum, rang) => sum + rang - 1, 0)) : 0;
   const legacyThresholds = [0, 75, 175, 285, 410, 560];
   const heroAttributes = (state) => attributes(state.faction, state.role, state.build, state.training ?? {});
   const heroSkills = (state) => ({ ...state.build.fertigkeiten });
@@ -809,14 +830,41 @@ const rules = (() => {
 
   function train(previous, id) {
     if (!own(K.grundwerte, id) || previous.combat || !previous.health || trainingLeft(previous) < 1 ||
-        heroAttributes(previous)[id] >= K.regeln.grundwertMax) return previous;
+        heroAttributes(previous)[id] >= grundwertGrenze(previous)) return previous;
     const state = structuredClone(previous);
     state.training[id] = (state.training[id] ?? 0) + 1;
-    state.stufenpunkte--;
+    if (!menschen(state)) state.stufenpunkte--;
     state.health += healthLimit(state) - healthLimit(previous);
     state.ember += emberLimit(state) - emberLimit(previous);
     note(state, K.grundwerte[id] + " dauerhaft um 1 erhöht.");
     return state;
+  }
+
+  function faehigkeitGrund(state, id) {
+    if (!menschen(state)) return "nur für die Menschen";
+    if (state.combat) return "nicht im Kampf";
+    const f = abilities(state).find((entry) => entry.id === id);
+    if (!f || !f.frei) return "noch nicht freigeschaltet";
+    const naechster = faehigkeitRang(state, id) + 1;
+    if (naechster > aufstieg.rangMax) return "höchster Rang erreicht";
+    if (level(state) < aufstieg.rangStufen[naechster]) return "Rang " + naechster + " ab Stufe " + aufstieg.rangStufen[naechster];
+    if (faehigkeitPunkte(state) < 1) return "kein freier Fertigkeitspunkt";
+    return null;
+  }
+  function faehigkeitSteigern(previous, id) {
+    if (faehigkeitGrund(previous, id)) return previous;
+    const state = structuredClone(previous);
+    state.faehigkeitRaenge[id] = faehigkeitRang(state, id) + 1;
+    const f = abilities(state).find((entry) => entry.id === id);
+    note(state, f.name + " steigt auf Rang " + state.faehigkeitRaenge[id] + " (+" + Math.round(aufstieg.rangBonus * 100 * (state.faehigkeitRaenge[id] - 1)) +
+      " % Wirkung" + (state.faehigkeitRaenge[id] === aufstieg.rangMax ? ", 1 Ausdauer oder Mana weniger" : "") + ").");
+    return state;
+  }
+  function faehigkeitInfo(state) {
+    if (!menschen(state)) return null;
+    return { punkte: faehigkeitPunkte(state), rangMax: aufstieg.rangMax, rangStufen: { ...aufstieg.rangStufen },
+      liste: abilities(state).filter((f) => f.frei).map((f) => ({ id: f.id, name: f.name, rang: faehigkeitRang(state, f.id),
+        bonus: Math.round(aufstieg.rangBonus * 100 * (faehigkeitRang(state, f.id) - 1)), grund: faehigkeitGrund(state, f.id) })) };
   }
 
   // Spezialisierung ab Quest-Stufe 3: Titel, +1 Fertigkeitspunkt, +1 Grundwert. Die Wahl gilt für immer.
@@ -2565,7 +2613,7 @@ const rules = (() => {
     const vergeben = Object.values(state.talente ?? {}).reduce((s, n) => s + n, 0);
     const ahnenVergeben = Object.values(state.ahnen ?? {}).reduce((s, n) => s + n, 0);
     return { stufe, maxStufe: SY.maxStufe, signaturRang: SY.signaturRang(stufe),
-      talentPunkte: SY.talentPunkte(stufe) - vergeben, talentStufen: SY.daten.aufstieg.talentStufen,
+      talentPunkte: SY.talentPunkte(stufe) - vergeben, talentStufen: SY.talentStufen,
       talente: SY.daten.aufstieg.talente.map((t) => ({ ...t, rang: SY.talentRang(state, t.id), max: SY.daten.aufstieg.talentMaxRang,
         grund: SY.talentGrund(state, t.id, stufe) })),
       ahnenPunkte: SY.ahnenPunkte(state.xp ?? 0) - ahnenVergeben,
@@ -2612,6 +2660,11 @@ const rules = (() => {
   // (ohne Zufall: ein Zähler steigt je Angriff um 15, bei 100 geht der Angriff ins Leere).
   const einsamerWolfWerte = { rollen: ["spaeher", "schurke", "heiler"], schaden: 0.15, ausweichen: 15 };
   const einsamerWolf = (state) => state.party.length === 0 && einsamerWolfWerte.rollen.includes(state.role);
+  // Patch 2.5.5: Schutz für Pyromant und Kleriker der Flamme ohne Gefährten (LP der Klasse bleiben gleich):
+  // Glutschild 25 % der LP zu Kampfbeginn, jeder weitere Treffer derselben Gegnerphase halbiert.
+  const magierSchutzWerte = { faction: "orden", rollen: ["magier", "heiler"], schild: 0.25, weitererTreffer: 0.5 };
+  const magierSchutz = (state) => state.party.length === 0 && state.faction === magierSchutzWerte.faction &&
+    magierSchutzWerte.rollen.includes(state.role);
   // Waffen- und Rüstungsrechte der Klasse, Glut- und Runengegenstände je Fraktion.
   function ausruestungGrund(state, id) {
     const klasse = menschenKlasse(state);
@@ -2906,7 +2959,9 @@ const rules = (() => {
     }
     return list.map((f) => ({
       ...f,
-      kostenWert: f.kosten ? Math.max(1, f.kosten - intelligenzRabatt(state)) : 0,
+      kostenWert: f.kosten ? Math.max(1, f.kosten - intelligenzRabatt(state) -
+        (faehigkeitRang(state, f.id) >= aufstieg.rangMax ? aufstieg.rangRabatt : 0)) : 0,
+      rang: faehigkeitRang(state, f.id),
       abklingzeitWert: Math.max(0, f.abklingzeit - (f.spezialisiert && hasControl(f.regel) ? 1 : 0)),
     }));
   }
@@ -2952,11 +3007,11 @@ const rules = (() => {
   const szenenKampf = (id) => (szenenKaempfe ??= new Set(Object.values(world.scenes)
     .flatMap((scene) => (scene.choices ?? []).map((choice) => choice.fight).filter(Boolean)))).has(id);
   const solo = { maxGegner: 2, mitlaeuferLp: 0.5, mitlaeuferSchaden: 0.75 };
-  // Anführer ab Stufe 10 treffen höchstens mit ihrer Stufe (Stufe 11: 11 Schaden je Treffer).
-  const anfuehrerDeckel = { abStufe: 10 };
+  // Patch 2.5.5: Anführer treffen auf jeder Stufe höchstens mit max(6, Heldenstufe) je Treffer (kein Sprung von Stufe 9 auf 10).
+  const anfuehrerDeckel = (heldStufe) => Math.max(6, heldStufe);
   const bossAnpassung = { "auftrag-skarn": { lp: 0.82 }, "auftrag-letztermammut": { lp: 0.85 } };
 
-  function lineup(id, size, stufe = null) {
+  function lineup(id, size, stufe = null, heldStufe = null) {
     const fight = world.fights[id];
     const spec = stufe ? { ...fight.gegner, stufe } : fight.gegner;
     const group = world.enemyGroups[id];
@@ -2973,7 +3028,7 @@ const rules = (() => {
       let lp = group ? values.lp : Math.round(values.lp * (1 + 0.25 * size));
       let schaden = values.schaden;
       if (anpassung && index === 0) lp = Math.max(1, Math.round(lp * anpassung.lp));
-      if (!fight.system && index === 0 && spec.rang === "anfuehrer" && spec.stufe >= anfuehrerDeckel.abStufe) schaden = Math.min(schaden, spec.stufe);
+      if (!fight.system && index === 0 && spec.rang === "anfuehrer") schaden = Math.min(schaden, anfuehrerDeckel(heldStufe ?? spec.stufe));
       const geschwaecht = allein && index >= solo.maxGegner;
       if (geschwaecht) {
         lp = Math.max(1, Math.round(lp * solo.mitlaeuferLp));
@@ -2989,11 +3044,16 @@ const rules = (() => {
     const max = kraft(state);
     const combat = {
       id, round: 0, stunned: false, bleeding: 0, supportUsed: [],
-      feinde: lineup(id, state.party.length, stufe), diener: [],
+      feinde: lineup(id, state.party.length, stufe, level(state)), diener: [],
       held: { ausdauer: max.ausdauer, mana: max.mana, schild: 0, schildRunden: 0, unsichtbar: 0, naechster: 0,
         staerkung: null, hot: null, todesschutz: null, abklingen: {}, genutzt: [], mine: false, bekehren: 0 },
     };
     state.combat = combat;
+    // Patch 2.5.5: Pyromant und Kleriker der Flamme allein beginnen mit einem Glutschild von 25 % ihrer LP.
+    if (magierSchutz(state)) {
+      combat.held.schild = Math.round(healthLimit(state) * magierSchutzWerte.schild);
+      combat.held.magierSchutz = true;
+    }
     // Wer das höhere Geschick hat, handelt zuerst.
     const fastest = Math.max(...combat.feinde.map((foe) => foe.geschick));
     if (opening && fastest > heroAttributes(state).agility) {
@@ -3238,7 +3298,8 @@ const rules = (() => {
     state.ressource = (state.ressource ?? 0) - resourceCost;
     if (ability.einmal) held.genutzt.push(ability.id);
     if (ability.abklingzeitWert) held.abklingen[ability.id] = ability.abklingzeitWert + 1;
-    const factor = (ability.spezialisiert ? 1 + kampf.spezVerstaerkung : 1) * (boosted ? 1 + kampf.ressourceVerstaerkung : 1);
+    const factor = (ability.spezialisiert ? 1 + kampf.spezVerstaerkung : 1) * (boosted ? 1 + kampf.ressourceVerstaerkung : 1) *
+      (1 + aufstieg.rangBonus * ((ability.rang ?? 1) - 1));
     const invisibleBefore = held.unsichtbar > 0;
     const skill = combatSkill(state, ability.zahlung);
     const bonus = skillValue(state, skill) + (ability.zahlung === "M" ? gearBonus(state, "magic") + reliktWert(state, "partyMagicPower") : 0);
@@ -3533,6 +3594,7 @@ const rules = (() => {
     let lost = 0;
     let sparedByStealth = false;
     let dodged = 0;
+    let treffer = 0;
     let bleedingNow = turn.bleeding > 0 ? 1 : 0;
     turn.bleeding = Math.max(0, (turn.bleeding ?? 0) - 1);
     for (const [index, foe] of turn.feinde.entries()) {
@@ -3610,6 +3672,7 @@ const rules = (() => {
             }
             if (heroTarget) {
               if (index === 0 && action === 0) { heroHit = true; heroGuarded = guarding; }
+              if (hit > 0 && magierSchutz(state) && treffer++ > 0) hit = Math.round(hit * magierSchutzWerte.weitererTreffer);
               const absorbed = Math.min(held.schild, hit);
               held.schild -= absorbed; hit -= absorbed;
               if (hit >= state.health && held.todesschutz) {
@@ -3850,7 +3913,7 @@ const rules = (() => {
   }
 
   return { awardXp, abilities, abilityState: (state, id) => state.combat ? abilityState(state, id).reason : "nur im Kampf", kampfwerte, kraft,
-    gegnerAufstellung: lineup,
+    gegnerAufstellung: lineup, faehigkeitSteigern, faehigkeitGrund, faehigkeitInfo, grundwertGrenze,
     level, resourceName, combatSkill, create, read, setRelikt, reliktGrund, reliktStand, preis, choices, unequip, wegwerfen, wegwerfGrund, equipmentSlots, slotKinds, targetSlot, gearStats, equipPreview, gearBonus, bagSlots, category, slotsUsed, fits, storageSite, storageOpen, canStore, canRetrieve,
     store, retrieve, isQuestItem: id => questItems.has(id), bagLimit, bagUpgrade, upgradeBag, belt, setBelt, quickUse, beltSize,
     stackLimit, itemCap, hire, hireCost, compatible, memberLevel, setTravelDice, canEvade, travelEncounter, choose, route, retrain, specialize, ascend, weapon, equip, use, canUse, strike,

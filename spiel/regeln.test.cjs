@@ -584,7 +584,7 @@ assert.equal(rules.choose(rewarded, "reward-cloak"), rewarded);
 const apprentice = { ...yard, xp: 100, training: {}, stufenpunkte: 1 };
 assert.equal(rules.progression(apprentice).level, 2);
 assert.equal(rules.progression({ ...apprentice, xp: 99 }).level, 1);
-assert.equal(rules.progression(apprentice).points, 1);
+assert.equal(rules.progression(apprentice).points, 2 + 1, "Patch 2.5.5: 2 Punkte je Stufe plus 1 alter Punkt");
 const trained = rules.train(apprentice, "strength");
 assert.equal(reload(trained).training.strength, 1);
 // LP hängen jetzt an Rolle und Erfahrungsstufe, nicht mehr an Stärke.
@@ -596,9 +596,11 @@ const strongest = { ...apprentice, faction: "kronreich", origin: rules.create("T
 assert.equal(rules.heroAttributes(strongest).strength, 18);
 const peak = rules.train(rules.train(strongest, "strength"), "strength");
 assert.equal(rules.heroAttributes(peak).strength, 20);
-assert.equal(rules.progression(peak).points, 1);
+assert.equal(rules.progression(peak).points, rules.progression(strongest).points - 2);
 assert.equal(rules.train(peak, "strength"), peak);
-assert.equal(rules.train(trained, "will"), trained);
+const ohnePunkte = { ...trained, xp: 0, stufenpunkte: 0 };
+assert.equal(rules.progression(ohnePunkte).points, 0);
+assert.equal(rules.train(ohnePunkte, "will"), ohnePunkte);
 assert.equal(rules.train({ ...apprentice, combat: bugs.combat }, "will").training.will, undefined);
 const vendor = rules.choose({ ...yard, silver: 25, inventory: [...yard.inventory, "keilerhauer"] }, "supply-post");
 const purchased = rules.trade(vendor, "eisenkeil", true);
@@ -1582,7 +1584,7 @@ console.log("Weltebene (Knotennetz, Weltleisten, Vorrat, Seewege, Pässe, Stolle
 {
   const ready = { ...hero(), stufenpunkte: 2 };
   const plan = rules.entwurf(ready, { training: { strength: 1, will: 1 } });
-  assert.equal(plan.stufenpunkte, 0);
+  assert.equal(rules.progression(plan).points, 0, "Patch 2.5.5: alle Punkte verteilt");
   same(plan.training, { strength: 1, will: 1 });
   assert.equal(rules.entwurf(ready, { training: { strength: 3 } }), ready, "Zu viele Punkte: nichts wird gespeichert");
   // Menschen spezialisieren sich ab Erfahrungsstufe 10 (Patch 2.0.0 Punkt 9), Quest-Stufe 3 reicht nicht mehr.
@@ -1945,10 +1947,10 @@ console.log("Aufträge am Aushang, Wegaufträge, Wegrabatt, Trophäen, Begleiter
   assert.equal(rules.progression(imOrt("kronreich", "kronhall", { xp: 57250 })).level, 30);
   assert.equal(rules.progression(imOrt("kronreich", "kronhall", { xp: 19000 })).level, 20);
   assert.equal(rules.progression(imOrt("kronreich", "kronhall", { xp: 21250 })).level, 21);
-  // Meister-Talente ab Stufe 22: Schildwall +10 % LP je Rang.
+  // Meister-Talente: Patch 2.5.5 ein Punkt je Stufe 21–30. Schildwall +10 % LP je Rang.
   let meister = imOrt("kronreich", "kronhall", { xp: 57250 });
   meister.health = rules.healthLimit(meister);
-  assert.equal(rules.aufstiegInfo(meister).talentPunkte, 5);
+  assert.equal(rules.aufstiegInfo(meister).talentPunkte, 10);
   const lp = rules.healthLimit(meister);
   meister = reload(rules.talentLernen(meister, "MT_EISENWALL"));
   assert.equal(meister.talente.MT_EISENWALL, 1);

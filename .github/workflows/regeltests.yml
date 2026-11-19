@@ -47,3 +47,4 @@ jobs:
           node --test spiel/systeme.test.cjs
           node --test spiel/npcs.test.cjs
           node --test spiel/patch254.test.cjs
+          node --test spiel/patch255.test.cjs

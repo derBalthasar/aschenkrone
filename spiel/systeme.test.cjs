@@ -18,8 +18,10 @@ assert.equal(S.epFuer(30), 57250);
 assert.equal(S.stufeAus(57249), 29);
 assert.equal(S.stufeAus(57250), 30);
 assert.equal(S.ahnenPunkte(57250 + 9999), 1);
-assert.equal(S.talentPunkte(21), 0);
-assert.equal(S.talentPunkte(30), 5);
+// Patch 2.5.5: ein Meister-Talentpunkt je Stufe von 21 bis 30.
+assert.equal(S.talentPunkte(20), 0);
+assert.equal(S.talentPunkte(21), 1);
+assert.equal(S.talentPunkte(30), 10);
 assert.equal(S.signaturRang(25), 4);
 
 // Schaden (Patch 2.2.0): Rüstung prozentual, mindestens 1, Durchdringung senkt die Rüstung.

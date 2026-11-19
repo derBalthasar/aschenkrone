@@ -296,7 +296,8 @@ assert.equal(upgraded.ressource, 42);
 same(upgraded.weltLeisten, { untote: 35, orks: 40, glut: 30, erzfieber: 45, welke: 30 });
 assert.ok(upgraded.health > 0 && upgraded.health <= rules.healthLimit(upgraded));
 const trained = rules.train(upgraded, "will");
-assert.equal(trained.stufenpunkte, 2);
+// Patch 2.5.5: Menschen verbrauchen Stufenpunkte nicht mehr; frei = 2 je Stufe + alte Punkte − trainierte Grundwerte.
+assert.equal(rules.progression(trained).points, rules.progression(upgraded).points - 1);
 assert.equal(reload(trained).training.will, 1);
 
 

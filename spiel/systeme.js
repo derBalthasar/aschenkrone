@@ -29,7 +29,9 @@ const systeme = (() => {
   };
   // Ahnenränge: ab Stufe 30 jede volle 5000 EP über der Schwelle.
   const ahnenPunkte = (ep) => Math.max(0, Math.floor((ep - epTabelle[maxStufe]) / D.aufstieg.ahnen.epJeRang));
-  const talentPunkte = (stufe) => D.aufstieg.talentStufen.filter((s) => stufe >= s).length;
+  // Patch 2.5.5: Jede Stufe von 21 bis 30 bringt einen Meister-Talentpunkt (10 Punkte, 5 Bäume mit je 3 Rängen).
+  const talentStufen = Array.from({ length: 10 }, (_, i) => 21 + i);
+  const talentPunkte = (stufe) => talentStufen.filter((s) => stufe >= s).length;
   const talentRang = (state, id) => state.talente?.[id] ?? 0;
   function talentGrund(state, id, stufe) {
     if (!D.aufstieg.talente.some((t) => t.id === id)) return "unbekanntes Talent";
@@ -632,7 +634,7 @@ const systeme = (() => {
 
   return {
     daten: D, MENSCHEN, ROHSTOFFE, rufSchluessel, istMensch,
-    maxStufe, epFuer, stufeAus, ahnenPunkte, talentPunkte, talentRang, talentGrund, talentLernen, ahnenGrund, ahnenLernen, signaturRang,
+    maxStufe, epFuer, stufeAus, ahnenPunkte, talentPunkte, talentStufen, talentRang, talentGrund, talentLernen, ahnenGrund, ahnenLernen, signaturRang,
     ruf, rufRang, rufAendern, geaechtet,
     moral, moralBonus, moralStufe, moralAendern,
     kontor, kontorAm, preisFaktor, rohstoffPreis, handelGrund, handeln, nahrungGrund, nahrungTragen, bezahlbar, bezahle, kostenText,

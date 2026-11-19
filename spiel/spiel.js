@@ -1827,7 +1827,8 @@
   const entwurfSumme = (record) => Object.values(record ?? {}).reduce((sum, value) => sum + value, 0);
   function entwurfQuellen() {
     const quellen = [];
-    if (state.stufenpunkte) quellen.push(["stufe", "Stufenpunkte"]);
+    // Patch 2.5.5: Menschen erhalten 2 Grundwertpunkte je Stufe; die Regeln zählen die freien Punkte.
+    if (rules.progression(state).points) quellen.push(["stufe", "Grundwertpunkte"]);
     if (!state.build.spez && rules.spezBereit(state)) quellen.push(["spez", "Spezialisierung"]);
     if (rules.meisterBereit(state)) quellen.push(["meister", "Meisterklasse"]);
     return quellen;
@@ -1867,10 +1868,10 @@
 
   function entwurfGrundwert(id, delta) {
     const { values } = entwurfStand();
-    if (delta > 0 && values[id] >= klassen.regeln.grundwertMax) return;
+    if (delta > 0 && values[id] >= rules.grundwertGrenze(state)) return;
     if (entwurf.quelle === "stufe") {
       const next = (entwurf.training[id] ?? 0) + delta;
-      if (next < 0 || (delta > 0 && entwurfSumme(entwurf.training) >= state.stufenpunkte)) return;
+      if (next < 0 || (delta > 0 && entwurfSumme(entwurf.training) >= rules.progression(state).points)) return;
       if (next) entwurf.training[id] = next; else delete entwurf.training[id];
     } else if (entwurf.quelle === "spez") {
       entwurf.spez ??= { variante: null, grundwert: null, fertigkeit: null };
@@ -1890,7 +1891,27 @@
     else if (entwurf[key].fertigkeit === id) entwurf[key].fertigkeit = null;
   }
 
+  // Patch 2.5.5: Fähigkeitsränge (1 Punkt je Stufe 2–20, Rang 2/3/4 ab Stufe 3/8/15) im Charakterfenster und im Stadt-Hub.
+  function faehigkeitsRaenge(panel, kopf, nachher = () => {}) {
+    const fi = rules.faehigkeitInfo(state);
+    if (!fi || !fi.liste.length) return;
+    kopf.textContent = "Fähigkeitsränge · freie Punkte " + fi.punkte;
+    panel.append(kopf);
+    const hinweis = element("p", "+12 % Schaden oder Heilung je Rang über 1, Rang 4 kostet 1 Ausdauer oder Mana weniger. Rang 2 ab Stufe " +
+      fi.rangStufen[2] + ", Rang 3 ab Stufe " + fi.rangStufen[3] + ", Rang 4 ab Stufe " + fi.rangStufen[4] + ". Ab Stufe 21 gehen die Punkte in Meister-Talente.");
+    hinweis.className = "sheet-note";
+    panel.append(hinweis);
+    const liste = element("div");
+    liste.className = "actions";
+    for (const f of fi.liste) {
+      button(liste, f.name + " · Rang " + f.rang + "/" + fi.rangMax + (f.bonus ? " · +" + f.bonus + " %" : "") + (f.grund ? " · " + f.grund : " · steigern"),
+        () => { update(rules.faehigkeitSteigern(state, f.id)); nachher(); }, { disabled: Boolean(f.grund) || Boolean(state.combat) });
+    }
+    panel.append(liste);
+  }
+
   function renderSheetAufstieg(panel) {
+    if (rules.faehigkeitInfo(state)) faehigkeitsRaenge(panel, element("h3"), () => renderSheet());
     const quellen = entwurfQuellen();
     if (!quellen.length) {
       const note = element("p", "Zurzeit ist nichts zu verteilen. Grundwertpunkte aus früheren Stufenaufstiegen, die Spezialisierung " +
@@ -1913,14 +1934,15 @@
     pick.setAttribute("role", "group");
     pick.setAttribute("aria-label", "Punkte verteilen aus");
     for (const [id, label] of quellen) {
-      const rest = id === "stufe" ? state.stufenpunkte - entwurfSumme(entwurf.training) :
+      const rest = id === "stufe" ? rules.progression(state).points - entwurfSumme(entwurf.training) :
         id === "spez" ? (entwurf.spez?.grundwert ? 0 : 1) + (entwurf.spez?.fertigkeit ? 0 : 1) :
         2 - entwurfSumme(entwurf.meister?.grundwerte) + (entwurf.meister?.fertigkeit ? 0 : 1);
       const control = button(pick, label + " · " + rest + " offen", () => { entwurf.quelle = id; rerender('[data-quelle="' + id + '"]'); });
       control.dataset.quelle = id;
       control.setAttribute("aria-pressed", String(entwurf.quelle === id));
     }
-    const intro = element("p", entwurf.quelle === "stufe" ? "Stufenpunkte erhöhen je einen Grundwert um 1 (höchstens 20)." :
+    const intro = element("p", entwurf.quelle === "stufe" ? "Jeder Punkt erhöht einen Grundwert sofort um 1 (höchstens " + rules.grundwertGrenze(state) +
+      "). Menschen erhalten 2 Punkte je Stufe und 1 je Ahnenrang." :
       entwurf.quelle === "spez" ? "Spezialisierung: Wähle A oder B. Sie bringt +1 Grundwert und +1 Fertigkeitspunkt." :
       "Meisterklasse " + klassen.meisterklassen[faction.volk].name + ": +2 Grundwerte und +1 Fertigkeitspunkt.");
     intro.className = "sheet-note";
@@ -2043,7 +2065,7 @@
     const panel = el("sheet-panel");
     panel.setAttribute("aria-labelledby", "sheet-tab-" + sheet.tab);
     panel.replaceChildren();
-    const offen = entwurfQuellen().length;
+    const offen = entwurfQuellen().length + (rules.faehigkeitInfo(state)?.liste.some((f) => !f.grund) ? 1 : 0);
     el("sheet-tab-aufstieg").textContent = "Aufstieg" + (offen ? " (" + offen + ")" : "");
     ({ stand: renderSheetStand, werte: renderSheetWerte, aufstieg: renderSheetAufstieg, effekte: renderSheetEffekte })[sheet.tab](panel);
   }
@@ -3632,6 +3654,8 @@
     panel.append(element("p", rules.title(state) + " · Erfahrungsstufe " + progress.level + " · " + progress.xp + " EP"));
     const open = [];
     if (progress.points) open.push(progress.points + " Grundwertpunkte");
+    const offeneRaenge = rules.faehigkeitInfo(state)?.punkte ?? 0;
+    if (offeneRaenge && rules.faehigkeitInfo(state).liste.some((f) => !f.grund)) open.push(offeneRaenge + " Fähigkeitspunkte");
     if (!state.build.spez && rules.spezBereit(state)) open.push("Spezialisierung");
     if (rules.meisterBereit(state)) open.push("Meisterklasse");
     panel.append(element("p", open.length ? "Offen: " + open.join(", ") + "." : "Zurzeit ist nichts zu verteilen."));
@@ -3639,8 +3663,10 @@
     // Menschen: Stufe 30, Signatur-Rang, Meister-Talente (Stufe 22–30) und Blut der Ahnen (je 5000 EP über Stufe 30).
     const auf = rules.aufstiegInfo(state);
     if (!auf) return;
+    // Patch 2.5.5: Fähigkeitsränge (1 Punkt je Stufe 2–20, Rang 2/3/4 ab Stufe 3/8/15).
+    faehigkeitsRaenge(panel, element("h4"));
     panel.append(element("p", "Stufe " + auf.stufe + " von " + auf.maxStufe + " · Signatur-Rang " + auf.signaturRang +
-      " · Meister-Talentpunkte frei: " + auf.talentPunkte + " (auf Stufe " + auf.talentStufen.join(", ") + ")."));
+      " · Meister-Talentpunkte frei: " + auf.talentPunkte + " (je einer auf Stufe 21 bis 30)."));
     if (auf.stufe >= auf.talentStufen[0] || Object.keys(state.talente ?? {}).length) {
       panel.append(element("h4", "Meister-Talente"));
       for (const t of auf.talente) {
