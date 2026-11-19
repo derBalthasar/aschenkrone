@@ -1285,6 +1285,7 @@
   const rkMarkenGroesse = 1.8;
   let rkMarken = [];
 
+  const svgNs = "http://www.w3.org/2000/svg";
   function svgElement(tag, attributes, parent) {
     const node = document.createElementNS(svgNs, tag);
     for (const [key, value] of Object.entries(attributes)) node.setAttribute(key, value);
@@ -2993,7 +2994,7 @@
 
   // Patch 2.6.7: Gesprächsaufbau der Menschen: Regieanweisung nach Rolle, Begrüßung nach Ruf, Kern des Gesprächs,
   // gelegentlicher Einwurf eines Gefährten, bis zu zwei Fragen zur Lage (schließen das Gespräch nicht) und die Antworten.
-  const dialogDaten = () => rules.systeme.daten.v260.ASCHENKRONE_V267_DYNAMIC_NPC_DIALOGUES;
+  const dialogDaten = () => rules.systeme.daten.v260.ASCHENKRONE_V267_DYNAMIC_NPC_DIALOGUES.dialogue_assembly_pipeline;
   const waehle = (liste, schluessel) => liste[[...String(schluessel)].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7) % liste.length];
   function npcRolle(person) {
     const t = (person.titel ?? "") + " " + (person.name ?? "");
