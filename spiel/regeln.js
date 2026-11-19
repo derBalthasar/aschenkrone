@@ -3482,6 +3482,12 @@ const rules = (() => {
   function finishIfWon(state, result) {
     const turn = state.combat;
     if (!turn || turn.feinde.some((foe) => foe.lp > 0)) return false;
+    // Fallen Held und letzter Gegner in derselben Gegnerphase (Vergeltung, Dornen), zählt es als Niederlage.
+    // Früher endete der Kampf als Sieg mit 0 LP, und der Spielstand ließ sich nicht mehr laden (Simulation 2.5.4).
+    if (!state.health) {
+      arrive(state, "defeat");
+      return true;
+    }
     if (result.deathBurst) {
       const damage = Math.min(state.health, result.deathBurst);
       state.health -= damage;
