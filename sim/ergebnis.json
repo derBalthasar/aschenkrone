@@ -1,0 +1,7318 @@
+{
+ "stand": "2026-11-19T12:23:41.073Z",
+ "kaempfe": 12,
+ "ergebnis": {
+  "BENCHMARK_A_UNSPENT": [
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "krieger",
+    "klasse": "Blutritter der Krone",
+    "stufe": 5,
+    "lp": 49,
+    "punkteOffen": 8,
+    "raengeOffen": 4,
+    "werte": "16/10/8/14/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 59
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 65
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 67
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 67
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "krieger",
+    "klasse": "Blutritter der Krone",
+    "stufe": 10,
+    "lp": 64,
+    "punkteOffen": 18,
+    "raengeOffen": 9,
+    "werte": "16/10/8/14/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 59
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 30
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 9
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 11
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "krieger",
+    "klasse": "Blutritter der Krone",
+    "stufe": 15,
+    "lp": 79,
+    "punkteOffen": 28,
+    "raengeOffen": 14,
+    "werte": "16/10/8/14/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 28
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 10
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "krieger",
+    "klasse": "Blutritter der Krone",
+    "stufe": 20,
+    "lp": 94,
+    "punkteOffen": 38,
+    "raengeOffen": 19,
+    "werte": "16/10/8/14/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 5
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "krieger",
+    "klasse": "Blutritter der Krone",
+    "stufe": 25,
+    "lp": 109,
+    "punkteOffen": 48,
+    "raengeOffen": 19,
+    "werte": "16/10/8/14/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "krieger",
+    "klasse": "Blutritter der Krone",
+    "stufe": 30,
+    "lp": 124,
+    "punkteOffen": 58,
+    "raengeOffen": 19,
+    "werte": "16/10/8/14/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "krieger",
+    "klasse": "Blutritter der Krone",
+    "stufe": "30+",
+    "lp": 124,
+    "punkteOffen": 60,
+    "raengeOffen": 19,
+    "werte": "16/10/8/14/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "waechter",
+    "klasse": "Eiserner Bastionär",
+    "stufe": 5,
+    "lp": 55,
+    "punkteOffen": 8,
+    "raengeOffen": 4,
+    "werte": "12/9/9/16/14",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 80
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 89
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 78
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 80
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "waechter",
+    "klasse": "Eiserner Bastionär",
+    "stufe": 10,
+    "lp": 70,
+    "punkteOffen": 18,
+    "raengeOffen": 9,
+    "werte": "12/9/9/16/14",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 66
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 74
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 56
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 44
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "waechter",
+    "klasse": "Eiserner Bastionär",
+    "stufe": 15,
+    "lp": 85,
+    "punkteOffen": 28,
+    "raengeOffen": 14,
+    "werte": "12/9/9/16/14",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 40
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 65
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 1
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 18
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "waechter",
+    "klasse": "Eiserner Bastionär",
+    "stufe": 20,
+    "lp": 100,
+    "punkteOffen": 38,
+    "raengeOffen": 19,
+    "werte": "12/9/9/16/14",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 22
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 38
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 7
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "waechter",
+    "klasse": "Eiserner Bastionär",
+    "stufe": 25,
+    "lp": 115,
+    "punkteOffen": 48,
+    "raengeOffen": 19,
+    "werte": "12/9/9/16/14",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 32
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "waechter",
+    "klasse": "Eiserner Bastionär",
+    "stufe": 30,
+    "lp": 130,
+    "punkteOffen": 58,
+    "raengeOffen": 19,
+    "werte": "12/9/9/16/14",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 11
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "waechter",
+    "klasse": "Eiserner Bastionär",
+    "stufe": "30+",
+    "lp": 130,
+    "punkteOffen": 60,
+    "raengeOffen": 19,
+    "werte": "12/9/9/16/14",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 11
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "spaeher",
+    "klasse": "Dämmerungsjäger",
+    "stufe": 5,
+    "lp": 38,
+    "punkteOffen": 8,
+    "raengeOffen": 4,
+    "werte": "11/16/11/10/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 79
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 84
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 71
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 68
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "spaeher",
+    "klasse": "Dämmerungsjäger",
+    "stufe": 10,
+    "lp": 48,
+    "punkteOffen": 18,
+    "raengeOffen": 9,
+    "werte": "11/16/11/10/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 48
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 50
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 63
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 25
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "spaeher",
+    "klasse": "Dämmerungsjäger",
+    "stufe": 15,
+    "lp": 58,
+    "punkteOffen": 28,
+    "raengeOffen": 14,
+    "werte": "11/16/11/10/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 24
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 31
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 2
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 17
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "spaeher",
+    "klasse": "Dämmerungsjäger",
+    "stufe": 20,
+    "lp": 68,
+    "punkteOffen": 38,
+    "raengeOffen": 19,
+    "werte": "11/16/11/10/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 4
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "spaeher",
+    "klasse": "Dämmerungsjäger",
+    "stufe": 25,
+    "lp": 78,
+    "punkteOffen": 48,
+    "raengeOffen": 19,
+    "werte": "11/16/11/10/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "spaeher",
+    "klasse": "Dämmerungsjäger",
+    "stufe": 30,
+    "lp": 88,
+    "punkteOffen": 58,
+    "raengeOffen": 19,
+    "werte": "11/16/11/10/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "spaeher",
+    "klasse": "Dämmerungsjäger",
+    "stufe": "30+",
+    "lp": 88,
+    "punkteOffen": 60,
+    "raengeOffen": 19,
+    "werte": "11/16/11/10/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "magier",
+    "klasse": "Runenskalde",
+    "stufe": 5,
+    "lp": 37,
+    "punkteOffen": 8,
+    "raengeOffen": 4,
+    "werte": "10/10/10/14/16",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 46
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 35
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 22
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 19
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "magier",
+    "klasse": "Runenskalde",
+    "stufe": 10,
+    "lp": 47,
+    "punkteOffen": 18,
+    "raengeOffen": 9,
+    "werte": "10/10/10/14/16",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 68
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 51
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 49
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 11
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "magier",
+    "klasse": "Runenskalde",
+    "stufe": 15,
+    "lp": 57,
+    "punkteOffen": 28,
+    "raengeOffen": 14,
+    "werte": "10/10/10/14/16",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 44
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 19
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 14
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 19
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "magier",
+    "klasse": "Runenskalde",
+    "stufe": 20,
+    "lp": 67,
+    "punkteOffen": 38,
+    "raengeOffen": 19,
+    "werte": "10/10/10/14/16",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 21
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "magier",
+    "klasse": "Runenskalde",
+    "stufe": 25,
+    "lp": 77,
+    "punkteOffen": 48,
+    "raengeOffen": 19,
+    "werte": "10/10/10/14/16",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 21
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "magier",
+    "klasse": "Runenskalde",
+    "stufe": 30,
+    "lp": 87,
+    "punkteOffen": 58,
+    "raengeOffen": 19,
+    "werte": "10/10/10/14/16",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "magier",
+    "klasse": "Runenskalde",
+    "stufe": "30+",
+    "lp": 87,
+    "punkteOffen": 60,
+    "raengeOffen": 19,
+    "werte": "10/10/10/14/16",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "heiler",
+    "klasse": "Wundmeister",
+    "stufe": 5,
+    "lp": 38,
+    "punkteOffen": 8,
+    "raengeOffen": 4,
+    "werte": "10/10/11/16/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 61
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 71
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 53
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 53
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "heiler",
+    "klasse": "Wundmeister",
+    "stufe": 10,
+    "lp": 48,
+    "punkteOffen": 18,
+    "raengeOffen": 9,
+    "werte": "10/10/11/16/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 96
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 67
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 100
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 83
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "heiler",
+    "klasse": "Wundmeister",
+    "stufe": 15,
+    "lp": 58,
+    "punkteOffen": 28,
+    "raengeOffen": 14,
+    "werte": "10/10/11/16/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 64
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 67
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 53
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 36
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "heiler",
+    "klasse": "Wundmeister",
+    "stufe": 20,
+    "lp": 68,
+    "punkteOffen": 38,
+    "raengeOffen": 19,
+    "werte": "10/10/11/16/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 100
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 79
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 1
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 9
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "heiler",
+    "klasse": "Wundmeister",
+    "stufe": 25,
+    "lp": 78,
+    "punkteOffen": 48,
+    "raengeOffen": 19,
+    "werte": "10/10/11/16/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 82
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 77
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 44
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 71
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "heiler",
+    "klasse": "Wundmeister",
+    "stufe": 30,
+    "lp": 88,
+    "punkteOffen": 58,
+    "raengeOffen": 19,
+    "werte": "10/10/11/16/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 75
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 63
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 1
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "heiler",
+    "klasse": "Wundmeister",
+    "stufe": "30+",
+    "lp": 88,
+    "punkteOffen": 60,
+    "raengeOffen": 19,
+    "werte": "10/10/11/16/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 75
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 63
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 1
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "schurke",
+    "klasse": "Nachtklinge",
+    "stufe": 5,
+    "lp": 35,
+    "punkteOffen": 8,
+    "raengeOffen": 4,
+    "werte": "13/16/9/9/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 77
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 69
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 71
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 71
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "schurke",
+    "klasse": "Nachtklinge",
+    "stufe": 10,
+    "lp": 45,
+    "punkteOffen": 18,
+    "raengeOffen": 9,
+    "werte": "13/16/9/9/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 38
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 33
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 29
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 29
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "schurke",
+    "klasse": "Nachtklinge",
+    "stufe": 15,
+    "lp": 55,
+    "punkteOffen": 28,
+    "raengeOffen": 14,
+    "werte": "13/16/9/9/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 13
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "schurke",
+    "klasse": "Nachtklinge",
+    "stufe": 20,
+    "lp": 65,
+    "punkteOffen": 38,
+    "raengeOffen": 19,
+    "werte": "13/16/9/9/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "schurke",
+    "klasse": "Nachtklinge",
+    "stufe": 25,
+    "lp": 75,
+    "punkteOffen": 48,
+    "raengeOffen": 19,
+    "werte": "13/16/9/9/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "schurke",
+    "klasse": "Nachtklinge",
+    "stufe": 30,
+    "lp": 85,
+    "punkteOffen": 58,
+    "raengeOffen": 19,
+    "werte": "13/16/9/9/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "kronreich",
+    "role": "schurke",
+    "klasse": "Nachtklinge",
+    "stufe": "30+",
+    "lp": 85,
+    "punkteOffen": 60,
+    "raengeOffen": 19,
+    "werte": "13/16/9/9/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "krieger",
+    "klasse": "Glutpaladin",
+    "stufe": 5,
+    "lp": 46,
+    "punkteOffen": 8,
+    "raengeOffen": 4,
+    "werte": "16/9/10/15/10",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 63
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 65
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 65
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "krieger",
+    "klasse": "Glutpaladin",
+    "stufe": 10,
+    "lp": 61,
+    "punkteOffen": 18,
+    "raengeOffen": 9,
+    "werte": "16/9/10/15/10",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 36
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 26
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 5
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 7
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "krieger",
+    "klasse": "Glutpaladin",
+    "stufe": 15,
+    "lp": 76,
+    "punkteOffen": 28,
+    "raengeOffen": 14,
+    "werte": "16/9/10/15/10",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 4
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 7
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "krieger",
+    "klasse": "Glutpaladin",
+    "stufe": 20,
+    "lp": 91,
+    "punkteOffen": 38,
+    "raengeOffen": 19,
+    "werte": "16/9/10/15/10",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "krieger",
+    "klasse": "Glutpaladin",
+    "stufe": 25,
+    "lp": 106,
+    "punkteOffen": 48,
+    "raengeOffen": 19,
+    "werte": "16/9/10/15/10",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "krieger",
+    "klasse": "Glutpaladin",
+    "stufe": 30,
+    "lp": 121,
+    "punkteOffen": 58,
+    "raengeOffen": 19,
+    "werte": "16/9/10/15/10",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "krieger",
+    "klasse": "Glutpaladin",
+    "stufe": "30+",
+    "lp": 121,
+    "punkteOffen": 60,
+    "raengeOffen": 19,
+    "werte": "16/9/10/15/10",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "waechter",
+    "klasse": "Eidwächter",
+    "stufe": 5,
+    "lp": 53,
+    "punkteOffen": 8,
+    "raengeOffen": 4,
+    "werte": "11/8/11/16/14",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 77
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 81
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 75
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 75
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "waechter",
+    "klasse": "Eidwächter",
+    "stufe": 10,
+    "lp": 68,
+    "punkteOffen": 18,
+    "raengeOffen": 9,
+    "werte": "11/8/11/16/14",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 53
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 62
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 69
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 62
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "waechter",
+    "klasse": "Eidwächter",
+    "stufe": 15,
+    "lp": 83,
+    "punkteOffen": 28,
+    "raengeOffen": 14,
+    "werte": "11/8/11/16/14",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 33
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 42
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 6
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "waechter",
+    "klasse": "Eidwächter",
+    "stufe": 20,
+    "lp": 98,
+    "punkteOffen": 38,
+    "raengeOffen": 19,
+    "werte": "11/8/11/16/14",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 7
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 20
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "waechter",
+    "klasse": "Eidwächter",
+    "stufe": 25,
+    "lp": 113,
+    "punkteOffen": 48,
+    "raengeOffen": 19,
+    "werte": "11/8/11/16/14",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 6
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "waechter",
+    "klasse": "Eidwächter",
+    "stufe": 30,
+    "lp": 128,
+    "punkteOffen": 58,
+    "raengeOffen": 19,
+    "werte": "11/8/11/16/14",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "waechter",
+    "klasse": "Eidwächter",
+    "stufe": "30+",
+    "lp": 128,
+    "punkteOffen": 60,
+    "raengeOffen": 19,
+    "werte": "11/8/11/16/14",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "spaeher",
+    "klasse": "Inquisitor",
+    "stufe": 5,
+    "lp": 37,
+    "punkteOffen": 8,
+    "raengeOffen": 4,
+    "werte": "10/16/12/12/10",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 68
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 70
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 73
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 73
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "spaeher",
+    "klasse": "Inquisitor",
+    "stufe": 10,
+    "lp": 47,
+    "punkteOffen": 18,
+    "raengeOffen": 9,
+    "werte": "10/16/12/12/10",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 66
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 53
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 28
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 28
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "spaeher",
+    "klasse": "Inquisitor",
+    "stufe": 15,
+    "lp": 57,
+    "punkteOffen": 28,
+    "raengeOffen": 14,
+    "werte": "10/16/12/12/10",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 42
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 16
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "spaeher",
+    "klasse": "Inquisitor",
+    "stufe": 20,
+    "lp": 67,
+    "punkteOffen": 38,
+    "raengeOffen": 19,
+    "werte": "10/16/12/12/10",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 16
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "spaeher",
+    "klasse": "Inquisitor",
+    "stufe": 25,
+    "lp": 77,
+    "punkteOffen": 48,
+    "raengeOffen": 19,
+    "werte": "10/16/12/12/10",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 5
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "spaeher",
+    "klasse": "Inquisitor",
+    "stufe": 30,
+    "lp": 87,
+    "punkteOffen": 58,
+    "raengeOffen": 19,
+    "werte": "10/16/12/12/10",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "spaeher",
+    "klasse": "Inquisitor",
+    "stufe": "30+",
+    "lp": 87,
+    "punkteOffen": 60,
+    "raengeOffen": 19,
+    "werte": "10/16/12/12/10",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "magier",
+    "klasse": "Pyromant",
+    "stufe": 5,
+    "lp": 34,
+    "punkteOffen": 8,
+    "raengeOffen": 4,
+    "werte": "9/9/16/16/10",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 94
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 76
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 85
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 85
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "magier",
+    "klasse": "Pyromant",
+    "stufe": 10,
+    "lp": 44,
+    "punkteOffen": 18,
+    "raengeOffen": 9,
+    "werte": "9/9/16/16/10",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 86
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 59
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 52
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 52
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "magier",
+    "klasse": "Pyromant",
+    "stufe": 15,
+    "lp": 54,
+    "punkteOffen": 28,
+    "raengeOffen": 14,
+    "werte": "9/9/16/16/10",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 57
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 30
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 11
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "magier",
+    "klasse": "Pyromant",
+    "stufe": 20,
+    "lp": 64,
+    "punkteOffen": 38,
+    "raengeOffen": 19,
+    "werte": "9/9/16/16/10",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 42
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "magier",
+    "klasse": "Pyromant",
+    "stufe": 25,
+    "lp": 74,
+    "punkteOffen": 48,
+    "raengeOffen": 19,
+    "werte": "9/9/16/16/10",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 42
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "magier",
+    "klasse": "Pyromant",
+    "stufe": 30,
+    "lp": 84,
+    "punkteOffen": 58,
+    "raengeOffen": 19,
+    "werte": "9/9/16/16/10",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 19
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "magier",
+    "klasse": "Pyromant",
+    "stufe": "30+",
+    "lp": 84,
+    "punkteOffen": 60,
+    "raengeOffen": 19,
+    "werte": "9/9/16/16/10",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 19
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "heiler",
+    "klasse": "Kleriker der Flamme",
+    "stufe": 5,
+    "lp": 38,
+    "punkteOffen": 8,
+    "raengeOffen": 4,
+    "werte": "9/9/16/14/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 97
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 92
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 97
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 97
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "heiler",
+    "klasse": "Kleriker der Flamme",
+    "stufe": 10,
+    "lp": 48,
+    "punkteOffen": 18,
+    "raengeOffen": 9,
+    "werte": "9/9/16/14/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 79
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 77
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 60
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 60
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "heiler",
+    "klasse": "Kleriker der Flamme",
+    "stufe": 15,
+    "lp": 58,
+    "punkteOffen": 28,
+    "raengeOffen": 14,
+    "werte": "9/9/16/14/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 71
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 48
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 17
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "heiler",
+    "klasse": "Kleriker der Flamme",
+    "stufe": 20,
+    "lp": 68,
+    "punkteOffen": 38,
+    "raengeOffen": 19,
+    "werte": "9/9/16/14/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 54
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 19
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "heiler",
+    "klasse": "Kleriker der Flamme",
+    "stufe": 25,
+    "lp": 78,
+    "punkteOffen": 48,
+    "raengeOffen": 19,
+    "werte": "9/9/16/14/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 9
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 9
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "heiler",
+    "klasse": "Kleriker der Flamme",
+    "stufe": 30,
+    "lp": 88,
+    "punkteOffen": 58,
+    "raengeOffen": 19,
+    "werte": "9/9/16/14/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 18
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "heiler",
+    "klasse": "Kleriker der Flamme",
+    "stufe": "30+",
+    "lp": 88,
+    "punkteOffen": 60,
+    "raengeOffen": 19,
+    "werte": "9/9/16/14/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 18
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "schurke",
+    "klasse": "Schatten-Vollstrecker",
+    "stufe": 5,
+    "lp": 35,
+    "punkteOffen": 8,
+    "raengeOffen": 4,
+    "werte": "11/16/11/11/11",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 54
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 71
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 71
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "schurke",
+    "klasse": "Schatten-Vollstrecker",
+    "stufe": 10,
+    "lp": 45,
+    "punkteOffen": 18,
+    "raengeOffen": 9,
+    "werte": "11/16/11/11/11",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 22
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 18
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 29
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 29
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "schurke",
+    "klasse": "Schatten-Vollstrecker",
+    "stufe": 15,
+    "lp": 55,
+    "punkteOffen": 28,
+    "raengeOffen": 14,
+    "werte": "11/16/11/11/11",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 13
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "schurke",
+    "klasse": "Schatten-Vollstrecker",
+    "stufe": 20,
+    "lp": 65,
+    "punkteOffen": 38,
+    "raengeOffen": 19,
+    "werte": "11/16/11/11/11",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "schurke",
+    "klasse": "Schatten-Vollstrecker",
+    "stufe": 25,
+    "lp": 75,
+    "punkteOffen": 48,
+    "raengeOffen": 19,
+    "werte": "11/16/11/11/11",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "schurke",
+    "klasse": "Schatten-Vollstrecker",
+    "stufe": 30,
+    "lp": 85,
+    "punkteOffen": 58,
+    "raengeOffen": 19,
+    "werte": "11/16/11/11/11",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "orden",
+    "role": "schurke",
+    "klasse": "Schatten-Vollstrecker",
+    "stufe": "30+",
+    "lp": 85,
+    "punkteOffen": 60,
+    "raengeOffen": 19,
+    "werte": "11/16/11/11/11",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "krieger",
+    "klasse": "Sturmkorsar",
+    "stufe": 5,
+    "lp": 46,
+    "punkteOffen": 8,
+    "raengeOffen": 4,
+    "werte": "16/11/9/12/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 57
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 74
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 83
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 61
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "krieger",
+    "klasse": "Sturmkorsar",
+    "stufe": 10,
+    "lp": 61,
+    "punkteOffen": 18,
+    "raengeOffen": 9,
+    "werte": "16/11/9/12/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 48
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 61
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 57
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 59
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "krieger",
+    "klasse": "Sturmkorsar",
+    "stufe": 15,
+    "lp": 76,
+    "punkteOffen": 28,
+    "raengeOffen": 14,
+    "werte": "16/11/9/12/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 26
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 42
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 20
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 32
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "krieger",
+    "klasse": "Sturmkorsar",
+    "stufe": 20,
+    "lp": 91,
+    "punkteOffen": 38,
+    "raengeOffen": 19,
+    "werte": "16/11/9/12/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 14
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 25
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 5
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "krieger",
+    "klasse": "Sturmkorsar",
+    "stufe": 25,
+    "lp": 106,
+    "punkteOffen": 48,
+    "raengeOffen": 19,
+    "werte": "16/11/9/12/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 2
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 13
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "krieger",
+    "klasse": "Sturmkorsar",
+    "stufe": 30,
+    "lp": 121,
+    "punkteOffen": 58,
+    "raengeOffen": 19,
+    "werte": "16/11/9/12/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 1
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "krieger",
+    "klasse": "Sturmkorsar",
+    "stufe": "30+",
+    "lp": 121,
+    "punkteOffen": 60,
+    "raengeOffen": 19,
+    "werte": "16/11/9/12/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 1
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "waechter",
+    "klasse": "Tiefenwächter",
+    "stufe": 5,
+    "lp": 53,
+    "punkteOffen": 8,
+    "raengeOffen": 4,
+    "werte": "11/10/10/16/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 77
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 77
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 68
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 66
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "waechter",
+    "klasse": "Tiefenwächter",
+    "stufe": 10,
+    "lp": 68,
+    "punkteOffen": 18,
+    "raengeOffen": 9,
+    "werte": "11/10/10/16/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 32
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 44
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 13
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 16
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "waechter",
+    "klasse": "Tiefenwächter",
+    "stufe": 15,
+    "lp": 83,
+    "punkteOffen": 28,
+    "raengeOffen": 14,
+    "werte": "11/10/10/16/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 13
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 13
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "waechter",
+    "klasse": "Tiefenwächter",
+    "stufe": 20,
+    "lp": 98,
+    "punkteOffen": 38,
+    "raengeOffen": 19,
+    "werte": "11/10/10/16/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "waechter",
+    "klasse": "Tiefenwächter",
+    "stufe": 25,
+    "lp": 113,
+    "punkteOffen": 48,
+    "raengeOffen": 19,
+    "werte": "11/10/10/16/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "waechter",
+    "klasse": "Tiefenwächter",
+    "stufe": 30,
+    "lp": 128,
+    "punkteOffen": 58,
+    "raengeOffen": 19,
+    "werte": "11/10/10/16/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "waechter",
+    "klasse": "Tiefenwächter",
+    "stufe": "30+",
+    "lp": 128,
+    "punkteOffen": 60,
+    "raengeOffen": 19,
+    "werte": "11/10/10/16/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "spaeher",
+    "klasse": "Schwarzschütze",
+    "stufe": 5,
+    "lp": 37,
+    "punkteOffen": 8,
+    "raengeOffen": 4,
+    "werte": "11/16/11/10/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 78
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 89
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 81
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 78
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "spaeher",
+    "klasse": "Schwarzschütze",
+    "stufe": 10,
+    "lp": 47,
+    "punkteOffen": 18,
+    "raengeOffen": 9,
+    "werte": "11/16/11/10/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 55
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 60
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 68
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 68
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "spaeher",
+    "klasse": "Schwarzschütze",
+    "stufe": 15,
+    "lp": 57,
+    "punkteOffen": 28,
+    "raengeOffen": 14,
+    "werte": "11/16/11/10/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 30
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 44
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 14
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 23
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "spaeher",
+    "klasse": "Schwarzschütze",
+    "stufe": 20,
+    "lp": 67,
+    "punkteOffen": 38,
+    "raengeOffen": 19,
+    "werte": "11/16/11/10/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 4
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 18
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "spaeher",
+    "klasse": "Schwarzschütze",
+    "stufe": 25,
+    "lp": 77,
+    "punkteOffen": 48,
+    "raengeOffen": 19,
+    "werte": "11/16/11/10/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 6
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "spaeher",
+    "klasse": "Schwarzschütze",
+    "stufe": 30,
+    "lp": 87,
+    "punkteOffen": 58,
+    "raengeOffen": 19,
+    "werte": "11/16/11/10/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "spaeher",
+    "klasse": "Schwarzschütze",
+    "stufe": "30+",
+    "lp": 87,
+    "punkteOffen": 60,
+    "raengeOffen": 19,
+    "werte": "11/16/11/10/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "magier",
+    "klasse": "Pulver-Alchemist",
+    "stufe": 5,
+    "lp": 35,
+    "punkteOffen": 8,
+    "raengeOffen": 4,
+    "werte": "9/16/12/11/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 89
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 71
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 69
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 66
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "magier",
+    "klasse": "Pulver-Alchemist",
+    "stufe": 10,
+    "lp": 45,
+    "punkteOffen": 18,
+    "raengeOffen": 9,
+    "werte": "9/16/12/11/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 69
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 64
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 60
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 60
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "magier",
+    "klasse": "Pulver-Alchemist",
+    "stufe": 15,
+    "lp": 55,
+    "punkteOffen": 28,
+    "raengeOffen": 14,
+    "werte": "9/16/12/11/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 55
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 27
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 13
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "magier",
+    "klasse": "Pulver-Alchemist",
+    "stufe": 20,
+    "lp": 65,
+    "punkteOffen": 38,
+    "raengeOffen": 19,
+    "werte": "9/16/12/11/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 48
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 3
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "magier",
+    "klasse": "Pulver-Alchemist",
+    "stufe": 25,
+    "lp": 75,
+    "punkteOffen": 48,
+    "raengeOffen": 19,
+    "werte": "9/16/12/11/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 28
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "magier",
+    "klasse": "Pulver-Alchemist",
+    "stufe": 30,
+    "lp": 85,
+    "punkteOffen": 58,
+    "raengeOffen": 19,
+    "werte": "9/16/12/11/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 9
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "magier",
+    "klasse": "Pulver-Alchemist",
+    "stufe": "30+",
+    "lp": 85,
+    "punkteOffen": 60,
+    "raengeOffen": 19,
+    "werte": "9/16/12/11/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 9
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "heiler",
+    "klasse": "Seuchenmedikus",
+    "stufe": 5,
+    "lp": 37,
+    "punkteOffen": 8,
+    "raengeOffen": 4,
+    "werte": "9/11/12/15/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 92
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 70
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 51
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 51
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "heiler",
+    "klasse": "Seuchenmedikus",
+    "stufe": 10,
+    "lp": 47,
+    "punkteOffen": 18,
+    "raengeOffen": 9,
+    "werte": "9/11/12/15/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 36
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 57
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 9
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 30
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "heiler",
+    "klasse": "Seuchenmedikus",
+    "stufe": 15,
+    "lp": 57,
+    "punkteOffen": 28,
+    "raengeOffen": 14,
+    "werte": "9/11/12/15/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 9
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 2
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "heiler",
+    "klasse": "Seuchenmedikus",
+    "stufe": 20,
+    "lp": 67,
+    "punkteOffen": 38,
+    "raengeOffen": 19,
+    "werte": "9/11/12/15/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "heiler",
+    "klasse": "Seuchenmedikus",
+    "stufe": 25,
+    "lp": 77,
+    "punkteOffen": 48,
+    "raengeOffen": 19,
+    "werte": "9/11/12/15/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "heiler",
+    "klasse": "Seuchenmedikus",
+    "stufe": 30,
+    "lp": 87,
+    "punkteOffen": 58,
+    "raengeOffen": 19,
+    "werte": "9/11/12/15/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "heiler",
+    "klasse": "Seuchenmedikus",
+    "stufe": "30+",
+    "lp": 87,
+    "punkteOffen": 60,
+    "raengeOffen": 19,
+    "werte": "9/11/12/15/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "schurke",
+    "klasse": "Schattenfreibeuter",
+    "stufe": 5,
+    "lp": 35,
+    "punkteOffen": 8,
+    "raengeOffen": 4,
+    "werte": "13/16/10/8/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 77
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 69
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 71
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 71
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "schurke",
+    "klasse": "Schattenfreibeuter",
+    "stufe": 10,
+    "lp": 45,
+    "punkteOffen": 18,
+    "raengeOffen": 9,
+    "werte": "13/16/10/8/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 38
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 18
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 20
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 24
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "schurke",
+    "klasse": "Schattenfreibeuter",
+    "stufe": 15,
+    "lp": 55,
+    "punkteOffen": 28,
+    "raengeOffen": 14,
+    "werte": "13/16/10/8/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 13
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "schurke",
+    "klasse": "Schattenfreibeuter",
+    "stufe": 20,
+    "lp": 65,
+    "punkteOffen": 38,
+    "raengeOffen": 19,
+    "werte": "13/16/10/8/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "schurke",
+    "klasse": "Schattenfreibeuter",
+    "stufe": 25,
+    "lp": 75,
+    "punkteOffen": 48,
+    "raengeOffen": 19,
+    "werte": "13/16/10/8/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "schurke",
+    "klasse": "Schattenfreibeuter",
+    "stufe": 30,
+    "lp": 85,
+    "punkteOffen": 58,
+    "raengeOffen": 19,
+    "werte": "13/16/10/8/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_A_UNSPENT",
+    "faction": "haefen",
+    "role": "schurke",
+    "klasse": "Schattenfreibeuter",
+    "stufe": "30+",
+    "lp": 85,
+    "punkteOffen": 60,
+    "raengeOffen": 19,
+    "werte": "13/16/10/8/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   }
+  ],
+  "BENCHMARK_B_OPTIMAL_SPEND": [
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "krieger",
+    "klasse": "Blutritter der Krone",
+    "stufe": 5,
+    "lp": 49,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "20/10/8/18/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 67
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 65
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 67
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 67
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "krieger",
+    "klasse": "Blutritter der Krone",
+    "stufe": 10,
+    "lp": 64,
+    "punkteOffen": 0,
+    "raengeOffen": 1,
+    "werte": "20/10/8/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 59
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 41
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 36
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 36
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "krieger",
+    "klasse": "Blutritter der Krone",
+    "stufe": 15,
+    "lp": 79,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "20/20/8/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 43
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 43
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 6
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 11
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "krieger",
+    "klasse": "Blutritter der Krone",
+    "stufe": 20,
+    "lp": 94,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "20/20/18/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 35
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 15
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "krieger",
+    "klasse": "Blutritter der Krone",
+    "stufe": 25,
+    "lp": 109,
+    "punkteOffen": 8,
+    "raengeOffen": 7,
+    "werte": "20/20/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 33
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 1
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "krieger",
+    "klasse": "Blutritter der Krone",
+    "stufe": 30,
+    "lp": 161,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/25/18/25/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 40
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 25
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "krieger",
+    "klasse": "Blutritter der Krone",
+    "stufe": "30+",
+    "lp": 161,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/25/20/25/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 55
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 33
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "waechter",
+    "klasse": "Eiserner Bastionär",
+    "stufe": 5,
+    "lp": 55,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "12/9/9/20/18",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 80
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 85
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 80
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 80
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "waechter",
+    "klasse": "Eiserner Bastionär",
+    "stufe": 10,
+    "lp": 70,
+    "punkteOffen": 0,
+    "raengeOffen": 1,
+    "werte": "20/9/9/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 76
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 83
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 60
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 63
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "waechter",
+    "klasse": "Eiserner Bastionär",
+    "stufe": 15,
+    "lp": 85,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "20/19/9/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 69
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 82
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 35
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 47
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "waechter",
+    "klasse": "Eiserner Bastionär",
+    "stufe": 20,
+    "lp": 100,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "20/20/18/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 44
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 64
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 23
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 28
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "waechter",
+    "klasse": "Eiserner Bastionär",
+    "stufe": 25,
+    "lp": 115,
+    "punkteOffen": 8,
+    "raengeOffen": 7,
+    "werte": "20/20/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 37
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 63
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 12
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 43
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "waechter",
+    "klasse": "Eiserner Bastionär",
+    "stufe": 30,
+    "lp": 169,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/25/18/25/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 55
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 71
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 18
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 48
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "waechter",
+    "klasse": "Eiserner Bastionär",
+    "stufe": "30+",
+    "lp": 169,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/25/20/25/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 56
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 75
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 18
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 48
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "spaeher",
+    "klasse": "Dämmerungsjäger",
+    "stufe": 5,
+    "lp": 38,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "11/20/11/10/16",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 79
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 84
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 100
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 100
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "spaeher",
+    "klasse": "Dämmerungsjäger",
+    "stufe": 10,
+    "lp": 48,
+    "punkteOffen": 0,
+    "raengeOffen": 1,
+    "werte": "17/20/11/10/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 63
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 67
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 63
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 63
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "spaeher",
+    "klasse": "Dämmerungsjäger",
+    "stufe": 15,
+    "lp": 58,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "20/20/18/10/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 50
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 31
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 3
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 17
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "spaeher",
+    "klasse": "Dämmerungsjäger",
+    "stufe": 20,
+    "lp": 68,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "20/20/20/18/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 9
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 4
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "spaeher",
+    "klasse": "Dämmerungsjäger",
+    "stufe": 25,
+    "lp": 78,
+    "punkteOffen": 8,
+    "raengeOffen": 7,
+    "werte": "20/20/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 5
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 28
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "spaeher",
+    "klasse": "Dämmerungsjäger",
+    "stufe": 30,
+    "lp": 114,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/25/25/18/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 12
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 39
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 18
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "spaeher",
+    "klasse": "Dämmerungsjäger",
+    "stufe": "30+",
+    "lp": 114,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/25/25/20/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 35
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 39
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 18
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "magier",
+    "klasse": "Runenskalde",
+    "stufe": 5,
+    "lp": 37,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "10/10/10/18/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 46
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 35
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 22
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 19
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "magier",
+    "klasse": "Runenskalde",
+    "stufe": 10,
+    "lp": 47,
+    "punkteOffen": 0,
+    "raengeOffen": 1,
+    "werte": "18/10/10/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 79
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 51
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 49
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 49
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "magier",
+    "klasse": "Runenskalde",
+    "stufe": 15,
+    "lp": 57,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "20/18/10/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 86
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 33
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 5
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 12
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "magier",
+    "klasse": "Runenskalde",
+    "stufe": 20,
+    "lp": 67,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "20/20/18/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 51
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 25
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 7
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "magier",
+    "klasse": "Runenskalde",
+    "stufe": 25,
+    "lp": 77,
+    "punkteOffen": 8,
+    "raengeOffen": 7,
+    "werte": "20/20/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 49
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 27
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 4
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "magier",
+    "klasse": "Runenskalde",
+    "stufe": 30,
+    "lp": 113,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/25/18/25/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 53
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 38
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "magier",
+    "klasse": "Runenskalde",
+    "stufe": "30+",
+    "lp": 113,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/25/20/25/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 53
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 50
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 20
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 34
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "heiler",
+    "klasse": "Wundmeister",
+    "stufe": 5,
+    "lp": 38,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "10/10/11/20/17",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 66
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 71
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 53
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 53
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "heiler",
+    "klasse": "Wundmeister",
+    "stufe": 10,
+    "lp": 48,
+    "punkteOffen": 0,
+    "raengeOffen": 1,
+    "werte": "10/10/18/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 100
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 67
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 77
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 79
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "heiler",
+    "klasse": "Wundmeister",
+    "stufe": 15,
+    "lp": 58,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "18/10/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 86
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 97
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 66
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 36
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "heiler",
+    "klasse": "Wundmeister",
+    "stufe": 20,
+    "lp": 68,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "20/18/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 84
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 63
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 75
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 75
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "heiler",
+    "klasse": "Wundmeister",
+    "stufe": 25,
+    "lp": 78,
+    "punkteOffen": 8,
+    "raengeOffen": 7,
+    "werte": "20/20/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 83
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 58
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 73
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 73
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "heiler",
+    "klasse": "Wundmeister",
+    "stufe": 30,
+    "lp": 114,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/18/25/25/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 77
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 88
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 79
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 54
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "heiler",
+    "klasse": "Wundmeister",
+    "stufe": "30+",
+    "lp": 114,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/20/25/25/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 86
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 88
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 81
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 71
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "schurke",
+    "klasse": "Nachtklinge",
+    "stufe": 5,
+    "lp": 35,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "17/20/9/9/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 77
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 69
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 71
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 71
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "schurke",
+    "klasse": "Nachtklinge",
+    "stufe": 10,
+    "lp": 45,
+    "punkteOffen": 0,
+    "raengeOffen": 1,
+    "werte": "20/20/9/9/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 38
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 33
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 29
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 29
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "schurke",
+    "klasse": "Nachtklinge",
+    "stufe": 15,
+    "lp": 55,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "20/20/19/9/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 27
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 15
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 13
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "schurke",
+    "klasse": "Nachtklinge",
+    "stufe": 20,
+    "lp": 65,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "20/20/20/18/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "schurke",
+    "klasse": "Nachtklinge",
+    "stufe": 25,
+    "lp": 75,
+    "punkteOffen": 8,
+    "raengeOffen": 7,
+    "werte": "20/20/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "schurke",
+    "klasse": "Nachtklinge",
+    "stufe": 30,
+    "lp": 111,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/25/25/18/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 29
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 12
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "kronreich",
+    "role": "schurke",
+    "klasse": "Nachtklinge",
+    "stufe": "30+",
+    "lp": 111,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/25/25/20/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 29
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 12
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "krieger",
+    "klasse": "Glutpaladin",
+    "stufe": 5,
+    "lp": 46,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "20/9/10/19/10",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 63
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 65
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 65
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "krieger",
+    "klasse": "Glutpaladin",
+    "stufe": 10,
+    "lp": 61,
+    "punkteOffen": 0,
+    "raengeOffen": 1,
+    "werte": "20/9/19/20/10",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 36
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 26
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 5
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 7
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "krieger",
+    "klasse": "Glutpaladin",
+    "stufe": 15,
+    "lp": 76,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "20/9/20/20/19",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 25
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 18
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "krieger",
+    "klasse": "Glutpaladin",
+    "stufe": 20,
+    "lp": 91,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "20/18/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 11
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "krieger",
+    "klasse": "Glutpaladin",
+    "stufe": 25,
+    "lp": 106,
+    "punkteOffen": 8,
+    "raengeOffen": 7,
+    "werte": "20/20/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 8
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "krieger",
+    "klasse": "Glutpaladin",
+    "stufe": 30,
+    "lp": 157,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/18/25/25/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 38
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 23
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "krieger",
+    "klasse": "Glutpaladin",
+    "stufe": "30+",
+    "lp": 157,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/20/25/25/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 38
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 23
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "waechter",
+    "klasse": "Eidwächter",
+    "stufe": 5,
+    "lp": 53,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "11/8/11/20/18",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 75
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 81
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 75
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 75
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "waechter",
+    "klasse": "Eidwächter",
+    "stufe": 10,
+    "lp": 68,
+    "punkteOffen": 0,
+    "raengeOffen": 1,
+    "werte": "19/8/11/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 57
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 74
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 54
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 56
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "waechter",
+    "klasse": "Eidwächter",
+    "stufe": 15,
+    "lp": 83,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "20/8/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 55
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 63
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 19
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 31
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "waechter",
+    "klasse": "Eidwächter",
+    "stufe": 20,
+    "lp": 98,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "20/18/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 29
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 57
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 14
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "waechter",
+    "klasse": "Eidwächter",
+    "stufe": 25,
+    "lp": 113,
+    "punkteOffen": 8,
+    "raengeOffen": 7,
+    "werte": "20/20/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 31
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 52
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 12
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "waechter",
+    "klasse": "Eidwächter",
+    "stufe": 30,
+    "lp": 166,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/18/25/25/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 47
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 62
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 9
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 28
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "waechter",
+    "klasse": "Eidwächter",
+    "stufe": "30+",
+    "lp": 166,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/20/25/25/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 47
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 62
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 10
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 42
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "spaeher",
+    "klasse": "Inquisitor",
+    "stufe": 5,
+    "lp": 37,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "10/20/16/12/10",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 68
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 70
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 73
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 73
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "spaeher",
+    "klasse": "Inquisitor",
+    "stufe": 10,
+    "lp": 47,
+    "punkteOffen": 0,
+    "raengeOffen": 1,
+    "werte": "10/20/20/18/10",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 70
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 53
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 28
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 28
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "spaeher",
+    "klasse": "Inquisitor",
+    "stufe": 15,
+    "lp": 57,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "18/20/20/20/10",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 56
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 35
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 4
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 12
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "spaeher",
+    "klasse": "Inquisitor",
+    "stufe": 20,
+    "lp": 67,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "20/20/20/20/18",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 33
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 6
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "spaeher",
+    "klasse": "Inquisitor",
+    "stufe": 25,
+    "lp": 77,
+    "punkteOffen": 8,
+    "raengeOffen": 7,
+    "werte": "20/20/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 31
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 9
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "spaeher",
+    "klasse": "Inquisitor",
+    "stufe": 30,
+    "lp": 113,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/25/25/25/18",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 42
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 26
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "spaeher",
+    "klasse": "Inquisitor",
+    "stufe": "30+",
+    "lp": 113,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/25/25/25/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 42
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 26
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "magier",
+    "klasse": "Pyromant",
+    "stufe": 5,
+    "lp": 34,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "9/9/20/20/10",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 94
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 76
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 85
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 85
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "magier",
+    "klasse": "Pyromant",
+    "stufe": 10,
+    "lp": 44,
+    "punkteOffen": 0,
+    "raengeOffen": 1,
+    "werte": "9/9/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 100
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 59
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 52
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 52
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "magier",
+    "klasse": "Pyromant",
+    "stufe": 15,
+    "lp": 54,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "19/9/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 91
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 43
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 2
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 11
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "magier",
+    "klasse": "Pyromant",
+    "stufe": 20,
+    "lp": 64,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "20/18/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 61
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 9
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 22
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "magier",
+    "klasse": "Pyromant",
+    "stufe": 25,
+    "lp": 74,
+    "punkteOffen": 8,
+    "raengeOffen": 7,
+    "werte": "20/20/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 59
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 12
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 23
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "magier",
+    "klasse": "Pyromant",
+    "stufe": 30,
+    "lp": 109,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/18/25/25/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 80
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 35
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 2
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 39
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "magier",
+    "klasse": "Pyromant",
+    "stufe": "30+",
+    "lp": 109,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/20/25/25/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 80
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 35
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 30
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 39
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "heiler",
+    "klasse": "Kleriker der Flamme",
+    "stufe": 5,
+    "lp": 38,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "9/9/20/18/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 100
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 92
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 97
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 97
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "heiler",
+    "klasse": "Kleriker der Flamme",
+    "stufe": 10,
+    "lp": 48,
+    "punkteOffen": 0,
+    "raengeOffen": 1,
+    "werte": "9/9/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 79
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 71
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 92
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 60
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "heiler",
+    "klasse": "Kleriker der Flamme",
+    "stufe": 15,
+    "lp": 58,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "19/9/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 66
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 78
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 34
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 47
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "heiler",
+    "klasse": "Kleriker der Flamme",
+    "stufe": 20,
+    "lp": 68,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "20/18/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 59
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 41
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 6
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "heiler",
+    "klasse": "Kleriker der Flamme",
+    "stufe": 25,
+    "lp": 78,
+    "punkteOffen": 8,
+    "raengeOffen": 7,
+    "werte": "20/20/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 55
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 41
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "heiler",
+    "klasse": "Kleriker der Flamme",
+    "stufe": 30,
+    "lp": 114,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/18/25/25/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 77
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 61
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 15
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "heiler",
+    "klasse": "Kleriker der Flamme",
+    "stufe": "30+",
+    "lp": 114,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/20/25/25/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 77
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 55
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 15
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "schurke",
+    "klasse": "Schatten-Vollstrecker",
+    "stufe": 5,
+    "lp": 35,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "15/20/11/11/11",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 54
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 71
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 71
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "schurke",
+    "klasse": "Schatten-Vollstrecker",
+    "stufe": 10,
+    "lp": 45,
+    "punkteOffen": 0,
+    "raengeOffen": 1,
+    "werte": "20/20/16/11/11",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 53
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 33
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 29
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 29
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "schurke",
+    "klasse": "Schatten-Vollstrecker",
+    "stufe": 15,
+    "lp": 55,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "20/20/20/17/11",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 27
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 15
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "schurke",
+    "klasse": "Schatten-Vollstrecker",
+    "stufe": 20,
+    "lp": 65,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "20/20/20/20/18",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "schurke",
+    "klasse": "Schatten-Vollstrecker",
+    "stufe": 25,
+    "lp": 75,
+    "punkteOffen": 8,
+    "raengeOffen": 7,
+    "werte": "20/20/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "schurke",
+    "klasse": "Schatten-Vollstrecker",
+    "stufe": 30,
+    "lp": 111,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/25/25/25/18",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 30
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 12
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "orden",
+    "role": "schurke",
+    "klasse": "Schatten-Vollstrecker",
+    "stufe": "30+",
+    "lp": 111,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/25/25/25/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 29
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 12
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "krieger",
+    "klasse": "Sturmkorsar",
+    "stufe": 5,
+    "lp": 46,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "20/11/9/16/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 65
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 72
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 83
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 83
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "krieger",
+    "klasse": "Sturmkorsar",
+    "stufe": 10,
+    "lp": 61,
+    "punkteOffen": 0,
+    "raengeOffen": 1,
+    "werte": "20/11/9/20/18",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 57
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 64
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 57
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 59
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "krieger",
+    "klasse": "Sturmkorsar",
+    "stufe": 15,
+    "lp": 76,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "20/19/9/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 58
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 64
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 32
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 42
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "krieger",
+    "klasse": "Sturmkorsar",
+    "stufe": 20,
+    "lp": 91,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "20/20/18/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 34
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 47
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 24
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 43
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "krieger",
+    "klasse": "Sturmkorsar",
+    "stufe": 25,
+    "lp": 106,
+    "punkteOffen": 8,
+    "raengeOffen": 7,
+    "werte": "20/20/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 32
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 47
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 20
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 43
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "krieger",
+    "klasse": "Sturmkorsar",
+    "stufe": 30,
+    "lp": 157,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/25/18/25/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 54
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 55
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 17
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 43
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "krieger",
+    "klasse": "Sturmkorsar",
+    "stufe": "30+",
+    "lp": 157,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/25/20/25/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 54
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 64
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 17
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 43
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "waechter",
+    "klasse": "Tiefenwächter",
+    "stufe": 5,
+    "lp": 53,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "11/10/10/20/17",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 72
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 70
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 62
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 60
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "waechter",
+    "klasse": "Tiefenwächter",
+    "stufe": 10,
+    "lp": 68,
+    "punkteOffen": 0,
+    "raengeOffen": 1,
+    "werte": "18/10/10/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 57
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 60
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 38
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 38
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "waechter",
+    "klasse": "Tiefenwächter",
+    "stufe": 15,
+    "lp": 83,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "20/18/10/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 46
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 37
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 6
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 7
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "waechter",
+    "klasse": "Tiefenwächter",
+    "stufe": 20,
+    "lp": 98,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "20/20/18/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 22
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 20
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "waechter",
+    "klasse": "Tiefenwächter",
+    "stufe": 25,
+    "lp": 113,
+    "punkteOffen": 8,
+    "raengeOffen": 7,
+    "werte": "20/20/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 27
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 18
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "waechter",
+    "klasse": "Tiefenwächter",
+    "stufe": 30,
+    "lp": 166,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/25/18/25/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 28
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 34
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "waechter",
+    "klasse": "Tiefenwächter",
+    "stufe": "30+",
+    "lp": 166,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/25/20/25/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 45
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 39
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "spaeher",
+    "klasse": "Schwarzschütze",
+    "stufe": 5,
+    "lp": 37,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "11/20/11/10/16",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 78
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 89
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 100
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 100
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "spaeher",
+    "klasse": "Schwarzschütze",
+    "stufe": 10,
+    "lp": 47,
+    "punkteOffen": 0,
+    "raengeOffen": 1,
+    "werte": "17/20/11/10/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 55
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 72
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 70
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 68
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "spaeher",
+    "klasse": "Schwarzschütze",
+    "stufe": 15,
+    "lp": 57,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "20/20/18/10/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 58
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 60
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 16
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 23
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "spaeher",
+    "klasse": "Schwarzschütze",
+    "stufe": 20,
+    "lp": 67,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "20/20/20/18/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 21
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 34
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 3
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 22
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "spaeher",
+    "klasse": "Schwarzschütze",
+    "stufe": 25,
+    "lp": 77,
+    "punkteOffen": 8,
+    "raengeOffen": 7,
+    "werte": "20/20/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 8
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 35
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 19
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "spaeher",
+    "klasse": "Schwarzschütze",
+    "stufe": 30,
+    "lp": 113,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/25/25/18/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 32
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 45
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 23
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "spaeher",
+    "klasse": "Schwarzschütze",
+    "stufe": "30+",
+    "lp": 113,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/25/25/20/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 32
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 45
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 23
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "magier",
+    "klasse": "Pulver-Alchemist",
+    "stufe": 5,
+    "lp": 35,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "9/20/16/11/12",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 89
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 86
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 69
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 66
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "magier",
+    "klasse": "Pulver-Alchemist",
+    "stufe": 10,
+    "lp": 45,
+    "punkteOffen": 0,
+    "raengeOffen": 1,
+    "werte": "9/20/20/11/18",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 100
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 64
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 60
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 60
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "magier",
+    "klasse": "Pulver-Alchemist",
+    "stufe": 15,
+    "lp": 55,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "9/20/20/19/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 69
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 45
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 20
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 13
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "magier",
+    "klasse": "Pulver-Alchemist",
+    "stufe": 20,
+    "lp": 65,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "18/20/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 48
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 20
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 14
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "magier",
+    "klasse": "Pulver-Alchemist",
+    "stufe": 25,
+    "lp": 75,
+    "punkteOffen": 8,
+    "raengeOffen": 7,
+    "werte": "20/20/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 47
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 25
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 15
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "magier",
+    "klasse": "Pulver-Alchemist",
+    "stufe": 30,
+    "lp": 111,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "18/25/25/25/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 64
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 37
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 16
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "magier",
+    "klasse": "Pulver-Alchemist",
+    "stufe": "30+",
+    "lp": 111,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "20/25/25/25/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 64
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 50
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 17
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 16
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "heiler",
+    "klasse": "Seuchenmedikus",
+    "stufe": 5,
+    "lp": 37,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "9/11/12/20/16",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 100
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 70
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 51
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 51
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "heiler",
+    "klasse": "Seuchenmedikus",
+    "stufe": 10,
+    "lp": 47,
+    "punkteOffen": 0,
+    "raengeOffen": 1,
+    "werte": "9/11/18/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 66
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 70
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 26
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 43
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "heiler",
+    "klasse": "Seuchenmedikus",
+    "stufe": 15,
+    "lp": 57,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "9/19/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 100
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 61
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "heiler",
+    "klasse": "Seuchenmedikus",
+    "stufe": 20,
+    "lp": 67,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "18/20/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 4
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 12
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "heiler",
+    "klasse": "Seuchenmedikus",
+    "stufe": 25,
+    "lp": 77,
+    "punkteOffen": 8,
+    "raengeOffen": 7,
+    "werte": "20/20/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 4
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 1
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "heiler",
+    "klasse": "Seuchenmedikus",
+    "stufe": 30,
+    "lp": 113,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "18/25/25/25/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 23
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 1
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "heiler",
+    "klasse": "Seuchenmedikus",
+    "stufe": "30+",
+    "lp": 113,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "20/25/25/25/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 30
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 13
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "schurke",
+    "klasse": "Schattenfreibeuter",
+    "stufe": 5,
+    "lp": 35,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "17/20/10/8/13",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 77
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 69
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 71
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 71
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "schurke",
+    "klasse": "Schattenfreibeuter",
+    "stufe": 10,
+    "lp": 45,
+    "punkteOffen": 0,
+    "raengeOffen": 1,
+    "werte": "20/20/10/8/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 53
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 33
+     },
+     "Skarn": {
+      "sieg": 100,
+      "restLp": 29
+     },
+     "Mammut": {
+      "sieg": 100,
+      "restLp": 29
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "schurke",
+    "klasse": "Schattenfreibeuter",
+    "stufe": 15,
+    "lp": 55,
+    "punkteOffen": 0,
+    "raengeOffen": 2,
+    "werte": "20/20/20/8/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 25
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 15
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "schurke",
+    "klasse": "Schattenfreibeuter",
+    "stufe": 20,
+    "lp": 65,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "20/20/20/18/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 15
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "schurke",
+    "klasse": "Schattenfreibeuter",
+    "stufe": 25,
+    "lp": 75,
+    "punkteOffen": 8,
+    "raengeOffen": 7,
+    "werte": "20/20/20/20/20",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 13
+     },
+     "Elite": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "schurke",
+    "klasse": "Schattenfreibeuter",
+    "stufe": 30,
+    "lp": 111,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/25/25/18/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 30
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 12
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   },
+   {
+    "lauf": "BENCHMARK_B_OPTIMAL_SPEND",
+    "faction": "haefen",
+    "role": "schurke",
+    "klasse": "Schattenfreibeuter",
+    "stufe": "30+",
+    "lp": 111,
+    "punkteOffen": 0,
+    "raengeOffen": 7,
+    "werte": "25/25/25/20/25",
+    "quoten": {
+     "Gruppe": {
+      "sieg": 100,
+      "restLp": 30
+     },
+     "Elite": {
+      "sieg": 100,
+      "restLp": 12
+     },
+     "Skarn": {
+      "sieg": 0,
+      "restLp": 0
+     },
+     "Mammut": {
+      "sieg": 0,
+      "restLp": 0
+     }
+    }
+   }
+  ]
+ }
+}
