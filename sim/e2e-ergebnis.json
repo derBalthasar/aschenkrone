@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-19T14:27:07.909Z",
+ "stand": "2026-11-19T14:31:42.379Z",
  "ergebnis": {
   "E2E_STANDARD_PARTY_RUN": [
    {
@@ -29,37 +29,37 @@
       "name": "Zweig haefen 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 81
+      "restLp": 63
      },
      {
       "name": "Zweig orden 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 92
+      "restLp": 52
      },
      {
       "name": "Zweig orden 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 99
+      "restLp": 59
      },
      {
       "name": "Zweig orden 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 97
+      "restLp": 60
      },
      {
       "name": "Akt 4 Hinterhalt",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 92
      },
      {
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 88
      }
     ],
     "fehler": [],
@@ -104,37 +104,37 @@
       "name": "Zweig haefen 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 81
+      "restLp": 63
      },
      {
       "name": "Zweig orden 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 92
+      "restLp": 52
      },
      {
       "name": "Zweig orden 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 99
+      "restLp": 59
      },
      {
       "name": "Zweig orden 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 97
+      "restLp": 60
      },
      {
       "name": "Akt 4 Hinterhalt",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 92
      },
      {
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 88
      }
     ],
     "fehler": [],
@@ -185,13 +185,13 @@
       "name": "Zweig orden 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 78
      },
      {
       "name": "Zweig orden 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 93
+      "restLp": 88
      },
      {
       "name": "Zweig orden 3",
@@ -209,7 +209,7 @@
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 94
      }
     ],
     "fehler": [],
@@ -260,13 +260,13 @@
       "name": "Zweig orden 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 78
      },
      {
       "name": "Zweig orden 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 93
+      "restLp": 88
      },
      {
       "name": "Zweig orden 3",
@@ -284,7 +284,7 @@
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 94
      }
     ],
     "fehler": [],
@@ -317,13 +317,13 @@
       "name": "Zweig haefen 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 92
+      "restLp": 90
      },
      {
       "name": "Zweig haefen 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 98
      },
      {
       "name": "Zweig haefen 3",
@@ -335,31 +335,31 @@
       "name": "Zweig orden 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 92
+      "restLp": 84
      },
      {
       "name": "Zweig orden 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 94
+      "restLp": 70
      },
      {
       "name": "Zweig orden 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 79
+      "restLp": 22
      },
      {
       "name": "Akt 4 Hinterhalt",
       "versuch": 1,
       "sieg": true,
-      "restLp": 83
+      "restLp": 71
      },
      {
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 55
      }
     ],
     "fehler": [],
@@ -392,13 +392,13 @@
       "name": "Zweig haefen 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 92
+      "restLp": 90
      },
      {
       "name": "Zweig haefen 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 98
      },
      {
       "name": "Zweig haefen 3",
@@ -410,31 +410,31 @@
       "name": "Zweig orden 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 92
+      "restLp": 84
      },
      {
       "name": "Zweig orden 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 94
+      "restLp": 70
      },
      {
       "name": "Zweig orden 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 79
+      "restLp": 22
      },
      {
       "name": "Akt 4 Hinterhalt",
       "versuch": 1,
       "sieg": true,
-      "restLp": 83
+      "restLp": 71
      },
      {
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 55
      }
     ],
     "fehler": [],
@@ -485,7 +485,7 @@
       "name": "Zweig orden 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 92
      },
      {
       "name": "Zweig orden 2",
@@ -497,7 +497,7 @@
       "name": "Zweig orden 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 99
      },
      {
       "name": "Akt 4 Hinterhalt",
@@ -509,7 +509,7 @@
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 84
      }
     ],
     "fehler": [],
@@ -560,7 +560,7 @@
       "name": "Zweig orden 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 92
      },
      {
       "name": "Zweig orden 2",
@@ -572,7 +572,7 @@
       "name": "Zweig orden 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 99
      },
      {
       "name": "Akt 4 Hinterhalt",
@@ -584,7 +584,7 @@
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 84
      }
     ],
     "fehler": [],
@@ -623,19 +623,19 @@
       "name": "Zweig haefen 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 98
      },
      {
       "name": "Zweig haefen 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 94
      },
      {
       "name": "Zweig orden 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 92
+      "restLp": 89
      },
      {
       "name": "Zweig orden 2",
@@ -653,13 +653,13 @@
       "name": "Akt 4 Hinterhalt",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 95
      },
      {
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 93
+      "restLp": 100
      }
     ],
     "fehler": [],
@@ -698,19 +698,19 @@
       "name": "Zweig haefen 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 98
      },
      {
       "name": "Zweig haefen 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 94
      },
      {
       "name": "Zweig orden 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 92
+      "restLp": 89
      },
      {
       "name": "Zweig orden 2",
@@ -728,13 +728,13 @@
       "name": "Akt 4 Hinterhalt",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 95
      },
      {
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 93
+      "restLp": 100
      }
     ],
     "fehler": [],
@@ -767,49 +767,49 @@
       "name": "Zweig haefen 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 91
+      "restLp": 64
      },
      {
       "name": "Zweig haefen 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 89
+      "restLp": 64
      },
      {
       "name": "Zweig haefen 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 71
+      "restLp": 69
      },
      {
       "name": "Zweig orden 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 84
+      "restLp": 74
      },
      {
       "name": "Zweig orden 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 92
+      "restLp": 67
      },
      {
       "name": "Zweig orden 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 88
+      "restLp": 22
      },
      {
       "name": "Akt 4 Hinterhalt",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 86
      },
      {
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 55
      }
     ],
     "fehler": [],
@@ -842,49 +842,49 @@
       "name": "Zweig haefen 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 91
+      "restLp": 64
      },
      {
       "name": "Zweig haefen 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 89
+      "restLp": 64
      },
      {
       "name": "Zweig haefen 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 71
+      "restLp": 69
      },
      {
       "name": "Zweig orden 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 84
+      "restLp": 74
      },
      {
       "name": "Zweig orden 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 92
+      "restLp": 67
      },
      {
       "name": "Zweig orden 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 88
+      "restLp": 22
      },
      {
       "name": "Akt 4 Hinterhalt",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 86
      },
      {
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 55
      }
     ],
     "fehler": [],
@@ -929,37 +929,37 @@
       "name": "Zweig kronreich 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 78
+      "restLp": 57
      },
      {
       "name": "Zweig haefen 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 88
+      "restLp": 45
      },
      {
       "name": "Zweig haefen 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 95
+      "restLp": 54
      },
      {
       "name": "Zweig haefen 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 89
+      "restLp": 56
      },
      {
       "name": "Akt 4 Hinterhalt",
       "versuch": 1,
       "sieg": true,
-      "restLp": 97
+      "restLp": 86
      },
      {
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 97
+      "restLp": 76
      }
     ],
     "fehler": [],
@@ -1004,112 +1004,112 @@
       "name": "Zweig kronreich 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 78
+      "restLp": 57
      },
      {
       "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 45
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 54
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 56
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 86
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 76
+     }
+    ],
+    "fehler": [],
+    "doppelteSpezialisierung": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "thing": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "orden",
+    "role": "waechter",
+    "variante": "WAHL_A",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 93
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 94
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 95
+     },
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 43
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 52
+     },
+     {
+      "name": "Zweig haefen 3",
       "versuch": 1,
       "sieg": true,
       "restLp": 88
      },
      {
-      "name": "Zweig haefen 2",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 95
-     },
-     {
-      "name": "Zweig haefen 3",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 89
-     },
-     {
       "name": "Akt 4 Hinterhalt",
       "versuch": 1,
       "sieg": true,
-      "restLp": 97
+      "restLp": 82
      },
      {
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 97
-     }
-    ],
-    "fehler": [],
-    "doppelteSpezialisierung": true,
-    "thorvaldEntlarvt": true,
-    "untoteDelta": -15,
-    "stilleFederVerborgen": true,
-    "thing": true,
-    "kontorEinzahlung": true,
-    "tor": true,
-    "ueberzaehlig": {
-     "grundwerte": 9,
-     "raenge": 1,
-     "talente": 0
-    },
-    "fertig": true
-   },
-   {
-    "profil": "E2E_STANDARD_PARTY_RUN",
-    "faction": "orden",
-    "role": "waechter",
-    "variante": "WAHL_A",
-    "stufen": {
-     "akt2": 10,
-     "akt3": 15,
-     "akt4": 22
-    },
-    "kaempfe": [
-     {
-      "name": "Zweig kronreich 1",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 94
-     },
-     {
-      "name": "Zweig kronreich 2",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 96
-     },
-     {
-      "name": "Zweig kronreich 3",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 95
-     },
-     {
-      "name": "Zweig haefen 1",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 89
-     },
-     {
-      "name": "Zweig haefen 2",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 77
-     },
-     {
-      "name": "Zweig haefen 3",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 98
-     },
-     {
-      "name": "Akt 4 Hinterhalt",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 98
-     },
-     {
-      "name": "Akt 4 Thorvald",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 99
+      "restLp": 71
      }
     ],
     "fehler": [],
@@ -1142,13 +1142,13 @@
       "name": "Zweig kronreich 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 94
+      "restLp": 93
      },
      {
       "name": "Zweig kronreich 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 96
+      "restLp": 94
      },
      {
       "name": "Zweig kronreich 3",
@@ -1160,31 +1160,31 @@
       "name": "Zweig haefen 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 89
+      "restLp": 43
      },
      {
       "name": "Zweig haefen 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 77
+      "restLp": 52
      },
      {
       "name": "Zweig haefen 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 98
+      "restLp": 88
      },
      {
       "name": "Akt 4 Hinterhalt",
       "versuch": 1,
       "sieg": true,
-      "restLp": 98
+      "restLp": 82
      },
      {
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 99
+      "restLp": 71
      }
     ],
     "fehler": [],
@@ -1229,13 +1229,13 @@
       "name": "Zweig kronreich 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 94
+      "restLp": 92
      },
      {
       "name": "Zweig haefen 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 92
      },
      {
       "name": "Zweig haefen 2",
@@ -1247,19 +1247,19 @@
       "name": "Zweig haefen 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 94
+      "restLp": 82
      },
      {
       "name": "Akt 4 Hinterhalt",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 98
      },
      {
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 52
      }
     ],
     "fehler": [],
@@ -1304,13 +1304,13 @@
       "name": "Zweig kronreich 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 94
+      "restLp": 92
      },
      {
       "name": "Zweig haefen 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 92
      },
      {
       "name": "Zweig haefen 2",
@@ -1322,19 +1322,19 @@
       "name": "Zweig haefen 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 94
+      "restLp": 82
      },
      {
       "name": "Akt 4 Hinterhalt",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 98
      },
      {
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 52
      }
     ],
     "fehler": [],
@@ -1379,25 +1379,25 @@
       "name": "Zweig kronreich 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 77
+      "restLp": 75
      },
      {
       "name": "Zweig haefen 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 80
+      "restLp": 78
      },
      {
       "name": "Zweig haefen 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 97
+      "restLp": 95
      },
      {
       "name": "Zweig haefen 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 94
+      "restLp": 67
      },
      {
       "name": "Akt 4 Hinterhalt",
@@ -1409,7 +1409,7 @@
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 85
      }
     ],
     "fehler": [],
@@ -1454,262 +1454,262 @@
       "name": "Zweig kronreich 3",
       "versuch": 1,
       "sieg": true,
+      "restLp": 75
+     },
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 78
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 95
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 67
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 85
+     }
+    ],
+    "fehler": [],
+    "doppelteSpezialisierung": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "thing": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "orden",
+    "role": "heiler",
+    "variante": "WAHL_A",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 40
+     },
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 97
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 85
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 90
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 78
+     }
+    ],
+    "fehler": [],
+    "doppelteSpezialisierung": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "thing": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "orden",
+    "role": "heiler",
+    "variante": "WAHL_B",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 40
+     },
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 97
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 85
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 90
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 78
+     }
+    ],
+    "fehler": [],
+    "doppelteSpezialisierung": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "thing": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "orden",
+    "role": "schurke",
+    "variante": "WAHL_A",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 78
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
       "restLp": 77
      },
      {
-      "name": "Zweig haefen 1",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 80
-     },
-     {
-      "name": "Zweig haefen 2",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 97
-     },
-     {
-      "name": "Zweig haefen 3",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 94
-     },
-     {
-      "name": "Akt 4 Hinterhalt",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 100
-     },
-     {
-      "name": "Akt 4 Thorvald",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 100
-     }
-    ],
-    "fehler": [],
-    "doppelteSpezialisierung": true,
-    "thorvaldEntlarvt": true,
-    "untoteDelta": -15,
-    "stilleFederVerborgen": true,
-    "thing": true,
-    "kontorEinzahlung": true,
-    "tor": true,
-    "ueberzaehlig": {
-     "grundwerte": 9,
-     "raenge": 1,
-     "talente": 0
-    },
-    "fertig": true
-   },
-   {
-    "profil": "E2E_STANDARD_PARTY_RUN",
-    "faction": "orden",
-    "role": "heiler",
-    "variante": "WAHL_A",
-    "stufen": {
-     "akt2": 10,
-     "akt3": 15,
-     "akt4": 22
-    },
-    "kaempfe": [
-     {
-      "name": "Zweig kronreich 1",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 100
-     },
-     {
-      "name": "Zweig kronreich 2",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 100
-     },
-     {
       "name": "Zweig kronreich 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 69
      },
      {
       "name": "Zweig haefen 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 94
+      "restLp": 82
      },
      {
       "name": "Zweig haefen 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 89
+      "restLp": 98
      },
      {
       "name": "Zweig haefen 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 54
      },
      {
       "name": "Akt 4 Hinterhalt",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 55
      },
      {
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
-     }
-    ],
-    "fehler": [],
-    "doppelteSpezialisierung": true,
-    "thorvaldEntlarvt": true,
-    "untoteDelta": -15,
-    "stilleFederVerborgen": true,
-    "thing": true,
-    "kontorEinzahlung": true,
-    "tor": true,
-    "ueberzaehlig": {
-     "grundwerte": 9,
-     "raenge": 1,
-     "talente": 0
-    },
-    "fertig": true
-   },
-   {
-    "profil": "E2E_STANDARD_PARTY_RUN",
-    "faction": "orden",
-    "role": "heiler",
-    "variante": "WAHL_B",
-    "stufen": {
-     "akt2": 10,
-     "akt3": 15,
-     "akt4": 22
-    },
-    "kaempfe": [
-     {
-      "name": "Zweig kronreich 1",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 100
-     },
-     {
-      "name": "Zweig kronreich 2",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 100
-     },
-     {
-      "name": "Zweig kronreich 3",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 100
-     },
-     {
-      "name": "Zweig haefen 1",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 94
-     },
-     {
-      "name": "Zweig haefen 2",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 89
-     },
-     {
-      "name": "Zweig haefen 3",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 100
-     },
-     {
-      "name": "Akt 4 Hinterhalt",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 100
-     },
-     {
-      "name": "Akt 4 Thorvald",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 100
-     }
-    ],
-    "fehler": [],
-    "doppelteSpezialisierung": true,
-    "thorvaldEntlarvt": true,
-    "untoteDelta": -15,
-    "stilleFederVerborgen": true,
-    "thing": true,
-    "kontorEinzahlung": true,
-    "tor": true,
-    "ueberzaehlig": {
-     "grundwerte": 9,
-     "raenge": 1,
-     "talente": 0
-    },
-    "fertig": true
-   },
-   {
-    "profil": "E2E_STANDARD_PARTY_RUN",
-    "faction": "orden",
-    "role": "schurke",
-    "variante": "WAHL_A",
-    "stufen": {
-     "akt2": 10,
-     "akt3": 15,
-     "akt4": 22
-    },
-    "kaempfe": [
-     {
-      "name": "Zweig kronreich 1",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 91
-     },
-     {
-      "name": "Zweig kronreich 2",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 89
-     },
-     {
-      "name": "Zweig kronreich 3",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 71
-     },
-     {
-      "name": "Zweig haefen 1",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 92
-     },
-     {
-      "name": "Zweig haefen 2",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 100
-     },
-     {
-      "name": "Zweig haefen 3",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 88
-     },
-     {
-      "name": "Akt 4 Hinterhalt",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 100
-     },
-     {
-      "name": "Akt 4 Thorvald",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 78
+      "restLp": 32
      }
     ],
     "fehler": [],
@@ -1742,49 +1742,49 @@
       "name": "Zweig kronreich 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 91
+      "restLp": 78
      },
      {
       "name": "Zweig kronreich 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 89
+      "restLp": 77
      },
      {
       "name": "Zweig kronreich 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 71
+      "restLp": 69
      },
      {
       "name": "Zweig haefen 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 92
+      "restLp": 82
      },
      {
       "name": "Zweig haefen 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 98
      },
      {
       "name": "Zweig haefen 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 88
+      "restLp": 54
      },
      {
       "name": "Akt 4 Hinterhalt",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 55
      },
      {
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 78
+      "restLp": 32
      }
     ],
     "fehler": [],
@@ -1817,49 +1817,49 @@
       "name": "Zweig kronreich 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 84
+      "restLp": 82
      },
      {
       "name": "Zweig kronreich 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 84
+      "restLp": 83
      },
      {
       "name": "Zweig kronreich 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 82
+      "restLp": 73
      },
      {
       "name": "Zweig orden 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 88
+      "restLp": 37
      },
      {
       "name": "Zweig orden 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 89
+      "restLp": 40
      },
      {
       "name": "Zweig orden 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 93
+      "restLp": 58
      },
      {
       "name": "Akt 4 Hinterhalt",
       "versuch": 1,
       "sieg": true,
-      "restLp": 64
+      "restLp": 57
      },
      {
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 81
+      "restLp": 43
      }
     ],
     "fehler": [],
@@ -1892,31 +1892,106 @@
       "name": "Zweig kronreich 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 84
+      "restLp": 82
      },
      {
       "name": "Zweig kronreich 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 84
+      "restLp": 83
      },
      {
       "name": "Zweig kronreich 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 82
+      "restLp": 73
      },
      {
       "name": "Zweig orden 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 88
+      "restLp": 37
      },
      {
       "name": "Zweig orden 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 89
+      "restLp": 40
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 58
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 57
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 43
+     }
+    ],
+    "fehler": [],
+    "doppelteSpezialisierung": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "thing": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "haefen",
+    "role": "waechter",
+    "variante": "WAHL_A",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 93
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 94
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 65
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 58
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 67
      },
      {
       "name": "Zweig orden 3",
@@ -1928,7 +2003,157 @@
       "name": "Akt 4 Hinterhalt",
       "versuch": 1,
       "sieg": true,
-      "restLp": 64
+      "restLp": 94
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 84
+     }
+    ],
+    "fehler": [],
+    "doppelteSpezialisierung": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "thing": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 2,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "haefen",
+    "role": "waechter",
+    "variante": "WAHL_B",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 93
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 94
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 65
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 58
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 67
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 93
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 94
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 84
+     }
+    ],
+    "fehler": [],
+    "doppelteSpezialisierung": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "thing": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 2,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "haefen",
+    "role": "spaeher",
+    "variante": "WAHL_A",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 87
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 94
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 92
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 83
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 89
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 61
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 76
      },
      {
       "name": "Akt 4 Thorvald",
@@ -1955,231 +2180,6 @@
    {
     "profil": "E2E_STANDARD_PARTY_RUN",
     "faction": "haefen",
-    "role": "waechter",
-    "variante": "WAHL_A",
-    "stufen": {
-     "akt2": 10,
-     "akt3": 15,
-     "akt4": 22
-    },
-    "kaempfe": [
-     {
-      "name": "Zweig kronreich 1",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 94
-     },
-     {
-      "name": "Zweig kronreich 2",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 96
-     },
-     {
-      "name": "Zweig kronreich 3",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 92
-     },
-     {
-      "name": "Zweig orden 1",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 97
-     },
-     {
-      "name": "Zweig orden 2",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 88
-     },
-     {
-      "name": "Zweig orden 3",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 100
-     },
-     {
-      "name": "Akt 4 Hinterhalt",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 100
-     },
-     {
-      "name": "Akt 4 Thorvald",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 100
-     }
-    ],
-    "fehler": [],
-    "doppelteSpezialisierung": true,
-    "thorvaldEntlarvt": true,
-    "untoteDelta": -15,
-    "stilleFederVerborgen": true,
-    "thing": true,
-    "kontorEinzahlung": true,
-    "tor": true,
-    "ueberzaehlig": {
-     "grundwerte": 9,
-     "raenge": 2,
-     "talente": 0
-    },
-    "fertig": true
-   },
-   {
-    "profil": "E2E_STANDARD_PARTY_RUN",
-    "faction": "haefen",
-    "role": "waechter",
-    "variante": "WAHL_B",
-    "stufen": {
-     "akt2": 10,
-     "akt3": 15,
-     "akt4": 22
-    },
-    "kaempfe": [
-     {
-      "name": "Zweig kronreich 1",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 94
-     },
-     {
-      "name": "Zweig kronreich 2",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 96
-     },
-     {
-      "name": "Zweig kronreich 3",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 92
-     },
-     {
-      "name": "Zweig orden 1",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 97
-     },
-     {
-      "name": "Zweig orden 2",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 88
-     },
-     {
-      "name": "Zweig orden 3",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 100
-     },
-     {
-      "name": "Akt 4 Hinterhalt",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 100
-     },
-     {
-      "name": "Akt 4 Thorvald",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 100
-     }
-    ],
-    "fehler": [],
-    "doppelteSpezialisierung": true,
-    "thorvaldEntlarvt": true,
-    "untoteDelta": -15,
-    "stilleFederVerborgen": true,
-    "thing": true,
-    "kontorEinzahlung": true,
-    "tor": true,
-    "ueberzaehlig": {
-     "grundwerte": 9,
-     "raenge": 2,
-     "talente": 0
-    },
-    "fertig": true
-   },
-   {
-    "profil": "E2E_STANDARD_PARTY_RUN",
-    "faction": "haefen",
-    "role": "spaeher",
-    "variante": "WAHL_A",
-    "stufen": {
-     "akt2": 10,
-     "akt3": 15,
-     "akt4": 22
-    },
-    "kaempfe": [
-     {
-      "name": "Zweig kronreich 1",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 89
-     },
-     {
-      "name": "Zweig kronreich 2",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 96
-     },
-     {
-      "name": "Zweig kronreich 3",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 94
-     },
-     {
-      "name": "Zweig orden 1",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 92
-     },
-     {
-      "name": "Zweig orden 2",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 100
-     },
-     {
-      "name": "Zweig orden 3",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 87
-     },
-     {
-      "name": "Akt 4 Hinterhalt",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 100
-     },
-     {
-      "name": "Akt 4 Thorvald",
-      "versuch": 1,
-      "sieg": true,
-      "restLp": 100
-     }
-    ],
-    "fehler": [],
-    "doppelteSpezialisierung": true,
-    "thorvaldEntlarvt": true,
-    "untoteDelta": -15,
-    "stilleFederVerborgen": true,
-    "thing": true,
-    "kontorEinzahlung": true,
-    "tor": true,
-    "ueberzaehlig": {
-     "grundwerte": 9,
-     "raenge": 1,
-     "talente": 0
-    },
-    "fertig": true
-   },
-   {
-    "profil": "E2E_STANDARD_PARTY_RUN",
-    "faction": "haefen",
     "role": "spaeher",
     "variante": "WAHL_B",
     "stufen": {
@@ -2192,49 +2192,49 @@
       "name": "Zweig kronreich 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 89
+      "restLp": 87
      },
      {
       "name": "Zweig kronreich 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 96
+      "restLp": 94
      },
      {
       "name": "Zweig kronreich 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 94
+      "restLp": 92
      },
      {
       "name": "Zweig orden 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 92
+      "restLp": 83
      },
      {
       "name": "Zweig orden 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 89
      },
      {
       "name": "Zweig orden 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 87
+      "restLp": 61
      },
      {
       "name": "Akt 4 Hinterhalt",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 76
      },
      {
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 81
      }
     ],
     "fehler": [],
@@ -2285,7 +2285,7 @@
       "name": "Zweig orden 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 92
+      "restLp": 90
      },
      {
       "name": "Zweig orden 2",
@@ -2309,7 +2309,7 @@
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 65
      }
     ],
     "fehler": [],
@@ -2360,7 +2360,7 @@
       "name": "Zweig orden 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 92
+      "restLp": 90
      },
      {
       "name": "Zweig orden 2",
@@ -2384,7 +2384,7 @@
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 65
      }
     ],
     "fehler": [],
@@ -2423,25 +2423,25 @@
       "name": "Zweig kronreich 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 86
      },
      {
       "name": "Zweig kronreich 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 78
      },
      {
       "name": "Zweig orden 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 97
+      "restLp": 84
      },
      {
       "name": "Zweig orden 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 91
+      "restLp": 98
      },
      {
       "name": "Zweig orden 3",
@@ -2453,13 +2453,13 @@
       "name": "Akt 4 Hinterhalt",
       "versuch": 1,
       "sieg": true,
-      "restLp": 96
+      "restLp": 28
      },
      {
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 93
+      "restLp": 100
      }
     ],
     "fehler": [],
@@ -2498,25 +2498,25 @@
       "name": "Zweig kronreich 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 86
      },
      {
       "name": "Zweig kronreich 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 78
      },
      {
       "name": "Zweig orden 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 97
+      "restLp": 84
      },
      {
       "name": "Zweig orden 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 91
+      "restLp": 98
      },
      {
       "name": "Zweig orden 3",
@@ -2528,13 +2528,13 @@
       "name": "Akt 4 Hinterhalt",
       "versuch": 1,
       "sieg": true,
-      "restLp": 96
+      "restLp": 28
      },
      {
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 93
+      "restLp": 100
      }
     ],
     "fehler": [],
@@ -2567,49 +2567,49 @@
       "name": "Zweig kronreich 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 89
+      "restLp": 87
      },
      {
       "name": "Zweig kronreich 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 87
+      "restLp": 85
      },
      {
       "name": "Zweig kronreich 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 71
+      "restLp": 69
      },
      {
       "name": "Zweig orden 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 92
+      "restLp": 82
      },
      {
       "name": "Zweig orden 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 67
      },
      {
       "name": "Zweig orden 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 80
+      "restLp": 22
      },
      {
       "name": "Akt 4 Hinterhalt",
       "versuch": 1,
       "sieg": true,
-      "restLp": 98
+      "restLp": 77
      },
      {
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 89
+      "restLp": 48
      }
     ],
     "fehler": [],
@@ -2642,49 +2642,49 @@
       "name": "Zweig kronreich 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 89
+      "restLp": 87
      },
      {
       "name": "Zweig kronreich 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 87
+      "restLp": 85
      },
      {
       "name": "Zweig kronreich 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 71
+      "restLp": 69
      },
      {
       "name": "Zweig orden 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 92
+      "restLp": 82
      },
      {
       "name": "Zweig orden 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 67
      },
      {
       "name": "Zweig orden 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 80
+      "restLp": 22
      },
      {
       "name": "Akt 4 Hinterhalt",
       "versuch": 1,
       "sieg": true,
-      "restLp": 98
+      "restLp": 77
      },
      {
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 89
+      "restLp": 48
      }
     ],
     "fehler": [],
@@ -2731,37 +2731,37 @@
       "name": "Zweig haefen 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 81
+      "restLp": 63
      },
      {
       "name": "Zweig orden 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 92
+      "restLp": 52
      },
      {
       "name": "Zweig orden 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 99
+      "restLp": 59
      },
      {
       "name": "Zweig orden 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 97
+      "restLp": 60
      },
      {
       "name": "Akt 4 Hinterhalt",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 92
      },
      {
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 100
+      "restLp": 88
      }
     ],
     "fehler": [],
@@ -2806,37 +2806,37 @@
       "name": "Zweig kronreich 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 78
+      "restLp": 57
      },
      {
       "name": "Zweig haefen 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 88
+      "restLp": 45
      },
      {
       "name": "Zweig haefen 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 95
+      "restLp": 54
      },
      {
       "name": "Zweig haefen 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 89
+      "restLp": 56
      },
      {
       "name": "Akt 4 Hinterhalt",
       "versuch": 1,
       "sieg": true,
-      "restLp": 97
+      "restLp": 86
      },
      {
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 97
+      "restLp": 76
      }
     ],
     "fehler": [],
@@ -2869,49 +2869,49 @@
       "name": "Zweig kronreich 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 84
+      "restLp": 82
      },
      {
       "name": "Zweig kronreich 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 84
+      "restLp": 83
      },
      {
       "name": "Zweig kronreich 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 82
+      "restLp": 73
      },
      {
       "name": "Zweig orden 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 88
+      "restLp": 37
      },
      {
       "name": "Zweig orden 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 89
+      "restLp": 40
      },
      {
       "name": "Zweig orden 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 93
+      "restLp": 58
      },
      {
       "name": "Akt 4 Hinterhalt",
       "versuch": 1,
       "sieg": true,
-      "restLp": 64
+      "restLp": 57
      },
      {
       "name": "Akt 4 Thorvald",
       "versuch": 1,
       "sieg": true,
-      "restLp": 81
+      "restLp": 43
      }
     ],
     "fehler": [],

@@ -2203,9 +2203,9 @@ const rules = (() => {
       victoryText: "Der Kampf ist gewonnen." };
   }
   // Patch 2.5.4: Der Letzte Mammut trampelt über die ganze Gruppe (höchstens 13 Schaden je Treffer) statt zu springen.
-  // Patch 2.6.17: Thorvalds Klagelied trifft alle, höchstens 8, alle 3 Runden.
+  // Patch 2.6.17/2.6.18: Thorvalds Klagelied trifft alle, höchstens 11, alle 2 Runden.
   if (world.fights["auftrag-thorvald"]) world.fights["auftrag-thorvald"].special = { name: "Klagelied des Bleichen Skalden",
-    warning: "Thorvald hebt die knöcherne Harfe. Ein kaltes Lied schwillt an.", damage: 0, flaeche: true, deckel: 8, intervall: 3 };
+    warning: "Thorvald hebt die knöcherne Harfe. Ein kaltes Lied schwillt an.", damage: 0, flaeche: true, deckel: 11, intervall: 2 };
   if (world.fights["auftrag-letztermammut"]) world.fights["auftrag-letztermammut"].special = { name: "Trampeln",
     warning: "Der Letzte Mammut senkt den Kopf und scharrt mit den Füßen.", damage: 2, flaeche: true, deckel: 13 };
 
@@ -3006,6 +3006,19 @@ const rules = (() => {
     lager: SY.daten.v260.ASCHENKRONE_V268_CAMP_COMPANION_DIALOGUES,
   };
   const zweigFraktion = { KRONREICH: "kronreich", ORDEN_DER_FLAMME: "orden", FREIE_HAEFEN: "haefen" };
+  // Patch 2.6.18 (Henry, Zielwert 55–75 % Rest-LP): Gegner der Akte 2–4 ab Stufe 6 mit 118 % LP und 112 % Schaden.
+  // Zweig-Bosse statt dessen 125 % LP und Schaden höchstens aufgerundet Heldenstufe × 1,15. Thorvald hat feste Werte.
+  const aktSkalierung = { abStufe: 6, lp: 1.18, schaden: 1.12, bossLp: 1.25, bossDeckel: 1.15 };
+  function aktGegnerSkalieren(state, boss) {
+    const heldStufe = level(state);
+    for (const [index, foe] of state.combat.feinde.entries()) {
+      if (foe.stufe < aktSkalierung.abStufe) continue;
+      const istBoss = boss && index === 0;
+      foe.lp = foe.max = Math.max(1, Math.round(foe.lp * (istBoss ? aktSkalierung.bossLp : aktSkalierung.lp)));
+      foe.schaden = Math.max(1, Math.round(foe.schaden * aktSkalierung.schaden));
+      if (istBoss) foe.schaden = Math.min(foe.schaden, Math.ceil(heldStufe * aktSkalierung.bossDeckel));
+    }
+  }
   const zweigHub = { kronreich: "kronhall", orden: "glutberg", haefen: "perlvik" };
   const zweigGegner = { kronreich: ["deserteure", "wegelagerer", "feldherr"], orden: ["kultisten", "kultisten", "zelot"],
     haefen: ["orkpiraten", "schmuggler", "kaperkapitaen"] };
@@ -3101,6 +3114,7 @@ const rules = (() => {
     note(state, schritt.title + ": " + world.fights[auftragKampf(typ)].name + " stellen sich dir · Stufe " + stufeGegner + ".");
     startFight(state, auftragKampf(typ), true, stufeGegner);
     if (state.combat) Object.assign(state.combat, { weiter: "weltknoten", auftrag: "zweig:" + fraktion, gegnerStufe: stufeGegner });
+    if (state.combat) aktGegnerSkalieren(state, ["feldherr", "zelot", "kaperkapitaen"].includes(typ));
     else if (!state.health) arrive(state, "defeat");
     return state;
   }
@@ -3214,6 +3228,7 @@ const rules = (() => {
     note(state, titel + ": " + world.fights[auftragKampf(typ)].name + " stellen sich dir · Stufe " + stufe + ".");
     startFight(state, auftragKampf(typ), true, stufe);
     if (state.combat) Object.assign(state.combat, { weiter: "weltknoten", auftrag: "akt4:" + state.akte.akt4.schritt, gegnerStufe: stufe });
+    if (state.combat && state.combat.id !== "auftrag-thorvald") aktGegnerSkalieren(state, false);
     else if (!state.health) arrive(state, "defeat");
   }
   function akt4Weiter(previous, wahl = null) {
@@ -3569,10 +3584,11 @@ const rules = (() => {
   // Gruppe 2–3: zusätzliche Gegner mit 90 % LP und Schaden; Gruppe 4: der vierte Gegner mit 75 %.
   // Szenenkämpfe behalten ihre festgelegte Zahl, aber ebenfalls höchstens 4.
   const gruppenSkalierung = { hoechstens: 4, stufen: { 1: { min: 1, max: 2, extra: 1 }, 2: { min: 2, max: 2, extra: 0.9 },
-    3: { min: 2, max: 3, extra: 0.9 }, 4: { min: 3, max: 4, extra: 1, vierter: 0.75 } }, gefaehrtenSchutz: 0.15 };
+    3: { min: 2, max: 3, extra: 0.9 }, 4: { min: 3, max: 4, extra: 1, vierter: 0.75 } }, gefaehrtenSchutz: 0.08 };
   // Patch 2.6.17: Thorvald, der Bleiche Skalde (Bezug Stufe 20): feste Werte und höchstens zwei schwache Akolythen.
-  const bossWerte = { "auftrag-thorvald": { lp: 112, ruestung: 5, deckel: 13,
-    adds: { anzahl: 2, name: "Untoter Akolyth", lp: 32, deckel: 6 } } };
+  // Patch 2.6.18: 148 LP, Rüstung 7, Treffer höchstens 16, Akolythen 45 LP und höchstens 9.
+  const bossWerte = { "auftrag-thorvald": { lp: 148, ruestung: 7, deckel: 16,
+    adds: { anzahl: 2, name: "Untoter Akolyth", lp: 45, deckel: 9 } } };
 
   function lineup(id, size, stufe = null, heldStufe = null) {
     const fight = world.fights[id];
@@ -4313,7 +4329,7 @@ const rules = (() => {
               const reduction = Math.floor(((heroTarget ? protection(state) : 2) + armor) / 2);
               hit = Math.max(guarding ? 0 : 1, damage - reduction - defense);
             }
-            // Patch 2.6.17: Gefährten nehmen 15 % weniger Schaden.
+            // Patch 2.6.17/2.6.18: Gefährten nehmen 8 % weniger Schaden.
             if (!heroTarget && hit > 0) hit = Math.max(1, Math.round(hit * (1 - gruppenSkalierung.gefaehrtenSchutz)));
             if (heroTarget) {
               if (index === 0 && action === 0) { heroHit = true; heroGuarded = guarding; }

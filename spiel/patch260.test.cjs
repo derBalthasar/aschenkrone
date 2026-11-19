@@ -189,7 +189,7 @@ test("Tränke zeigen Werte in der Spielskala", () => {
   assert.match(rules.effektText("POT_MANA_1"), /^Tier 1 · Stellt im Kampf \d+ Mana/);
 });
 
-test("Patch 2.6.17: Gegnerzahl nach Gruppengröße, Gefährtenschutz, Thorvald", () => {
+test("Patch 2.6.17/2.6.18: Gegnerzahl nach Gruppengröße, Thorvald, Akt-Skalierung", () => {
   const anzahl = (party) => rules.gegnerAufstellung("auftrag-deserteure", party, 10, 10);
   assert.equal(anzahl(0).length, 2);
   assert.equal(anzahl(1).length, 2);
@@ -201,9 +201,16 @@ test("Patch 2.6.17: Gegnerzahl nach Gruppengröße, Gefährtenschutz, Thorvald",
   if (vier.length === 4) assert.equal(vier[3].lp, Math.round(vier[0].lp * 0.75));
   const t = rules.gegnerAufstellung("auftrag-thorvald", 2, 20, 20);
   assert.equal(t.length, 3);
-  assert.equal(t[0].lp, 112);
-  assert.equal(t[0].ruestung, 5);
-  assert.ok(t[0].schaden <= 13);
-  assert.equal(t[1].lp, 32);
-  assert.ok(t[1].schaden <= 6);
+  assert.equal(t[0].lp, 148);
+  assert.equal(t[0].ruestung, 7);
+  assert.ok(t[0].schaden <= 16);
+  assert.equal(t[1].lp, 45);
+  assert.ok(t[1].schaden <= 9);
+  // Zweig-Boss: 125 % LP, Schaden höchstens aufgerundet Heldenstufe × 1,15.
+  let s = bei(reload({ ...held("kronreich", "krieger", 15), akte: { zweige: { haefen: { stufe: 2, akt: 2, wahl: "good", soeldner: false } },
+    fspez: null, akt4: { schritt: 0, siegel: [], wahlOffen: false, wahl: null } } }), "perlvik");
+  const k = rules.zweigWeiter(s, "haefen");
+  const roh = rules.gegnerAufstellung("auftrag-kaperkapitaen", s.party.length, k.combat.gegnerStufe, rules.level(s))[0];
+  assert.equal(k.combat.feinde[0].lp, Math.round(roh.lp * 1.25));
+  assert.ok(k.combat.feinde[0].schaden <= Math.ceil(rules.level(s) * 1.15));
 });

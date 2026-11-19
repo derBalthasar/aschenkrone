@@ -96,7 +96,9 @@ function kampf(s) {
     // Abwehr nur bei wenig LP und nie zweimal hintereinander (sonst endlose Patt-Runden).
     const abwehr = s.health < 0.4 * rules.healthLimit(s) && zuletzt !== "guard" ? ["guard"] : [];
     const aktionen = [...rules.abilities(s).filter((f) => f.frei && !rules.abilityState(s, f.id)).map((f) => f.id), "spear", ...abwehr];
-    const wert = (n) => n === s ? -Infinity : (n.combat ? 0 : 1000) + gegnerLp(s) - gegnerLp(n) - 1.2 * (s.health - n.health) - (n.health ? 0 : 5000);
+    // Nach 30 Runden zählt Schaden am Gegner mehr als eigene LP (sonst heilen Heiler endlos, statt den Kampf zu beenden).
+    const lpGewicht = runde > 30 ? 0.3 : 1.2;
+    const wert = (n) => n === s ? -Infinity : (n.combat ? 0 : 1000) + gegnerLp(s) - gegnerLp(n) - lpGewicht * (s.health - n.health) - (n.health ? 0 : 5000);
     const beste = aktionen.reduce((best, id) => (wert(rules.strike(s, id, mitte)) > wert(rules.strike(s, best, mitte)) ? id : best), "spear");
     s = rules.strike(s, beste, wuerfel);
     zuletzt = beste;
