@@ -763,7 +763,7 @@ h1, h2 { font-family: var(--font-title); letter-spacing: .01em; }
 .hero-head .glut-help p { color: var(--ivory); }
 
 /* Reiter */
-.side-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: var(--iron-deep);
+.side-tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); background: var(--iron-deep);
   border-block: 1px solid var(--frame); }
 .side-tabs [role="tab"] { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .2rem;
   min-height: 3.4rem; padding: .4rem .2rem; color: var(--muted); background: transparent; border: 0; border-right: 1px solid var(--line);
@@ -783,6 +783,7 @@ h1, h2 { font-family: var(--font-title); letter-spacing: .01em; }
 #character-panel[data-side-tab="beutel"] #side-beutel,
 #character-panel[data-side-tab="chronik"] #side-chronik,
 #character-panel[data-side-tab="gefaehrten"] #side-gefaehrten { display: block; }
+#character-panel[data-side-tab="einstellungen"] #side-einstellungen { display: block; }
 .side-panel > details:first-child, .side-panel > section:first-child { border-top: 0; }
 .side-panel details > summary { cursor: pointer; font-family: var(--font-title); font-size: .95rem; letter-spacing: .03em; color: var(--accent); }
 .side-panel details details > summary { font-family: var(--font-ui); font-size: .88rem; letter-spacing: 0; color: var(--muted); }
@@ -835,7 +836,7 @@ h1, h2 { font-family: var(--font-title); letter-spacing: .01em; }
   :root[data-layout="ultrawide"] #side-karte { display: block; grid-column: 2; grid-row: 1 / span 3; align-self: start;
     padding: .2rem 1rem 1rem; background: var(--iron); border: 1px solid var(--frame); }
   :root[data-layout="ultrawide"] .hero-head { grid-column: 3; grid-row: 1; background: var(--iron); border: 1px solid var(--frame); border-bottom: 0; }
-  :root[data-layout="ultrawide"] .side-tabs { grid-column: 3; grid-row: 2; grid-template-columns: repeat(3, minmax(0, 1fr)); border-inline: 1px solid var(--frame); }
+  :root[data-layout="ultrawide"] .side-tabs { grid-column: 3; grid-row: 2; grid-template-columns: repeat(4, minmax(0, 1fr)); border-inline: 1px solid var(--frame); }
   :root[data-layout="ultrawide"] #side-tab-karte { display: none; }
   :root[data-layout="ultrawide"] .side-panel:not(#side-karte) { grid-column: 3; grid-row: 3; align-self: start;
     background: var(--iron); border: 1px solid var(--frame); border-top: 0; }
@@ -847,7 +848,7 @@ h1, h2 { font-family: var(--font-title); letter-spacing: .01em; }
   :root:is(:not([data-layout]), [data-layout="auto"]) #side-karte { display: block; grid-column: 2; grid-row: 1 / span 3; align-self: start;
     padding: .2rem 1rem 1rem; background: var(--iron); border: 1px solid var(--frame); }
   :root:is(:not([data-layout]), [data-layout="auto"]) .hero-head { grid-column: 3; grid-row: 1; background: var(--iron); border: 1px solid var(--frame); border-bottom: 0; }
-  :root:is(:not([data-layout]), [data-layout="auto"]) .side-tabs { grid-column: 3; grid-row: 2; grid-template-columns: repeat(3, minmax(0, 1fr)); border-inline: 1px solid var(--frame); }
+  :root:is(:not([data-layout]), [data-layout="auto"]) .side-tabs { grid-column: 3; grid-row: 2; grid-template-columns: repeat(4, minmax(0, 1fr)); border-inline: 1px solid var(--frame); }
   :root:is(:not([data-layout]), [data-layout="auto"]) #side-tab-karte { display: none; }
   :root:is(:not([data-layout]), [data-layout="auto"]) .side-panel:not(#side-karte) { grid-column: 3; grid-row: 3; align-self: start;
     background: var(--iron); border: 1px solid var(--frame); border-top: 0; }
@@ -1345,3 +1346,295 @@ dialog.dialog-klein[open] { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .npc-wechsel { animation: none; } }
 /* Gesprächsknopf im Hauptbildschirm */
 .npc-start { font-style: normal; }
+
+/* Patch 2.6.10: Einstellungs-Reiter (bei schmaler Leiste nur das Zahnrad) */
+/* Die Leiste ist schmal: der Reiter zeigt nur das Zahnrad, der Name steht im Tooltip und für Screenreader im Label. */
+.side-tab-kurz { display: none; }
+#side-tab-einstellungen .side-tab-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+#side-tab-einstellungen svg { width: 1.45rem; height: 1.45rem; }
+.einstellungen .save-actions { display: flex; flex-direction: column; align-items: stretch; gap: .35rem; }
+.einstellungen .save-badge { margin: .4rem 0 0; padding: .25rem .5rem; border: 1px solid var(--frame); border-radius: 3px; font-size: .85rem; color: var(--muted); }
+.einstellungen .option-row { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .6rem; margin: .45rem 0; font-size: .9rem; }
+.einstellungen .option-row select { margin-left: auto; }
+.menu-confirm { margin-top: .6rem; padding: .6rem .75rem; border: 1px solid var(--accent); border-radius: 3px; background: #241d16; }
+.menu-confirm p { margin: 0 0 .4rem; }
+
+/* Akt 2 bis 4 im Stadt-Hub */
+.welt-akte .akt-zweig { margin: .5rem 0; padding: .45rem .6rem; border-left: 3px solid var(--accent); }
+.welt-akte .akt-zweig.fertig { opacity: .7; border-left-color: var(--frame); }
+.akt5-tor { margin-top: .6rem; padding: .6rem .8rem; border: 1px solid var(--accent); border-radius: 4px; background: #241d16; }
+.akt5-tor h4 { margin: 0 0 .3rem; color: var(--accent); }
+
+/* Patch 2.6.15: Farbthemen je Fraktion (Henry). Das Attribut data-faction-theme am Wurzelelement wechselt bei Fraktionswahl
+ * und beim Laden. Henrys Variablen stehen wie geliefert, die bisherigen Variablen des Spiels werden darauf abgebildet. */
+:root[data-faction-theme="THEME_KRONREICH"] {
+  --bg-primary: #171513;
+  --bg-panel: #211d1a;
+  --bg-card: #292420;
+  --border-subtle: #3d352e;
+  --border-accent: #c89d54;
+  --text-primary: #ede6dc;
+  --text-muted: #a3988b;
+  --accent-primary: #c89d54;
+  --accent-secondary: #7d8894;
+  --hp-bar-fill: #9e2a2b;
+  --resource-bar-fill: #c89d54;
+  --bg: var(--bg-primary);
+  --iron-deep: var(--bg-primary);
+  --iron: var(--bg-panel);
+  --off-bg: var(--bg-card);
+  --line: var(--border-subtle);
+  --frame: var(--border-accent);
+  --ivory: var(--text-primary);
+  --muted: var(--text-muted);
+  --accent: var(--accent-primary);
+  --bar-hp: var(--hp-bar-fill);
+  --bar-stamina: var(--resource-bar-fill);
+}
+:root[data-faction-theme="THEME_ORDEN_DER_FLAMME"] {
+  --bg-primary: #161110;
+  --bg-panel: #211816;
+  --bg-card: #2b1e1b;
+  --border-subtle: #452d27;
+  --border-accent: #e06328;
+  --text-primary: #f2e6df;
+  --text-muted: #ad958c;
+  --accent-primary: #e06328;
+  --accent-secondary: #f0a848;
+  --hp-bar-fill: #b52b27;
+  --resource-bar-fill: #e06328;
+  --bg: var(--bg-primary);
+  --iron-deep: var(--bg-primary);
+  --iron: var(--bg-panel);
+  --off-bg: var(--bg-card);
+  --line: var(--border-subtle);
+  --frame: var(--border-accent);
+  --ivory: var(--text-primary);
+  --muted: var(--text-muted);
+  --accent: var(--accent-primary);
+  --bar-hp: var(--hp-bar-fill);
+  --bar-stamina: var(--resource-bar-fill);
+}
+:root[data-faction-theme="THEME_FREIE_HAEFEN"] {
+  --bg-primary: #10171c;
+  --bg-panel: #172229;
+  --bg-card: #1f2d36;
+  --border-subtle: #2f434f;
+  --border-accent: #4ea396;
+  --text-primary: #e4edf0;
+  --text-muted: #8fa4ad;
+  --accent-primary: #4ea396;
+  --accent-secondary: #c7a658;
+  --hp-bar-fill: #a33333;
+  --resource-bar-fill: #4ea396;
+  --bg: var(--bg-primary);
+  --iron-deep: var(--bg-primary);
+  --iron: var(--bg-panel);
+  --off-bg: var(--bg-card);
+  --line: var(--border-subtle);
+  --frame: var(--border-accent);
+  --ivory: var(--text-primary);
+  --muted: var(--text-muted);
+  --accent: var(--accent-primary);
+  --bar-hp: var(--hp-bar-fill);
+  --bar-stamina: var(--resource-bar-fill);
+}
+:root[data-faction-theme="THEME_ELFEN_PLACEHOLDER"] {
+  --bg-primary: #111714;
+  --bg-panel: #18211c;
+  --bg-card: #202b25;
+  --border-subtle: #324239;
+  --border-accent: #6aa87e;
+  --text-primary: #e6efe9;
+  --text-muted: #92a699;
+  --accent-primary: #6aa87e;
+  --accent-secondary: #c2d1d9;
+  --hp-bar-fill: #9e333b;
+  --resource-bar-fill: #6aa87e;
+  --bg: var(--bg-primary);
+  --iron-deep: var(--bg-primary);
+  --iron: var(--bg-panel);
+  --off-bg: var(--bg-card);
+  --line: var(--border-subtle);
+  --frame: var(--border-accent);
+  --ivory: var(--text-primary);
+  --muted: var(--text-muted);
+  --accent: var(--accent-primary);
+  --bar-hp: var(--hp-bar-fill);
+  --bar-stamina: var(--resource-bar-fill);
+}
+:root[data-faction-theme="THEME_ORKS_PLACEHOLDER"] {
+  --bg-primary: #171211;
+  --bg-panel: #221917;
+  --bg-card: #2c201d;
+  --border-subtle: #47332e;
+  --border-accent: #b8432e;
+  --text-primary: #ede3dc;
+  --text-muted: #a69288;
+  --accent-primary: #b8432e;
+  --accent-secondary: #c4b49f;
+  --hp-bar-fill: #a82424;
+  --resource-bar-fill: #b8432e;
+  --bg: var(--bg-primary);
+  --iron-deep: var(--bg-primary);
+  --iron: var(--bg-panel);
+  --off-bg: var(--bg-card);
+  --line: var(--border-subtle);
+  --frame: var(--border-accent);
+  --ivory: var(--text-primary);
+  --muted: var(--text-muted);
+  --accent: var(--accent-primary);
+  --bar-hp: var(--hp-bar-fill);
+  --bar-stamina: var(--resource-bar-fill);
+}
+:root[data-faction-theme="THEME_ZWERGE_PLACEHOLDER"] {
+  --bg-primary: #141517;
+  --bg-panel: #1d1f22;
+  --bg-card: #26292d;
+  --border-subtle: #3b4047;
+  --border-accent: #c47d3b;
+  --text-primary: #eaecf0;
+  --text-muted: #969ca6;
+  --accent-primary: #c47d3b;
+  --accent-secondary: #7c8999;
+  --hp-bar-fill: #a12d2d;
+  --resource-bar-fill: #c47d3b;
+  --bg: var(--bg-primary);
+  --iron-deep: var(--bg-primary);
+  --iron: var(--bg-panel);
+  --off-bg: var(--bg-card);
+  --line: var(--border-subtle);
+  --frame: var(--border-accent);
+  --ivory: var(--text-primary);
+  --muted: var(--text-muted);
+  --accent: var(--accent-primary);
+  --bar-hp: var(--hp-bar-fill);
+  --bar-stamina: var(--resource-bar-fill);
+}
+:root[data-faction-theme="THEME_UNTOTE_PLACEHOLDER"] {
+  --bg-primary: #0f1417;
+  --bg-panel: #161d21;
+  --bg-card: #1d262b;
+  --border-subtle: #2d3b42;
+  --border-accent: #66a3bd;
+  --text-primary: #e1eaed;
+  --text-muted: #899ba3;
+  --accent-primary: #66a3bd;
+  --accent-secondary: #9eb0b8;
+  --hp-bar-fill: #4b7b94;
+  --resource-bar-fill: #66a3bd;
+  --bg: var(--bg-primary);
+  --iron-deep: var(--bg-primary);
+  --iron: var(--bg-panel);
+  --off-bg: var(--bg-card);
+  --line: var(--border-subtle);
+  --frame: var(--border-accent);
+  --ivory: var(--text-primary);
+  --muted: var(--text-muted);
+  --accent: var(--accent-primary);
+  --bar-hp: var(--hp-bar-fill);
+  --bar-stamina: var(--resource-bar-fill);
+}
+:root[data-faction-theme] body, :root[data-faction-theme] .game-wrap { background-color: var(--bg-primary); }
+:root[data-faction-theme] .game-header { background: radial-gradient(ellipse at 24% 0%, var(--bg-card), var(--bg-primary) 74%); }
+:root[data-faction-theme] .side-tabs { background: var(--bg-primary); }
+
+/* Patch 2.6.16: Erstellung als dunkles Zwei-Spalten-Cockpit mit stehender rechter Spalte. */
+.creation { max-width: 1180px; grid-template-columns: minmax(0, 1fr) minmax(0, 320px); align-items: start; }
+.creation-vorschau { position: sticky; top: 1rem; display: grid; gap: .7rem; padding: .9rem; background: var(--iron-deep, #1d1915); color: var(--ivory, #efe4cc); border: 1px solid var(--frame, #6d5a41); border-radius: 6px; }
+.creation-vorschau figure { margin: 0; }
+.creation-vorschau #preview { width: 100%; aspect-ratio: 3 / 4; height: auto; }
+.creation-vorschau figcaption { font-size: .85rem; color: var(--muted, #b9a988); margin-top: .3rem; }
+.portrait-steuerung { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .35rem .6rem; align-items: center; }
+.portrait-steuerung label { margin: 0; font-size: .88rem; }
+.creation .portrait-steuerung select { padding: .3rem .4rem; }
+.creation-summary { border-top: 1px solid var(--frame, #6d5a41); padding-top: .5rem; }
+.creation-summary h3 { margin: 0 0 .3rem; font-size: 1rem; }
+.creation-summary p { margin: .25rem 0; font-size: .86rem; line-height: 1.35; }
+.creation-summary dl:empty { display: none; }
+.creation-knoepfe { display: grid; grid-template-columns: 1fr; gap: .4rem; margin: 0; }
+@media (max-width: 760px) {
+  .creation { grid-template-columns: minmax(0, 1fr); }
+  .creation-vorschau { position: static; grid-row: auto; }
+  .creation-vorschau figure { width: min(10rem, 50%); }
+}
+.creation .creation-vorschau select { background: #2a241e; color: var(--ivory, #efe4cc); border-color: var(--frame, #6d5a41); color-scheme: dark; }
+
+/* Patch 2.6.14: Aufstieg mit Abzeichen, Fähigkeitskarten und Meilensteinleiste. */
+.aufstieg-abzeichen { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; margin: .3rem 0 .6rem; }
+.abzeichen { padding: .2rem .55rem; border: 1px solid var(--line, #8a7457); border-radius: 999px; font-size: .85rem; }
+.abzeichen-offen { border-color: var(--accent, #b5862b); background: color-mix(in srgb, var(--accent, #b5862b) 22%, transparent); }
+.abzeichen-info { display: inline-grid; place-items: center; width: 1.4rem; height: 1.4rem; border-radius: 50%; border: 1px solid var(--line, #8a7457); font-size: .8rem; cursor: help; }
+.faehigkeit-karten { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; }
+@media (max-width: 640px) { .faehigkeit-karten { grid-template-columns: minmax(0, 1fr); } }
+.faehigkeit-karte { padding: .6rem .7rem; background: var(--iron-deep, #1d1915); color: var(--ivory, #efe4cc); border: 1px solid var(--frame, #6d5a41); border-left: 3px solid var(--accent, #b5862b); border-radius: 5px; }
+.faehigkeit-karte p { margin: .35rem 0; font-size: .86rem; line-height: 1.35; }
+.faehigkeit-kopf { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem; }
+.faehigkeit-kopf strong { flex: 1 1 auto; }
+.rang-pips { display: inline-flex; gap: 2px; }
+.rang-pips i { width: .9rem; height: .4rem; border: 1px solid var(--accent, #b5862b); }
+.rang-pips i.voll { background: var(--accent, #b5862b); }
+.kosten-pille { font-size: .75rem; padding: .05rem .45rem; border-radius: 999px; background: color-mix(in srgb, var(--accent, #b5862b) 30%, transparent); }
+.faehigkeit-fuss { color: var(--muted, #b9a988); }
+.faehigkeit-karte button { width: 100%; }
+.meilenstein-leiste { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .3rem; list-style: none; padding: 0; margin: .8rem 0; }
+.meilenstein-leiste li { padding: .35rem .4rem; border-top: 3px solid var(--line, #8a7457); font-size: .78rem; line-height: 1.25; }
+.meilenstein-leiste li.erreicht { border-top-color: var(--accent, #b5862b); }
+.meilenstein-leiste strong { display: block; }
+@media (max-width: 520px) { .meilenstein-leiste { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Patch 2.6.11: Kontor mit Rohstoffkarten, Proviantleiste, Kriegskasse und kompaktem Leerzustand. */
+.kontor-karten { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .35rem; list-style: none; padding: 0; margin: .3rem 0 .5rem; }
+.kontor-karten li { display: grid; text-align: center; padding: .4rem .2rem; border: 1px solid var(--line, #8a7457); border-radius: 4px; min-width: 0; }
+.kontor-karten strong { font-size: 1.25rem; line-height: 1.1; }
+.kontor-karten span { font-size: .72rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kontor-proviant { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .4rem; font-size: .88rem; }
+.kontor-proviant-knoepfe { display: inline-flex; gap: .25rem; }
+.kontor-kasse { margin: .5rem 0; padding: .4rem .6rem; border: 1px solid var(--accent, #b5862b); border-radius: 4px; }
+.kontor-kasse summary { cursor: pointer; font-weight: 600; }
+.kontor-kasse ul { list-style: none; padding: 0; margin: .4rem 0; display: grid; gap: .25rem; }
+.kontor-kasse li { display: grid; grid-template-columns: 5.5rem minmax(0, 1fr) 3.6rem; gap: .4rem; align-items: center; font-size: .82rem; }
+.kontor-kasse progress { width: 100%; height: .55rem; accent-color: var(--accent, #b5862b); }
+.kontor-kasse p { margin: .2rem 0 0; font-size: .8rem; }
+.kontor-leer { margin: 0; padding: .45rem .6rem; border: 1px dashed var(--line, #8a7457); border-radius: 4px; font-size: .85rem; }
+
+/* Patch 2.6.6: Kampfwerte als 2×2-Raster, Rohstoffe im festen Raster, Filterleiste beim Ausrüster. */
+.inv-stats, .inventory-hub .inv-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.inv-stats div { min-width: 0; }
+.inv-stats dd { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.rohstoff-raster .inv-row-kopf { flex-wrap: nowrap; }
+.rohstoff-raster .inv-row-auf { flex: 1 1 auto; min-width: 0; }
+.rohstoff-raster .inv-row-name { flex: 0 0 34%; min-width: 0; }
+.rohstoff-raster .inv-row-name strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.rohstoff-raster .inv-kennwert { flex: 0 0 auto; white-space: nowrap; }
+.rohstoff-raster .inv-primaer { flex: 0 0 auto; white-space: nowrap; padding-inline: .5rem; }
+.handel-filter { display: flex; flex-wrap: wrap; gap: .25rem; margin: 0 0 .4rem; }
+.handel-filter [aria-pressed="true"] { border-color: var(--accent, #b5862b); background: color-mix(in srgb, var(--accent, #b5862b) 25%, transparent); }
+
+/* Patch 2.6.12: Chronik mit Goldkarte, Statusmarken und Zeitleiste. */
+.travel-objective { border: 1px solid var(--accent, #b5862b); border-radius: 5px; padding: .45rem .6rem; }
+.travel-objective h3 { margin-top: 0; font-size: .95rem; }
+.quest-marke-done { color: var(--accent, #b5862b); font-weight: 600; }
+#quest-filters { display: flex; flex-wrap: nowrap; gap: .25rem; overflow-x: auto; }
+#quest-filters button { flex: 1 0 auto; padding: .25rem .45rem; font-size: .8rem; border-radius: 999px; }
+.journal-zeitleiste { list-style: none; padding: 0 0 0 .8rem; margin: .3rem 0; border-left: 2px solid var(--line, #8a7457); max-height: 30rem; overflow-y: auto; }
+.journal-zeitleiste li { position: relative; padding: .25rem 0 .45rem .4rem; }
+.journal-zeitleiste li::before { content: ""; position: absolute; left: -1.15rem; top: .55rem; width: .5rem; height: .5rem; border-radius: 50%; background: var(--accent, #b5862b); }
+.journal-zeitleiste small { display: block; color: var(--muted, #8a7457); font-size: .75rem; }
+.journal-zeitleiste p { margin: 0; font-size: .86rem; }
+.journal-marken { display: flex; flex-wrap: wrap; gap: .2rem; margin-top: .2rem; }
+.journal-marken span { font-size: .72rem; padding: 0 .4rem; border-radius: 999px; border: 1px solid var(--line, #8a7457); }
+
+/* Patch 2.6.8/2.6.9: Lagerfeuer-Szene. */
+.lagerfeuer { margin: 0 0 .8rem; padding: .6rem .8rem; border: 1px solid var(--accent, #b5862b); border-radius: 6px; background: color-mix(in srgb, var(--accent, #b5862b) 10%, transparent); }
+.lagerfeuer h3 { margin: 0 0 .3rem; }
+.lagerfeuer-regie { font-style: italic; color: var(--muted, #6b5a46); }
+.lagerfeuer-persoenlich { border-width: 2px; }
+.lagerfeuer-antworten { display: grid; gap: .35rem; }
+.lagerfeuer-antworten button { text-align: left; }
+.lagerfeuer-antworten small { display: block; font-size: .78rem; opacity: .85; }
+.party-vorteile { font-size: .85rem; margin: .2rem 0 .5rem; }
+
+/* Patch 2.6.7: Einwurf eines Gefährten und gestellte Fragen im Gespräch. */
+.npc-einwurf { font-style: italic; border-left: 2px solid var(--accent, #b5862b); padding-left: .5rem; }
+.npc-frage { font-weight: 600; margin-top: .6rem; }

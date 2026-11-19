@@ -85,10 +85,6 @@
           <label for="volk-wahl">Vielseitig · +1 auf einen Grundwert nach Wahl</label>
           <select id="volk-wahl"></select>
         </div>
-        <label for="appearance">Porträt</label>
-        <select id="appearance"><option value="mann">Männlich</option><option value="frau">Weiblich</option></select>
-        <label for="variant">Variante</label>
-        <select id="variant"></select>
         <div class="creation-werte">
         <fieldset id="point-buy"><legend>Grundwerte</legend>
           <p id="points-left" aria-live="polite"></p>
@@ -100,14 +96,28 @@
           <button id="skill-suggest" class="action" type="button">Vorschlag übernehmen</button>
         </fieldset>
         </div>
-        <dl id="preview-stats" class="stat-line"></dl>
         <p id="creation-status" role="status"></p>
-        <div class="actions">
-          <button id="character-submit" class="action primary" type="submit">Prolog starten</button>
+      </form>
+      <!-- Patch 2.6.16: rechte Spalte bleibt stehen: Porträt mit Auswahl, Zusammenfassung, Knöpfe. -->
+      <aside class="creation-vorschau" aria-label="Vorschau">
+        <figure class="creation-portrait"><div id="preview" class="avatar" role="img"></div><figcaption id="preview-caption"></figcaption></figure>
+        <div class="portrait-steuerung">
+          <label for="appearance">Porträt</label>
+          <select id="appearance" form="character-form"><option value="mann">Männlich</option><option value="frau">Weiblich</option></select>
+          <label for="variant">Variante</label>
+          <select id="variant" form="character-form"></select>
+        </div>
+        <section class="creation-summary" aria-label="Zusammenfassung">
+          <h3 id="summary-title">Zusammenfassung</h3>
+          <p id="summary-faction"></p>
+          <p id="summary-class"></p>
+          <dl id="preview-stats" class="stat-line"></dl>
+        </section>
+        <div class="actions creation-knoepfe">
+          <button id="character-submit" class="action primary" type="submit" form="character-form">Prolog starten</button>
           <button class="action" type="button" id="cancel">Zurück</button>
         </div>
-      </form>
-      <figure><div id="preview" class="avatar" role="img"></div><figcaption id="preview-caption"></figcaption></figure>
+      </aside>
     </section>
 
     <section class="prologue" id="prologue" aria-labelledby="intro-title" hidden>
@@ -170,6 +180,7 @@
             <button type="button" role="tab" id="side-tab-beutel" aria-controls="side-beutel" aria-selected="false" tabindex="-1" data-side-tab="beutel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7c0-2 1.5-3 4-3s4 1 4 3 M6 8h12l1 11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z M10 4l-1-2 M14 4l1-2"/></svg><span class="side-tab-label">Beutel</span></button>
             <button type="button" role="tab" id="side-tab-chronik" aria-controls="side-chronik" aria-selected="false" tabindex="-1" data-side-tab="chronik"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z M5 17a3 3 0 0 1 3-3h10 M9 8h6 M9 11h4"/></svg><span class="side-tab-label">Chronik</span></button>
             <button type="button" role="tab" id="side-tab-gefaehrten" aria-controls="side-gefaehrten" aria-selected="false" tabindex="-1" data-side-tab="gefaehrten"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6 M16 11a2.5 2.5 0 1 0 0-5 M17 14c2.5.5 4 2.6 4 5.5"/></svg><span class="side-tab-label">Gefährten</span></button>
+            <button type="button" role="tab" id="side-tab-einstellungen" aria-controls="side-einstellungen" aria-selected="false" tabindex="-1" data-side-tab="einstellungen" title="Einstellungen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="side-tab-label">Einstellungen</span><span class="side-tab-kurz" aria-hidden="true">⚙</span></button>
           </div>
           <div id="side-karte" class="side-panel" role="tabpanel" aria-labelledby="side-tab-karte">
             <button type="button" class="action primary hub-launch rk-launch" data-reisekarte-open><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z M9 4v14 M15 6v14"/></svg><span>Reisekarte öffnen</span></button>
@@ -212,10 +223,38 @@
             </details>
             <div class="actions save-actions">
               <button id="legacy-build" class="action" hidden>Held an das neue Klassensystem anpassen</button>
-              <button id="export" class="action">Spielstand exportieren</button>
+            </div>
+          </div>
+          <div id="side-einstellungen" class="side-panel einstellungen" role="tabpanel" aria-labelledby="side-tab-einstellungen">
+            <details open><summary>Spielstand speichern</summary>
+              <div class="actions save-actions">
+                <button id="save-now" class="action">Lokal speichern</button>
+                <button id="export" class="action">Spielstand als Datei exportieren</button>
+              </div>
+              <p id="save-status" class="save-badge" role="status"></p>
+            </details>
+            <details open><summary>Spielstand laden</summary>
+              <div class="actions save-actions">
+                <button id="load-local" class="action">Letzten lokalen Spielstand laden</button>
+                <button id="load-wegpunkt" class="action">Wegpunkt vor letzter Schlacht laden</button>
+                <label for="save-file-play" class="action file-label">Spielstand-Datei importieren<input type="file" id="save-file-play" accept=".json,application/json"></label>
+              </div>
+              <p id="load-status" role="status"></p>
+            </details>
+            <details open><summary>Optionen</summary>
+              <label class="option-row"><input type="checkbox" id="opt-punkte"> Vor Bosskämpfen an ungenutzte Aufstiegspunkte erinnern</label>
+              <label class="option-row">Begleiter-Einwürfe in Dialogen &amp; am Lagerfeuer
+                <select id="opt-einwuerfe"><option value="HÄUFIG">Häufig</option><option value="NORMAL">Normal</option><option value="SELTEN">Selten</option></select></label>
+              <label class="option-row">Kampflog-Anzeige
+                <select id="opt-kampflog"><option value="KOMPAKT">Kompakt</option><option value="AUSFÜHRLICH">Ausführlich</option></select></label>
+            </details>
+            <div class="actions save-actions">
               <button id="menu" class="action">Hauptmenü</button>
             </div>
-            <p id="save-status" role="status"></p>
+            <div id="menu-confirm" class="menu-confirm" hidden>
+              <p>Möchtest du wirklich zum Hauptmenü zurückkehren? Nicht gespeicherter Fortschritt geht verloren.</p>
+              <div class="actions"><button id="menu-yes" class="action primary">Zum Hauptmenü</button><button id="menu-no" class="action">Abbrechen</button></div>
+            </div>
           </div>
         </aside>
       </div>

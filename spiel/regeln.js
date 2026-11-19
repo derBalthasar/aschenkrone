@@ -169,7 +169,7 @@ const rules = (() => {
     return build;
   }
 
-  function create(name, faction, appearance, variant, role = "krieger", build = null) {
+  function create(name, faction, appearance, variant, role = "krieger", build = null, training = {}, grenze = K.regeln.grundwertMax) {
     const cleanName = name.trim();
     if (!own(K.fraktionen, faction) || !K.klassenFolge.includes(role)) throw new Error("Wähle Volk, Fraktion und Klasse.");
     const origin = originOf(faction);
@@ -178,7 +178,9 @@ const rules = (() => {
       throw new Error("Bitte gib einen Namen ein und wähle ein Porträt.");
     }
     const setup = build ?? defaultBuild(faction, role);
-    const problem = buildProblem(faction, role, setup);
+    // Patch 2.6.3: Beim Laden zählen trainierte Grundwerte für die Fertigkeitsgrenzen mit (sonst war ein Spielstand nach
+    // Stufenpunkten auf Willenskraft und Spezialisierung in Mut nicht mehr ladbar; gefunden mit sim/e2e.cjs).
+    const problem = buildProblem(faction, role, setup, training, grenze);
     if (problem) throw new Error(problem);
     const weapon = kit({ faction, role }).weapon;
     const state = {
@@ -363,6 +365,9 @@ const rules = (() => {
     state.gefaehrtenPerks ??= [];
     state.lagerGesehen ??= [];
     state.vorhut ??= null;
+    state.lagerSzene ??= null;
+    if (state.lagerSzene && !lagerSzeneDaten(state.lagerSzene)) state.lagerSzene = null;
+    state.gefaehrtenEtappen ??= {};
     // Patch 2.6.2: Die fünf alten Meister-Talente werden zu den neuen Talentbäumen (gleicher Rang).
     if (isRecord(state.talente)) {
       for (const [alt, neu] of Object.entries(SY.daten.aufstieg.talentAlt ?? {})) {
@@ -395,7 +400,8 @@ const rules = (() => {
     // Patch 2.5.5: Bisher trainierte Grundwerte stammen aus alten Punkten und zählen nicht gegen die neuen Stufenpunkte.
     state.grundwertAlt ??= isRecord(state.training) ? total(state.training) : 0;
     state.faehigkeitRaenge ??= {};
-    create(state.name, state.faction, state.appearance, state.variant, state.role, state.build);
+    create(state.name, state.faction, state.appearance, state.variant, state.role, state.build,
+      isRecord(state.training) ? state.training : {}, grundwertGrenze(state));
     const combat = state.combat;
     const validList = (value, check, limit) => Array.isArray(value) && value.length <= limit && value.every(check);
     if (state.origin !== originOf(state.faction) ||
@@ -883,7 +889,8 @@ const rules = (() => {
     if (!menschen(state)) return null;
     return { punkte: faehigkeitPunkte(state), rangMax: aufstieg.rangMax, rangStufen: { ...aufstieg.rangStufen },
       liste: abilities(state).filter((f) => f.frei).map((f) => ({ id: f.id, name: f.name, rang: faehigkeitRang(state, f.id),
-        bonus: Math.round(aufstieg.rangBonus * 100 * (faehigkeitRang(state, f.id) - 1)), grund: faehigkeitGrund(state, f.id) })) };
+        bonus: Math.round(aufstieg.rangBonus * 100 * (faehigkeitRang(state, f.id) - 1)), grund: faehigkeitGrund(state, f.id),
+        wirkung: f.wirkung, kosten: f.kostenWert, zahlung: f.zahlung })), rangBonus: Math.round(aufstieg.rangBonus * 100) };
   }
 
   // Spezialisierung ab Quest-Stufe 3: Titel, +1 Fertigkeitspunkt, +1 Grundwert. Die Wahl gilt für immer.
@@ -1369,10 +1376,13 @@ const rules = (() => {
       const restored = Math.max(1, Math.ceil(target.max * supply.revive / 100));
       changeHealth(state, targetId, restored);
       events.push({ kind: "revive", actor: "hero", ally: targetId, value: restored });
-    } else if (supply.heal) healAlly(state, targetId, supply.heal, "hero", events);
+    }
+    // Patch 2.6.9: Hafen-Tinktur: +15 % Wirkung der Heil- und Fokustränke.
+    const tinktur = (wert) => /^POT_/.test(id) && state.gefaehrtenPerks?.includes("PERK_FH_HAFEN_TINKTUR") ? Math.round(wert * 1.15) : wert;
+    if (!supply.revive && supply.heal) healAlly(state, targetId, tinktur(supply.heal), "hero", events);
     if (supply.ember) state.ember = Math.min(emberLimit(state), state.ember + supply.ember);
-    if (supply.mana && state.combat) state.combat.held.mana = Math.min(kraft(state).mana, state.combat.held.mana + supply.mana);
-    if (supply.ausdauer && state.combat) state.combat.held.ausdauer = Math.min(kraft(state).ausdauer, state.combat.held.ausdauer + supply.ausdauer);
+    if (supply.mana && state.combat) state.combat.held.mana = Math.min(kraft(state).mana, state.combat.held.mana + tinktur(supply.mana));
+    if (supply.ausdauer && state.combat) state.combat.held.ausdauer = Math.min(kraft(state).ausdauer, state.combat.held.ausdauer + tinktur(supply.ausdauer));
     if (supply.cure) {
       delete (targetId === "hero" ? state.heroStatus : state.partyVitals[targetId].status)[supply.cure];
       events.push({ kind: "cleanse", actor: "hero", ally: targetId });
@@ -1974,6 +1984,12 @@ const rules = (() => {
     note(state, "Ihr rastet in " + N.get(state.knoten).name + ". Alle sind wieder bei Kräften" +
       (kosten ? " · −" + kosten + " " + resourceName(state) : " · als Bannerjarl ohne Kosten") +
       (menschen(state) ? " · Moral " + SY.moral(state) : "") + ".");
+    if (menschen(state)) {
+      // Patch 2.6.9: Lied der Wundheilung: +4 als Schild für den nächsten Kampf (nach der Rast sind alle schon geheilt).
+      if (state.gefaehrtenPerks?.includes("PERK_KR_AHNENLIED")) state.lagerBuff = { ...(state.lagerBuff ?? {}),
+        schild: (state.lagerBuff?.schild ?? 0) + 4, name: [state.lagerBuff?.name, "Lied der Wundheilung"].filter(Boolean).join(", ") };
+      lagerSzeneWaehlen(state);
+    }
     return state;
   }
 
@@ -2165,10 +2181,11 @@ const rules = (() => {
   // (Kampfdokument: ein einzelner Held schafft 1 Elite, ein Anführer braucht eine Gruppe).
   const auftragGegner = { ...(NQ?.daten.gegnerTypen ?? {}),
     urgash: { name: "Kapitän Urgash", rang: "elite" },
-    // Patch 2.6.0/2.6.1: Bosse der Schwester-Zweige und von Akt 4.
-    feldherr: { name: "Abtrünniger Feldherr", rang: "anfuehrer" },
-    zelot: { name: "Verderbter Zelot", rang: "anfuehrer", tags: ["untot", "ascheriss"] },
-    kaperkapitaen: { name: "Abtrünniger Kaperkapitän", rang: "anfuehrer" },
+    // Patch 2.6.0/2.6.1: Bosse der Schwester-Zweige und von Akt 4. Die Zweig-Bosse kämpfen wie Urgash als Elite
+    // (E2E-Simulation 2.6.3: als Anführer verliert auch eine Gruppe sechs Stufen darüber), Thorvald als Anführer.
+    feldherr: { name: "Abtrünniger Feldherr", rang: "elite" },
+    zelot: { name: "Verderbter Zelot", rang: "elite", tags: ["untot", "ascheriss"] },
+    kaperkapitaen: { name: "Abtrünniger Kaperkapitän", rang: "elite" },
     thorvald: { name: "Erzpriester Thorvald, der Bleiche Skalde", rang: "anfuehrer", tags: ["untot"] },
     aschenschatten: { name: "Ascheriss-Schatten", rang: "mitlaeufer", anzahl: 3, leader: "Schattenführer", ally: "Schatten", tags: ["ascheriss"] } };
   for (const [typ, gegner] of Object.entries(auftragGegner)) {
@@ -2239,6 +2256,8 @@ const rules = (() => {
   // Beute der Gegner der Menschenlande: Silber, Material, Tränke, Ausrüstung; Runensplitter gehen ins Kontor.
   function systemBeute(state, gegnerId) {
     const b = SY.beute(state, gegnerId, travelDice);
+    // Patch 2.6.9: Kaperbeute: +10 % Silber aus besiegten Gegnern.
+    if (b.silber && state.gefaehrtenPerks?.includes("PERK_FH_KAPERBEUTE")) b.silber = Math.round(b.silber * 1.1);
     state.silver += b.silber;
     const teile = [b.silber + " Silber"];
     const sachen = [];
@@ -2753,11 +2772,25 @@ const rules = (() => {
     return SY.ausruestungErlaubt(state.faction, klasse.id, id) ? null : "nicht für " + klasse.name;
   }
   const kaufWaren = Object.values(SY.daten.gegenstaende).filter((g) => g.source?.includes("KAUF") && g.baseBuyPrice);
+  // Patch 2.6.6: Trankbeschreibungen in der Spielskala (÷ 3,5). Henrys vier Texte wörtlich, die übrigen nach demselben Muster.
+  const trankTexte = { POT_HEILUNG_1: "POT_HEAL_1", POT_HEILUNG_2: "POT_HEAL_2", POT_HEILUNG_3: "POT_HEAL_3", POT_FOKUS_1: "POT_FOCUS_1" };
+  function effektText(id) {
+    const g = SY.daten.gegenstaende[id];
+    if (!g?.effect) return null;
+    const henry = V260.handelUi?.trade_tab_fixes?.potion_descriptions_3_5_scale?.[trankTexte[id]];
+    if (henry) return henry;
+    if (!/^POT_/.test(id)) return g.effect;
+    const vorrat = world.supplies[id] ?? {};
+    const text = g.effect.replace(/(\d+) LP/, (m, n) => (vorrat.heal ?? SY.skaliert(Number(n))) + " LP")
+      .replace(/(\d+) Ausdauer/, (m, n) => (vorrat.ausdauer ?? SY.skaliert(Number(n))) + " Ausdauer")
+      .replace(/(\d+) Mana/, (m, n) => (vorrat.mana ?? SY.skaliert(Number(n))) + " Mana");
+    return (g.tier ? "Tier " + g.tier + " · " : "") + text;
+  }
   function ausruester(state) {
     if (!imHub(state) || !menschen(state) || !SY.kontorAm(state.knoten)) return null;
     const rang = SY.rufRang(SY.ruf(state, SY.kontorAm(state.knoten)));
     return {
-      kaufen: kaufWaren.map((g) => ({ id: g.id, name: g.name, tier: g.tier, effekt: g.effect ?? null, preis: SY.gegenstandPreis(state, state.knoten, g.id, true),
+      kaufen: kaufWaren.map((g) => ({ id: g.id, name: g.name, tier: g.tier, effekt: effektText(g.id), preis: SY.gegenstandPreis(state, state.knoten, g.id, true),
         grund: ausruesterGrund(state, g.id, true), passt: !world.gear[g.id] || !ausruestungGrund(state, g.id) })),
       verkaufen: [...new Set(state.inventory.filter((id) => SY.daten.gegenstaende[id]?.baseSellPrice))].map((id) => ({ id, name: world.items[id],
         anzahl: state.inventory.filter((x) => x === id).length, preis: SY.gegenstandPreis(state, state.knoten, id, false),
@@ -2966,6 +2999,8 @@ const rules = (() => {
     zweige: SY.daten.v260.ASCHENKRONE_ACT2_ACT3_BRANCH_DATA.sister_branches,
     akt4: SY.daten.v260.ASCHENKRONE_ACT4_MAIN_STORY,
     armada: SY.daten.v260.ASCHENKRONE_ARMADA_AND_ACT5_GATE,
+    handelUi: SY.daten.v260.ASCHENKRONE_UI_MASTER_V2616_PART_3,
+    lager: SY.daten.v260.ASCHENKRONE_V268_CAMP_COMPANION_DIALOGUES,
   };
   const zweigFraktion = { KRONREICH: "kronreich", ORDEN_DER_FLAMME: "orden", FREIE_HAEFEN: "haefen" };
   const zweigHub = { kronreich: "kronhall", orden: "glutberg", haefen: "perlvik" };
@@ -3014,7 +3049,7 @@ const rules = (() => {
   function zweigInfo(state, fraktion) {
     const daten = zweigDaten(fraktion);
     const zweig = akteStand(state).zweige[fraktion] ?? { stufe: 0 };
-    const akt = zweig.akt ?? (zweigeFertig(state) + 1 + (Object.values(akteStand(state).zweige).some((z) => z.stufe > 0 && z.stufe < 3) ? 1 : 0));
+    const akt = zweig.akt ?? zweigeFertig(state) + 2;
     const stufe = daten.stages[Math.min(2, zweig.stufe)];
     return { fraktion, id: daten.branch_id, titel: daten.title, hub: zweigHub[fraktion], text: daten.summary, akt: Math.min(3, akt),
       stufen: zweigStufen(Math.min(3, akt)).join("-"), fortschritt: zweig.stufe, fertig: zweig.stufe >= 3, wahl: zweig.wahl ?? null,
@@ -3024,7 +3059,7 @@ const rules = (() => {
         boss: Boolean(stufe.boss_template), rohstoffe: stufe.reward_resources ?? null },
       spez: daten.faction_specialization_unlock, grund: zweigGrund(state, fraktion, zweig.stufe === 0 ? "good" : null) };
   }
-  const zweigWahlLabel = { good: "Gute Tat: im Namen der Krone und der Dörfer", mercenary: "Söldnerweg: gegen Silber", evil: "Schlechte Tat: plündern und erpressen" };
+  const zweigWahlLabel = { good: "Gute Tat: Dörfer und Wege schützen", mercenary: "Söldnerweg: gegen Silber", evil: "Schlechte Tat: plündern und erpressen" };
   const zweigWahlText = (o) => [o.reputation_delta ? "Ruf " + (o.reputation_delta > 0 ? "+" : "") + o.reputation_delta : "",
     o.silver_bonus_pct ? "+" + o.silver_bonus_pct + " % Silber" : "", o.bonus_resources ? "+" + o.bonus_resources + " Rohstoffe" : "",
     o.unlocks_protectorate ? "Schutzbund" : ""].filter(Boolean).join(", ");
@@ -3251,6 +3286,136 @@ const rules = (() => {
         ziele: gate.planned_continents_preview } : null };
   }
 
+  // ---- Patch 2.6.8 / 2.6.9: Lagerfeuer-Szenen und persönliche Gefährten-Szenen bei der Rast (Menschen) ----
+  // Bei jeder Rast mit mindestens einem Gefährten: zuerst ein offener Akt-Meilenstein, dann eine fällige persönliche Szene
+  // (nach 4 gemeinsamen Etappen), sonst mit 65 % eine Lagerszene nach dem Archetyp eines Gefährten, ohne Wiederholung,
+  // bis der Vorrat erschöpft ist. Thorvalds Tarnung und die Identität der Stillen Feder bleiben gewahrt (keine Szene verrät sie).
+  const lagerRegeln = () => V260.lager.camp_event_rules;
+  const lagerSzenen = () => V260.lager.camp_scenes_by_companion_archetype;
+  const lagerMeilensteine = () => V260.lager.act_specific_camp_milestones;
+  const personModule = { kronreich: "ASCHENKRONE_V269_COMPANION_SCENES_KRONREICH", orden: "ASCHENKRONE_V269_COMPANION_SCENES_ORDEN",
+    haefen: "ASCHENKRONE_V269_COMPANION_SCENES_HAEFEN" };
+  const personSzenen = (fraktion) => SY.daten.v260[personModule[fraktion]]?.companion_personal_scenes ?? [];
+  const lagerArchetyp = (klasse) => ["krieger", "waechter"].includes(klasse) ? "KRIEGER_WAECHTER"
+    : ["spaeher", "schurke"].includes(klasse) ? "SPAEHER_SCHURKE" : "MAGIER_HEILER";
+  // Archetyp der persönlichen Szene: Platz 1 Front, Platz 2 Späher/Schatten, Platz 3 Unterstützung.
+  const personArchetyp = (slot) => /_COMP_1_/.test(slot) ? "KRIEGER_WAECHTER" : /_COMP_2_/.test(slot) ? "SPAEHER_SCHURKE" : "MAGIER_HEILER";
+  // Zuordnung Szene → Gefährte der Fraktionsreihe: erst nach passendem Archetyp, dann der übrige Gefährte.
+  function personZuordnung(fraktion) {
+    const frei = (NQ?.reihe(fraktion)?.begleiter ?? []).map((b) => begleiterNachAuftrag[b.auftrag]).filter(Boolean);
+    const zuordnung = {};
+    const szenen = personSzenen(fraktion);
+    for (const s of szenen) {
+      const id = frei.find((c) => lagerArchetyp(world.companions[c].klasse) === personArchetyp(s.companion_slot));
+      if (id) { zuordnung[s.scene_id] = id; frei.splice(frei.indexOf(id), 1); }
+    }
+    for (const s of szenen) if (!zuordnung[s.scene_id] && frei.length) zuordnung[s.scene_id] = frei.shift();
+    return zuordnung;
+  }
+  const personZuordnungen = Object.fromEntries(["kronreich", "orden", "haefen"].map((f) => [f, personZuordnung(f)]));
+  function personSzeneFaellig(state) {
+    for (const fraktion of ["kronreich", "orden", "haefen"]) {
+      for (const s of personSzenen(fraktion)) {
+        const id = personZuordnungen[fraktion][s.scene_id];
+        if (!id || !state.party.includes(id) || state.lagerGesehen.includes(s.scene_id)) continue;
+        if (personSzenen(fraktion).some((x) => x !== s && personZuordnungen[fraktion][x.scene_id] === id && state.lagerGesehen.includes(x.scene_id))) continue;
+        if ((state.gefaehrtenEtappen?.[id] ?? 0) >= s.trigger_condition.min_stages_together) return { id: s.scene_id, art: "person", begleiter: id };
+      }
+    }
+    return null;
+  }
+  function lagerSzeneWaehlen(state) {
+    state.lagerSzene = null;
+    state.lagerGesehen ??= [];
+    state.gefaehrtenPerks ??= [];
+    if (!state.party.length) return;
+    if (state.lagerMeilenstein) {
+      state.lagerSzene = { id: state.lagerMeilenstein, art: "meilenstein", begleiter: state.party[0] };
+      state.lagerMeilenstein = null;
+      return;
+    }
+    const person = personSzeneFaellig(state);
+    if (person) { state.lagerSzene = person; return; }
+    if (Math.floor(travelDice() * 100) >= lagerRegeln().trigger_chance_pct) return;
+    const passend = state.party.flatMap((id) => lagerSzenen().filter((s) => s.archetype === lagerArchetyp(world.companions[id].klasse))
+      .map((s) => ({ s, id })));
+    if (!passend.length) return;
+    let offen = passend.filter(({ s }) => !state.lagerGesehen.includes(s.scene_id));
+    if (!offen.length) {
+      // Vorrat erschöpft: die Lagerszenen dieser Gruppe dürfen wieder erscheinen.
+      state.lagerGesehen = state.lagerGesehen.filter((id) => !passend.some(({ s }) => s.scene_id === id));
+      offen = passend;
+    }
+    const wahl = offen[Math.floor(travelDice() * offen.length) % offen.length];
+    state.lagerSzene = { id: wahl.s.scene_id, art: "lager", begleiter: wahl.id };
+  }
+  const lagerBuffNamen = { BUFF_EISERNE_ENTSCHLOSSENHEIT: "Eiserne Entschlossenheit (+1 Rüstung)", BUFF_SOELDNER_BLUTDURST: "Söldner-Blutdurst (+8 % Schaden)",
+    BUFF_ERSTSCHLAG_LAUER: "Erstschlag aus der Lauer (+12 % Krit)", BUFF_ASCHERISS_FOKUS: "Ascheriss-Fokus (+10 % Fähigkeitsschaden)" };
+  function lagerFolgeText(e) {
+    const teile = [];
+    if (e.moral_delta) teile.push("Moral +" + e.moral_delta);
+    if (e.next_combat_buff) teile.push("nächster Kampf: " + (lagerBuffNamen[e.next_combat_buff.buff_id] ?? e.next_combat_buff.buff_id));
+    if (e.companion_heal_bonus_hp) teile.push("nächster Kampf: Schild " + e.companion_heal_bonus_hp);
+    if (e.party_heal_bonus_hp) teile.push("nächster Kampf: Schild " + e.party_heal_bonus_hp);
+    if (e.party_mana_and_stamina_restore) teile.push("nächster Kampf: +" + e.party_mana_and_stamina_restore + " Mana und Ausdauer");
+    if (e.next_stages_ambush_reduction_pct) teile.push("−" + e.next_stages_ambush_reduction_pct + " % Hinterhalt für " + e.duration_stages + " Etappen");
+    if (e.party_all_stats_next_combat_pct) teile.push("nächster Kampf: +" + e.party_all_stats_next_combat_pct + " % Schaden");
+    if (e.unlock_companion_perk) teile.push("Vorteil " + e.unlock_companion_perk.name + ": " + e.unlock_companion_perk.bonus);
+    return teile.join(" · ");
+  }
+  function lagerSzeneDaten(szene) {
+    if (!szene) return null;
+    if (szene.art === "meilenstein") {
+      const m = lagerMeilensteine().find((x) => x.scene_id === szene.id);
+      return m && { regie: "Das Lagerfeuer brennt hoch, und alle rücken näher zusammen.", text: m.dialogue,
+        antworten: [{ id: "WEITER", label: "Schweigend nicken und den Becher heben", effects: m.effects }] };
+    }
+    if (szene.art === "person") {
+      const s = ["kronreich", "orden", "haefen"].flatMap(personSzenen).find((x) => x.scene_id === szene.id);
+      return s && { regie: s.stage_direction, text: s.dialogue, antworten: s.choices.map((c) => ({ id: c.choice_id, label: c.label, effects: c.effects })) };
+    }
+    const s = lagerSzenen().find((x) => x.scene_id === szene.id);
+    return s && { regie: s.stage_direction, text: s.dialogue, antworten: s.player_responses.map((r) => ({ id: r.response_id, label: r.label, effects: r.effects })) };
+  }
+  function lagerSzeneInfo(state) {
+    const daten = lagerSzeneDaten(state.lagerSzene);
+    if (!daten) return null;
+    return { ...state.lagerSzene, sprecher: world.companions[state.lagerSzene.begleiter]?.name ?? "Deine Gefährten",
+      persoenlich: state.lagerSzene.art === "person", meilenstein: state.lagerSzene.art === "meilenstein",
+      regie: daten.regie, text: daten.text, antworten: daten.antworten.map((a) => ({ id: a.id, label: a.label, folge: lagerFolgeText(a.effects) })) };
+  }
+  function lagerAntwort(previous, antwortId) {
+    const daten = lagerSzeneDaten(previous.lagerSzene);
+    const antwort = daten?.antworten.find((a) => a.id === antwortId);
+    if (!antwort || previous.combat) return previous;
+    const state = structuredClone(previous);
+    const e = antwort.effects ?? {};
+    if (e.moral_delta) state.moral = Math.min(SY.daten.moral.max, (state.moral ?? SY.daten.moral.start) + e.moral_delta);
+    const buff = { ...(state.lagerBuff ?? {}) };
+    const namen = buff.name ? [buff.name] : [];
+    if (e.next_combat_buff) {
+      const { buff_id, duration_combats, ...werte } = e.next_combat_buff;
+      for (const [k, v] of Object.entries(werte)) buff[k] = (buff[k] ?? 0) + v;
+      namen.push(lagerBuffNamen[buff_id] ?? buff_id);
+    }
+    const schild = (e.companion_heal_bonus_hp ?? 0) + (e.party_heal_bonus_hp ?? 0);
+    if (schild) { buff.schild = (buff.schild ?? 0) + schild; namen.push("Schild " + schild); }
+    if (e.party_mana_and_stamina_restore) { buff.ressource = (buff.ressource ?? 0) + e.party_mana_and_stamina_restore; namen.push("+" + e.party_mana_and_stamina_restore + " Mana und Ausdauer"); }
+    if (e.party_all_stats_next_combat_pct) { buff.party_all_stats_pct = (buff.party_all_stats_pct ?? 0) + e.party_all_stats_next_combat_pct; namen.push("+" + e.party_all_stats_next_combat_pct + " % Schaden"); }
+    if (namen.length > (buff.name ? 1 : 0) || Object.keys(buff).length) state.lagerBuff = Object.keys(buff).length ? { ...buff, name: [...new Set(namen)].join(", ") } : null;
+    if (e.next_stages_ambush_reduction_pct) state.vorhut = { prozent: e.next_stages_ambush_reduction_pct, etappen: e.duration_stages ?? 3 };
+    state.gefaehrtenPerks ??= [];
+    state.lagerGesehen ??= [];
+    if (e.unlock_companion_perk && !state.gefaehrtenPerks.includes(e.unlock_companion_perk.perk_id)) state.gefaehrtenPerks.push(e.unlock_companion_perk.perk_id);
+    state.lagerGesehen = [...new Set([...state.lagerGesehen, state.lagerSzene.id])];
+    note(state, "Am Lagerfeuer: " + antwort.label + (lagerFolgeText(e) ? " · " + lagerFolgeText(e) : "") + ".");
+    state.lagerSzene = null;
+    return state;
+  }
+  const lagerVorteile = (state) => (state.gefaehrtenPerks ?? []).map((id) => ["kronreich", "orden", "haefen"].flatMap(personSzenen)
+    .flatMap((s) => s.choices).map((c) => c.effects.unlock_companion_perk).find((p) => p?.perk_id === id)).filter(Boolean)
+    .map((p) => ({ id: p.perk_id, name: p.name, bonus: p.bonus }));
+
   // Sieg in einem Auftrags- oder Hauptquestkampf.
   function auftragSieg(state, auftrag) {
     if (/^(?:zweig|akt4):/.test(auftrag)) aktSieg(state, auftrag);
@@ -3447,9 +3612,16 @@ const rules = (() => {
     }
     // Patch 2.6.5: Reliquienstab von Glutberg: Glutschild von 10 % der LP zu Kampfbeginn.
     if (gearStat(state, "emberShieldPct")) combat.held.schild += Math.round(healthLimit(state) * gearStat(state, "emberShieldPct") / 100);
+    // Patch 2.6.9: Takt der Schildbrecher: +1 Ausdauer zu Kampfbeginn.
+    if (state.gefaehrtenPerks?.includes("PERK_KR_SCHILDBRECHER_TAKT")) combat.held.ausdauer = Math.min(kraft(state).ausdauer, combat.held.ausdauer + 1);
     // Patch 2.6.8: Stärkung vom Lagerfeuer für den nächsten Kampf.
     if (state.lagerBuff) {
       combat.held.lagerBuff = state.lagerBuff;
+      combat.held.schild += state.lagerBuff.schild ?? 0;
+      if (state.lagerBuff.ressource) {
+        combat.held.mana = Math.min(kraft(state).mana, combat.held.mana + state.lagerBuff.ressource);
+        combat.held.ausdauer = Math.min(kraft(state).ausdauer, combat.held.ausdauer + state.lagerBuff.ressource);
+      }
       note(state, "Vom Lagerfeuer gestärkt: " + state.lagerBuff.name + ".");
       state.lagerBuff = null;
     }
@@ -4374,7 +4546,7 @@ const rules = (() => {
     spezBereit, spezHinweis, meisterBereit, taten, tatWaehlen, ausruester, ausruesterHandel, ausruestungGrund, handwerkListe, handwerk, schmiedeInfo, schmieden, kontorInfo, kontorHandel, nahrungTragen, spenden, lage, systeme: SY, glutgabe, resonanz, kasseVollText,
     siedlungInfo, siedlungAusbauen, gebaeudeBauen, strasseBauen, garnisonRekrutieren, ortReparieren, wiederaufbau,
     endgameListe, endgameStarten, aufstiegInfo, talentLernen, ahnenLernen,
-    akteInfo, zweigWeiter, zweigGrund, fspezWaehlen, fspezGrund, fspezText, akt4Weiter, akt4Grund, armadaInfo, ausweichIntervall, kritChance,
+    akteInfo, zweigWeiter, zweigGrund, fspezWaehlen, fspezGrund, fspezText, akt4Weiter, akt4Grund, armadaInfo, ausweichIntervall, kritChance, effektText, lagerSzeneInfo, lagerAntwort, lagerVorteile,
     auftragGrund, auftragAnnehmen, ausfuehrenGrund, auftragAusfuehren, aushang, auftraege, hauptquest, hauptGrund, hauptWeiter, auftragEp, rast, ertragGrund, ertragEinholen, vertragGrund, vertragSchliessen, entwurf,
     levelThresholds: Array.from({ length: kampf.maxStufe }, (_, index) => kampf.epFuer(index + 1)) };
 })();

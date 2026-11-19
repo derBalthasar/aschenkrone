@@ -203,6 +203,10 @@ const systeme = (() => {
   // Eine Reise-Etappe: Zähler, alle 6 Etappen Zehnt ins Kontor, alle 8 Etappen Überfallprüfung.
   function etappe(state, dice = Math.random) {
     state.etappen = (state.etappen ?? 0) + 1;
+    // Patch 2.6.8/2.6.9: gemeinsame Etappen je Gefährte (persönliche Szenen ab 4) und Vorhut-Etappen herunterzählen.
+    state.gefaehrtenEtappen ??= {};
+    for (const id of state.party ?? []) state.gefaehrtenEtappen[id] = (state.gefaehrtenEtappen[id] ?? 0) + 1;
+    if (state.vorhut?.etappen > 0) state.vorhut = state.vorhut.etappen > 1 ? { ...state.vorhut, etappen: state.vorhut.etappen - 1 } : null;
     const meldungen = [];
     if (state.etappen % D.zehnt.etappen === 0) {
       const summe = {};

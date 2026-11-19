@@ -54,8 +54,10 @@ test("Akt 2 und 3: Schwester-Zweige, Wahl, Rohstoffe, Boss und Fraktions-Spezial
   s = kaempfen(k);
   assert.equal(SY.kontor(s, "kronreich").holz, holz + 8);
   assert.match(rules.zweigGrund(bei(s, "glutberg"), "orden", "good"), /erst den Zweig/);
-  s = kaempfen(rules.zweigWeiter(s, "haefen"));
-  assert.ok(s.journal.some((t) => t.includes("Pilger in grauer Kutte")), "Thorvald bleibt unerkannt");
+  const bossStart = rules.zweigWeiter(s, "haefen");
+  assert.ok(bossStart.journal.some((t) => t.includes("Pilger in grauer Kutte")), "Thorvald bleibt unerkannt");
+  assert.equal(bossStart.combat.feinde[0].rang, "elite");
+  s = kaempfen(bossStart);
   assert.equal(rules.akteInfo(s).zweige[1].fertig, true);
   assert.equal(s.questStufe, 2);
   // Zweiter Zweig: Akt 3, Stufe 11–15.
@@ -144,4 +146,45 @@ test("Tier 3/4: Handschuh-Platz, Klassenrechte, Stadtstufe beim Händler", () =>
   const t4 = laden.kaufen.find((x) => x.id === "HLM_T4_AHNENKRONE_VISIER");
   assert.equal(t4.grund, "erst ab Stadtstufe 2");
   assert.ok(lp > 0);
+});
+
+test("Lagerfeuer: Meilenstein, persönliche Szene nach 4 Etappen, Lagerszene mit Stärkung", () => {
+  let s = held("kronreich", "krieger", 12, { party: ["sigrid"], lagerMeilenstein: "CAMP_MILESTONE_SISTER_REALMS", ressource: 40 });
+  s = reload(rules.rast(s));
+  assert.equal(rules.lagerSzeneInfo(s).meilenstein, true);
+  const moral = SY.moral(s);
+  s = reload(rules.lagerAntwort(s, "WEITER"));
+  assert.equal(SY.moral(s), Math.min(SY.daten.moral.max, moral + 8));
+  assert.equal(s.lagerSzene, null);
+  // Persönliche Szene: Sigrid (Platz 1, Front) nach 4 gemeinsamen Etappen.
+  s = reload({ ...s, gefaehrtenEtappen: { sigrid: 4 } });
+  s = reload(rules.rast(s));
+  const p = rules.lagerSzeneInfo(s);
+  assert.equal(p.id, "PSCENE_KR_BROKEN_BANNER");
+  s = reload(rules.lagerAntwort(s, "KR_C1_HONOR"));
+  assert.ok(s.gefaehrtenPerks.includes("PERK_KR_SCHILDTREUE"));
+  assert.equal(rules.lagerVorteile(s)[0].name, "Schildtreue der Mark");
+  // Lagerszene (Würfel 0 → 65 %-Probe gelingt): Krieger/Wächter am Schleifstein, Stärkung für den nächsten Kampf.
+  s = reload(rules.rast(s));
+  assert.equal(rules.lagerSzeneInfo(s).id, "CAMP_WARRIOR_WHETSTONE");
+  s = reload(rules.lagerAntwort(s, "RESP_WARRIOR_COIN"));
+  assert.equal(s.lagerBuff.damage_bonus_pct, 8);
+  const a = rules.aushang(s).find((x) => x.spiel.gegner && !x.spiel.weg);
+  const k = rules.auftragAusfuehren(rules.auftragAnnehmen(s, a.id), a.id);
+  assert.equal(k.combat.held.lagerBuff.damage_bonus_pct, 8);
+  assert.equal(k.lagerBuff, null);
+});
+
+test("Spielstand mit trainierter Willenskraft und Spezialisierung in Mut bleibt ladbar", () => {
+  let s = held("kronreich", "krieger", 10);
+  for (let i = 0; i < 6; i++) s = rules.train(s, "will");
+  const spez = rules.specialize(s, "a", "mind", "mut");
+  assert.notEqual(spez, s);
+  assert.doesNotThrow(() => reload(spez));
+});
+
+test("Tränke zeigen Werte in der Spielskala", () => {
+  assert.equal(rules.effektText("POT_HEILUNG_1"), "Tier 1 · Stellt im Kampf 10 LP wieder her.");
+  assert.equal(rules.effektText("POT_HEILUNG_2"), "Tier 2 · Stellt im Kampf 24 LP wieder her und entfernt Blutung.");
+  assert.match(rules.effektText("POT_MANA_1"), /^Tier 1 · Stellt im Kampf \d+ Mana/);
 });
