@@ -117,3 +117,29 @@ test("Fähigkeitsrang verstärkt den Schaden um 12 % je Rang", () => {
   const r3 = schaden(kampf(rules.faehigkeitSteigern(rules.faehigkeitSteigern(start, "f3"), "f3")));
   assert.ok(r3 > r1, r1 + " → " + r3);
 });
+
+test("Patch 2.5.6: Einsamer Wolf höchstens +3 Schaden je Treffer, Schurken weichen jedem 5. Angriff aus", () => {
+  const kampfVon = (role, stufe) => {
+    const s = aufStufe("kronreich", role, stufe);
+    const a = rules.aushang(s).find((x) => x.spiel.gegner && !x.spiel.weg);
+    const k = rules.auftragAusfuehren(rules.auftragAnnehmen(s, a.id), a.id);
+    return { ...k, health: 9999, combat: { ...k.combat, feinde: k.combat.feinde.map((f) => ({ ...f, lp: 9999, max: 9999 })) } };
+  };
+  const treffer = (state) => 9999 - rules.strike(state, "spear", () => 0.5).combat.feinde[0].lp;
+  for (const stufe of [5, 30]) {
+    const allein = kampfVon("spaeher", stufe);
+    const mitGefaehrte = { ...allein, party: ["warrior"], partyVitals: { warrior: { health: 0, status: {} } } };
+    const plus = treffer(allein) - treffer(mitGefaehrte);
+    assert.ok(plus >= 1 && plus <= 3, "Stufe " + stufe + ": +" + plus);
+  }
+  const ausweichen = (role) => {
+    let s = kampfVon(role, 10);
+    let n = 0;
+    for (let i = 0; i < 10; i++) {
+      s = rules.strike(s, "guard", () => 0.5);
+      n += /weichst (einem|\d+) Angriff/.test(s.journal.at(-1)) ? Number(/(\d+) Angriffen/.exec(s.journal.at(-1))?.[1] ?? 1) : 0;
+    }
+    return n;
+  };
+  assert.ok(ausweichen("schurke") > ausweichen("spaeher"), ausweichen("schurke") + " gegen " + ausweichen("spaeher"));
+});

@@ -2658,7 +2658,11 @@ const rules = (() => {
   const glutgabe = (state) => !menschen(state) || state.faction === "orden";
   // Patch 2.5.4: Einsamer Wolf. Späher, Schurken und Heiler ohne Gefährten: +15 % Schaden, 15 % Ausweichen
   // (ohne Zufall: ein Zähler steigt je Angriff um 15, bei 100 geht der Angriff ins Leere).
-  const einsamerWolfWerte = { rollen: ["spaeher", "schurke", "heiler"], schaden: 0.15, ausweichen: 15 };
+  // Patch 2.5.6: Der Zusatzschaden wächst nach Stufe 15 nicht weiter (höchstens 3 je Treffer, so viel wie ein typischer
+  // Treffer auf Stufe 15 erhält), damit Gefährten im Spätspiel der stärkere Weg bleiben. Schurken weichen jedem 5. statt
+  // jedem 7. Angriff aus (Zähler +20 statt +15).
+  const einsamerWolfWerte = { rollen: ["spaeher", "schurke", "heiler"], schaden: 0.15, schadenDeckel: 3, ausweichen: 15,
+    ausweichenSchurke: 20 };
   const einsamerWolf = (state) => state.party.length === 0 && einsamerWolfWerte.rollen.includes(state.role);
   // Patch 2.5.5: Schutz für Pyromant und Kleriker der Flamme ohne Gefährten (LP der Klasse bleiben gleich):
   // Glutschild 25 % der LP zu Kampfbeginn, jeder weitere Treffer derselben Gegnerphase halbiert.
@@ -3236,7 +3240,7 @@ const rules = (() => {
         }
       }
     }
-    if (actor === "hero" && einsamerWolf(state)) amount = Math.round(amount * (1 + einsamerWolfWerte.schaden));
+    if (actor === "hero" && einsamerWolf(state)) amount += Math.min(einsamerWolfWerte.schadenDeckel, Math.round(amount * einsamerWolfWerte.schaden));
     if (foe.ruestung) amount = SY.schaden(amount, foe.ruestung, actor === "hero" ? world.gear[weapon(state)]?.durchdringung ?? 0 : 0);
     const value = Math.min(foe.lp, amount + (foe.status.verwundbar?.wert ?? 0));
     foe.lp -= value;
@@ -3647,7 +3651,7 @@ const rules = (() => {
           for (const victim of sonder?.flaeche ? active : [active[victimCursor++ % active.length]]) {
             const heroTarget = victim.id === "hero";
             if (heroTarget && damage > 0 && einsamerWolf(state)) {
-              held.ausweichen = (held.ausweichen ?? 0) + einsamerWolfWerte.ausweichen;
+              held.ausweichen = (held.ausweichen ?? 0) + (state.role === "schurke" ? einsamerWolfWerte.ausweichenSchurke : einsamerWolfWerte.ausweichen);
               if (held.ausweichen >= 100) {
                 held.ausweichen -= 100;
                 dodged++;

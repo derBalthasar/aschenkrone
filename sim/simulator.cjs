@@ -5,6 +5,7 @@
 //   node sim/simulator.cjs            beide Läufe
 //   node sim/simulator.cjs A          nur BENCHMARK_A_UNSPENT
 //   node sim/simulator.cjs B 8        nur BENCHMARK_B_OPTIMAL_SPEND, 8 Kämpfe je Gegner
+//   node sim/simulator.cjs C          nur SIM_BENCHMARK_C_WITH_GEAR (Patch 2.5.6)
 //
 // BENCHMARK_A_UNSPENT: Der Held verteilt keine Punkte (untere Grenze: Spieler vergisst die Punkteverteilung).
 // BENCHMARK_B_OPTIMAL_SPEND: Der Held verteilt alles nach festen Regeln:
@@ -12,6 +13,8 @@
 //   Fähigkeiten Die freigeschaltete Fähigkeit mit der höchsten Grundwirkung (Schaden oder Heilung) zuerst.
 //   Talente     Hauptbaum (Klinge & Wucht) auf 3, dann Runen- & Glutresonanz, dann Schildwall.
 //   Ahnen       Zorn der Alten Könige, dann Eisernes Ahnenblut.
+// SIM_BENCHMARK_C_WITH_GEAR (Patch 2.5.6): wie B auf jeder Stufe von 1 bis 30, dazu die angelegte Ausrüstung in der
+//   Schmiede aufgewertet: Stufe 1–5 ohne, 6–11 +1, 12–17 +2, 18–30 +3.
 // Jede Klasse kämpft allein gegen vier Auftragsgegner auf ihrer Stufe: Mitläufergruppe (Kultisten),
 // Elite (Kapitän Urgash), Anführer (Skarn) und Anführer mit Flächenangriff (Der Letzte Mammut).
 // Würfel mit festem Startwert: Jeder Lauf ist wiederholbar.
@@ -34,7 +37,9 @@ rules.setTravelDice(() => 0.99);
 const LAEUFE = {
   A: { id: "BENCHMARK_A_UNSPENT", verteilen: false },
   B: { id: "BENCHMARK_B_OPTIMAL_SPEND", verteilen: true },
+  C: { id: "SIM_BENCHMARK_C_WITH_GEAR", verteilen: true, ausruestung: true, stufen: Array.from({ length: 30 }, (_, i) => i + 1), prestige: false },
 };
+const AUFWERTUNG = [{ min: 1, max: 5, stufe: 0 }, { min: 6, max: 11, stufe: 1 }, { min: 12, max: 17, stufe: 2 }, { min: 18, max: 30, stufe: 3 }];
 const FRAKTIONEN = { kronreich: "kronhall", orden: "glutberg", haefen: "zollholm" };
 const ROLLEN = ["krieger", "waechter", "spaeher", "magier", "heiler", "schurke"];
 const STUFEN = [5, 10, 15, 20, 25, 30];
@@ -42,7 +47,7 @@ const GEGNER = [["auftrag-kultisten", "Gruppe"], ["auftrag-urgash", "Elite"], ["
 const TALENTE = ["MT_KLINGENSTURM", "MT_RUNENRESONANZ", "MT_EISENWALL", "MT_SCHLACHTFUEHRER", "MT_GRENZLAEUFER"];
 const AHNEN = ["perk_ancestral_might", "perk_iron_blood"];
 
-const auswahl = process.argv[2] ? [process.argv[2].toUpperCase()] : ["A", "B"];
+const auswahl = process.argv[2] ? [process.argv[2].toUpperCase()] : ["A", "B", "C"];
 const kaempfe = Number(process.argv[3] ?? 12);
 
 let saat = 1;
@@ -98,6 +103,12 @@ function held(faction, role, stufe, lauf, extraEp = 0) {
   state = rules.read(JSON.stringify({ ...state, scene: "weltknoten", knoten: FRAKTIONEN[faction], handlung: null,
     xp: SY.epFuer(stufe) + extraEp }));
   if (lauf.verteilen) state = verteilen(state);
+  if (lauf.ausruestung) {
+    const stufeSchmiede = AUFWERTUNG.find((a) => stufe >= a.min && stufe <= a.max).stufe;
+    const aufwertung = {};
+    for (const id of Object.values(state.equipment)) if (id && stufeSchmiede) aufwertung[id] = stufeSchmiede;
+    state = rules.read(JSON.stringify({ ...state, aufwertung }));
+  }
   return { ...state, health: rules.healthLimit(state) };
 }
 
@@ -128,7 +139,7 @@ function kampfStart(state, gegnerId, stufe) {
 function lauf(key) {
   const config = LAEUFE[key];
   const zeilen = [];
-  for (const faction of Object.keys(FRAKTIONEN)) for (const role of ROLLEN) for (const stufe of [...STUFEN, "30+"]) {
+  for (const faction of Object.keys(FRAKTIONEN)) for (const role of ROLLEN) for (const stufe of [...(config.stufen ?? STUFEN), ...(config.prestige === false ? [] : ["30+"])]) {
     const prestige = stufe === "30+";
     const st = prestige ? 30 : stufe;
     const basis = held(faction, role, st, config, prestige ? 2 * 5000 : 0);
