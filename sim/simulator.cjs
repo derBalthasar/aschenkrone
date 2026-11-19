@@ -101,11 +101,14 @@ function held(faction, role, stufe, lauf, extraEp = 0) {
   return { ...state, health: rules.healthLimit(state) };
 }
 
-// ---- Kampf: jede Runde die Aktion, die den Gegnern am meisten und dem Helden am wenigsten schadet ----
+// ---- Kampf: jede Runde die Aktion, die den Gegnern am meisten und dem Helden am wenigsten schadet. Nach 80 Runden zählt
+// der Kampf als verloren. ----
 const gegnerLp = (s) => (s.combat ? s.combat.feinde.reduce((sum, f) => sum + f.lp, 0) : 0);
 function kampf(s) {
   for (let runde = 0; s.combat && runde < 80; runde++) {
-    const aktionen = [...rules.abilities(s).filter((f) => f.frei && !rules.abilityState(s, f.id)).map((f) => f.id), "spear", "guard"];
+    // Abwehr nur bei weniger als 40 % LP, sonst blockt der Held endlos (Abwehr hält Mitläufer vollständig ab).
+    const abwehr = s.health < 0.4 * rules.healthLimit(s) ? ["guard"] : [];
+    const aktionen = [...rules.abilities(s).filter((f) => f.frei && !rules.abilityState(s, f.id)).map((f) => f.id), "spear", ...abwehr];
     const wert = (n) => n === s ? -Infinity : (n.combat ? 0 : 1000) + gegnerLp(s) - gegnerLp(n) - 1.2 * (s.health - n.health) - (n.health ? 0 : 5000);
     const beste = aktionen.reduce((best, id) => (wert(rules.strike(s, id, mitte)) > wert(rules.strike(s, best, mitte)) ? id : best), "spear");
     s = rules.strike(s, beste, wuerfel);
