@@ -36,6 +36,7 @@ jobs:
           node --check spiel/reisekarte-daten.js
           node --check spiel/reisekarte.js
           node --check spiel/oberflaeche.js
+          node --check spiel/npcs.js
       - name: Spielregeln testen
         run: |
           node --test spiel/regeln.test.cjs
@@ -44,3 +45,4 @@ jobs:
           node --test spiel/nebenquests.test.cjs
           node --test spiel/reisekarte.test.cjs
           node --test spiel/systeme.test.cjs
+          node --test spiel/npcs.test.cjs

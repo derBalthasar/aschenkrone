@@ -244,6 +244,7 @@
     if (el("inventory-hub").open) el("inventory-hub").close();
     if (el("character-sheet").open) el("character-sheet").close();
     if (el("reisekarte").open) el("reisekarte").close();
+    if (el("npc-dialog").open) el("npc-dialog").close();
     show("home");
     el("continue").hidden = state === null;
     el("home-status").textContent = message;
@@ -2451,6 +2452,22 @@
     }
   }
 
+  // Szenentext mit den Varianten nach Spielstand (auch für das Gesprächsfenster).
+  function szenenText() {
+    let sceneText = world.scenes[state.scene].text;
+    if (state.scene === "watch-yard" && state.marks.includes("joren-gerettet")) {
+      sceneText = "Unter der Torlaube hängt Jorens Laterne. Er sitzt mit geschientem Bein am Wachfeuer. Lene hat ihren Schal zum Trocknen über die Bank gelegt. Runa hält den Seilwagen für die Grenzwache bereit.";
+    } else if (state.scene === "watch-yard" && state.marks.includes("joren-verloren")) {
+      sceneText = "Jorens Haken unter der Torlaube ist leer. Der Seilwagen steht am Brunnen. Runa hält die übrigen Wege offen und lässt am Wachfeuer eine Kanne Wasser für dich stehen.";
+    }
+    if (state.scene === "skarn-gate" && (state.marks.includes("runen-geschuetzt") || state.marks.includes("runen-verbrannt"))) {
+      sceneText = state.marks.includes("runen-geschuetzt")
+        ? "Aus Naldas Esse steigt wieder Rauch. Torben hält die Laterne, während die Nachbarn ihre Säcke durch das gesicherte Tor bringen."
+        : "Nalda und Torben tragen die Säcke auf den unteren Steig. Über dem eingestürzten Tor stehen die Familiennamen nur noch auf ihren Zetteln.";
+    }
+    return sceneText;
+  }
+
   function renderScene() {
     const scene = world.scenes[state.scene];
     const combat = state.combat;
@@ -2538,17 +2555,7 @@
         renderWeltHub(content, actions);
         return;
       }
-      let sceneText = scene.text;
-      if (state.scene === "watch-yard" && state.marks.includes("joren-gerettet")) {
-        sceneText = "Unter der Torlaube hängt Jorens Laterne. Er sitzt mit geschientem Bein am Wachfeuer. Lene hat ihren Schal zum Trocknen über die Bank gelegt. Runa hält den Seilwagen für die Grenzwache bereit.";
-      } else if (state.scene === "watch-yard" && state.marks.includes("joren-verloren")) {
-        sceneText = "Jorens Haken unter der Torlaube ist leer. Der Seilwagen steht am Brunnen. Runa hält die übrigen Wege offen und lässt am Wachfeuer eine Kanne Wasser für dich stehen.";
-      }
-      if (state.scene === "skarn-gate" && (state.marks.includes("runen-geschuetzt") || state.marks.includes("runen-verbrannt"))) {
-        sceneText = state.marks.includes("runen-geschuetzt")
-          ? "Aus Naldas Esse steigt wieder Rauch. Torben hält die Laterne, während die Nachbarn ihre Säcke durch das gesicherte Tor bringen."
-          : "Nalda und Torben tragen die Säcke auf den unteren Steig. Über dem eingestürzten Tor stehen die Familiennamen nur noch auf ihren Zetteln.";
-      }
+      const sceneText = szenenText();
       content.append(element("p", sceneText));
       if (state.scene === "weltende" && state.niederlage) {
         const reason = element("p", rules.niederlagen[state.niederlage]);
@@ -2630,11 +2637,22 @@
         if (state.marks.includes("saat-erholt")) content.append(element("p", "Auf dem Saatstreifen stehen die ersten grünen Halme."));
       }
       const choices = rules.choices(state);
+      // Gesprächsszenen öffnen beim Betreten das Gesprächsfenster; die Wahlen bleiben auch hier im Hauptbildschirm.
+      const sprecher = npcs.fuerSzene(state.scene, scene);
+      if (sprecher && choices.length) {
+        const start = button(actions, "Gespräch mit " + npcPerson(sprecher).name + " öffnen", () => szenenGespraech());
+        start.classList.add("primary", "npc-start");
+        if (gespraech.auto !== state.scene && !gespraech.laeuft) {
+          gespraech.auto = state.scene;
+          queueMicrotask(() => { if (state && !state.combat && npcs.fuerSzene(state.scene, world.scenes[state.scene])) szenenGespraech(); });
+        }
+      } else if (!gespraech.laeuft) gespraech.auto = null;
       for (const choice of choices) {
         const attribute = choice.check ? klassen.fertigkeiten[choice.check[0]].name : "";
         const risk = choice.emberRescue && state.balance <= -2 ? " · Rückschlag" : "";
+        const wer = !sprecher && npcs.fuerWahl(state.scene, choice);
         button(actions, choice.label + (attribute ? " · Probe auf " + attribute : "") + risk,
-          () => update(rules.choose(state, choice.id)), { story: true });
+          wer ? () => wahlGespraech(wer, choice.id) : () => update(rules.choose(state, choice.id)), { story: true });
       }
       renderCandidates(content);
       if (rules.weltOffen(state)) {
@@ -2647,6 +2665,270 @@
       if (!choices.length) button(actions, "Zum Hauptmenü", () => showHome());
     }
   }
+
+  // ---- Gesprächsfenster (NPC-Dialog, 19. 11. 2026) ----
+  // Gespräche, Auftragsannahmen und Hauptquest-Schritte laufen in einem eigenen Pergament-Fenster. Beim Wechsel zwischen
+  // Gesprächsschritten tauscht das Fenster nur Text und Antworten aus, es rollt nicht neu auf. Personen: spiel/npcs.js.
+  const gespraech = { auto: null, laeuft: false, art: null, npc: null, wahlNpc: null, kopf: null };
+  const portraitStatus = new Map();
+  const kapuze = '<svg viewBox="0 0 100 120" role="presentation" focusable="false">' +
+    '<defs><radialGradient id="npc-glut" cx="50%" cy="38%" r="60%"><stop offset="0" stop-color="#5a3a24"/><stop offset="1" stop-color="#1d1813"/></radialGradient></defs>' +
+    '<rect width="100" height="120" fill="url(#npc-glut)"/>' +
+    '<path d="M50 14c-17 0-29 15-29 34 0 9 2 16 5 21-9 6-16 17-19 31-1 6 0 20 0 20h86s1-14 0-20c-3-14-10-25-19-31 3-5 5-12 5-21 0-19-12-34-29-34z" fill="#0f0c09" stroke="#8d6947" stroke-width="1.5"/>' +
+    '<path d="M50 30c-10 0-17 9-17 20 0 9 5 16 11 19h12c6-3 11-10 11-19 0-11-7-20-17-20z" fill="#050403"/>' +
+    '<circle cx="44" cy="50" r="1.6" fill="#d4a857" opacity=".75"/><circle cx="56" cy="50" r="1.6" fill="#d4a857" opacity=".75"/>' +
+    '<path d="M30 92l20 10 20-10" fill="none" stroke="#8d6947" stroke-width="1.5" opacity=".7"/></svg>';
+
+  const npcPerson = (id, extra = null) => ({ name: "Unbekannt", titel: "", fraktion: null, ...(npcs.get(id) ?? {}), ...(extra ?? {}) });
+
+  // Kopfzeile: Fraktion mit Ruf-Rang der Menschen (Fremder, Schutzherr, Geächtet …) und örtliches Ansehen.
+  function npcStand(person) {
+    const teile = [];
+    const fraktion = person.fraktion && klassen.fraktionen[person.fraktion];
+    if (fraktion) {
+      if (rules.lage(state) && rules.systeme.istMensch(person.fraktion)) {
+        const wert = rules.systeme.ruf(state, person.fraktion);
+        teile.push([fraktion.name + " · " + rules.systeme.rufRang(wert).name + " (" + signed(wert) + ")",
+          wert >= 20 ? "gut" : wert <= -25 ? "schlecht" : ""]);
+      } else teile.push([fraktion.name + (person.fraktion === state.faction ? " · eigene Fraktion" : ""), ""]);
+    }
+    if (person.ruf && world.factions[person.ruf]) {
+      const wert = rules.reputation(state, person.ruf);
+      teile.push([world.factions[person.ruf] + " · " + (wert >= 25 ? "Wohlgesinnt" : wert <= -25 ? "Feindselig" : "Neutral") +
+        " (" + signed(wert) + ")", wert >= 25 ? "gut" : wert <= -25 ? "schlecht" : ""]);
+    }
+    if (!teile.length) teile.push(["Keiner Fraktion verpflichtet", ""]);
+    return teile;
+  }
+
+  // Porträt: erst der Platzhalter, das Bild ersetzt ihn erst, wenn es wirklich geladen ist (kein kaputtes Bildsymbol).
+  function npcPortrait(id, quelle) {
+    const box = el("npc-portrait");
+    const url = npcs.portrait(id, quelle) ?? "";
+    if (box.dataset.url === url && box.firstChild) return;
+    box.dataset.url = url;
+    box.innerHTML = kapuze;
+    if (!url || portraitStatus.get(url) === "fehlt") return;
+    const bild = new Image();
+    bild.alt = "";
+    bild.decoding = "async";
+    bild.onload = () => {
+      portraitStatus.set(url, "ok");
+      if (box.dataset.url === url) box.replaceChildren(bild);
+    };
+    bild.onerror = () => portraitStatus.set(url, "fehlt");
+    bild.src = url;
+  }
+
+  // Rede in „…“ bleibt gerade, Erzähltext dazwischen wird zur kursiven Regieanweisung.
+  function redeAbsatz({ text, art = "" }) {
+    const absatz = element("p");
+    if (art) absatz.className = "npc-" + art;
+    const teile = String(text).split(/(„[^“]*“)/);
+    if (art === "regie" || teile.length === 1) absatz.textContent = text;
+    else for (const teil of teile.filter(Boolean)) {
+      if (teil.startsWith("„")) absatz.append(teil);
+      else {
+        const regie = element("em", teil);
+        regie.className = "npc-regie";
+        absatz.append(regie);
+      }
+    }
+    return absatz;
+  }
+
+  // inhalt: { npc, person?, quelle?, ort, absaetze: [{ text, art }], optionen: [{ label, badges, hinweis, disabled, aktion }] }
+  function gespraechZeigen(inhalt) {
+    const dialog = el("npc-dialog");
+    const person = npcPerson(inhalt.npc, inhalt.person);
+    const offen = dialog.open;
+    const neuePerson = gespraech.npc !== inhalt.npc;
+    gespraech.npc = inhalt.npc;
+    gespraech.kopf = { npc: inhalt.npc, person: inhalt.person, quelle: inhalt.quelle, ort: inhalt.ort };
+    el("npc-ort").textContent = inhalt.ort ?? "";
+    el("npc-name").textContent = person.name;
+    el("npc-titel").textContent = person.titel ?? "";
+    el("npc-titel").hidden = !person.titel;
+    el("npc-stand").replaceChildren(...npcStand(person).map(([text, ton]) => {
+      const marke = element("span", text);
+      if (ton) marke.className = "npc-rang-" + ton;
+      return marke;
+    }));
+    npcPortrait(inhalt.npc, inhalt.quelle ?? inhalt.person);
+    el("npc-text").replaceChildren(...inhalt.absaetze.filter(a => a?.text).map(redeAbsatz));
+    el("npc-optionen").replaceChildren(...inhalt.optionen.slice(0, 9).map((option, index) => {
+      const li = element("li");
+      const knopf = element("button");
+      knopf.type = "button";
+      knopf.className = "npc-option";
+      knopf.disabled = Boolean(option.disabled);
+      knopf.dataset.taste = String(index + 1);
+      const taste = element("span", String(index + 1));
+      taste.className = "npc-taste";
+      taste.setAttribute("aria-hidden", "true");
+      const text = element("span");
+      text.className = "npc-option-text";
+      text.append(option.label);
+      if (option.badges?.length) {
+        const badges = element("span");
+        badges.className = "npc-badges";
+        for (const [label, ton] of option.badges) {
+          const badge = element("span", "[" + label + "]");
+          badge.className = "npc-badge" + (ton ? " npc-badge-" + ton : "");
+          badges.append(badge);
+        }
+        text.append(" ", badges);
+      }
+      knopf.append(taste, text);
+      if (option.hinweis) {
+        const hinweis = element("span", option.hinweis);
+        hinweis.className = "npc-option-hinweis";
+        knopf.append(hinweis);
+      }
+      knopf.addEventListener("click", () => option.aktion());
+      li.append(knopf);
+      return li;
+    }));
+    if (offen) {
+      for (const teil of neuePerson ? [el("npc-body"), dialog.querySelector(".npc-kopf")] : [el("npc-body")]) {
+        teil.classList.remove("npc-wechsel");
+        void teil.offsetWidth;
+        teil.classList.add("npc-wechsel");
+      }
+      dialog.scrollTop = 0;
+    } else {
+      for (const id of ["inventory-hub", "character-sheet", "reisekarte"]) if (el(id).open) el(id).close();
+      dialog.showModal();
+    }
+    (el("npc-optionen").querySelector("button:not(:disabled)") ?? el("npc-close")).focus();
+  }
+
+  function gespraechEnde() {
+    if (el("npc-dialog").open) el("npc-dialog").close();
+  }
+
+  function abschluss(text) {
+    gespraech.art = "ende";
+    gespraechZeigen({ ...gespraech.kopf, absaetze: [{ text, art: "antwort" }],
+      optionen: [{ label: "Weiter", badges: [["Gespräch beenden", "ende"]], aktion: gespraechEnde }] });
+  }
+
+  function wahlBadges(choice) {
+    const badges = [];
+    if (choice.check) badges.push([klassen.fertigkeiten[choice.check[0]].name + " / Probe " + choice.check[1], "probe"]);
+    if (choice.fight) badges.push([choice.check ? "Kampf bei Misserfolg" : "Kampf", "kampf"]);
+    if (/annehmen/i.test(choice.label)) badges.push(["Annehmen", "gut"]);
+    else if (choice.item || choice.reward) badges.push(["Belohnung", "gut"]);
+    if (choice.emberCost) badges.push([choice.emberCost + " Glut", ""]);
+    if (choice.destination && choice.to !== state.scene) badges.push(["Reise", "ende"]);
+    return badges;
+  }
+  const wahlOption = (choice, aktion) => ({ label: choice.label, badges: wahlBadges(choice), aktion });
+
+  // Nach jeder Antwort: Kampf schließt das Fenster, ein Gesprächsschritt tauscht den Inhalt, sonst folgt der letzte Satz mit „Weiter“.
+  function gespraechWahl(schritt) {
+    const vorher = state;
+    const art = gespraech.art;
+    gespraech.laeuft = true;
+    try { update(schritt()); } finally { gespraech.laeuft = false; }
+    const sprecher = state.scene !== "weltknoten" && npcs.fuerSzene(state.scene, world.scenes[state.scene]);
+    gespraech.auto = sprecher ? state.scene : null;
+    if (state === vorher) return;
+    const neu = vorher.journal.at(-1) !== state.journal.at(-1) ? state.journal.at(-1) : null;
+    if (state.combat || state.health <= 0 || ["defeat", "weltende"].includes(state.scene)) return gespraechEnde();
+    if (art === "haupt") return hauptGespraech(neu);
+    if (art === "aushang") return abschluss(neu ?? "Abgemacht. Der Auftrag steht jetzt in deinem Questlog.");
+    if (sprecher) return szenenGespraech(neu);
+    if (art === "wahl" && state.scene === vorher.scene) return wahlFolge(gespraech.wahlNpc, neu);
+    if (neu) return abschluss(neu);
+    gespraechEnde();
+  }
+
+  function szenenGespraech(nachricht = null) {
+    const scene = world.scenes[state.scene];
+    const npc = npcs.fuerSzene(state.scene, scene);
+    if (!npc || state.combat) return gespraechEnde();
+    gespraech.art = "szene";
+    const optionen = rules.choices(state).map(choice => wahlOption(choice, () => gespraechWahl(() => rules.choose(state, choice.id))));
+    if (state.scene === "supply-post") {
+      optionen.unshift({ label: "Zeig mir, was du hast.", badges: [["Handel öffnen", "gut"]], aktion: () => { gespraechEnde(); openHub("trade"); } });
+    }
+    optionen.push({ label: "Gespräch beenden", badges: [["Verabschieden", "ende"]], aktion: gespraechEnde });
+    gespraechZeigen({ npc, quelle: scene, ort: scene.place, absaetze: [{ text: nachricht, art: "antwort" }, { text: szenenText() }], optionen });
+  }
+
+  // Einzelne Gesprächswahlen in offenen Szenen (z. B. Lene und Runa im Wachhof).
+  function wahlGespraech(npc, wahlId) {
+    gespraech.art = "wahl";
+    gespraech.wahlNpc = npc;
+    gespraechWahl(() => rules.choose(state, wahlId));
+  }
+  function wahlFolge(npc, nachricht) {
+    const scene = world.scenes[state.scene];
+    const weitere = rules.choices(state).filter(choice => npcs.fuerWahl(state.scene, choice) === npc);
+    gespraechZeigen({ npc, quelle: scene, ort: scene.place,
+      absaetze: [nachricht ? { text: nachricht } : { text: szenenText(), art: "regie" }],
+      optionen: [...weitere.map(choice => wahlOption(choice, () => wahlGespraech(npc, choice.id))),
+        { label: "Verabschieden", badges: [["Gespräch beenden", "ende"]], aktion: gespraechEnde }] });
+  }
+
+  // Aushang: Auftrag im Gespräch mit dem Ausrufer annehmen.
+  function aushangGespraech(ort, auftrag, spiel) {
+    gespraech.art = "aushang";
+    const person = { name: "Ausrufer von " + ort.name, titel: "Liest die Aufträge am Aushang vor", fraktion: ort.fraktion,
+      portrait: "assets/npcs/ausrufer-" + ort.fraktion + ".png" };
+    const absaetze = [{ text: auftrag.titel + " · " + auftrag.art, art: "regie" }, { text: auftrag.text }, { text: "Lohn: " + auftrag.lohn, art: "folge" }];
+    if (auftrag.hinweis) absaetze.push({ text: auftrag.hinweis, art: "regie" });
+    const optionen = spiel.spiel.lohn.map((_, index) => ({
+      label: "Ich übernehme den Auftrag" + (spiel.spiel.lohn.length > 1 ? " · " + lohnText(spiel, index) : "") + ".",
+      badges: [["Annehmen", "gut"], ...(spiel.spiel.gegner ? [["Kampf", "kampf"]] : [])],
+      hinweis: auftragOrt(spiel) + " · " + rules.auftragEp + " EP",
+      aktion: () => gespraechWahl(() => rules.auftragAnnehmen(state, auftrag.id, index)),
+    }));
+    optionen.push({ label: "Vielleicht später.", badges: [["Gespräch beenden", "ende"]], aktion: gespraechEnde });
+    gespraechZeigen({ npc: "ausrufer-" + ort.id, person, quelle: person, ort: ort.name + " · Aushang", absaetze, optionen });
+  }
+
+  // Hauptquest: Schritte und Entscheidungen im Gespräch mit der Auftraggeberin der Fraktionsreihe.
+  function hauptGespraech(nachricht = null) {
+    const haupt = rules.hauptquest(state);
+    const npc = npcs.fuerHauptquest(state.faction);
+    if (!haupt || !npc) return nachricht ? abschluss(nachricht) : gespraechEnde();
+    gespraech.art = "haupt";
+    const absaetze = [{ text: nachricht, art: "antwort" }];
+    let optionen;
+    if (haupt.fertig) {
+      absaetze.push({ text: "Akt " + haupt.akt + " ist abgeschlossen. Akt 2 wird noch gebaut.", art: "regie" });
+      optionen = [{ label: "Weiter", badges: [["Gespräch beenden", "ende"]], aktion: gespraechEnde }];
+    } else {
+      const schritt = haupt.schritt;
+      absaetze.push({ text: "Schritt " + schritt.nr + " von " + schritt.von + " · " + schritt.titel + " · " + knoten.get(schritt.ort).name, art: "regie" },
+        { text: schritt.text });
+      optionen = schritt.wahl
+        ? schritt.wahlen.map(option => {
+          const grund = rules.hauptGrund(state, option.id);
+          return { label: option.label, badges: [["Entscheidung", "probe"]], hinweis: option.folge + (grund ? " · " + grund : ""),
+            disabled: Boolean(grund), aktion: () => gespraechWahl(() => rules.hauptWeiter(state, option.id)) };
+        })
+        : [{ label: (schritt.gegner ? "Kämpfen · " : "Weiter · ") + schritt.titel, badges: schritt.gegner ? [["Kampf", "kampf"]] : [],
+          hinweis: haupt.grund ?? "", disabled: Boolean(haupt.grund), aktion: () => gespraechWahl(() => rules.hauptWeiter(state)) }];
+      optionen.push({ label: "Später", badges: [["Gespräch beenden", "ende"]], aktion: gespraechEnde });
+    }
+    gespraechZeigen({ npc, ort: "Hauptquest · Akt " + haupt.akt + " · „" + haupt.titel + "“", absaetze, optionen });
+  }
+
+  el("npc-close").addEventListener("click", gespraechEnde);
+  el("npc-dialog").addEventListener("keydown", event => {
+    if (event.altKey || event.ctrlKey || event.metaKey || !/^[1-9]$/.test(event.key)) return;
+    const knopf = el("npc-optionen").querySelector('[data-taste="' + event.key + '"]:not(:disabled)');
+    if (!knopf) return;
+    event.preventDefault();
+    knopf.click();
+  });
+  el("npc-dialog").addEventListener("close", () => {
+    gespraech.npc = null;
+    gespraech.art = null;
+  });
 
   // ---- Stadt-Hub (Technische Spezifikation, Abschnitt 2): Statusleiste, Krise und Aufhänger, vier Bereiche ----
   const welt = { tab: "aufbruch" };
@@ -2940,6 +3222,15 @@
     const kopf = element("p");
     kopf.append(element("strong", "Schritt " + schritt.nr + " von " + schritt.von + " · " + schritt.titel), " · " + knoten.get(schritt.ort).name);
     box.append(kopf, element("p", schritt.text));
+    const auftraggeber = npcs.fuerHauptquest(state.faction);
+    if (auftraggeber) {
+      // Gesprächsfenster: Schritte und Entscheidungen laufen im Dialog mit der Auftraggeberin.
+      if (schritt.wahl) box.append(element("p", "Entscheidung: " + schritt.wahlen.map(option => option.label + " → " + option.folge).join(" · ")));
+      const knopf = button(box, "Mit " + npcPerson(auftraggeber).name + " sprechen · Schritt " + schritt.nr +
+        (haupt.grund && !schritt.wahl ? " · " + haupt.grund : ""), () => hauptGespraech());
+      knopf.classList.add("primary", "npc-start");
+      return box;
+    }
     if (schritt.wahl) {
       if (state.knoten === schritt.ort) box.append(element("p", "Entscheide, wie Akt " + haupt.akt + " endet:"));
       for (const option of schritt.wahlen) {
@@ -3022,8 +3313,7 @@
       } else if (spiel && !spiel.grund) {
         item.append(element("p", (spiel.spiel.gegner ? "Kampf auf Stufe " + (nebenquests.stufenFuer(ort.id, state.faction) ?? "") + " · " : "Ohne Kampf · ") +
           auftragOrt(spiel) + " · " + rules.auftragEp + " EP"));
-        spiel.spiel.lohn.forEach((_, index) => button(item, "Annehmen" + (spiel.spiel.lohn.length > 1 ? " · " + lohnText(spiel, index) : ""),
-          () => update(rules.auftragAnnehmen(state, auftrag.id, index))));
+        button(item, "Auftrag besprechen und annehmen", () => aushangGespraech(ort, auftrag, spiel)).classList.add("npc-start");
       }
       liste.append(item);
     }

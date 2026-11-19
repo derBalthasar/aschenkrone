@@ -20,6 +20,7 @@
   <script defer src="spiel/systeme-daten.js"></script>
   <script defer src="spiel/systeme.js"></script>
   <script defer src="spiel/regeln.js"></script>
+  <script defer src="spiel/npcs.js"></script>
   <script defer src="spiel/karte-daten.js"></script>
   <script defer src="spiel/karte.js"></script>
   <script defer src="spiel/reisekarte-daten.js"></script>
@@ -220,7 +221,7 @@
       </div>
     </div>
   </main>
-  <dialog id="inventory-hub" class="inventory-hub inv-hub" aria-labelledby="hub-title">
+  <dialog id="inventory-hub" class="inventory-hub inv-hub pergament" aria-labelledby="hub-title">
     <div class="hub-head">
       <div><p class="overline" id="hub-place"></p><h2 id="hub-title">Inventar</h2></div>
       <button type="button" id="hub-close" class="action">Schließen</button>
@@ -250,7 +251,7 @@
     </div>
     <p id="hub-status" class="hub-status" role="status"></p>
   </dialog>
-  <dialog id="character-sheet" class="inventory-hub character-sheet" aria-labelledby="sheet-title">
+  <dialog id="character-sheet" class="inventory-hub character-sheet pergament" aria-labelledby="sheet-title">
     <div class="hub-head">
       <div class="sheet-who">
         <div id="sheet-avatar" class="avatar sheet-avatar" role="img"></div>
@@ -274,7 +275,7 @@
     </div>
     <div id="sheet-panel" class="sheet-panel" role="tabpanel" tabindex="0"></div>
   </dialog>
-  <dialog id="reisekarte" class="inventory-hub reisekarte" aria-labelledby="rk-title">
+  <dialog id="reisekarte" class="inventory-hub reisekarte pergament" aria-labelledby="rk-title">
     <div class="hub-head">
       <div><p class="overline" id="rk-place"></p><h2 id="rk-title">Reisekarte</h2></div>
       <button type="button" id="rk-close" class="action">Schließen</button>
@@ -303,6 +304,22 @@
       <aside id="rk-info" class="rk-info" aria-live="polite"></aside>
     </div>
     <p class="rk-legend"><span class="rk-key rk-key-kernland">Kernland</span><span class="rk-key rk-key-grenzland">Grenzland</span><span class="rk-key rk-key-pass">Pass</span><span class="rk-key rk-key-dorfweg">Dorfweg</span><span class="rk-key rk-key-seeweg">Seeweg</span><span class="rk-key rk-key-ziel">erreichbar</span></p>
+  </dialog>
+  <dialog id="npc-dialog" class="npc-dialog pergament" aria-labelledby="npc-name" aria-describedby="npc-text">
+    <header class="npc-kopf">
+      <div id="npc-portrait" class="npc-portrait" aria-hidden="true"></div>
+      <div class="npc-wer">
+        <p class="overline" id="npc-ort"></p>
+        <h2 id="npc-name"></h2>
+        <p id="npc-titel" class="npc-titel"></p>
+        <p id="npc-stand" class="npc-stand"></p>
+      </div>
+      <button type="button" id="npc-close" class="npc-close" aria-label="Gespräch beenden">×</button>
+    </header>
+    <div id="npc-body" class="npc-body">
+      <div id="npc-text" class="npc-text" aria-live="polite"></div>
+      <ol id="npc-optionen" class="npc-optionen" aria-label="Antworten · Tasten 1 bis 9"></ol>
+    </div>
   </dialog>
 </body>
 </html>
