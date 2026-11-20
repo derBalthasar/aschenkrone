@@ -2128,8 +2128,8 @@
       sheetSection("Erfahrungsstufe " + progress.level, xp, table, training),
       sheetSection(glutSichtbar() ? "Lebenspunkte, Kraft und Glut" : "Lebenspunkte und Kraft", sheetStats([
         ["Lebenspunkte", state.health + " / " + rules.healthLimit(state)],
-        ...((values) => [["Ausdauer", values.ausdauer + " / " + values.ausdauerMax],
-          ...(values.manaMax ? [["Mana", values.mana + " / " + values.manaMax]] : []),
+        ...((values) => [[poolNamen().A, values.ausdauer + " / " + values.ausdauerMax],
+          ...(values.manaMax ? [[poolNamen().M, values.mana + " / " + values.manaMax]] : []),
           [values.ressourceName, rules.lage(state) ? values.ressource + " (Proviant)" : values.ressource + " / " + rules.vorratMax]])(rules.kampfwerte(state)),
         ...(glutSichtbar() ? [["Glut", state.ember + " / " + rules.emberLimit(state)]] : []),
         ["Schutz im Kampf", String(rules.protection(state) + rules.gearBonus(state, "armor"))],
@@ -2335,7 +2335,7 @@
       }
       kopfzeile.append(pips);
       if (f.kosten) {
-        const pille = element("span", f.kosten + " " + (f.zahlung === "M" ? "Mana" : "Ausdauer"));
+        const pille = element("span", f.kosten + " " + poolNamen()[f.zahlung === "M" ? "M" : "A"]);
         pille.className = "kosten-pille";
         kopfzeile.append(pille);
       }
@@ -3285,8 +3285,8 @@
       renderBattle(content);
       const values = rules.kampfwerte(state);
       const held = combat.held;
-      const line = element("p", "Erfahrungsstufe " + values.stufe + " · Ausdauer " + values.ausdauer + " / " + values.ausdauerMax +
-        (values.manaMax ? " · Mana " + values.mana + " / " + values.manaMax : "") + " · " + values.ressourceName + " " + values.ressource +
+      const line = element("p", "Erfahrungsstufe " + values.stufe + " · " + poolNamen().A + " " + values.ausdauer + " / " + values.ausdauerMax +
+        (values.manaMax ? " · " + poolNamen().M + " " + values.mana + " / " + values.manaMax : "") + " · " + values.ressourceName + " " + values.ressource +
         (held.schild ? " · Schild " + held.schild : "") + (held.unsichtbar ? " · Unsichtbar" : "") +
         (held.staerkung ? " · +" + held.staerkung.wert + " Schaden" : "") + (held.naechster ? " · Nächster Angriff +" + held.naechster : ""));
       line.className = "battle-resources";
@@ -3309,7 +3309,7 @@
         const reason = rules.abilityState(state, f.id);
         const boostable = boostAbility && canBoost && f.stufe >= 3 && f.stufe < 20 && f.id[0] !== "m";
         const cost = f.id === "f1" ? "Grundangriff · " + world.items[rules.weapon(state)] :
-          f.kostenWert + " " + (f.zahlung === "M" ? "Mana" : "Ausdauer") + (f.ressource ? " + " + f.ressource + " " + values.ressourceName : "") +
+          f.kostenWert + " " + poolNamen()[f.zahlung === "M" ? "M" : "A"] + (f.ressource ? " + " + f.ressource + " " + values.ressourceName : "") +
           (boostable ? " + 1 " + values.ressourceName : "");
         const label = f.name + " · " + cost + (reason ? " · " + reason : "");
         const node = button(actions, label, () => battleAction(f.id + (boostable ? "+" : "")), { disabled: Boolean(reason) || Boolean((f.regel.heilung || f.regel.hot) && !rules.allies(state).find(ally => ally.id === selectedAlly()).health) });
@@ -3501,6 +3501,17 @@
     '<circle cx="44" cy="50" r="1.6" fill="#d4a857" opacity=".75"/><circle cx="56" cy="50" r="1.6" fill="#d4a857" opacity=".75"/>' +
     '<path d="M30 92l20 10 20-10" fill="none" stroke="#8d6947" stroke-width="1.5" opacity=".7"/></svg>';
 
+  // Fragenkatalog 4 B (Henry, 20. 11. 2026): Ausdauer bzw. Mana trägt je Volk den Namen der Volksressource
+  // (Flammeneifer, Astralstrom, Runenhitze, Blutwut, Seelenessenz). Nur die Anzeige wechselt, Werte und Regeln bleiben.
+  // Umbenannt wird der Vorrat, aus dem die Klasse überwiegend zahlt; der andere behält seinen Namen.
+  function poolNamen() {
+    const volk = state && klassen.fraktionen[state.faction]?.volk;
+    const r = volk && typeof kharosDaten !== "undefined" ? kharosDaten.ressourcen?.[volk] : null;
+    if (!r) return { A: "Ausdauer", M: "Mana" };
+    const liste = rules.abilities(state).filter((f) => f.kostenWert);
+    const mana = liste.filter((f) => f.zahlung === "M").length;
+    return rules.kampfwerte(state).manaMax > 0 && mana * 2 > liste.length ? { A: "Ausdauer", M: r.anzeigename } : { A: r.anzeigename, M: "Mana" };
+  }
   const npcPerson = (id, extra = null) => ({ name: "Unbekannt", titel: "", fraktion: null, ...(npcs.get(id) ?? {}), ...(extra ?? {}) });
 
   // Kopfzeile: Fraktion mit Ruf-Rang der Menschen (Fremder, Schutzherr, Geächtet …) und örtliches Ansehen.
@@ -3788,9 +3799,12 @@
   }
 
   // Hauptquest: Schritte und Entscheidungen im Gespräch mit der Auftraggeberin der Fraktionsreihe.
+  // Fragenkatalog 1 A: Jeder Schritt hat seine eigene Auftraggeberin, Berichte gehen an die Anführerin.
+  const hauptNpc = (haupt = rules.hauptquest(state)) => haupt?.schritt
+    ? npcs.fuerHauptquest(state.faction, haupt.schritt.schritt, Boolean(haupt.bericht)) : npcs.fuerHauptquest(state.faction);
   function hauptGespraech(nachricht = null) {
     const haupt = rules.hauptquest(state);
-    const npc = npcs.fuerHauptquest(state.faction);
+    const npc = hauptNpc(haupt);
     if (!haupt || !npc) return nachricht ? abschluss(nachricht) : gespraechEnde();
     gespraech.art = "haupt";
     const absaetze = [{ text: nachricht, art: "antwort" }];
@@ -4153,7 +4167,7 @@
       box.append(element("p", "Erfüllt. Bericht erwartet in " + haupt.bericht.ortName + " (siehe oben)."));
       return box;
     }
-    const auftraggeber = npcs.fuerHauptquest(state.faction);
+    const auftraggeber = hauptNpc(haupt);
     if (auftraggeber) {
       // Gesprächsfenster: Schritte und Entscheidungen laufen im Dialog mit der Auftraggeberin – nur an ihrem Ort.
       if (schritt.wahl) box.append(element("p", "Entscheidung: " + schritt.wahlen.map(option => option.label + " → " + option.folge).join(" · ")));
@@ -4217,6 +4231,8 @@
         teil.append(zeile);
         if (!z.fertig) {
           const sch = z.schritt;
+          const gastgeber = npcs.anfuehrer(z.fraktion);
+          if (gastgeber) teil.append(element("p", "Auftrag von " + npcPerson(gastgeber).name + " in " + knoten.get(z.hub).name + "."));
           teil.append(questSchritt("Stufe " + sch.nr + " · " + sch.titel + (sch.boss ? " (Boss)" : ""), knoten.get(z.zielOrt ?? z.hub).name,
             (!z.fortschritt ? z.text + " " : "") + sch.text +
             (sch.rohstoffe ? " · Lohn: " + Object.entries(sch.rohstoffe).map(([id, n]) => n + " " + id.replace("RES_", "").toLowerCase()).join(", ") : "")));
@@ -4252,6 +4268,8 @@
     box.append(element("h4", "Akt 4 · „" + a4.titel + "“ · Stufe " + a4.stufen));
     if (!a4.fertig) {
       box.append(element("p", a4.text));
+      const eigene = npcs.anfuehrer(state.faction);
+      if (eigene) box.append(element("p", "Auftrag von " + npcPerson(eigene).name + "."));
       if (a4.schritt === 0) box.append(element("p", "Reichssiegel: " + (a4.siegel.length ? a4.siegel.map((o) => knoten.get(o).name).join(", ") : "noch keins") +
         " (" + a4.siegel.length + " von 3)" + (a4.siegel.length >= 3 ? ". Danach wartet ein Hinterhalt auf der Reichsstraße." : ".")));
       const gesperrt4 = Boolean(a4.zielOrt) && ortGate(box, a4.zielOrt);
@@ -4294,7 +4312,7 @@
     if (ziel.hier) {
       const grund = ziel.art === "haupt" ? rules.hauptGrund(state) : rules.abgabeGrund(state, ziel.id);
       const knopf = button(parent, "Bericht erstatten · " + ziel.titel + (grund ? " · " + grund : ""),
-        () => ziel.art === "haupt" && npcs.fuerHauptquest(state.faction) ? hauptGespraech()
+        () => ziel.art === "haupt" && hauptNpc() ? hauptGespraech()
           : update(ziel.art === "haupt" ? rules.hauptWeiter(state) : rules.auftragAbgeben(state, ziel.id)),
         { disabled: Boolean(grund), story: true });
       knopf.classList.add("primary");
@@ -5112,8 +5130,8 @@
     const zeigeGlut = glutSichtbar();
     const bars = [
       ["hp", "Lebenspunkte", state.health, rules.healthLimit(state)],
-      ["ausdauer", "Ausdauer", values.ausdauer, values.ausdauerMax],
-      ...(zeigeMana ? [["mana", "Mana", values.mana, values.manaMax]] : []),
+      ["ausdauer", poolNamen().A, values.ausdauer, values.ausdauerMax],
+      ...(zeigeMana ? [["mana", poolNamen().M, values.mana, values.manaMax]] : []),
       ...(zeigeGlut ? [["glut", "Glut", state.ember, rules.emberLimit(state)]] : []),
     ];
     const vitals = el("vitals");
@@ -5223,7 +5241,15 @@
     if (el("reisekarte").open) renderReisekarte();
   }
 
-  for (const [id, data] of Object.entries(klassen.voelker)) volk.add(new Option(data.name, id));
+  // Fragenkatalog 6 A (Henry, 20. 11. 2026): Spielbar sind vorerst nur die drei Menschen-Fraktionen. Die anderen Völker und
+  // ihre zwölf Fraktionen stehen ausgegraut als „Bald verfügbar“ in der Auswahl. Alte Spielstände bleiben spielbar.
+  const SPIELBAR = ["kronreich", "orden", "haefen"];
+  const volkSpielbar = (id) => Object.entries(klassen.fraktionen).some(([f, data]) => data.volk === id && SPIELBAR.includes(f));
+  for (const [id, data] of Object.entries(klassen.voelker)) {
+    const option = new Option(data.name + (volkSpielbar(id) ? "" : " · Bald verfügbar"), id);
+    option.disabled = !volkSpielbar(id);
+    volk.add(option);
+  }
   for (const [id, label] of Object.entries(world.attributes)) volkWahl.add(new Option(label, id));
 
   function fillFactions() {
@@ -5233,6 +5259,17 @@
     origin.replaceChildren(...allowed.map(([id, data]) =>
       // Patch 2.6.16: Kein alter Vorrats-Hinweis mehr in der Fraktionsauswahl.
       new Option(data.name + " · " + data.schwierigkeit, id)));
+    if (!editingLegacy) {
+      const bald = document.createElement("optgroup");
+      bald.label = "Bald verfügbar";
+      for (const [id, data] of Object.entries(klassen.fraktionen)) {
+        if (SPIELBAR.includes(id) || allowed.some(([a]) => a === id)) continue;
+        const option = new Option(data.name + " · Bald verfügbar", id);
+        option.disabled = true;
+        bald.append(option);
+      }
+      if (bald.children.length) origin.append(bald);
+    }
     if (allowed.some(([id]) => id === previous)) origin.value = previous;
     const people = klassen.voelker[volk.value];
     el("volk-description").textContent = people.text;
@@ -5314,6 +5351,7 @@
     editingLegacy = false;
     portraitNeedsReset = true;
     el("character-form").reset();
+    if (!volkSpielbar(volk.value)) volk.value = "menschen";
     for (const input of [name, volk, appearance, variant]) input.disabled = false;
     el("character-submit").textContent = "Prolog starten";
     creationNote = state ? "Beim Start des Prologs wird der bisherige lokale Spielstand ersetzt." : "";

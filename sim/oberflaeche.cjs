@@ -98,7 +98,7 @@ function stand({ fraktion, akt }) {
     const text = (await reise.count()) ? await reise.textContent() : "";
     if (!/^Nach Eisentor reisen \(1 Etappe\)$/.test(text)) fehler.push("Ort-Gate: Reise-Knopf fehlt oder falsch: „" + text + "“");
     const hinweis = await page.locator(".welt-hauptquest .ort-gate-hinweis").first().textContent().catch(() => "");
-    if (!hinweis.includes("Du bist in Valengrad. Reise nach Eisentor, um mit Kaiserin Aurelia zu sprechen.")) fehler.push("Ort-Gate: Hinweis falsch: „" + hinweis + "“");
+    if (!hinweis.includes("Du bist in Valengrad. Reise nach Eisentor, um mit Marschall Kaelen zu sprechen.")) fehler.push("Ort-Gate: Hinweis falsch: „" + hinweis + "“");
     await reise.click();
     await page.waitForTimeout(400);
     if (!(await page.evaluate(() => document.querySelector(".rk-marschiert") !== null))) fehler.push("Ort-Gate: Reise startet keinen Marsch");
@@ -233,6 +233,48 @@ function stand({ fraktion, akt }) {
       if (hinweis !== "Nur in Hauptstädten möglich") fehler.push("Gefährten-Pool: Hinweis unterwegs falsch: „" + hinweis + "“");
     }
     console.log("Gefährten-Pool " + (hauptstadt ? "in der Hauptstadt" : "unterwegs") + " geprüft");
+    await page.close();
+  }
+  // Fragenkatalog v3.0.4 (Henry, 20. 11. 2026): Titel, nur Menschen wählbar, Volksressource, keine 404-Bilder, Sternenklipp.
+  {
+    const page = await browser.newPage({ viewport: { width: 1366, height: 900 } });
+    const fehlend = [];
+    page.on("pageerror", (e) => fehler.push("Fragenkatalog: " + e.message));
+    page.on("requestfailed", (r) => fehlend.push(r.url()));
+    page.on("response", (r) => { if (r.status() >= 400) fehlend.push(r.url()); });
+    await page.goto(seite);
+    if (!(await page.title()).includes("Der Krieg um den letzten Atem")) fehler.push("Fragenkatalog 8: Seitentitel falsch");
+    if ((await page.locator("h1").first().textContent()) !== "Der Krieg um den letzten Atem") fehler.push("Fragenkatalog 8: Überschrift falsch");
+    await page.click("#new-game");
+    const auswahl = await page.evaluate(() => ({
+      voelker: [...document.querySelectorAll("#volk option")].map((o) => [o.value, o.disabled]),
+      fraktionen: [...document.querySelectorAll("#origin option")].map((o) => [o.value, o.disabled, o.textContent]),
+    }));
+    const frei = auswahl.fraktionen.filter(([, aus]) => !aus).map(([id]) => id).sort().join(",");
+    if (frei !== "haefen,kronreich,orden") fehler.push("Fragenkatalog 6: wählbar sind " + frei);
+    const bald = auswahl.fraktionen.filter(([, aus, text]) => aus && /Bald verfügbar/.test(text)).length;
+    if (bald !== 12) fehler.push("Fragenkatalog 6: " + bald + " statt 12 Fraktionen als „Bald verfügbar“");
+    if (auswahl.voelker.filter(([, aus]) => aus).length !== 4) fehler.push("Fragenkatalog 6: andere Völker nicht ausgegraut");
+    // Spielstand Orden-Heiler: Mana heißt Flammeneifer; Schritt 2 spricht mit Läuterin Seraphina.
+    const json = await page.evaluate(() => {
+      let s = { ...rules.create("Prüferin", "orden", "frau", 2, "heiler"), scene: "weltknoten", knoten: "glutberg", handlung: null, hauptquest: { schritt: 1, wahl: null } };
+      s = rules.read(JSON.stringify(s));
+      s.health = rules.healthLimit(s);
+      return JSON.stringify(s);
+    });
+    await page.evaluate(([k, v]) => localStorage.setItem(k, v), [KEY, json]);
+    await page.reload();
+    await page.click("#continue");
+    await page.waitForTimeout(400);
+    const leiste = await page.evaluate(() => document.body.innerText);
+    if (!/Flammeneifer/.test(leiste)) fehler.push("Fragenkatalog 4: Volksressource „Flammeneifer“ fehlt in der Anzeige");
+    if (/Thorvaldsklipp/.test(leiste)) fehler.push("Fragenkatalog 9: Thorvaldsklipp noch sichtbar");
+    const knopf = await page.locator(".welt-hauptquest .npc-start").first().textContent().catch(() => "");
+    if (!/Läuterin Seraphina/.test(knopf)) fehler.push("Fragenkatalog 1: Schritt 2 nennt „" + knopf + "“");
+    await page.locator("#npc-dialog").count();
+    const bilder = fehlend.filter((url) => /\.(png|jpe?g|webp)(\?|$)/i.test(url));
+    if (bilder.length) fehler.push("Fragenkatalog 10: fehlende Bilder angefragt: " + [...new Set(bilder)].slice(0, 5).join(", "));
+    console.log("Fragenkatalog geprüft");
     await page.close();
   }
   await browser.close();

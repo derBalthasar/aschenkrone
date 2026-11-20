@@ -11,6 +11,9 @@ const systeme = (() => {
   for (const [id, name] of Object.entries({ nahrung: "Nahrung", holz: "Bauholz", eisen: "Roheisen", stein: "Bruchstein", runensplitter: "Runensplitter" })) {
     if (D.rohstoffe?.[id]) D.rohstoffe[id].name = name;
   }
+  // Fragenkatalog 5 A (Henry, 20. 11. 2026): Hardcore wird nach Akt 4 frei, der Hinweis sagt das jetzt auch.
+  const hardcoreHinweis = D.v2619schwierigkeit?.hardcore_freischaltung?.gesperrt_anzeige_in_ui;
+  if (hardcoreHinweis) hardcoreHinweis.hinweis_text = "Gesperrt: Schließe Akt 4 ab, um den Hardcore-Modus (Permadeath) freizuschalten.";
   const N = typeof knoten !== "undefined" ? knoten : require("./knoten.js");
 
   const MENSCHEN = ["kronreich", "orden", "haefen"];

@@ -59,6 +59,8 @@ const kharos = (() => {
   };
   // Figuren. Thorvald hängt vom Stand ab: vor der Entlarvung nur der Tarnname (Henry: darf vor Akt 4 nicht enttarnt werden).
   const figuren = (entlarvt) => [
+    // Fragenkatalog 9 A (Henry, 20. 11. 2026): Der Ort trägt den Namen des Verräters nicht mehr.
+    ["Thorvaldsklipp", "Sternenklipp"],
     ["(?:Kron)?[Pp]rinzessin Astrid", "Kaiserin Aurelia"], ["Astrids", "Aurelias"], ["Astrid", "Aurelia"],
     ["Hochmeisterin Ragna Glutherz", "Großinquisitor Vane"], ["Ragna Glutherz", "Großinquisitor Vane"], ["Hochmeisterin Ragna", "Großinquisitor Vane"], ["Ragna", "Vane"],
     ["Der Zollmeister von Zollholm", "Flottenfürst Draven"], ["der Zollmeister von Zollholm", "Flottenfürst Draven"],

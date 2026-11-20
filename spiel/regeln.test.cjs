@@ -2081,3 +2081,24 @@ console.log("Patch 2.5.3 geprüft.");
   assert.ok(rules.recruit(geeint, id).party.includes(id));
 }
 console.log("Gefährten-Pool und Hauptstadt-Tausch geprüft.");
+// Fragenkatalog v3.0.4, Antwort 3 A (Henry, 20. 11. 2026): Alle vier Völker-Synergien wirken im Kampf.
+{
+  const mitElfe = reload({ ...rules.create("Tala", "kronreich", "frau", 1, "krieger"), scene: "weltknoten", knoten: "kronhall",
+    marks: ["buendnis_elfen"], party: ["gef_elfen_aethel"] });
+  const astral = rules.synergien(mitElfe).find((s) => s.name === "Astrale Kriegsführung");
+  assert.ok(astral.aktiv && astral.wirkt, "Mensch + Elf aktiv");
+  assert.ok(rules.synergien(mitElfe).every((s) => s.wirkt), "Alle Synergien haben eine Wirkung");
+  const auftrag = rules.aushang(mitElfe).find((x) => x.spiel.gegner && !x.spiel.weg);
+  const kampf = rules.auftragAusfuehren(rules.auftragAnnehmen(mitElfe, auftrag.id), auftrag.id);
+  assert.ok(kampf.combat, "Kampf beginnt");
+  const max = rules.kampfwerte(kampf).ausdauerMax;
+  assert.equal(kampf.combat.held.ausdauer, max + 1, "+1 Ausdauer über dem Höchstwert zu Kampfbeginn");
+  assert.equal(reload(kampf).combat.held.ausdauer, max + 1, "Spielstand mit Vorsprung bleibt ladbar");
+  const ohne = reload({ ...mitElfe, party: [] });
+  const kampfOhne = rules.auftragAusfuehren(rules.auftragAnnehmen(ohne, auftrag.id), auftrag.id);
+  assert.equal(kampfOhne.combat.held.ausdauer, rules.kampfwerte(kampfOhne).ausdauerMax, "Ohne Elf kein Vorsprung");
+  const amboss = rules.synergien(reload({ ...rules.create("Tala", "tiefes-koenigreich", "frau", 1, "krieger"), marks: ["buendnis_orks"] }));
+  assert.equal(amboss.find((s) => s.name === "Donner & Amboss").wert.nahkampfKrit, 1.62);
+  assert.equal(amboss.find((s) => s.name === "Zorn der Alten Wildnis").wert.ausweichenFrueh, 1);
+}
+console.log("Völker-Synergien geprüft.");

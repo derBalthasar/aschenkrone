@@ -128,8 +128,8 @@ Quelle: `quellen/henry/v300/gefaehrten-pool.json`. Regeln in `spiel/regeln.js` (
 - Akt 2/3: Nach abgeschlossenem Schwester-Zweig wartet deren Q10-Gefährte als Abgesandter an seinem Ort.
 - Akt 5: Elite-Champions (`gef_*`) treten bei Marke `buendnis_<volk>` kostenlos der Reserve bei. Untote bekommen keine
   Champions und nehmen nur Untote/Korrumpierte auf.
-- Synergien werden angezeigt; nur „Pakt aus Stahl & Flamme“ (+1 Rüstung) wirkt im Kampf. Die übrigen drei brauchen noch
-  fehlende Systeme (Kampfressourcen, Ausweichen nach Kampfphase, Krit-Schaden).
+- Synergien wirken seit dem Fragenkatalog v3.0.4 alle im Kampf (`SYNERGIEN[].wert`, `synergieWert`): +1 Rüstung,
+  Ausweichen in Runde 1–3 einen Treffer früher, +1 Ausdauer/Mana über dem Höchstwert zu Kampfbeginn, Nahkampf-Krit ×1,62.
 
 ## UI-Aufräumen v3.0.2–v3.0.4 (20. 11. 2026)
 
@@ -143,3 +143,13 @@ alles steckt in `spiel/spiel.js`, `spiel/stil.css`, `spiel/kharos.js`, `spiel/sy
   „n Gold“ „n Silber“. Söldner warten auch in Kronhall/Valengrad und Hagenfels/Eisentor (`soeldnerStadt`).
 - v3.0.4: Schatz-Banner im Handel, kurze Rohstoffnamen (systeme.js), SVG-Symbole (`SYMBOLE`), Tier-Kante
   (`data-tier`), Rüstungs-Silhouette hinter den Slots. Ascheriss-Fangzahn → Leerenriss-Fangzahn (Anzeige).
+
+## Fragenkatalog v3.0.4 umgesetzt (20. 11. 2026)
+
+- Auftraggeber je Akt-1-Schritt: `npcs.fuerHauptquest(fraktion, planSchritt, bericht)`, Schritt 2 = Kaelen/Seraphina/Mirella;
+  Akt 2/3 zeigt die Anführung der Gastgeber-Fraktion, Akt 4 die eigene (`npcs.anfuehrer`).
+- Ausdauer/Mana heißen je Volk wie die Volksressource (`poolNamen()` in spiel.js, nur Anzeige).
+- Charaktererstellung: nur Menschen wählbar, die übrigen 12 Fraktionen als „Bald verfügbar“ (`SPIELBAR`).
+- Bilder: Nur Dateien aus `npcs.bilder` (assets/npcs) und `npcPortraets.vorhanden` (assets/portraits) werden geladen.
+  Neues Bild ablegen und dort eintragen.
+- `sim/simulator.cjs`: Maßstab Held + 3 Gefährten (Gegner auf Gruppengröße), Lauf S = Held allein als Info.

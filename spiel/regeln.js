@@ -624,13 +624,12 @@ const rules = (() => {
     return Boolean(c?.auftrag && c.fraktion !== state.faction && K.fraktionen[c.fraktion]?.volk === people(state.faction) &&
       (state.akte?.zweige?.[c.fraktion]?.stufe ?? 0) >= 3);
   };
-  // Völker-Synergien des aktiven Trupps. Nur „Pakt aus Stahl & Flamme“ hat schon einen Wert im Kampf; die übrigen
-  // brauchen Systeme, die es noch nicht gibt (Kampfressourcen, Ausweichen nach Kampfphase, Krit-Schaden).
+  // Völker-Synergien des aktiven Trupps. Seit dem Fragenkatalog v3.0.4 (Antwort 3 A) wirken alle vier im Kampf.
   const SYNERGIEN = [
     { voelker: ["menschen", "zwerge"], name: "Pakt aus Stahl & Flamme", effekt: "+1 Rüstung für die gesamte aktive Gruppe", wert: { ruestung: 1 } },
-    { voelker: ["elfen", "orks"], name: "Zorn der Alten Wildnis", effekt: "+10 % Ausweichen in der ersten Kampfphase", wert: null },
-    { voelker: ["menschen", "elfen"], name: "Astrale Kriegsführung", effekt: "+1 Start-Kampfressource (Flammeneifer / Astralstrom)", wert: null },
-    { voelker: ["zwerge", "orks"], name: "Donner & Amboss", effekt: "+12 % kritischer Schaden im Nahkampf", wert: null },
+    { voelker: ["elfen", "orks"], name: "Zorn der Alten Wildnis", effekt: "Ausweichen in den ersten 3 Runden einen Treffer früher", wert: { ausweichenFrueh: 1 } },
+    { voelker: ["menschen", "elfen"], name: "Astrale Kriegsführung", effekt: "+1 Ausdauer und +1 Mana zu Kampfbeginn (über dem Höchstwert)", wert: { startRessource: 1 } },
+    { voelker: ["zwerge", "orks"], name: "Donner & Amboss", effekt: "Kritische Treffer im Nahkampf ×1,62 statt ×1,5", wert: { nahkampfKrit: 1.62 } },
   ];
   const truppVoelker = (state) => new Set([people(state.faction), ...state.party.map(memberPeople)]);
   function synergien(state) {
@@ -4117,6 +4116,13 @@ const rules = (() => {
     if (gearStat(state, "emberShieldPct")) combat.held.schild += Math.round(healthLimit(state) * gearStat(state, "emberShieldPct") / 100);
     // Patch 2.6.9: Takt der Schildbrecher: +1 Ausdauer zu Kampfbeginn.
     if (state.gefaehrtenPerks?.includes("PERK_KR_SCHILDBRECHER_TAKT")) combat.held.ausdauer = Math.min(kraft(state).ausdauer, combat.held.ausdauer + 1);
+    // Fragenkatalog 3 A (Henry, 20. 11. 2026): Astrale Kriegsführung (Mensch + Elf) gibt +1 Ausdauer und +1 Mana über dem
+    // Höchstwert zu Kampfbeginn. Die Regeneration füllt nur bis zum Höchstwert, der Bonus ist also ein Vorsprung für die erste Runde.
+    const startPlus = synergieWert(state, "startRessource");
+    if (startPlus) {
+      combat.held.ausdauer += startPlus;
+      if (max.mana > 0) combat.held.mana += startPlus;
+    }
     // Patch 2.6.8: Stärkung vom Lagerfeuer für den nächsten Kampf.
     if (state.lagerBuff) {
       combat.held.lagerBuff = state.lagerBuff;
@@ -4313,7 +4319,9 @@ const rules = (() => {
         held.kritZaehler = (held.kritZaehler ?? 0) + krit;
         if (held.kritZaehler >= 100) {
           held.kritZaehler -= 100;
-          const mult = SY.talentRang(state, "TREE_EISERNE_VORHUT") >= 2 ? 1.65 : SY.daten.kampf.krit;
+          // Fragenkatalog 3 A: Donner & Amboss (Zwerg + Ork) – Nahkampf-Krit ×1,62 statt ×1,5 (Eiserne Vorhut ×1,65 bleibt höher).
+          const amboss = combatSkill(state) === "nahkampf" ? synergieWert(state, "nahkampfKrit") : 0;
+          const mult = Math.max(SY.talentRang(state, "TREE_EISERNE_VORHUT") >= 2 ? 1.65 : SY.daten.kampf.krit, amboss);
           amount = Math.floor(amount * mult);
           kritisch = true;
           note(state, "Kritischer Treffer gegen " + foe.name + " (×" + String(mult).replace(".", ",") + ").");
@@ -4757,7 +4765,9 @@ const rules = (() => {
           // Flächenangriffe (Trampeln) treffen alle, sonst einer nach dem anderen.
           for (const victim of sonder?.flaeche ? active : [active[victimCursor++ % active.length]]) {
             const heroTarget = victim.id === "hero";
-            const intervall = heroTarget && damage > 0 ? ausweichIntervall(state) : 0;
+            let intervall = heroTarget && damage > 0 ? ausweichIntervall(state) : 0;
+            // Fragenkatalog 3 A: Zorn der Alten Wildnis (Elf + Ork) – in den ersten 3 Runden weicht der Held einen Treffer früher aus.
+            if (intervall && (state.combat.round ?? 0) <= 3) intervall = Math.max(2, intervall - synergieWert(state, "ausweichenFrueh"));
             if (intervall) {
               // Ausweichen ohne Zufall: jeder n-te Angriff auf den Helden geht ins Leere (Einsamer Wolf jeder 7., Schurken jeder 5.,
               // Patch 2.6.x: Talente, Ausrüstung und Spezialisierung verkürzen das Intervall).
@@ -4862,17 +4872,19 @@ const rules = (() => {
     if (!turn) return;
     const held = turn.held;
     const max = kraft(state);
-    held.ausdauer = Math.min(max.ausdauer, held.ausdauer + 2);
+    // Auffüllen bis zum Höchstwert; ein Vorsprung darüber (Astrale Kriegsführung) bleibt, bis er ausgegeben ist.
+    const fuellen = (wert, hoch, plus) => Math.max(wert, Math.min(hoch, wert + plus));
+    held.ausdauer = fuellen(held.ausdauer, max.ausdauer, 2);
     if (menschen(state)) {
       // Patch 2.5.3: Runen- & Glutresonanz +10 % Manaregeneration je Rang; Bruchteile sammeln sich über die Züge.
       // Patch 2.6.2: Resonanz Rang 1 +10 % (mit Runen-/Glutausrüstung), Rang 2 +1 je Zug; Eid der Ewigen Glut +10 %.
-      held.ausdauer = Math.min(max.ausdauer, held.ausdauer + SY.talentWirkung(state, "TREE_RUNEN_UND_GLUTRESONANZ", "resource_regen_per_turn_bonus"));
+      held.ausdauer = fuellen(held.ausdauer, max.ausdauer, SY.talentWirkung(state, "TREE_RUNEN_UND_GLUTRESONANZ", "resource_regen_per_turn_bonus"));
       const regen = SY.daten.kampf.mana.jeZug * (1 + (resonanz(state) ? SY.talentWirkung(state, "TREE_RUNEN_UND_GLUTRESONANZ", "heal_and_mana_regen_pct") / 100 : 0) +
         (state.akte?.fspez === "FSPEC_EID_DER_EWIGEN_GLUT" ? 0.1 : 0)) +
         SY.talentWirkung(state, "TREE_RUNEN_UND_GLUTRESONANZ", "resource_regen_per_turn_bonus") + (held.manaRest ?? 0);
       held.manaRest = Math.round((regen - Math.floor(regen)) * 100) / 100;
-      held.mana = Math.min(max.mana, held.mana + Math.floor(regen));
-    } else held.mana = Math.min(max.mana, held.mana + 2);
+      held.mana = fuellen(held.mana, max.mana, Math.floor(regen));
+    } else held.mana = fuellen(held.mana, max.mana, 2);
     for (const id of Object.keys(held.abklingen)) {
       if (--held.abklingen[id] <= 0) delete held.abklingen[id];
     }
@@ -4911,7 +4923,7 @@ const rules = (() => {
       combat.feinde.some((foe) => foe.lp > 0) &&
       Array.isArray(combat.diener) && combat.diener.length <= kampf.maxDiener &&
       combat.diener.every((summon) => isRecord(summon) && intBetween(summon.lp, 0, 100) && intBetween(summon.runden, 0, 10)) &&
-      isRecord(held) && intBetween(held.ausdauer, 0, max.ausdauer) && intBetween(held.mana, 0, max.mana) &&
+      isRecord(held) && intBetween(held.ausdauer, 0, max.ausdauer + 1) && intBetween(held.mana, 0, max.mana + 1) &&
       intBetween(held.schild, 0, 1000) && isRecord(held.abklingen) && Array.isArray(held.genutzt);
   }
 

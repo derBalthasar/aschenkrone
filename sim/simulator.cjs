@@ -6,6 +6,10 @@
 //   node sim/simulator.cjs A          nur BENCHMARK_A_UNSPENT
 //   node sim/simulator.cjs B 8        nur BENCHMARK_B_OPTIMAL_SPEND, 8 Kämpfe je Gegner
 //   node sim/simulator.cjs C          nur SIM_BENCHMARK_C_WITH_GEAR (Patch 2.5.6)
+//   node sim/simulator.cjs S          nur INFO_SOLO_B (wie B, aber der Held allein)
+//
+// Fragenkatalog v3.0.4, Antwort 13 A (Henry, 20. 11. 2026): Maßstab ist der Held mit 3 Gefährten seiner Fraktion
+// (die drei Auftrags-Gefährten). Der Sololauf INFO_SOLO_B bleibt als Information, er ist kein Balance-Ziel.
 //
 // BENCHMARK_A_UNSPENT: Der Held verteilt keine Punkte (untere Grenze: Spieler vergisst die Punkteverteilung).
 // BENCHMARK_B_OPTIMAL_SPEND: Der Held verteilt alles nach festen Regeln:
@@ -15,7 +19,7 @@
 //   Ahnen       Zorn der Alten Könige, dann Eisernes Ahnenblut.
 // SIM_BENCHMARK_C_WITH_GEAR (Patch 2.5.6): wie B auf jeder Stufe von 1 bis 30, dazu die angelegte Ausrüstung in der
 //   Schmiede aufgewertet: Stufe 1–5 ohne, 6–11 +1, 12–17 +2, 18–30 +3.
-// Jede Klasse kämpft allein gegen vier Auftragsgegner auf ihrer Stufe: Mitläufergruppe (Kultisten),
+// Jede Klasse kämpft (mit 3 Gefährten, Info-Lauf S allein) gegen vier Auftragsgegner auf ihrer Stufe: Mitläufergruppe (Kultisten),
 // Elite (Kapitän Urgash), Anführer (Skarn) und Anführer mit Flächenangriff (Der Letzte Mammut).
 // Würfel mit festem Startwert: Jeder Lauf ist wiederholbar.
 
@@ -38,7 +42,9 @@ const LAEUFE = {
   A: { id: "BENCHMARK_A_UNSPENT", verteilen: false },
   B: { id: "BENCHMARK_B_OPTIMAL_SPEND", verteilen: true },
   C: { id: "SIM_BENCHMARK_C_WITH_GEAR", verteilen: true, ausruestung: true, stufen: Array.from({ length: 30 }, (_, i) => i + 1), prestige: false },
+  S: { id: "INFO_SOLO_B", verteilen: true, solo: true },
 };
+const GEFAEHRTEN = { kronreich: ["sigrid", "wulfgar", "fenris"], orden: ["halvar", "gunhild", "malte"], haefen: ["halvor", "karen", "soren"] };
 const AUFWERTUNG = [{ min: 1, max: 5, stufe: 0 }, { min: 6, max: 11, stufe: 1 }, { min: 12, max: 17, stufe: 2 }, { min: 18, max: 30, stufe: 3 }];
 const FRAKTIONEN = { kronreich: "kronhall", orden: "glutberg", haefen: "zollholm" };
 const ROLLEN = ["krieger", "waechter", "spaeher", "magier", "heiler", "schurke"];
@@ -47,7 +53,7 @@ const GEGNER = [["auftrag-kultisten", "Gruppe"], ["auftrag-urgash", "Elite"], ["
 const TALENTE = ["TREE_EISERNE_VORHUT", "TREE_RUNEN_UND_GLUTRESONANZ", "TREE_UNGEBROCHENER_SCHILDWALL", "TREE_SCHATTENPFAD_UND_LIST", "TREE_BANNERJARL"];
 const AHNEN = ["perk_ancestral_might", "perk_iron_blood"];
 
-const auswahl = process.argv[2] ? [process.argv[2].toUpperCase()] : ["A", "B", "C"];
+const auswahl = process.argv[2] ? [process.argv[2].toUpperCase()] : ["A", "B", "C", "S"];
 const kaempfe = Number(process.argv[3] ?? 12);
 
 let saat = 1;
@@ -101,7 +107,7 @@ function verteilen(state) {
 function held(faction, role, stufe, lauf, extraEp = 0) {
   let state = rules.create("Sim", faction, "frau", 2, role);
   state = rules.read(JSON.stringify({ ...state, scene: "weltknoten", knoten: FRAKTIONEN[faction], handlung: null,
-    xp: SY.epFuer(stufe) + extraEp }));
+    xp: SY.epFuer(stufe) + extraEp, party: lauf.solo ? [] : GEFAEHRTEN[faction] }));
   if (lauf.verteilen) state = verteilen(state);
   if (lauf.ausruestung) {
     const stufeSchmiede = AUFWERTUNG.find((a) => stufe >= a.min && stufe <= a.max).stufe;
@@ -132,7 +138,8 @@ function kampfStart(state, gegnerId, stufe) {
   if (!s.combat) return null;
   // Gleicher Kampfstart (Initiative, Glutschild), danach die Gegner des Benchmarks auf Heldenstufe.
   s.combat.id = gegnerId;
-  s.combat.feinde = rules.gegnerAufstellung(gegnerId, 0, stufe, stufe);
+  // Gegner auf Gruppengröße skaliert (Held + Gefährten), wie im Spiel.
+  s.combat.feinde = rules.gegnerAufstellung(gegnerId, s.party.length, stufe, stufe);
   return s;
 }
 
@@ -144,7 +151,7 @@ function lauf(key) {
     const st = prestige ? 30 : stufe;
     const basis = held(faction, role, st, config, prestige ? 2 * 5000 : 0);
     const werte = rules.heroAttributes(basis);
-    const zeile = { lauf: config.id, faction, role, klasse: SY.daten.menschenKlassen[faction][role].name, stufe,
+    const zeile = { lauf: config.id, gruppe: basis.party.length, faction, role, klasse: SY.daten.menschenKlassen[faction][role].name, stufe,
       lp: rules.healthLimit(basis), punkteOffen: rules.progression(basis).points, raengeOffen: rules.faehigkeitInfo(basis)?.punkte ?? 0,
       werte: Object.values(werte).join("/"), quoten: {} };
     for (const [gegnerId, name] of GEGNER) {
@@ -173,7 +180,8 @@ const ergebnis = Object.fromEntries(auswahl.map((key) => [LAEUFE[key].id, lauf(k
 const ziel = path.join(__dirname, "ergebnis.json");
 fs.writeFileSync(ziel, JSON.stringify({ stand: new Date().toISOString(), kaempfe, ergebnis }, null, 1));
 for (const [id, zeilen] of Object.entries(ergebnis)) {
-  console.log("\n## " + id + " (" + kaempfe + " Kämpfe je Gegner, Sieg % / Rest-LP %)");
+  console.log("\n## " + id + " (" + (zeilen[0]?.gruppe ? "Held + " + zeilen[0].gruppe + " Gefährten" : "Held allein, nur Info") + ", " +
+    kaempfe + " Kämpfe je Gegner, Sieg % / Rest-LP %)");
   console.log(["Klasse", "Stufe", "LP", ...GEGNER.map(([, n]) => n)].join(" | "));
   for (const z of zeilen) {
     console.log([z.faction + " " + z.klasse, z.stufe, z.lp, ...GEGNER.map(([, n]) => z.quoten[n].sieg + " / " + z.quoten[n].restLp)].join(" | "));

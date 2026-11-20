@@ -9,7 +9,12 @@ const npcPortraets = (() => {
 
   // Zuordnung der Spielfiguren (spiel/npcs.js) zu Henrys Porträts. Die übrigen festen Figuren kommen mit den Dialog-Paketen.
   // Kharos 3.0: Die Auftraggeber tragen jetzt die Kharos-Figuren (Henrys Paket 3A).
-  const spielNpc = { astrid: "kaiserin_aurelia", ragna: "grossinquisitor_vane", zollmeister: "flottenfuerst_draven" };
+  const spielNpc = { astrid: "kaiserin_aurelia", ragna: "grossinquisitor_vane", zollmeister: "flottenfuerst_draven",
+    // Fragenkatalog 1 A: Auftraggeberinnen in Schritt 2 (Zeichnungen aus Henrys Porträt-Paket mit passender Rolle).
+    kaelen: "jarl_ragnvald", seraphina: "priorin_sigrid", mirella: "hafenmeisterin_ylva" };
+  // Fragenkatalog 10 B: Bilddateien, die wirklich unter assets/portraits/ liegen. Nur diese werden angefragt,
+  // alle anderen Figuren zeigen sofort ihr SVG (keine 404-Meldungen in der Konsole).
+  const vorhanden = new Set([]);
   const spielPool = { dorfvorsteher: "bauer_und_dorfbewohner", faehrfrau: "bauer_und_dorfbewohner", boersenhaendler: "kontor_verwalter",
     reeder: "kontor_verwalter" };
   // Astrid hat ein fertiges Gemälde, aber keine SVG-Zeichnung: Merkmale für den Fallback aus Henrys Bildbeschreibung.
@@ -116,7 +121,8 @@ const npcPortraets = (() => {
   // Bild unter assets/portraits/ probieren (PNG, dann WebP), sonst SVG behalten.
   const status = new Map();
   function bildLaden(box, eintrag) {
-    const kandidaten = [ORDNER() + eintrag.datei, ORDNER() + stamm(eintrag.datei) + ".webp"].filter((url) => status.get(url) !== "fehlt");
+    const kandidaten = [eintrag.datei, stamm(eintrag.datei) + ".webp"].filter((datei) => vorhanden.has(datei))
+      .map((datei) => ORDNER() + datei).filter((url) => status.get(url) !== "fehlt");
     const versuch = (i) => {
       if (i >= kandidaten.length) return;
       const url = kandidaten[i];
@@ -140,5 +146,5 @@ const npcPortraets = (() => {
     return true;
   }
 
-  return { fest, pool, fuerNpc, zeigen, aufbauen, archetypNamen };
+  return { fest, pool, fuerNpc, zeigen, aufbauen, archetypNamen, vorhanden };
 })();
