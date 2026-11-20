@@ -73,7 +73,7 @@ const kharos = (() => {
     ["Stillen Feder", "Schweigsamen Chronisten"], ["Stille Feder", "Schweigsame Chronist"],
     ["Odris", WELT],
     // v3.0.2–v3.0.4: Altlasten aus Odris in angezeigten Texten.
-    ["König Harald IV\\.", "Kaiser Aurelian IV."], ["Harald IV\\.", "Aurelian IV."],
+    ["des todkranken König Harald IV\\.", "des todkranken Kaisers Aurelian IV."], ["König Harald IV\\.", "Kaiser Aurelian IV."], ["Harald IV\\.", "Aurelian IV."],
     ["Jarl Ragnvalds?", "Marschall Kaelen"], ["Ragnvalds", "Kaelens"], ["Ragnvald", "Kaelen"],
     ["Aldric Vaelthar III\\.", "Grabkönig Sethek"], ["Aldric", "Sethek"],
     ["(R|r)unengeätzte([rn]?) Ascheriss-Fangzahn", "$1unengeätzte$2 Leerenriss-Fangzahn"],
@@ -99,6 +99,7 @@ const kharos = (() => {
     [new RegExp("\\b(gegen|für|durch|um|stellst|stellt|besiegst|besiegt|entlarvst|entlarvt|suchst|sucht|triffst|trifft) der " + TITEL + " (Sternenleser|Chronist)\\b", "g"),
       (_, p, t, n) => p + " den " + schwach(t, n)],
     [new RegExp("(^|[.!?:]\\s+|[„\"»]\\s*)der " + TITEL, "g"), "$1Der $2"],
+    [new RegExp("\\bder " + TITEL + " (Sternenleser|Chronist) (stellen|besiegen|entlarven|suchen|treffen)\\b", "g"), (_, t, n, v) => "den " + schwach(t, n) + " " + v],
     // v3.0.3: Belohnungen in Gold heißen Silber; Entwicklernotizen wie „(Henry, 18. 11. 2026):“ verschwinden aus der Anzeige.
     [/([+−-]?\d+) Gold\b/g, "$1 Silber"],
     [/\s*\((?:Henry|Patch|Errata)[^()]*\d{4}\)/g, ""],
