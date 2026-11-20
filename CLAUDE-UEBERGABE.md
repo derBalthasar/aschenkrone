@@ -84,3 +84,21 @@ Henrys JSON `quellen/henry/v2619/schwierigkeitsgrade.json` (als `SY.daten.v2619s
 - Freischaltung: `localStorage aschenkrone_hardcore_unlocked = "1"`, gesetzt sobald ein Held Quest-Stufe 4 erreicht.
 - Oberfläche: Auswahl bei der Charaktererstellung (`#schwierigkeit`), Wechsel leicht/mittel/schwer in den Einstellungen (`#opt-schwierigkeit`), Ruhmeshalle dort.
 - Tests: `spiel/schwierigkeit.test.cjs`; E2E meldet die Hardcore-Freischaltung nach Akt 4.
+
+## Kampf-Paket: Animationen, 2D-Arena, Bühnen (v2.6.19d, 20. 11. 2026)
+
+Henrys JSONs `quellen/henry/v2619/kampf-animationen.json`, `kampfarena-2d.json`, `kampfbuehnen.json` (als `SY.daten.v2619kampf`).
+
+- `spiel/kampf-arena.js` (global `kampfArena`): baut die Arena (220 px, Formationen in Prozent, SVG-Figuren aus Schatten, Beinen, Torso, Kopf/Helm, Nebenhand, Waffenarm; Thorvald ×1,35 mit Aura) und spielt Ereignisse ab (Vorsturm, Fernkampf mit Projektil, Treffer, Ausweichen, Zerfall zu Asche, Schwebetext, Waffen-Effekte, Krit-Bildschirmwackeln). Reine Anzeige.
+- `spiel/spiel.js`: `arenaBeschreibung`, `kampfBuehne` (Region aus dem Ort des Spiels: Orden → Glutberg/Aschland, Häfen/Hafenstädte → Salzklippen, Untote und Eiswacht/Nordwacht/Pässe → Eispass, Elfen/Wald → Dornenforst, sonst Westmark; Thorvald → Glutberg mit Aura; Ascheriss-Gegner → Altes Reich), `arenaAktion`, `lpNachziehen` (gelber Nachzieh-Balken), `kartenText`. Taktung 420/360/400 ms. Die Animation läuft immer, nur unter `navigator.webdriver` (Headless-Sim) nicht – außer `localStorage aschenkrone.animationen = "an"`.
+- `spiel/regeln.js`: Ereignisse tragen nur Anzeigehinweise `krit`, `glut`, `ausgewichen`, `schild`/`rest`.
+- Tiere ohne Bestiariumsbild bekommen eine eigene Bestien-Silhouette (Henrys Katalog hat nur Menschenformen); Gegner mit Bild zeigen ihr Bild.
+
+## NPC-Porträts (v2.6.19d, 20. 11. 2026)
+
+Henrys JSONs `npc-portraets-engine.json`, `npc-portraets-svg-teil1.json`, `npc-portraets-svg-teil2.json` (als `SY.daten.v2619portraets`).
+
+- `state.laufSeed` (neu bei jedem Spielstart; alte Stände: fester Wert aus Name und Fraktion).
+- `spiel/npc-portraets.js` (global `npcPortraets`): `fest(npcId)`, `pool(archetyp, seed, ort)`, `fuerNpc`, `zeigen(box, eintrag)`. Lädt erst `assets/portraits/<dateiname>` (PNG, dann WebP), sonst Henrys SVG, sonst ein aus den Merkmalen erzeugtes SVG (Astrid, bauer_var_3, schmied_var_3, soeldner_var_2 haben keine Zeichnung).
+- Eingebaut: Gesprächsfenster (Astrid, Ausrufer am Aushang, Dorfvorsteher, Fährfrau, Reeder, Händler), Porträtleiste „Leute“ in Hofstaat und Kontor-Reiter.
+- Ragnvald, Kastellan, Sigrid, Torben, Ylva und die zwei geheimen Figuren sind hinterlegt, erscheinen aber erst mit den Dialog-Paketen.

@@ -1,0 +1,153 @@
+{
+  "quelle": "Henry, Projekt-Thread 20. 11. 2026 11:11 Berlin (Kampf-Paket)",
+  "schema_version": "2.6.19",
+  "feature": "ff6_stil_2d_seitenansicht_kampfarena",
+  "target_files": [
+    "ui/kampf.js",
+    "ui/kampf_arena_2d.js",
+    "style/kampf.css"
+  ],
+  "arena_layout": {
+    "stil": "nordic_dark_fantasy_2d_sideview",
+    "hoehe_px": 220,
+    "linke_seite": {
+      "rolle": "spielergruppe",
+      "blickrichtung": "rechts",
+      "formations_koordinaten_prozent": [
+        {
+          "slot": 0,
+          "x": 22,
+          "y": 58
+        },
+        {
+          "slot": 1,
+          "x": 14,
+          "y": 42
+        },
+        {
+          "slot": 2,
+          "x": 14,
+          "y": 74
+        },
+        {
+          "slot": 3,
+          "x": 8,
+          "y": 58
+        }
+      ]
+    },
+    "rechte_seite": {
+      "rolle": "gegnergruppe",
+      "blickrichtung": "links",
+      "max_gegner": 4,
+      "formations_koordinaten_prozent": [
+        {
+          "slot": 0,
+          "x": 74,
+          "y": 54
+        },
+        {
+          "slot": 1,
+          "x": 82,
+          "y": 38
+        },
+        {
+          "slot": 2,
+          "x": 82,
+          "y": 72
+        },
+        {
+          "slot": 3,
+          "x": 90,
+          "y": 54
+        }
+      ]
+    }
+  },
+  "2d_modell_generator": {
+    "render_technik": "modular_svg_rig",
+    "koerper_teile": [
+      "schatten_oval",
+      "beine",
+      "torso",
+      "kopf_helm",
+      "schild_oder_nebenhand",
+      "waffenarm"
+    ],
+    "animationen": {
+      "idle": {
+        "css_klasse": "rig-idle-breathe",
+        "dauer_ms": 1800,
+        "loop": true
+      },
+      "vorsturm_angriff": {
+        "vorlauf_ms": 220,
+        "ziel_offset_x_px": -45,
+        "schlag_schwung_ms": 180,
+        "rueckzug_ms": 240
+      },
+      "fernkampf_oder_zauber": {
+        "hebepose_ms": 260,
+        "projektil_flug_ms": 220,
+        "projektil_typen": [
+          "pfeil_bolzen",
+          "glut_kugel",
+          "runen_blitz"
+        ]
+      },
+      "treffer": {
+        "css_klasse": "rig-hit-recoil",
+        "dauer_ms": 260
+      },
+      "ausweichen": {
+        "css_klasse": "rig-dodge-step",
+        "offset_x_px": 18,
+        "dauer_ms": 280
+      },
+      "besiegt": {
+        "css_klasse": "rig-collapse-ash",
+        "dauer_ms": 550
+      }
+    }
+  },
+  "klassen_und_gegner_silhouetten": [
+    {
+      "typ": "krieger_blutritter",
+      "waffe": "schwere_streitaxt",
+      "schild": "rundschild_eisen",
+      "helm": "nordischer_nasenhelm",
+      "akzent_farbe": "#b91c1c"
+    },
+    {
+      "typ": "schurke_spaeher",
+      "waffe": "kurzbogen_oder_dolche",
+      "schild": "keiner",
+      "helm": "kapuze",
+      "akzent_farbe": "#38bdf8"
+    },
+    {
+      "typ": "pyromant_kleriker",
+      "waffe": "runenstab",
+      "schild": "glut_flamme_hand",
+      "helm": "ordens_kapuze",
+      "akzent_farbe": "#f59e0b"
+    },
+    {
+      "typ": "deserteur_pluenderer",
+      "waffe": "rostiges_schwert_oder_armbrust",
+      "schild": "holz_buckler",
+      "helm": "zerfetzte_kappe",
+      "akzent_farbe": "#78716c"
+    },
+    {
+      "typ": "boss_thorvald",
+      "skalierung": 1.35,
+      "waffe": "aschen_zepter",
+      "aura": "dunkle_glut_korona",
+      "akzent_farbe": "#991b1b"
+    }
+  ],
+  "simulator_kompatibilitaet": {
+    "deaktiviere_animation_wartezeiten_im_headless_sim": true
+  }
+}

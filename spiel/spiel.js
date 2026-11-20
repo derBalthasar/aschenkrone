@@ -2758,11 +2758,140 @@
     return name + " trifft " + target + ": −" + event.value + " LP";
   }
 
+
+  // ---- Kampf-Paket (Henry, 20. 11. 2026): 2D-Arena, Bühnen nach Region, Treffer-Feedback ----
+  const KAMPFANIM = rules.systeme.daten.v2619kampf.animationen;
+  const KAMPFBUEHNEN = rules.systeme.daten.v2619kampf.buehnen;
+  // Headless-Simulator (Playwright setzt navigator.webdriver): keine Wartezeiten, außer eine Prüfung schaltet sie ausdrücklich an.
+  const kampfSchnell = () => {
+    if (!KAMPFANIM.kampf_sequenz_timing.fast_mode_in_simulator || !navigator.webdriver) return false;
+    try { return localStorage.getItem("aschenkrone.animationen") !== "an"; } catch { return true; }
+  };
+  const klassenSilhouette = { krieger: "krieger_blutritter", waechter: "krieger_blutritter", skalde: "krieger_blutritter",
+    spaeher: "schurke_spaeher", schurke: "schurke_spaeher", pulvermeister: "schurke_spaeher",
+    magier: "pyromant_kleriker", heiler: "pyromant_kleriker", feldscher: "pyromant_kleriker" };
+  const klassenAngriff = { spaeher: ["fern", "pfeil_bolzen"], pulvermeister: ["fern", "pfeil_bolzen"], magier: ["fern", "runen_blitz"],
+    heiler: ["fern", "runen_blitz"], feldscher: ["fern", "runen_blitz"] };
+  const bestienMuster = /wolf|wölfe|keiler|krähe|bär|troll|käfer|greif|krabb|hai|wyrm|wurm|mammut|krake|rochen|salamander|jäger der|vurm|drache|viper|ratte|schnapper|schleicher|kriecher|hauer|fresser|leviathan|koloss|schrecken|schlinger|weberin|irrglut|mutter der tiefen|bestie|ursa|hyäne|graufang|schluchtenjäger/i;
+  const fernkampfMuster = /schütze|pulver|armbrust|hexer|zelot|ketzer|priester|thorvald|alchemist|quacksalber|spione|skalde/i;
+  function gegnerFigur(enemy, combatId) {
+    const creature = world.creatures[combatId];
+    const thorvald = /thorvald/.test(combatId);
+    const name = enemy.name + " " + (world.fights[combatId]?.name ?? creature?.name ?? "");
+    const typ = thorvald && enemy.id === 0 ? "boss_thorvald" : bestienMuster.test(name) ? "bestie" :
+      /zelot|ketzer|priester|hexer|pilger|kult|draugr|wiedergänger|geist|schatten|gebundene/i.test(name) ? "pyromant_kleriker" :
+      /schütze|späher|spione|wilderer|jäger/i.test(name) ? "schurke_spaeher" : "deserteur_pluenderer";
+    const skala = typ === "boss_thorvald" ? kampfArena.daten().arena.klassen_und_gegner_silhouetten.find((x) => x.typ === "boss_thorvald").skalierung :
+      ["anfuehrer", "endgegner"].includes(enemy.rang) ? 1.18 : 1;
+    return { id: enemy.id, name: enemy.name, lp: enemy.health, max: enemy.max, typ, skala,
+      bild: enemy.id === 0 && creature?.image ? creature.image : null, akzent: "#78716c",
+      angriff: typ === "bestie" ? "nah" : fernkampfMuster.test(name) ? "fern" : "nah",
+      projektil: /schütze|pulver|armbrust|spione/i.test(name) ? "pfeil_bolzen" : "glut_kugel" };
+  }
+  // Bühne nach Region (Henrys Katalog, auf die Orte des Spiels übertragen).
+  function kampfBuehne(s) {
+    const id = s.combat?.id ?? "";
+    if (/thorvald/.test(id)) return { buehne: KAMPFBUEHNEN.boss_sonderbeleuchtung.erzpriester_thorvald.ueberschreibe_buehne, aura: true };
+    if (/aschenschatten|runenfresser|mutterdertiefen|stollenkriecher/.test(id) || s.akte?.akt4?.siegelKampf) return { buehne: "altes_reich_ruinen" };
+    const hier = rules.aktuellerKnoten(s) ?? s.knoten;
+    const k = hier ? knoten.get(hier) : null;
+    if (k) {
+      const nordFraktionen = ["hof", "erinnernde", "faeulnisbrut"];
+      if (nordFraktionen.includes(k.fraktion) || ["eiswacht", "nordwacht"].includes(k.id) || /pass/.test(k.typ ?? "")) return { buehne: "eispass_und_norden" };
+      if (k.fraktion === "orden") return { buehne: "glutberg_und_aschland" };
+      if (k.typ === "hafenstadt" || k.fraktion === "haefen" || k.hatHafen) return { buehne: "salzklippen_und_kueste" };
+      if (["dornenklingen", "hueter", "schattenbluete"].includes(k.fraktion) || /wald|forst|grenz/i.test(k.name)) return { buehne: "duesterwald_und_grenzhaus" };
+      return { buehne: KAMPFBUEHNEN.standard_buehne };
+    }
+    const ort = (world.scenes[s.scene]?.place ?? "") + " " + (world.fights[id]?.name ?? "");
+    if (/pass|eis|frost|schnee|nord/i.test(ort)) return { buehne: "eispass_und_norden" };
+    if (/glut|asche|kloster|flamme|kreuzgang/i.test(ort)) return { buehne: "glutberg_und_aschland" };
+    if (/hafen|küste|kai|riff|wrack|bucht|see|insel/i.test(ort)) return { buehne: "salzklippen_und_kueste" };
+    if (/ruine|tor|gewölbe|tiefe|stollen|runen/i.test(ort)) return { buehne: "altes_reich_ruinen" };
+    if (/wald|forst|grenz|moor|dorn/i.test(ort)) return { buehne: "duesterwald_und_grenzhaus" };
+    return { buehne: KAMPFBUEHNEN.standard_buehne };
+  }
+  function arenaBeschreibung(s) {
+    const gruppe = [{ id: "hero", name: s.name, typ: klassenSilhouette[s.role] ?? "krieger_blutritter", lp: s.health, max: rules.healthLimit(s) },
+      ...s.party.map((id) => ({ id, name: world.companions[id].name, typ: klassenSilhouette[world.companions[id].klasse] ?? "krieger_blutritter",
+        lp: rules.memberVitals(s, id).health, max: rules.memberVitals(s, id).max ?? 1 }))];
+    return { ...kampfBuehne(s), gruppe, gegner: rules.targets(s).map((enemy) => gegnerFigur(enemy, s.combat.id)) };
+  }
+  // Ein Kampfereignis in eine Arena-Aktion übersetzen.
+  // lp: laufender LP-Stand je Arena-Figur während der Runde (Gegner „gegner-0“, Gruppe „hero“/Gefährten-ID).
+  function arenaAktion(event, previous, lp) {
+    const vorherFeinde = rules.targets(previous);
+    if (event.kind === "hit") {
+      const rolle = event.actor === "hero" ? previous.role : world.companions[event.actor]?.klasse;
+      const [art, proj] = event.glut ? ["fern", "glut_kugel"] : klassenAngriff[rolle] ?? ["nah"];
+      const key = "gegner-" + event.target;
+      lp[key] = (lp[key] ?? 0) - (event.value ?? 0);
+      const besiegt = lp[key] <= 0;
+      return { von: ["summon", "dot"].includes(event.actor) ? null : event.actor, ziel: "gegner-" + event.target, art: event.actor === "dot" ? "keine" : art,
+        projektil: proj, krit: event.krit, besiegt, effekt: event.glut ? "glut_stoss" : event.krit ? "blutrausch_klaue" : "hieb_stahl",
+        text: { art: event.krit ? "kritischer_treffer" : "normaler_treffer", schaden: event.value } };
+    }
+    if (event.kind === "retaliate") {
+      const feind = gegnerFigur(vorherFeinde.find((f) => f.id === event.actor) ?? vorherFeinde[0], previous.combat.id);
+      const ally = event.ally ?? "hero";
+      lp[ally] = (lp[ally] ?? 0) - (event.value ?? 0);
+      const aktion = { von: "gegner-" + event.actor, ziel: ally, art: feind.angriff, projektil: feind.projektil, besiegt: lp[ally] <= 0 };
+      if (event.ausgewichen) return { ...aktion, ausweichen: true, text: { art: "ausgewichen" } };
+      if (event.schild) return { ...aktion, effekt: "schild_block", text: event.value ? { art: "normaler_treffer", schaden: event.value } : { art: "glutschild_block", rest: event.rest } };
+      if (!event.value) return { ...aktion, effekt: "schild_block", text: { art: "glutschild_block", rest: 0 } };
+      return { ...aktion, effekt: feind.typ === "bestie" ? "blutrausch_klaue" : "hieb_stahl", text: { art: "normaler_treffer", schaden: event.value } };
+    }
+    if (event.kind === "heal" || event.kind === "revive") lp[event.ally ?? "hero"] = (lp[event.ally ?? "hero"] ?? 0) + (event.value ?? 0);
+    if (event.kind === "status") lp[event.ally] = (lp[event.ally] ?? 0) - (event.value ?? 0);
+    if (event.kind === "heal" || event.kind === "revive") return { von: event.actor === "summon" ? null : event.actor, ziel: event.ally ?? "hero", art: "heilung", text: { art: "heilung", wert: event.value } };
+    if (event.kind === "status") return { ziel: event.ally, art: "keine", text: { art: "normaler_treffer", schaden: event.value } };
+    if (event.kind === "cover") return { von: event.actor, art: "deckung" };
+    return null;
+  }
+  // LP-Balken mit Nachzieh-Effekt: der verlorene Teil leuchtet gelb nach und schrumpft verzögert.
+  function lpNachziehen(meter, vorher, nachher) {
+    const n = KAMPFANIM.visuelle_effekte.lp_balken_nachzieh_effekt;
+    if (!n.aktiv || !meter || nachher >= vorher || !meter.max) return;
+    const huelle = meter.parentElement;
+    huelle.classList.add("lp-huelle");
+    const geist = element("span");
+    geist.className = "lp-nachzug";
+    geist.setAttribute("aria-hidden", "true");
+    geist.style.background = n.verzoegerungs_balken_farbe;
+    geist.style.left = (meter.offsetLeft + meter.offsetWidth * Math.max(0, nachher) / meter.max) + "px";
+    geist.style.top = meter.offsetTop + "px";
+    geist.style.height = meter.offsetHeight + "px";
+    geist.style.width = (meter.offsetWidth * (vorher - Math.max(0, nachher)) / meter.max) + "px";
+    geist.style.transition = "width " + n.transition_ms + "ms ease-in " + n.verzoegerung_ms + "ms";
+    huelle.append(geist);
+    requestAnimationFrame(() => requestAnimationFrame(() => { geist.style.width = "0px"; }));
+    setTimeout(() => geist.remove(), n.verzoegerung_ms + n.transition_ms + 80);
+  }
+  // Schwebender Kampftext über einer Karte (gleiche Vorlagen wie in der Arena).
+  function kartenText(karte, text) {
+    const stil = text && KAMPFANIM.visuelle_effekte.floating_combat_text.stile[text.art];
+    if (!karte || !stil) return null;
+    const marker = element("span", stil.vorlage.replace("{schaden}", text.schaden).replace("{wert}", text.wert).replace("{rest}", text.rest));
+    marker.className = "hit-value fct-" + text.art;
+    marker.style.color = stil.farbe;
+    marker.style.setProperty("--fct-skala", stil.skalierung ?? 1);
+    marker.setAttribute("aria-hidden", "true");
+    karte.append(marker);
+    return marker;
+  }
+
   function renderBattle(content) {
     const battlefield = element("section");
     battlefield.className = "battlefield";
     battlefield.setAttribute("aria-label", "Kampfübersicht");
     battlefield.style.setProperty("--battle-step", battleStepMs + "ms");
+    const ausfall = KAMPFANIM.visuelle_effekte.karten_ausfallschritt;
+    const reaktion = KAMPFANIM.visuelle_effekte.treffer_reaktion;
+    battlefield.style.setProperty("--ausfall", ausfall.spieler_angriff_translate_y_px + "px");
+    battlefield.style.setProperty("--ausfall-gegner", ausfall.gegner_angriff_translate_y_px + "px");
+    battlefield.style.setProperty("--ausfall-dauer", ausfall.dauer_ms + "ms");
+    battlefield.style.setProperty("--treffer-shake", reaktion.ziel_karte_shake_px + "px");
+    battlefield.style.setProperty("--treffer-flash", reaktion.ziel_karte_flash_farbe);
     const header = element("div");
     header.className = "battle-header";
     header.append(element("strong", "Runde " + (state.combat.round + 1)), element("span", "Dein Zug"));
@@ -2876,7 +3005,8 @@
     for (const message of lastBattleMessages) messages.append(element("li", message));
     log.append(messages);
     log.hidden = !lastBattleMessages.length;
-    battlefield.append(header, sequence, allyPicker("Kampf"), group, opponents, summary, announcement, log);
+    const arena = kampfArena.bauen(arenaBeschreibung(state));
+    battlefield.append(arena, header, sequence, allyPicker("Kampf"), group, opponents, summary, announcement, log);
     content.append(battlefield);
   }
 
@@ -2887,7 +3017,8 @@
     const next = rules.strike(previous, action, Math.random, item, enemyTarget, events, selectedAlly());
     if (next === previous) return;
     lastBattleMessages = events.map(event => battleMessage(event, previous));
-    if (!events.length || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    // Kampf-Paket: Die Kampfanimation läuft immer (auch bei reduzierter Bewegung, wie der Marsch), nur der Headless-Simulator überspringt sie.
+    if (!events.length || kampfSchnell()) {
       update(next);
       return;
     }
@@ -2898,6 +3029,10 @@
     const panel = el("play");
     panel.inert = true;
     panel.setAttribute("aria-busy", "true");
+    const takt = KAMPFANIM.kampf_sequenz_timing;
+    const arena = panel.querySelector(".kampf-arena");
+    const laufendeLp = Object.fromEntries([...rules.targets(previous).map((f) => ["gegner-" + f.id, f.health]),
+      ["hero", previous.health], ...previous.party.map((id) => [id, rules.memberVitals(previous, id).health])]);
     try {
       for (const event of events) {
         const retaliates = ["retaliate", "afflict"].includes(event.kind);
@@ -2912,25 +3047,34 @@
         panel.querySelector(".battle-header span").textContent = retaliates ? "Gegnerzug" :
           actorName(event.actor, previous) + " handelt";
         panel.querySelector(".battle-announcement").textContent = battleMessage(event, previous);
+        const aktion = arenaAktion(event, previous, laufendeLp);
+        // Taktung nach Henrys Vorgabe: Held 420 ms, Gefährten 360 ms, Gegnerphase 400 ms.
+        const pause = retaliates ? takt.gegner_phase_pause_ms : event.actor === "hero" ? takt.spieler_aktion_dauer_ms : takt.gefaehrten_aktion_pause_ms;
         actor?.classList.add("is-acting");
         actor?.classList.add(retaliates ? "enemy-lunge" : event.kind === "cover" ? "fighter-cover" : "fighter-lunge");
+        const arenaLauf = aktion ? kampfArena.abspielen(arena, aktion) : Promise.resolve();
+        await arenaLauf;
         let marker;
-        if (target && event.value > 0) {
+        if (target && (event.value > 0 || aktion?.text)) {
           const healing = ["heal", "revive"].includes(event.kind);
-          if (!healing) target.classList.add("fighter-hit");
-          marker = element("span", (healing ? "+" : "−") + event.value);
-          marker.className = "hit-value";
-          if (healing) marker.classList.add("healing-value");
-          marker.setAttribute("aria-hidden", "true");
-          target.append(marker);
+          if (!healing && event.value > 0) target.classList.add("fighter-hit");
+          if (aktion?.ausweichen) target.classList.add("fighter-dodge");
+          marker = kartenText(target, aktion?.text ?? { art: healing ? "heilung" : "normaler_treffer", schaden: event.value, wert: event.value });
           const meter = target.querySelector("progress");
-          if (meter) meter.value = Math.min(meter.max, Math.max(0, meter.value + (healing ? event.value : -event.value)));
+          if (meter && event.value > 0) {
+            const vorher = meter.value;
+            meter.value = Math.min(meter.max, Math.max(0, meter.value + (healing ? event.value : -event.value)));
+            if (!healing) lpNachziehen(meter, vorher, meter.value);
+          }
         }
-        await new Promise(resolve => setTimeout(resolve, battleStepMs));
+        await new Promise(resolve => setTimeout(resolve, pause));
         actor?.classList.remove("is-acting", "enemy-lunge", "fighter-cover", "fighter-lunge");
-        target?.classList.remove("fighter-hit");
+        target?.classList.remove("fighter-hit", "fighter-dodge");
         marker?.remove();
       }
+      // Gefallene Gegner zerfallen zu Asche, bevor das Bild neu aufgebaut wird.
+      if (arena?.querySelector(".rig-collapse-ash:not(.war-besiegt)")) await new Promise(resolve => setTimeout(resolve,
+        kampfArena.daten().arena["2d_modell_generator"].animationen.besiegt.dauer_ms));
     } finally {
       animating = false;
       panel.inert = false;
@@ -3227,6 +3371,20 @@
     const url = npcs.portrait(id, quelle) ?? "";
     if (box.dataset.url === url && box.firstChild) return;
     box.dataset.url = url;
+    // Porträt-Paket: Hauptfiguren und Pool-Figuren zeigen ihr Porträt aus assets/portraits/ oder als SVG.
+    const eintrag = state && npcPortraets.fuerNpc(id, state.laufSeed, state.knoten ?? "");
+    delete box.dataset.portraet;
+    if (eintrag) {
+      npcPortraets.zeigen(box, eintrag);
+      if (url && portraitStatus.get(url) !== "fehlt") {
+        const eigenes = new Image();
+        eigenes.onload = () => { portraitStatus.set(url, "ok"); if (box.dataset.url === url) { delete box.dataset.portraet; box.replaceChildren(eigenes); } };
+        eigenes.onerror = () => portraitStatus.set(url, "fehlt");
+        eigenes.alt = "";
+        eigenes.src = url;
+      }
+      return;
+    }
     box.innerHTML = kapuze;
     if (!url || portraitStatus.get(url) === "fehlt") return;
     const bild = new Image();
@@ -4204,18 +4362,40 @@
   }
 
   // Bereich B der Menschen: Kontor, Ausrüster, Händler und Schmiede.
+  // Porträt-Paket: Bewohner des Ortes aus den Welt-Pools (Variante je Lauf fest, bei Neustart neu).
+  function ortsBewohner(panel, ort, archetypen) {
+    const leiste = element("ul");
+    leiste.className = "orts-bewohner";
+    leiste.setAttribute("aria-label", "Leute in " + ort.name);
+    for (const archetyp of archetypen) {
+      const eintrag = npcPortraets.pool(archetyp, state.laufSeed, ort.id);
+      if (!eintrag) continue;
+      const li = element("li");
+      const bild = element("div");
+      bild.className = "orts-bewohner-bild";
+      bild.setAttribute("aria-hidden", "true");
+      npcPortraets.zeigen(bild, eintrag);
+      li.append(bild, element("span", eintrag.name));
+      leiste.append(li);
+    }
+    panel.append(leiste);
+  }
+
   function weltKontorTab(panel) {
     if (!rules.kontorInfo(state)) {
       panel.append(element("h3", "Kontor, Händler & Schmiede"),
         element("p", "Kontor, Ausrüster und Schmiede gibt es in den Städten der Menschen. Dörfer haben keins."));
       return;
     }
+    const hier = knoten.get(state.knoten);
+    if (hier) ortsBewohner(panel, hier, ["kontor_verwalter", "schmied", "kraeuterheilerin"]);
     weltKontor(panel);
     weltSchmiede(panel);
   }
 
   function weltHofstaat(panel, ort) {
     if (rules.lage(state)) {
+      ortsBewohner(panel, ort, rules.kontorInfo(state) ? ["wachhauptmann_aushang", "schankwirt", "soeldner_anwerber"] : ["bauer_und_dorfbewohner", "schankwirt"]);
       const aushang = weltAushang(ort);
       if (aushang) {
         aushang.open = true;

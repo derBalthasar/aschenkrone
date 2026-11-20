@@ -197,6 +197,8 @@ const rules = (() => {
       weltAuftraege: {}, hauptquest: null,
       moral: SY.daten.moral.start, entkraeftet: false, etappen: 0, kontor: {}, befreit: [], tatOffen: null,
       zuflucht: null, gefallenIn: null, grundwertAlt: 0, faehigkeitRaenge: {}, schwierigkeit: SCHWIERIG.standard_auswahl,
+      // Porträt-Paket (20. 11. 2026): Lauf-Seed für die NPC-Porträt-Pools, bleibt im Lauf gleich, wechselt beim Neustart.
+      laufSeed: Math.floor(Math.random() * 2147483647),
       party: [], companionEquipment: {}, partyVitals: {}, heroStatus: {}, companionXp: {},
       rucksack: 0, guertel: Array(beltSize).fill(null), relikt: null,
       relationships: {}, factionRuf: {}, companionQuests: {}, crafted: [], questClock: 0, questLog: {},
@@ -402,6 +404,8 @@ const rules = (() => {
     state.gefallenIn ??= null;
     // Henry, 20. 11. 2026: Alte Spielstände spielen auf „Leicht“ (der bisherigen Balance).
     state.schwierigkeit ??= SCHWIERIG.standard_auswahl;
+    // Alte Stände bekommen einen festen Seed aus Name und Fraktion, damit die Porträts beim Laden nicht wechseln.
+    state.laufSeed ??= [...String(state.name) + "|" + state.faction].reduce((h, c) => (Math.imul(h, 31) + c.charCodeAt(0)) >>> 0, 7) % 2147483647;
     // Patch 2.5.5: Bisher trainierte Grundwerte stammen aus alten Punkten und zählen nicht gegen die neuen Stufenpunkte.
     state.grundwertAlt ??= isRecord(state.training) ? total(state.training) : 0;
     state.faehigkeitRaenge ??= {};
@@ -435,7 +439,7 @@ const rules = (() => {
         new Set(state.vertraege).size !== state.vertraege.length ||
         !isRecord(state.ertraege) || !Object.entries(state.ertraege).every(([id, runde]) => N.get(id)?.typ === "dorf" && intBetween(runde, 0, state.runde)) ||
         (state.niederlage !== null && !own(niederlagen, state.niederlage)) ||
-        (state.zuflucht !== null && !N.get(state.zuflucht)) || !schwierigkeitsGrad(state.schwierigkeit) ||
+        (state.zuflucht !== null && !N.get(state.zuflucht)) || !schwierigkeitsGrad(state.schwierigkeit) || !intBetween(state.laufSeed, 0, 2147483647) ||
         (state.gefallenIn !== null && !(own(world.scenes, state.gefallenIn) && !["defeat", "weltende"].includes(state.gefallenIn))) ||
         !validRecord(state.weltAuftraege, auftragIndex, entry => isRecord(entry) && ["aktiv", rueckkehr.status, "erledigt"].includes(entry.status) &&
           intBetween(entry.wahl, 0, 1)) ||
@@ -4179,6 +4183,7 @@ const rules = (() => {
     if (foe.tags.includes("untot")) amount = Math.round(amount * (1 + reliktWert(state, "damageVsUndead")));
     // Patch 2.2.0/2.5.1: Kritische Treffer (×1,5) nach Kritchance der Waffe, ohne Zufall über einen Zähler,
     // und Rüstung der Systemgegner als prozentuale Minderung mit Konstante 14, gesenkt durch Durchschlag.
+    let kritisch = false;
     if (actor === "hero" && menschen(state)) {
       // Patch 2.6.2: Eiserne Vorhut Rang 1 +6 %, Runen- & Glutresonanz Rang 1 +6 % (mit Runen- oder Glutausrüstung),
       // Schattenpfad Rang 2 +15 % gegen Ziele unter halben LP, Rang 3 +25 % nach eigenem Ausweichen. Zorn der Alten Könige +5 % je Rang.
@@ -4199,6 +4204,7 @@ const rules = (() => {
           held.kritZaehler -= 100;
           const mult = SY.talentRang(state, "TREE_EISERNE_VORHUT") >= 2 ? 1.65 : SY.daten.kampf.krit;
           amount = Math.floor(amount * mult);
+          kritisch = true;
           note(state, "Kritischer Treffer gegen " + foe.name + " (×" + String(mult).replace(".", ",") + ").");
         }
       }
@@ -4226,7 +4232,8 @@ const rules = (() => {
     const value = Math.min(foe.lp, amount + (foe.status.verwundbar?.wert ?? 0));
     foe.lp -= value;
     if (fire && round) round.usedFire = true;
-    round?.events.push({ kind: "hit", actor, target: id, value });
+    // Kampf-Paket 20. 11. 2026: Krit und Glut-Treffer nur als Anzeigehinweis für die Kampfanimation.
+    round?.events.push({ kind: "hit", actor, target: id, value, ...(kritisch ? { krit: true } : {}), ...(fire ? { glut: true } : {}) });
     if (own(world.companions, actor)) note(state, world.companions[actor].name + " trifft " + foe.name + " für " + value + " Schaden.");
     if (foe.lp <= 0) foeFalls(state, id, fire);
     return value;
@@ -4648,7 +4655,7 @@ const rules = (() => {
                 held.ausweichSchlaege = 0;
                 held.nachAusweichen = true;
                 dodged++;
-                events.push({ kind: "retaliate", actor: index, ally: "hero", value: 0 });
+                events.push({ kind: "retaliate", actor: index, ally: "hero", value: 0, ausgewichen: true });
                 continue;
               }
             }
@@ -4656,6 +4663,7 @@ const rules = (() => {
             const defense = heroTarget && round.guarding ? Math.max(6, round.ward) : round.ward;
             const guarding = defense > 0;
             let hit;
+            let schildBlock = null;
             if (menschen(state)) {
               // Patch 2.2.0/2.5.1: Rüstung mindert prozentual (Konstante 14); Klassenrüstung zählt beim Helden mit.
               // Patch 2.6.2: Ungebrochener Schildwall Rang 1 +2 Rüstung; Schildwall der Krone +2; Kriegshorn des Großen Things +1 (alle).
@@ -4679,6 +4687,7 @@ const rules = (() => {
               if (hit > 0 && thorvaldHilfeAktiv(state)) hit = Math.max(1, Math.round(hit * thorvaldHilfe.schaden));
               const absorbed = Math.min(held.schild, hit);
               held.schild -= absorbed; hit -= absorbed;
+              if (absorbed) schildBlock = { schild: absorbed, rest: held.schild };
               if (hit >= state.health && held.todesschutz) {
                 hit = Math.max(0, state.health - Math.max(1, held.todesschutz.lp));
                 // Patch 2.6.2: Ungebrochener Schildwall Rang 3 gibt danach einen Schild von 20 % der LP.
@@ -4690,7 +4699,8 @@ const rules = (() => {
             const loss = Math.min(victim.health, hit);
             changeHealth(state, victim.id, victim.health - loss);
             lost += loss;
-            events.push({ kind: "retaliate", actor: index, ally: victim.id, value: loss });
+            events.push({ kind: "retaliate", actor: index, ally: victim.id, value: loss, ...(heroTarget && schildBlock ? schildBlock : {}) });
+            schildBlock = null;
             const ailment = world.enemyAilments[turn.id];
             if (ailment && !round.previousStatuses?.[victim.id]?.[ailment] && index === 0 && action === 0 && turn.round > 0 && turn.round % 2 === 0 && !guarding && victim.health - loss > 0) {
               const effects = heroTarget ? state.heroStatus : state.partyVitals[victim.id].status;

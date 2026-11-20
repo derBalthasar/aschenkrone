@@ -1,0 +1,113 @@
+{
+  "quelle": "Henry, Projekt-Thread 20. 11. 2026 11:23 Berlin (Porträt-Paket)",
+  "schema_version": "2.6.19",
+  "paket": "npc_portraets_svg_teil_2_von_2_variable_welt_pools",
+  "target_file": "ui/portraet_engine.js",
+  "variable_pools": [
+    {
+      "archetyp": "bauer_und_dorfbewohner",
+      "varianten": [
+        {
+          "id": "bauer_v1_alter_mann",
+          "dateiname": "pool_bauer_01.svg",
+          "svg_markup": "<svg xmlns='http://w3.org' viewBox='0 0 200 240'><rect width='200' height='240' fill='#1c1917'/><path d='M32,240 L52,172 L148,172 L168,240 Z' fill='#57534e'/><path d='M68,72 Q68,142 100,154 Q132,142 132,72 Q128,42 100,42 Q72,42 68,72 Z' fill='#cfa886'/><path d='M64,66 Q100,32 136,66 Z' fill='#44403c'/><path d='M70,114 Q76,154 100,158 Q124,154 130,114 Q112,126 100,124 Q88,126 70,114 Z' fill='#94a3b8'/><circle cx='84' cy='92' r='3' fill='#475569'/><circle cx='116' cy='92' r='3' fill='#475569'/><path d='M99,90 L96,108 L104,108' stroke='#8a6648' stroke-width='2' fill='none'/></svg>"
+        },
+        {
+          "id": "bauer_v2_baeuerin",
+          "dateiname": "pool_bauer_02.svg",
+          "svg_markup": "<svg xmlns='http://w3.org' viewBox='0 0 200 240'><rect width='200' height='240' fill='#292524'/><path d='M48,88 Q52,36 100,36 Q148,36 152,88 L166,240 L34,240 Z' fill='#78350f'/><path d='M70,74 Q70,138 100,150 Q130,138 130,74 Q124,52 100,52 Q76,52 70,74 Z' fill='#d6b496'/><circle cx='84' cy='93' r='3' fill='#65a30d'/><circle cx='116' cy='93' r='3' fill='#65a30d'/><path d='M90,122 Q100,125 110,122' stroke='#884a4a' stroke-width='2' fill='none'/></svg>"
+        }
+      ]
+    },
+    {
+      "archetyp": "schmied",
+      "varianten": [
+        {
+          "id": "schmied_v1_brokk",
+          "dateiname": "pool_schmied_01.svg",
+          "svg_markup": "<svg xmlns='http://w3.org' viewBox='0 0 200 240'><rect width='200' height='240' fill='#27130c'/><path d='M22,240 L45,168 L155,168 L178,240 Z' fill='#451a03'/><path d='M64,72 Q62,144 100,158 Q138,144 136,72 Q132,42 100,42 Q68,42 64,72 Z' fill='#b88b68'/><path d='M64,110 Q66,178 100,188 Q134,178 136,110 Q114,122 100,120 Q86,122 64,110 Z' fill='#1c1917'/><circle cx='83' cy='90' r='3.5' fill='#f97316'/><circle cx='117' cy='90' r='3.5' fill='#f97316'/><path d='M98,88 L95,107 L105,107' stroke='#785236' stroke-width='2.5' fill='none'/></svg>"
+        },
+        {
+          "id": "schmied_v2_schmiedin",
+          "dateiname": "pool_schmied_02.svg",
+          "svg_markup": "<svg xmlns='http://w3.org' viewBox='0 0 200 240'><rect width='200' height='240' fill='#1c1917'/><path d='M28,240 L48,170 L152,170 L172,240 Z' fill='#3f2e21'/><path d='M68,72 Q68,140 100,152 Q132,140 132,72 Q128,42 100,42 Q72,42 68,72 Z' fill='#c49a76'/><path d='M62,78 Q66,36 100,36 Q134,36 138,78 Q122,54 100,54 Q78,54 62,78 Z' fill='#292524'/><circle cx='84' cy='92' r='3.2' fill='#ea580c'/><circle cx='116' cy='92' r='3.2' fill='#ea580c'/><path d='M89,122 Q100,124 111,122' stroke='#7c3f36' stroke-width='2.5' fill='none'/></svg>"
+        }
+      ]
+    },
+    {
+      "archetyp": "schankwirt",
+      "varianten": [
+        {
+          "id": "wirt_v1_marta",
+          "dateiname": "pool_wirt_01.svg",
+          "svg_markup": "<svg xmlns='http://w3.org' viewBox='0 0 200 240'><rect width='200' height='240' fill='#291d16'/><path d='M32,240 L52,172 L148,172 L168,240 Z' fill='#713f12'/><circle cx='100' cy='36' r='16' fill='#451a03'/><path d='M68,74 Q68,140 100,152 Q132,140 132,74 Q128,44 100,44 Q72,44 68,74 Z' fill='#dec0a4'/><path d='M64,76 Q70,42 100,42 Q130,42 136,76 Q120,56 100,56 Q80,56 64,76 Z' fill='#451a03'/><circle cx='84' cy='93' r='3.2' fill='#84cc16'/><circle cx='116' cy='93' r='3.2' fill='#84cc16'/><path d='M88,120 Q100,128 112,120' stroke='#994d47' stroke-width='2.5' fill='none'/></svg>"
+        },
+        {
+          "id": "wirt_v2_gastwirt",
+          "dateiname": "pool_wirt_02.svg",
+          "svg_markup": "<svg xmlns='http://w3.org' viewBox='0 0 200 240'><rect width='200' height='240' fill='#1c1917'/><path d='M26,240 L48,170 L152,170 L174,240 Z' fill='#44403c'/><path d='M64,72 Q62,144 100,156 Q138,144 136,72 Q132,42 100,42 Q68,42 64,72 Z' fill='#d6b496'/><path d='M76,115 Q100,108 124,115 Q118,126 100,122 Q82,126 76,115 Z' fill='#94a3b8'/><circle cx='84' cy='92' r='3.2' fill='#64748b'/><circle cx='116' cy='92' r='3.2' fill='#64748b'/></svg>"
+        }
+      ]
+    },
+    {
+      "archetyp": "wachhauptmann_aushang",
+      "varianten": [
+        {
+          "id": "wache_v1_torsten",
+          "dateiname": "pool_wache_01.svg",
+          "svg_markup": "<svg xmlns='http://w3.org' viewBox='0 0 200 240'><rect width='200' height='240' fill='#0f172a'/><path d='M28,240 L50,170 L150,170 L172,240 Z' fill='#334155'/><path d='M66,72 Q66,142 100,154 Q134,142 134,72 Q130,38 100,38 Q70,38 66,72 Z' fill='#cfa682'/><path d='M62,74 Q64,34 100,34 Q136,34 138,74 Z' fill='#64748b'/><rect x='97' y='68' width='6' height='34' fill='#64748b'/><circle cx='83' cy='93' r='3.2' fill='#475569'/><circle cx='117' cy='93' r='3.2' fill='#475569'/><path d='M88,124 L112,124' stroke='#78483c' stroke-width='2.5'/></svg>"
+        },
+        {
+          "id": "wache_v2_hauptfrau",
+          "dateiname": "pool_wache_02.svg",
+          "svg_markup": "<svg xmlns='http://w3.org' viewBox='0 0 200 240'><rect width='200' height='240' fill='#1e293b'/><path d='M30,240 L52,170 L148,170 L170,240 Z' fill='#475569'/><path d='M68,72 Q68,140 100,152 Q132,140 132,72 Q128,42 100,42 Q72,42 68,72 Z' fill='#d6b89c'/><path d='M64,76 Q68,38 100,38 Q132,38 136,76 Q118,54 100,54 Q82,54 64,76 Z' fill='#1e293b'/><circle cx='84' cy='93' r='3.2' fill='#38bdf8'/><circle cx='116' cy='93' r='3.2' fill='#38bdf8'/><path d='M89,122 L111,122' stroke='#7c3f36' stroke-width='2.5'/></svg>"
+        }
+      ]
+    },
+    {
+      "archetyp": "kraeuterheilerin",
+      "varianten": [
+        {
+          "id": "heiler_v1_freja",
+          "dateiname": "pool_heiler_01.svg",
+          "svg_markup": "<svg xmlns='http://w3.org' viewBox='0 0 200 240'><rect width='200' height='240' fill='#052e16'/><path d='M32,240 L52,170 L148,170 L168,240 Z' fill='#14532d'/><path d='M68,72 Q68,140 100,152 Q132,140 132,72 Q128,42 100,42 Q72,42 68,72 Z' fill='#d8bfa8'/><path d='M58,92 Q62,36 100,36 Q138,36 142,92 Q122,56 100,56 Q78,56 58,92 Z' fill='#cbd5e1'/><circle cx='84' cy='93' r='3.2' fill='#10b981'/><circle cx='116' cy='93' r='3.2' fill='#10b981'/><path d='M89,121 Q100,125 111,121' stroke='#884a4a' stroke-width='2' fill='none'/></svg>"
+        },
+        {
+          "id": "heiler_v2_medicus",
+          "dateiname": "pool_heiler_02.svg",
+          "svg_markup": "<svg xmlns='http://w3.org' viewBox='0 0 200 240'><rect width='200' height='240' fill='#0f172a'/><path d='M30,240 L50,170 L150,170 L170,240 Z' fill='#1e293b'/><path d='M68,72 Q68,142 100,154 Q132,142 132,72 Q128,42 100,42 Q72,42 68,72 Z' fill='#e2cbb5'/><path d='M66,70 Q70,38 100,38 Q130,38 134,70 Q116,52 100,52 Q84,52 66,70 Z' fill='#334155'/><circle cx='84' cy='93' r='3.2' fill='#34d399'/><circle cx='116' cy='93' r='3.2' fill='#34d399'/><path d='M90,123 L110,123' stroke='#78483c' stroke-width='2'/></svg>"
+        }
+      ]
+    },
+    {
+      "archetyp": "kontor_verwalter",
+      "varianten": [
+        {
+          "id": "kontor_v1_halvard",
+          "dateiname": "pool_kontor_01.svg",
+          "svg_markup": "<svg xmlns='http://w3.org' viewBox='0 0 200 240'><rect width='200' height='240' fill='#1c1917'/><path d='M28,240 L50,170 L150,170 L172,240 Z' fill='#292524'/><path d='M72,172 Q100,195 128,172' stroke='#eab308' stroke-width='2.5' fill='none'/><path d='M68,72 Q68,142 100,154 Q132,142 132,72 Q128,42 100,42 Q72,42 68,72 Z' fill='#dec5ae'/><path d='M66,68 Q72,40 100,40 Q128,40 134,68 Q115,52 100,52 Q85,52 66,68 Z' fill='#64748b'/><circle cx='84' cy='93' r='3' fill='#475569'/><circle cx='116' cy='93' r='3' fill='#475569'/><path d='M90,122 L110,122' stroke='#78483c' stroke-width='2'/></svg>"
+        },
+        {
+          "id": "kontor_v2_vogtin",
+          "dateiname": "pool_kontor_02.svg",
+          "svg_markup": "<svg xmlns='http://w3.org' viewBox='0 0 200 240'><rect width='200' height='240' fill='#292524'/><path d='M30,240 L52,170 L148,170 L170,240 Z' fill='#44403c'/><path d='M68,72 Q68,140 100,152 Q132,140 132,72 Q128,42 100,42 Q72,42 68,72 Z' fill='#d6b89c'/><path d='M64,76 Q68,38 100,38 Q132,38 136,76 Q118,54 100,54 Q82,54 64,76 Z' fill='#451a03'/><circle cx='84' cy='93' r='3.2' fill='#0284c7'/><circle cx='116' cy='93' r='3.2' fill='#0284c7'/><path d='M89,122 Q100,124 111,122' stroke='#884a4a' stroke-width='2' fill='none'/></svg>"
+        }
+      ]
+    },
+    {
+      "archetyp": "soeldner_anwerber",
+      "varianten": [
+        {
+          "id": "soeldner_v1_leif",
+          "dateiname": "pool_soeldner_01.svg",
+          "svg_markup": "<svg xmlns='http://w3.org' viewBox='0 0 200 240'><rect width='200' height='240' fill='#18181b'/><path d='M28,240 L48,170 L152,170 L172,240 Z' fill='#3f2e21'/><path d='M68,72 Q68,142 100,154 Q132,142 132,72 Q128,42 100,42 Q72,42 68,72 Z' fill='#c9a382'/><path d='M66,70 Q70,38 100,38 Q130,38 134,70 Q116,52 100,52 Q84,52 66,70 Z' fill='#27272a'/><path d='M68,84 L126,102' stroke='#09090b' stroke-width='3'/><ellipse cx='84' cy='92' rx='8' ry='6' fill='#09090b'/><circle cx='116' cy='93' r='3.2' fill='#78716c'/><path d='M88,122 Q102,127 114,119' stroke='#7c3f36' stroke-width='2.5' fill='none'/></svg>"
+        },
+        {
+          "id": "soeldner_v2_klinge",
+          "dateiname": "pool_soeldner_02.svg",
+          "svg_markup": ""
+        }
+      ]
+    }
+  ]
+}

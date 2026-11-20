@@ -1,0 +1,98 @@
+{
+  "quelle": "Henry, Projekt-Thread 20. 11. 2026 11:11 Berlin (Kampf-Paket)",
+  "schema_version": "2.6.19",
+  "feature": "wuchtige_kampf_animationen_und_treffer_feedback",
+  "target_files": [
+    "ui/kampf.js",
+    "style/kampf.css",
+    "style/layout.css"
+  ],
+  "kampf_sequenz_timing": {
+    "spieler_aktion_dauer_ms": 420,
+    "gefaehrten_aktion_pause_ms": 360,
+    "gegner_phase_pause_ms": 400,
+    "fast_mode_in_simulator": true
+  },
+  "visuelle_effekte": {
+    "karten_ausfallschritt": {
+      "spieler_angriff_translate_y_px": 14,
+      "gegner_angriff_translate_y_px": -14,
+      "dauer_ms": 240
+    },
+    "treffer_reaktion": {
+      "ziel_karte_shake_px": 6,
+      "ziel_karte_flash_farbe": "rgba(185, 28, 28, 0.45)",
+      "krit_screen_shake_px": 5,
+      "krit_screen_shake_dauer_ms": 260
+    },
+    "svg_waffen_effekte": [
+      {
+        "typ": "hieb_stahl",
+        "svg_pfad": "M10,80 L90,20",
+        "farbe": "#f8fafc",
+        "dauer_ms": 320
+      },
+      {
+        "typ": "blutrausch_klaue",
+        "svg_pfad": "M15,75 L85,15 M25,85 L95,25",
+        "farbe": "#dc2626",
+        "dauer_ms": 360
+      },
+      {
+        "typ": "glut_stoss",
+        "svg_pfad": "M50,10 L50,90 M10,50 L90,50",
+        "farbe": "#f59e0b",
+        "dauer_ms": 380
+      },
+      {
+        "typ": "schild_block",
+        "symbol": "schild_aufprall",
+        "farbe": "#94a3b8",
+        "dauer_ms": 300
+      }
+    ],
+    "floating_combat_text": {
+      "aktiv": true,
+      "aufstieg_px": 28,
+      "dauer_ms": 850,
+      "stile": {
+        "normaler_treffer": {
+          "vorlage": "-{schaden}",
+          "farbe": "#f8fafc",
+          "skalierung": 1.0
+        },
+        "kritischer_treffer": {
+          "vorlage": "-{schaden} KRIT!",
+          "farbe": "#f59e0b",
+          "skalierung": 1.35
+        },
+        "ausgewichen": {
+          "vorlage": "AUSGEWICHEN",
+          "farbe": "#38bdf8",
+          "karte_weicht_aus_px": 12
+        },
+        "glutschild_block": {
+          "vorlage": "SCHILD ({rest})",
+          "farbe": "#fb923c",
+          "skalierung": 1.05
+        },
+        "heilung": {
+          "vorlage": "+{wert} LP",
+          "farbe": "#4ade80",
+          "skalierung": 1.1
+        }
+      }
+    },
+    "lp_balken_nachzieh_effekt": {
+      "aktiv": true,
+      "verzoegerungs_balken_farbe": "#fef08a",
+      "verzoegerung_ms": 380,
+      "transition_ms": 300
+    }
+  },
+  "ui_kleinfix_seitenleiste": {
+    "tab_id": "gefaehrten",
+    "label": "Gefährten",
+    "css_fix": "white-space: nowrap; font-size: 0.72rem;"
+  }
+}
