@@ -2670,8 +2670,15 @@
     el("quest-clock").textContent = "Reisestand · Etappe " + etappeJetzt();
     // Patch 2.5.0: Bei den Menschen zählt die Etappe, mit Countdown bis Zehnt und Überfallprüfung.
     const etappe = rules.lage(state);
-    el("turn-badge").textContent = etappe ? "Etappe " + etappe.etappen + " · Zehnt in " + etappe.naechsterZehnt + " · Überfall in " + etappe.naechsterUeberfall
+    // Gesamtsimulation 20. 11.: Nach mehreren Niederlagen verhungerte die Gruppe ohne Vorwarnung. Das Abzeichen warnt
+    // jetzt bei knapper Nahrung und erklärt beim Darüberfahren, was Zehnt und Überfall bedeuten (nur Anzeige).
+    const nahrung = etappe ? state.ressource ?? 0 : null;
+    const knapp = nahrung === null ? "" : nahrung <= 0 ? " · Keine Nahrung: Moral sinkt" : nahrung <= 5 ? " · Nahrung knapp (" + nahrung + ")" : "";
+    el("turn-badge").textContent = etappe ? "Etappe " + etappe.etappen + " · Zehnt in " + etappe.naechsterZehnt + " · Überfall in " + etappe.naechsterUeberfall + knapp
       : "Etappe " + etappeJetzt();
+    el("turn-badge").classList.toggle("knapp", Boolean(knapp));
+    el("turn-badge").title = etappe ? "Eine Etappe ist ein Reiseabschnitt. Zehnt: In so vielen Etappen liefern befreite Dörfer Rohstoffe. " +
+      "Überfall: In so vielen Etappen prüft der Feind einen Angriff auf deine Orte." + (knapp ? " Kaufe Nahrung im Kontor oder raste in einer Stadt." : "") : "";
     const filters = el("quest-filters");
     filters.replaceChildren();
     const offeneAushaenge = entries.filter((e) => e.aushang && e.status === "active").length;
@@ -3624,7 +3631,9 @@
       gespraech.lore = { npc: inhalt.npc, gefragt: [] };
       const rolle = npcRolle(person);
       if (rolle) vorne.push({ text: waehle(d.stage_directions_by_npc_role[rolle], inhalt.npc + state.etappen), art: "regie" });
-      vorne.push({ text: waehle(d.greetings_by_reputation_tier[npcStufe(person)], inhalt.npc + (state.etappen ?? 0)) });
+      // Gesamtsimulation 20. 11.: Story-Szenen (v3.0.5) haben eine eigene Eröffnung, die allgemeine Begrüßung
+      // („Ein neues Gesicht …“) passte dort nicht und stand vor der Kaiserin wie vor einem Fremden.
+      if (!inhalt.ohneGruss) vorne.push({ text: waehle(d.greetings_by_reputation_tier[npcStufe(person)], inhalt.npc + (state.etappen ?? 0)) });
       const begleiter = state.party.map((id) => world.companions[id]).find(Boolean);
       if (begleiter && Math.random() < einwurfChance()) {
         const typ = ["krieger", "waechter"].includes(begleiter.klasse) ? "KRIEGER_WAECHTER"
@@ -3642,6 +3651,8 @@
           const antwort = f.answer_uses_city_state ? stadtLage() : waehle(f.answer_pool, inhalt.npc);
           gespraechZeigen({ ...inhalt, absaetze: [...absaetze, { text: f.question, art: "frage" }, { text: antwort, art: "antwort" }], weiter: true });
         } }));
+    // In Story-Szenen stehen die Antworten der Szene vorn (Taste 1–3), die freien Fragen dahinter.
+    if (inhalt.ohneGruss) return { ...inhalt, absaetze, optionen: [...inhalt.optionen.slice(0, -1), ...loreOptionen, ...inhalt.optionen.slice(-1)] };
     return { ...inhalt, absaetze, optionen: [...loreOptionen, ...inhalt.optionen] };
   }
 
@@ -3817,7 +3828,7 @@
   function szeneGespraech(sz, ort, waehlen) {
     gespraech.art = "szene305";
     const npc = sz.npc ?? "archivar_malakor";
-    gespraechZeigen({ npc, person: sz.sprecher ?? undefined, ort, absaetze: [{ text: sz.titel, art: "regie" }, { text: sz.text }, { text: "„" + sz.eroeffnung + "“" }],
+    gespraechZeigen({ npc, person: sz.sprecher ?? undefined, ort, ohneGruss: true, absaetze: [{ text: sz.titel, art: "regie" }, { text: sz.text }, { text: "„" + sz.eroeffnung + "“" }],
       optionen: [...sz.optionen.map((o) => ({ label: o.label, badges: dialogBadges(o), hinweis: dialogHinweis(o, o.grund),
         disabled: Boolean(o.grund), aktion: () => gespraechWahl(() => waehlen(o.id)) })),
       { label: "Später", badges: [["Gespräch beenden", "ende"]], aktion: gespraechEnde }] });
@@ -3857,7 +3868,8 @@
           hinweis: haupt.grund ?? "", disabled: Boolean(haupt.grund), aktion: () => gespraechWahl(() => rules.hauptWeiter(state)) }];
       optionen.push({ label: "Später", badges: [["Gespräch beenden", "ende"]], aktion: gespraechEnde });
     }
-    gespraechZeigen({ npc, ort: "Hauptquest · Akt " + haupt.akt + " · „" + haupt.titel + "“", absaetze, optionen });
+    gespraechZeigen({ npc, ort: "Hauptquest · Akt " + haupt.akt + " · „" + haupt.titel + "“", absaetze, optionen,
+      ohneGruss: Boolean(haupt.schritt?.eroeffnung && !haupt.bericht) });
   }
 
   el("npc-close").addEventListener("click", gespraechEnde);
@@ -4107,6 +4119,18 @@
     content.append(tabs, panel);
   }
 
+  // Gesamtsimulation 20. 11.: Die Gegner eines Akts sind nie schwächer als die Untergrenze seiner Stufen. Liegt der
+  // Held darunter, sagt der Abschnitt das vorher (nur Anzeige, keine Sperre).
+  function stufenHinweis(parent, stufen) {
+    const min = Number(String(stufen).split("-")[0]);
+    const jetzt = rules.level(state);
+    if (!min || jetzt >= min) return;
+    const p = element("p", "Achtung: Die Gegner hier sind mindestens Stufe " + min + ", du bist Stufe " + jetzt +
+      ". Aufträge am Aushang bringen Erfahrung, bevor du aufbrichst.");
+    p.className = "stufen-warnung";
+    parent.append(p);
+  }
+
   // Fraktionsreihe als Plan (Gemini-Aufbau, spiel/nebenquests.js). Nur lesbar, die Akte sind noch nicht spielbar.
   // v3.0.2: Kapitel-1-Übersicht in der Kharos-Fassung (ersetzt den alten Plan mit Harald IV., Ragnvald, Aldric, Kornwik).
   const KAPITEL1 = { titel: "Hauptquest · Akt 1: Risse im eigenen Banner", eintraege: [
@@ -4245,6 +4269,8 @@
     }
     if (!a4.offen) {
       box.append(element("h4", "Akt 2 und 3 · Schwester-Zweige (freie Reihenfolge)"));
+      const offenerZweig = info.zweige.find((z) => z.fortschritt > 0 && !z.fertig) ?? info.zweige.find((z) => !z.fertig);
+      if (offenerZweig) stufenHinweis(box, offenerZweig.stufen);
       // v3.0.2: Nur der laufende Zweig (sonst der Zweig am aktuellen Ort) ist offen, alle anderen sind eingeklappt.
       const laufend = info.zweige.find((z) => z.fortschritt > 0 && !z.fertig) ?? info.zweige.find((z) => !z.fertig && z.hub === state.knoten);
       for (const z of info.zweige) {
@@ -4303,6 +4329,7 @@
     if (fspez) box.append(element("p", "Fraktions-Spezialisierung: " + fspez.name + " · " + rules.fspezText[fspez.spec_id] + "."));
     box.append(element("h4", "Akt 4 · „" + a4.titel + "“ · Stufe " + a4.stufen));
     if (!a4.fertig) {
+      stufenHinweis(box, a4.stufen);
       box.append(element("p", a4.text));
       const eigene = npcs.anfuehrer(state.faction);
       if (eigene) box.append(element("p", "Auftrag von " + npcPerson(eigene).name + "."));

@@ -1871,3 +1871,7 @@ details.quest-akkordeon[open] > summary { opacity: 1; }
 .hub-gear { position: relative; isolation: isolate; }
 .hub-gear::before { content: ""; position: absolute; inset: 2.2rem 8% 30% 8%; z-index: -1; pointer-events: none; opacity: .07;
   background: no-repeat center / contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140' fill='none' stroke='%23e8d5a8' stroke-width='2.5'%3E%3Cpath d='M35 18a15 15 0 0 1 30 0v12H35z M42 30v6h16v-6 M22 44l28-6 28 6-4 40-24 10-24-10z M50 40v52 M38 58l12 8 12-8 M30 92l-6 40h16l10-34 10 34h16l-6-40'/%3E%3Cpath d='M50 52l-5 6 5 6 5-6z' stroke='%23d9a441'/%3E%3C/svg%3E"); }
+
+/* Gesamtsimulation 20. 11.: Warnungen zu knapper Nahrung und zu niedriger Stufe. */
+.turn-badge.knapp { border-color: #b4553c; color: #f0b9a6; }
+.stufen-warnung { margin: .4rem 0; padding: .35rem .6rem; border-left: 3px solid #b4553c; background: rgba(180, 85, 60, .1); }

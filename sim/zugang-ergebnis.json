@@ -1,0 +1,525 @@
+[
+ {
+  "geraet": "handy",
+  "name": "handy-1-start",
+  "minSchrift": 12.48,
+  "anteilKlein": 18,
+  "beispieleKlein": [
+   "Aschenkrone",
+   "Kaiserreich von Valen · Ackerland"
+  ],
+  "knoepfe": 6,
+  "winzig": 5,
+  "beispieleWinzig": [
+   "Weltbuch",
+   "Bestiarium",
+   "Porträts",
+   "Automatisch\n            Kompak",
+   "INPUT"
+  ],
+  "woerter": 42,
+  "langeSaetze": 1,
+  "saetze": 3,
+  "begriffe": [],
+  "ohneTitel": 1,
+  "querScroll": false
+ },
+ {
+  "geraet": "handy",
+  "name": "handy-2-charakter",
+  "minSchrift": 12.8,
+  "anteilKlein": 1,
+  "beispieleKlein": [
+   "Aschenkrone"
+  ],
+  "knoepfe": 36,
+  "winzig": 34,
+  "beispieleWinzig": [
+   "Weltbuch",
+   "Bestiarium",
+   "Porträts",
+   "Automatisch\n            Kompak",
+   "INPUT",
+   "MenschenUntote · Bald verfügba"
+  ],
+  "woerter": 513,
+  "langeSaetze": 5,
+  "saetze": 14,
+  "begriffe": [
+   "Ahnen",
+   "Spezialisierung",
+   "Hardcore",
+   "Permadeath"
+  ],
+  "ohneTitel": 1,
+  "querScroll": false
+ },
+ {
+  "geraet": "handy",
+  "name": "handy-3-prolog",
+  "minSchrift": 12.8,
+  "anteilKlein": 8,
+  "beispieleKlein": [
+   "Aschenkrone"
+  ],
+  "knoepfe": 7,
+  "winzig": 4,
+  "beispieleWinzig": [
+   "Weltbuch",
+   "Bestiarium",
+   "Porträts",
+   "Automatisch\n            Kompak"
+  ],
+  "woerter": 58,
+  "langeSaetze": 0,
+  "saetze": 5,
+  "begriffe": [
+   "Glut"
+  ],
+  "ohneTitel": 0,
+  "querScroll": false
+ },
+ {
+  "geraet": "handy",
+  "name": "handy-3b-prolog-mitte",
+  "minSchrift": 12.8,
+  "anteilKlein": 8,
+  "beispieleKlein": [
+   "Aschenkrone"
+  ],
+  "knoepfe": 7,
+  "winzig": 4,
+  "beispieleWinzig": [
+   "Weltbuch",
+   "Bestiarium",
+   "Porträts",
+   "Automatisch\n            Kompak"
+  ],
+  "woerter": 54,
+  "langeSaetze": 1,
+  "saetze": 3,
+  "begriffe": [],
+  "ohneTitel": 0,
+  "querScroll": false
+ },
+ {
+  "geraet": "handy",
+  "name": "handy-3c-erste-szene",
+  "minSchrift": 11.52,
+  "anteilKlein": 24,
+  "beispieleKlein": [
+   "Aschenkrone",
+   "Westvik · Methalle",
+   "Proviant",
+   "Rüstungsschutz",
+   "0 EP · Noch 100 bis Stufe 2",
+   "Karte"
+  ],
+  "knoepfe": 21,
+  "winzig": 7,
+  "beispieleWinzig": [
+   "Weltbuch",
+   "Bestiarium",
+   "Porträts",
+   "Automatisch\n            Kompak",
+   "Charakterfenster öffnen",
+   "Reisekarte öffnen"
+  ],
+  "woerter": 143,
+  "langeSaetze": 2,
+  "saetze": 4,
+  "begriffe": [
+   "Etappe",
+   "Moral",
+   "Zehnt",
+   "Rüstung",
+   "Flammeneifer"
+  ],
+  "ohneTitel": 0,
+  "querScroll": false
+ },
+ {
+  "geraet": "handy",
+  "name": "handy-4-hauptstadt",
+  "minSchrift": 10.88,
+  "anteilKlein": 31,
+  "beispieleKlein": [
+   "Aschenkrone",
+   "Hauptstadt · Kaiserreich von Valen · Ruf",
+   "Zeit",
+   "Dörfer",
+   "Marken",
+   "+0 Kontor"
+  ],
+  "knoepfe": 26,
+  "winzig": 5,
+  "beispieleWinzig": [
+   "Weltbuch",
+   "Bestiarium",
+   "Porträts",
+   "Automatisch\n            Kompak",
+   "Hauptquest · Akt 1: Risse im e"
+  ],
+  "woerter": 630,
+  "langeSaetze": 5,
+  "saetze": 13,
+  "begriffe": [
+   "Etappe",
+   "Kontor",
+   "Moral",
+   "Zehnt",
+   "Rüstung",
+   "Flammeneifer",
+   "Runensplitter",
+   "Aushang",
+   "Hofstaat"
+  ],
+  "ohneTitel": 0,
+  "querScroll": false
+ },
+ {
+  "geraet": "handy",
+  "name": "handy-5-hauptquest-gespraech",
+  "minSchrift": 10.88,
+  "anteilKlein": 32,
+  "beispieleKlein": [
+   "Untoten-Bedrohung",
+   "35 / 100",
+   "Ork-Bedrohung",
+   "40 / 100",
+   "Glut des Mutterbergs",
+   "30 / 100"
+  ],
+  "knoepfe": 31,
+  "winzig": 3,
+  "beispieleWinzig": [
+   "Hauptquest · Akt 1: Risse im e",
+   "Charakterfenster öffnen",
+   "×"
+  ],
+  "woerter": 796,
+  "langeSaetze": 6,
+  "saetze": 23,
+  "begriffe": [
+   "Etappe",
+   "Kontor",
+   "Moral",
+   "Ruf",
+   "Zehnt",
+   "Rüstung",
+   "Flammeneifer",
+   "Runensplitter",
+   "Aushang",
+   "Hofstaat"
+  ],
+  "ohneTitel": 0,
+  "querScroll": false
+ },
+ {
+  "geraet": "handy",
+  "name": "handy-6-charakterfenster",
+  "minSchrift": 10.88,
+  "anteilKlein": 42,
+  "beispieleKlein": [
+   "Untoten-Bedrohung",
+   "35 / 100",
+   "Ork-Bedrohung",
+   "40 / 100",
+   "Glut des Mutterbergs",
+   "30 / 100"
+  ],
+  "knoepfe": 31,
+  "winzig": 3,
+  "beispieleWinzig": [
+   "Hauptquest · Akt 1: Risse im e",
+   "Charakterfenster öffnen",
+   "Stufentabelle"
+  ],
+  "woerter": 730,
+  "langeSaetze": 6,
+  "saetze": 14,
+  "begriffe": [
+   "Etappe",
+   "Kontor",
+   "Glut",
+   "Moral",
+   "Zehnt",
+   "Rüstung",
+   "Flammeneifer",
+   "Runensplitter",
+   "Aushang",
+   "Hofstaat"
+  ],
+  "ohneTitel": 0,
+  "querScroll": false
+ },
+ {
+  "geraet": "handy",
+  "fehler": []
+ },
+ {
+  "geraet": "laptop",
+  "name": "laptop-1-start",
+  "minSchrift": 12.48,
+  "anteilKlein": 18,
+  "beispieleKlein": [
+   "Aschenkrone",
+   "Kaiserreich von Valen · Ackerland"
+  ],
+  "knoepfe": 6,
+  "winzig": 5,
+  "beispieleWinzig": [
+   "Weltbuch",
+   "Bestiarium",
+   "Porträts",
+   "Automatisch\n            Kompak",
+   "INPUT"
+  ],
+  "woerter": 42,
+  "langeSaetze": 1,
+  "saetze": 3,
+  "begriffe": [],
+  "ohneTitel": 1,
+  "querScroll": false
+ },
+ {
+  "geraet": "laptop",
+  "name": "laptop-2-charakter",
+  "minSchrift": 12.8,
+  "anteilKlein": 1,
+  "beispieleKlein": [
+   "Aschenkrone"
+  ],
+  "knoepfe": 40,
+  "winzig": 37,
+  "beispieleWinzig": [
+   "Weltbuch",
+   "Bestiarium",
+   "Porträts",
+   "Automatisch\n            Kompak",
+   "INPUT",
+   "MenschenUntote · Bald verfügba"
+  ],
+  "woerter": 513,
+  "langeSaetze": 5,
+  "saetze": 14,
+  "begriffe": [
+   "Ahnen",
+   "Spezialisierung",
+   "Hardcore",
+   "Permadeath"
+  ],
+  "ohneTitel": 1,
+  "querScroll": false
+ },
+ {
+  "geraet": "laptop",
+  "name": "laptop-3-prolog",
+  "minSchrift": 12.8,
+  "anteilKlein": 8,
+  "beispieleKlein": [
+   "Aschenkrone"
+  ],
+  "knoepfe": 7,
+  "winzig": 4,
+  "beispieleWinzig": [
+   "Weltbuch",
+   "Bestiarium",
+   "Porträts",
+   "Automatisch\n            Kompak"
+  ],
+  "woerter": 58,
+  "langeSaetze": 0,
+  "saetze": 5,
+  "begriffe": [
+   "Glut"
+  ],
+  "ohneTitel": 0,
+  "querScroll": false
+ },
+ {
+  "geraet": "laptop",
+  "name": "laptop-3b-prolog-mitte",
+  "minSchrift": 12.8,
+  "anteilKlein": 8,
+  "beispieleKlein": [
+   "Aschenkrone"
+  ],
+  "knoepfe": 7,
+  "winzig": 4,
+  "beispieleWinzig": [
+   "Weltbuch",
+   "Bestiarium",
+   "Porträts",
+   "Automatisch\n            Kompak"
+  ],
+  "woerter": 54,
+  "langeSaetze": 1,
+  "saetze": 3,
+  "begriffe": [],
+  "ohneTitel": 0,
+  "querScroll": false
+ },
+ {
+  "geraet": "laptop",
+  "name": "laptop-3c-erste-szene",
+  "minSchrift": 11.52,
+  "anteilKlein": 28,
+  "beispieleKlein": [
+   "Aschenkrone",
+   "Westvik · Methalle",
+   "Proviant",
+   "Rüstungsschutz",
+   "0 EP · Noch 100 bis Stufe 2",
+   "Karte"
+  ],
+  "knoepfe": 15,
+  "winzig": 7,
+  "beispieleWinzig": [
+   "Weltbuch",
+   "Bestiarium",
+   "Porträts",
+   "Automatisch\n            Kompak",
+   "Charakterfenster öffnen",
+   "Reisekarte öffnen"
+  ],
+  "woerter": 137,
+  "langeSaetze": 2,
+  "saetze": 4,
+  "begriffe": [
+   "Etappe",
+   "Moral",
+   "Zehnt",
+   "Rüstung",
+   "Flammeneifer"
+  ],
+  "ohneTitel": 0,
+  "querScroll": false
+ },
+ {
+  "geraet": "laptop",
+  "name": "laptop-4-hauptstadt",
+  "minSchrift": 10.88,
+  "anteilKlein": 46,
+  "beispieleKlein": [
+   "Aschenkrone",
+   "Hauptstadt · Kaiserreich von Valen · Ruf",
+   "Zeit",
+   "Dörfer",
+   "Marken",
+   "+0 Kontor"
+  ],
+  "knoepfe": 42,
+  "winzig": 11,
+  "beispieleWinzig": [
+   "Weltbuch",
+   "Bestiarium",
+   "Porträts",
+   "Automatisch\n            Kompak",
+   "Weltlage: Höchste Gefahr Erzfi",
+   "Akt 2 und 3 · Schwester-Zweige"
+  ],
+  "woerter": 624,
+  "langeSaetze": 5,
+  "saetze": 13,
+  "begriffe": [
+   "Etappe",
+   "Kontor",
+   "Moral",
+   "Zehnt",
+   "Rüstung",
+   "Flammeneifer",
+   "Runensplitter",
+   "Aushang",
+   "Hofstaat"
+  ],
+  "ohneTitel": 0,
+  "querScroll": false
+ },
+ {
+  "geraet": "laptop",
+  "name": "laptop-5-hauptquest-gespraech",
+  "minSchrift": 10.88,
+  "anteilKlein": 43,
+  "beispieleKlein": [
+   "Aschenkrone",
+   "Hauptstadt · Kaiserreich von Valen · Ruf",
+   "Zeit",
+   "Dörfer",
+   "Marken",
+   "+0 Kontor"
+  ],
+  "knoepfe": 48,
+  "winzig": 11,
+  "beispieleWinzig": [
+   "Weltbuch",
+   "Bestiarium",
+   "Porträts",
+   "Automatisch\n            Kompak",
+   "Weltlage: Höchste Gefahr Erzfi",
+   "Akt 2 und 3 · Schwester-Zweige"
+  ],
+  "woerter": 790,
+  "langeSaetze": 6,
+  "saetze": 23,
+  "begriffe": [
+   "Etappe",
+   "Kontor",
+   "Moral",
+   "Ruf",
+   "Zehnt",
+   "Rüstung",
+   "Flammeneifer",
+   "Runensplitter",
+   "Aushang",
+   "Hofstaat"
+  ],
+  "ohneTitel": 0,
+  "querScroll": false
+ },
+ {
+  "geraet": "laptop",
+  "name": "laptop-6-charakterfenster",
+  "minSchrift": 10.88,
+  "anteilKlein": 48,
+  "beispieleKlein": [
+   "Aschenkrone",
+   "Hauptstadt · Kaiserreich von Valen · Ruf",
+   "Zeit",
+   "Dörfer",
+   "Marken",
+   "+0 Kontor"
+  ],
+  "knoepfe": 48,
+  "winzig": 12,
+  "beispieleWinzig": [
+   "Weltbuch",
+   "Bestiarium",
+   "Porträts",
+   "Automatisch\n            Kompak",
+   "Weltlage: Höchste Gefahr Erzfi",
+   "Akt 2 und 3 · Schwester-Zweige"
+  ],
+  "woerter": 724,
+  "langeSaetze": 6,
+  "saetze": 14,
+  "begriffe": [
+   "Etappe",
+   "Kontor",
+   "Glut",
+   "Moral",
+   "Zehnt",
+   "Rüstung",
+   "Flammeneifer",
+   "Runensplitter",
+   "Aushang",
+   "Hofstaat"
+  ],
+  "ohneTitel": 0,
+  "querScroll": false
+ },
+ {
+  "geraet": "laptop",
+  "fehler": []
+ }
+]

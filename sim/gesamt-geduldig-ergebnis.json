@@ -1,0 +1,1234 @@
+{
+ "stand": "2026-11-20T14:24:38.970Z",
+ "ergebnis": [
+  {
+   "faction": "kronreich",
+   "role": "krieger",
+   "fehler": [],
+   "hinweise": [],
+   "niederlagen": 12,
+   "kaempfe": 47,
+   "etappen": 52,
+   "auftraege": 41,
+   "stufen": {
+    "prolog": 3,
+    "akt1": 4,
+    "akt2Start": 5,
+    "zweig_haefen": 9,
+    "zweig_orden": 14,
+    "akt4": 18
+   },
+   "schritte": 292,
+   "blockiert": "Akt 4 nach 30 Versuchen nicht abgeschlossen (Schritt 1)",
+   "ende": null,
+   "silber": {
+    "prolog": 5,
+    "akt1": 45,
+    "akt3": 691
+   },
+   "dialoge": [
+    "A1.1 ⚔️ Sofort nach Eisentor aufbrechen",
+    "A1.2 ⚔️ Frontalsturm mit dem Rammbock (Stärke 12)",
+    "A1.3 ⚔️ Gnadenlose Härte: Richtet ihn öffentlich hin",
+    "Zweig haefen 🗡️ Einen meuternden Kapitän im Messerduell entwaffnen (Geschick 13)",
+    "Zweig orden 🔥 Die Feuerprobe am Altar bestehen (Stärke oder Intelligenz 13)",
+    "Gefährte sigrid"
+   ],
+   "silberNot": 0,
+   "niederlageOrte": {
+    "Akt 4: auftrag-mutterdertiefen (St. 14 vs 14)": 1,
+    "Akt 4: auftrag-thorvald (St. 18 vs 18/18/18)": 11
+   },
+   "phase": "Akt 4",
+   "letzterKampf": "sys-ENM_OF_MAGMA_HYAENE (St. 18 vs 15)",
+   "auftraegeBisAkt2": 4,
+   "nahrungGekauft": 20,
+   "grind": [
+    {
+     "ort": "hagenfels",
+     "stufe": 14,
+     "auftraege": 5,
+     "ep": 400
+    },
+    {
+     "ort": "kornwik",
+     "stufe": 15,
+     "auftraege": 5,
+     "ep": 500
+    }
+   ]
+  },
+  {
+   "faction": "kronreich",
+   "role": "waechter",
+   "fehler": [],
+   "hinweise": [],
+   "niederlagen": 11,
+   "kaempfe": 47,
+   "etappen": 49,
+   "auftraege": 39,
+   "stufen": {
+    "prolog": 3,
+    "akt1": 4,
+    "akt2Start": 5,
+    "zweig_haefen": 9,
+    "zweig_orden": 14,
+    "akt4": 18
+   },
+   "schritte": 376,
+   "blockiert": "Akt 4 nach 30 Versuchen nicht abgeschlossen (Schritt 1)",
+   "ende": null,
+   "silber": {
+    "prolog": 5,
+    "akt1": 45,
+    "akt3": 840
+   },
+   "dialoge": [
+    "A1.1 ⚔️ Sofort nach Eisentor aufbrechen",
+    "A1.2 ⚔️ Frontalsturm mit dem Rammbock (Stärke 12)",
+    "A1.3 ⚔️ Gnadenlose Härte: Richtet ihn öffentlich hin",
+    "Zweig haefen 🗡️ Einen meuternden Kapitän im Messerduell entwaffnen (Geschick 13)",
+    "Zweig orden 🔥 Die Feuerprobe am Altar bestehen (Stärke oder Intelligenz 13)"
+   ],
+   "silberNot": 0,
+   "niederlageOrte": {
+    "Akt 4: auftrag-thorvald (St. 18 vs 18/18/18)": 11
+   },
+   "phase": "Akt 4",
+   "letzterKampf": "auftrag-thorvald (St. 18 vs 18/18/18)",
+   "auftraegeBisAkt2": 4,
+   "grind": [
+    {
+     "ort": "hagenfels",
+     "stufe": 15,
+     "auftraege": 5,
+     "ep": 400
+    },
+    {
+     "ort": "kornwik",
+     "stufe": 15,
+     "auftraege": 5,
+     "ep": 500
+    }
+   ],
+   "nahrungGekauft": 20
+  },
+  {
+   "faction": "kronreich",
+   "role": "spaeher",
+   "fehler": [],
+   "hinweise": [],
+   "niederlagen": 12,
+   "kaempfe": 44,
+   "etappen": 52,
+   "auftraege": 46,
+   "stufen": {
+    "prolog": 3,
+    "akt1": 4,
+    "akt2Start": 5,
+    "zweig_haefen": 9,
+    "zweig_orden": 14,
+    "akt4": 18
+   },
+   "schritte": 306,
+   "blockiert": "Akt 4 nach 30 Versuchen nicht abgeschlossen (Schritt 1)",
+   "ende": null,
+   "silber": {
+    "prolog": 5,
+    "akt1": 65,
+    "akt3": 645
+   },
+   "dialoge": [
+    "A1.1 🧠 Die Leiche untersuchen (Intelligenz 11)",
+    "A1.2 🗡️ Über die vereiste Wehrmauer in ihren Rücken schleichen (Geschick 11)",
+    "A1.3 ⚔️ Gnadenlose Härte: Richtet ihn öffentlich hin",
+    "Zweig haefen 🗡️ Einen meuternden Kapitän im Messerduell entwaffnen (Geschick 13)",
+    "Zweig orden 🔥 Die Feuerprobe am Altar bestehen (Stärke oder Intelligenz 13)",
+    "Gefährte sigrid"
+   ],
+   "silberNot": 0,
+   "niederlageOrte": {
+    "Akt 4: auftrag-mutterdertiefen (St. 14 vs 14)": 1,
+    "Akt 4: auftrag-thorvald (St. 18 vs 18/18/18)": 11
+   },
+   "phase": "Akt 4",
+   "letzterKampf": "auftrag-thorvald (St. 18 vs 18/18/18)",
+   "auftraegeBisAkt2": 4,
+   "grind": [
+    {
+     "ort": "hagenfels",
+     "stufe": 14,
+     "auftraege": 5,
+     "ep": 400
+    },
+    {
+     "ort": "kornwik",
+     "stufe": 15,
+     "auftraege": 5,
+     "ep": 500
+    },
+    {
+     "ort": "rosshag",
+     "stufe": 16,
+     "auftraege": 5,
+     "ep": 400
+    }
+   ],
+   "nahrungGekauft": 20
+  },
+  {
+   "faction": "kronreich",
+   "role": "magier",
+   "fehler": [],
+   "hinweise": [],
+   "niederlagen": 12,
+   "kaempfe": 22,
+   "etappen": 28,
+   "auftraege": 8,
+   "stufen": {
+    "prolog": 3,
+    "akt1": 4,
+    "akt2Start": 5
+   },
+   "schritte": 209,
+   "blockiert": "Spiel verloren (Weltende: verhungert) nach 12 Niederlagen, Stufe 7, Leisten {\"untote\":28,\"orks\":40,\"glut\":43,\"erzfieber\":49,\"welke\":43}, Runde 28",
+   "ende": null,
+   "silber": {
+    "prolog": 5,
+    "akt1": 45
+   },
+   "dialoge": [
+    "A1.1 ⚔️ Sofort nach Eisentor aufbrechen",
+    "A1.2 ⚔️ Frontalsturm mit dem Rammbock (Stärke 12)",
+    "A1.3 ⚔️ Gnadenlose Härte: Richtet ihn öffentlich hin",
+    "Zweig haefen 🗡️ Einen meuternden Kapitän im Messerduell entwaffnen (Geschick 13)"
+   ],
+   "silberNot": 0,
+   "niederlageOrte": {
+    "Akt 2/3: auftrag-orkpiraten (St. 6 vs 6/6)": 10,
+    "Akt 2/3: auftrag-orkpiraten (St. 7 vs 7/7)": 2
+   },
+   "phase": "Akt 2/3",
+   "letzterKampf": "auftrag-orkpiraten (St. 7 vs 7/7)",
+   "auftraegeBisAkt2": 4,
+   "nahrungGekauft": 20,
+   "weltende": "verhungert"
+  },
+  {
+   "faction": "kronreich",
+   "role": "heiler",
+   "fehler": [],
+   "hinweise": [],
+   "niederlagen": 0,
+   "kaempfe": 31,
+   "etappen": 33,
+   "auftraege": 45,
+   "stufen": {
+    "prolog": 3,
+    "akt1": 4,
+    "akt2Start": 5,
+    "zweig_haefen": 9,
+    "zweig_orden": 14,
+    "akt4": 22
+   },
+   "schritte": 291,
+   "blockiert": null,
+   "ende": {
+    "hochfeldherr": true,
+    "hardcore": true,
+    "armada": true,
+    "gefaehrten": 1,
+    "moral": 100
+   },
+   "silber": {
+    "prolog": 5,
+    "akt1": 72,
+    "akt3": 690,
+    "akt4": 1562
+   },
+   "dialoge": [
+    "A1.1 🧠 Die Leiche untersuchen (Intelligenz 11)",
+    "A1.2 ⚔️ Frontalsturm mit dem Rammbock (Stärke 12)",
+    "A1.3 ⚔️ Gnadenlose Härte: Richtet ihn öffentlich hin",
+    "Zweig haefen 🗡️ Einen meuternden Kapitän im Messerduell entwaffnen (Geschick 13)",
+    "Zweig orden 🔥 Die Feuerprobe am Altar bestehen (Stärke oder Intelligenz 13)",
+    "Gefährte sigrid"
+   ],
+   "silberNot": 0,
+   "niederlageOrte": {},
+   "phase": "Akt 4",
+   "letzterKampf": "auftrag-thorvald (St. 18 vs 18/18/18)",
+   "auftraegeBisAkt2": 4,
+   "grind": [
+    {
+     "ort": "hagenfels",
+     "stufe": 14,
+     "auftraege": 5,
+     "ep": 400
+    },
+    {
+     "ort": "kornwik",
+     "stufe": 15,
+     "auftraege": 5,
+     "ep": 500
+    },
+    {
+     "ort": "rosshag",
+     "stufe": 16,
+     "auftraege": 5,
+     "ep": 400
+    }
+   ]
+  },
+  {
+   "faction": "kronreich",
+   "role": "schurke",
+   "fehler": [],
+   "hinweise": [],
+   "niederlagen": 12,
+   "kaempfe": 48,
+   "etappen": 52,
+   "auftraege": 41,
+   "stufen": {
+    "prolog": 3,
+    "akt1": 4,
+    "akt2Start": 5,
+    "zweig_haefen": 9,
+    "zweig_orden": 14,
+    "akt4": 19
+   },
+   "schritte": 959,
+   "blockiert": "Akt 4 nach 30 Versuchen nicht abgeschlossen (Schritt 1)",
+   "ende": null,
+   "silber": {
+    "prolog": 5,
+    "akt1": 45,
+    "akt3": 652
+   },
+   "dialoge": [
+    "A1.1 ⚔️ Sofort nach Eisentor aufbrechen",
+    "A1.2 ⚔️ Frontalsturm mit dem Rammbock (Stärke 12)",
+    "A1.3 ⚔️ Gnadenlose Härte: Richtet ihn öffentlich hin",
+    "Zweig haefen 🗡️ Einen meuternden Kapitän im Messerduell entwaffnen (Geschick 13)",
+    "Zweig orden 🔥 Die Feuerprobe am Altar bestehen (Stärke oder Intelligenz 13)",
+    "Gefährte sigrid"
+   ],
+   "silberNot": 0,
+   "niederlageOrte": {
+    "Akt 4: auftrag-mutterdertiefen (St. 14 vs 14)": 1,
+    "Akt 4: auftrag-thorvald (St. 18 vs 18/18/18)": 11
+   },
+   "phase": "Akt 4",
+   "letzterKampf": "sys-ENM_OF_MAGMA_HYAENE (St. 18 vs 15)",
+   "auftraegeBisAkt2": 4,
+   "patt": 12,
+   "grind": [
+    {
+     "ort": "hagenfels",
+     "stufe": 14,
+     "auftraege": 5,
+     "ep": 400
+    },
+    {
+     "ort": "kornwik",
+     "stufe": 15,
+     "auftraege": 5,
+     "ep": 500
+    }
+   ],
+   "nahrungGekauft": 40
+  },
+  {
+   "faction": "orden",
+   "role": "krieger",
+   "fehler": [],
+   "hinweise": [],
+   "niederlagen": 21,
+   "kaempfe": 54,
+   "etappen": 35,
+   "auftraege": 37,
+   "stufen": {
+    "prolog": 3,
+    "akt1": 4,
+    "akt2Start": 5,
+    "zweig_kronreich": 9,
+    "zweig_haefen": 14,
+    "akt4": 18
+   },
+   "schritte": 274,
+   "blockiert": "Akt 4 nach 30 Versuchen nicht abgeschlossen (Schritt 1)",
+   "ende": null,
+   "silber": {
+    "prolog": 5,
+    "akt1": 40,
+    "akt3": 763
+   },
+   "dialoge": [
+    "A1.1 🧠 Die gläsernen Augen der Toten untersuchen (Intelligenz 11)",
+    "A1.2 ⚔️ Durch das brennende Tor brechen und den Prediger fällen (Stärke 12)",
+    "A1.3 🔥 Gnadenlose Läuterung: Übergebt ihn den Flammen",
+    "Zweig kronreich ⚔️ Den Champion der Herzöge zum Duell fordern (Stärke 13)",
+    "Zweig haefen 🗡️ Einen meuternden Kapitän im Messerduell entwaffnen (Geschick 13)"
+   ],
+   "silberNot": 0,
+   "niederlageOrte": {
+    "Akt 4: auftrag-aschenschatten (St. 16 vs 16/16)": 1,
+    "Akt 4: auftrag-thorvald (St. 18 vs 18/18/18)": 20
+   },
+   "phase": "Akt 4",
+   "letzterKampf": "auftrag-thorvald (St. 18 vs 18/18/18)",
+   "auftraegeBisAkt2": 2,
+   "grind": [
+    {
+     "ort": "aschenkloster",
+     "stufe": 14,
+     "auftraege": 5,
+     "ep": 650
+    },
+    {
+     "ort": "eiswacht",
+     "stufe": 15,
+     "auftraege": 3,
+     "ep": 550
+    },
+    {
+     "ort": "nordwacht",
+     "stufe": 15,
+     "auftraege": 4,
+     "ep": 500
+    },
+    {
+     "ort": "thorvaldsklipp",
+     "stufe": 15,
+     "auftraege": 2,
+     "ep": 250
+    },
+    {
+     "ort": "lichtheim",
+     "stufe": 16,
+     "auftraege": 5,
+     "ep": 650
+    }
+   ]
+  },
+  {
+   "faction": "orden",
+   "role": "waechter",
+   "fehler": [],
+   "hinweise": [],
+   "niederlagen": 23,
+   "kaempfe": 55,
+   "etappen": 34,
+   "auftraege": 35,
+   "stufen": {
+    "prolog": 3,
+    "akt1": 4,
+    "akt2Start": 5,
+    "zweig_kronreich": 9,
+    "zweig_haefen": 14,
+    "akt4": 16
+   },
+   "schritte": 476,
+   "blockiert": "Akt 4 nach 30 Versuchen nicht abgeschlossen (Schritt 0)",
+   "ende": null,
+   "silber": {
+    "prolog": 5,
+    "akt1": 40,
+    "akt3": 700
+   },
+   "dialoge": [
+    "A1.1 🧠 Die gläsernen Augen der Toten untersuchen (Intelligenz 11)",
+    "A1.2 ⚔️ Durch das brennende Tor brechen und den Prediger fällen (Stärke 12)",
+    "A1.3 🔥 Gnadenlose Läuterung: Übergebt ihn den Flammen",
+    "Zweig kronreich ⚔️ Den Champion der Herzöge zum Duell fordern (Stärke 13)",
+    "Zweig haefen 🗡️ Einen meuternden Kapitän im Messerduell entwaffnen (Geschick 13)"
+   ],
+   "silberNot": 0,
+   "niederlageOrte": {
+    "Akt 4: auftrag-aschenschatten (St. 16 vs 16/16)": 23
+   },
+   "phase": "Akt 4",
+   "letzterKampf": "auftrag-aschenschatten (St. 16 vs 16/16)",
+   "auftraegeBisAkt2": 2,
+   "grind": [
+    {
+     "ort": "aschenkloster",
+     "stufe": 14,
+     "auftraege": 5,
+     "ep": 650
+    },
+    {
+     "ort": "eiswacht",
+     "stufe": 15,
+     "auftraege": 3,
+     "ep": 550
+    },
+    {
+     "ort": "nordwacht",
+     "stufe": 15,
+     "auftraege": 4,
+     "ep": 500
+    },
+    {
+     "ort": "thorvaldsklipp",
+     "stufe": 15,
+     "auftraege": 2,
+     "ep": 250
+    },
+    {
+     "ort": "lichtheim",
+     "stufe": 16,
+     "auftraege": 5,
+     "ep": 650
+    }
+   ]
+  },
+  {
+   "faction": "orden",
+   "role": "spaeher",
+   "fehler": [],
+   "hinweise": [],
+   "niederlagen": 21,
+   "kaempfe": 53,
+   "etappen": 38,
+   "auftraege": 35,
+   "stufen": {
+    "prolog": 3,
+    "akt1": 4,
+    "akt2Start": 5,
+    "zweig_kronreich": 9,
+    "zweig_haefen": 14,
+    "akt4": 18
+   },
+   "schritte": 327,
+   "blockiert": "Akt 4 nach 30 Versuchen nicht abgeschlossen (Schritt 1)",
+   "ende": null,
+   "silber": {
+    "prolog": 5,
+    "akt1": 40,
+    "akt3": 709
+   },
+   "dialoge": [
+    "A1.1 🧠 Die gläsernen Augen der Toten untersuchen (Intelligenz 11)",
+    "A1.2 🗡️ Über die Klosterdächer auf die Bogenschützen springen (Geschick 11)",
+    "A1.3 🔥 Gnadenlose Läuterung: Übergebt ihn den Flammen",
+    "Zweig kronreich ⚔️ Den Champion der Herzöge zum Duell fordern (Stärke 13)",
+    "Zweig haefen 🗡️ Einen meuternden Kapitän im Messerduell entwaffnen (Geschick 13)"
+   ],
+   "silberNot": 0,
+   "niederlageOrte": {
+    "Akt 4: auftrag-thorvald (St. 18 vs 18/18/18)": 21
+   },
+   "phase": "Akt 4",
+   "letzterKampf": "auftrag-thorvald (St. 18 vs 18/18/18)",
+   "auftraegeBisAkt2": 2,
+   "grind": [
+    {
+     "ort": "aschenkloster",
+     "stufe": 14,
+     "auftraege": 5,
+     "ep": 650
+    },
+    {
+     "ort": "eiswacht",
+     "stufe": 15,
+     "auftraege": 3,
+     "ep": 550
+    },
+    {
+     "ort": "nordwacht",
+     "stufe": 15,
+     "auftraege": 4,
+     "ep": 500
+    },
+    {
+     "ort": "thorvaldsklipp",
+     "stufe": 15,
+     "auftraege": 2,
+     "ep": 250
+    },
+    {
+     "ort": "lichtheim",
+     "stufe": 16,
+     "auftraege": 5,
+     "ep": 650
+    }
+   ]
+  },
+  {
+   "faction": "orden",
+   "role": "magier",
+   "fehler": [],
+   "hinweise": [],
+   "niederlagen": 26,
+   "kaempfe": 60,
+   "etappen": 63,
+   "auftraege": 16,
+   "stufen": {
+    "prolog": 3,
+    "akt1": 4,
+    "akt2Start": 5,
+    "zweig_kronreich": 9
+   },
+   "schritte": 366,
+   "blockiert": "Mehr als 25 Niederlagen (Zweig haefen)",
+   "ende": null,
+   "silber": {
+    "prolog": 5,
+    "akt1": 40
+   },
+   "dialoge": [
+    "A1.1 🧠 Die gläsernen Augen der Toten untersuchen (Intelligenz 11)",
+    "A1.2 🔥 Die verängstigten Dörfler mit einem Fluch-Bann zum Rückzug bewegen (Intelligenz 12)",
+    "A1.3 🔥 Gnadenlose Läuterung: Übergebt ihn den Flammen",
+    "Zweig kronreich ⚔️ Den Champion der Herzöge zum Duell fordern (Stärke 13)",
+    "Zweig haefen 🗡️ Einen meuternden Kapitän im Messerduell entwaffnen (Geschick 13)"
+   ],
+   "silberNot": 0,
+   "niederlageOrte": {
+    "Akt 2/3: auftrag-kaperkapitaen (St. 13 vs 13)": 8,
+    "Akt 2/3: auftrag-kaperkapitaen (St. 14 vs 14)": 13,
+    "Akt 2/3: sys-MB_FH_KAPITAEN_DRAVEN (St. 14 vs 14)": 2,
+    "Akt 2/3: auftrag-kaperkapitaen (St. 15 vs 15)": 3
+   },
+   "phase": "Akt 2/3",
+   "letzterKampf": "auftrag-kaperkapitaen (St. 15 vs 15)",
+   "auftraegeBisAkt2": 2,
+   "nahrungGekauft": 60
+  },
+  {
+   "faction": "orden",
+   "role": "heiler",
+   "fehler": [],
+   "hinweise": [],
+   "niederlagen": 22,
+   "kaempfe": 55,
+   "etappen": 39,
+   "auftraege": 35,
+   "stufen": {
+    "prolog": 3,
+    "akt1": 4,
+    "akt2Start": 5,
+    "zweig_kronreich": 9,
+    "zweig_haefen": 14,
+    "akt4": 18
+   },
+   "schritte": 307,
+   "blockiert": "Akt 4 nach 30 Versuchen nicht abgeschlossen (Schritt 1)",
+   "ende": null,
+   "silber": {
+    "prolog": 5,
+    "akt1": 40,
+    "akt3": 784
+   },
+   "dialoge": [
+    "A1.1 🧠 Die gläsernen Augen der Toten untersuchen (Intelligenz 11)",
+    "A1.2 🔥 Die verängstigten Dörfler mit einem Fluch-Bann zum Rückzug bewegen (Intelligenz 12)",
+    "A1.3 🔥 Gnadenlose Läuterung: Übergebt ihn den Flammen",
+    "Zweig kronreich ⚔️ Den Champion der Herzöge zum Duell fordern (Stärke 13)",
+    "Zweig haefen 🗡️ Einen meuternden Kapitän im Messerduell entwaffnen (Geschick 13)"
+   ],
+   "silberNot": 0,
+   "niederlageOrte": {
+    "Akt 4: sys-MB_KR_URSA_GRAUHAAR (St. 16 vs 15)": 1,
+    "Akt 4: auftrag-thorvald (St. 18 vs 18/18/18)": 21
+   },
+   "phase": "Akt 4",
+   "letzterKampf": "auftrag-thorvald (St. 18 vs 18/18/18)",
+   "auftraegeBisAkt2": 2,
+   "grind": [
+    {
+     "ort": "aschenkloster",
+     "stufe": 14,
+     "auftraege": 5,
+     "ep": 650
+    },
+    {
+     "ort": "eiswacht",
+     "stufe": 15,
+     "auftraege": 3,
+     "ep": 550
+    },
+    {
+     "ort": "nordwacht",
+     "stufe": 15,
+     "auftraege": 4,
+     "ep": 500
+    },
+    {
+     "ort": "thorvaldsklipp",
+     "stufe": 15,
+     "auftraege": 2,
+     "ep": 250
+    },
+    {
+     "ort": "lichtheim",
+     "stufe": 16,
+     "auftraege": 5,
+     "ep": 650
+    }
+   ]
+  },
+  {
+   "faction": "orden",
+   "role": "schurke",
+   "fehler": [],
+   "hinweise": [],
+   "niederlagen": 26,
+   "kaempfe": 62,
+   "etappen": 64,
+   "auftraege": 16,
+   "stufen": {
+    "prolog": 3,
+    "akt1": 4,
+    "akt2Start": 5,
+    "zweig_kronreich": 9
+   },
+   "schritte": 1769,
+   "blockiert": "Mehr als 25 Niederlagen (Zweig haefen)",
+   "ende": null,
+   "silber": {
+    "prolog": 5,
+    "akt1": 40
+   },
+   "dialoge": [
+    "A1.1 🧠 Die gläsernen Augen der Toten untersuchen (Intelligenz 11)",
+    "A1.2 🗡️ Über die Klosterdächer auf die Bogenschützen springen (Geschick 11)",
+    "A1.3 🔥 Gnadenlose Läuterung: Übergebt ihn den Flammen",
+    "Zweig kronreich ⚔️ Den Champion der Herzöge zum Duell fordern (Stärke 13)",
+    "Zweig haefen 🗡️ Einen meuternden Kapitän im Messerduell entwaffnen (Geschick 13)"
+   ],
+   "silberNot": 0,
+   "niederlageOrte": {
+    "Akt 2/3: auftrag-kaperkapitaen (St. 13 vs 13)": 11,
+    "Akt 2/3: sys-MB_FH_KAPITAEN_DRAVEN (St. 13 vs 13)": 1,
+    "Akt 2/3: auftrag-kaperkapitaen (St. 14 vs 14)": 9,
+    "Akt 2/3: auftrag-kaperkapitaen (St. 15 vs 15)": 5
+   },
+   "phase": "Akt 2/3",
+   "letzterKampf": "auftrag-kaperkapitaen (St. 15 vs 15)",
+   "auftraegeBisAkt2": 2,
+   "patt": 26,
+   "nahrungGekauft": 60
+  },
+  {
+   "faction": "haefen",
+   "role": "krieger",
+   "fehler": [],
+   "hinweise": [
+    "Reise braucht Silber: zu wenig Silber (ankerfjord → perlvik, Silber 0)",
+    "Reise braucht Silber: zu wenig Silber (bernsvik → nordwacht, Silber 12)",
+    "Reise braucht Silber: zu wenig Silber (bernsvik → nordwacht, Silber 12)",
+    "Reise braucht Silber: zu wenig Silber (bernsvik → nordwacht, Silber 12)",
+    "Reise braucht Silber: zu wenig Silber (bernsvik → nordwacht, Silber 12)",
+    "Reise braucht Silber: zu wenig Silber (bernsvik → nordwacht, Silber 12)",
+    "Reise braucht Silber: zu wenig Silber (bernsvik → nordwacht, Silber 12)"
+   ],
+   "niederlagen": 9,
+   "kaempfe": 36,
+   "etappen": 64,
+   "auftraege": 44,
+   "stufen": {
+    "prolog": 3,
+    "akt1": 4,
+    "akt2Start": 5,
+    "zweig_kronreich": 9,
+    "zweig_orden": 14
+   },
+   "schritte": 241,
+   "blockiert": "Kein Silber für die Überfahrt (zu wenig Silber)",
+   "ende": null,
+   "silber": {
+    "prolog": 30,
+    "akt1": 75,
+    "akt3": 634
+   },
+   "dialoge": [
+    "A1.1 ⚔️ Mit Entermesser und Schwarzpulver direkt losmarschieren",
+    "A1.2 🗡️ Durch die Flutgrotte in ihre Flanke schleichen (Geschick 11)",
+    "A1.3 ⚖️ Gilden-Ordnung: Besiegele offizielle Handelsverträge mit allen Häfen",
+    "Zweig kronreich ⚔️ Den Champion der Herzöge zum Duell fordern (Stärke 13)",
+    "Zweig orden 🔥 Die Feuerprobe am Altar bestehen (Stärke oder Intelligenz 13)"
+   ],
+   "silberNot": 7,
+   "niederlageOrte": {
+    "Akt 4: auftrag-thorvald (St. 18 vs 18/18/18)": 9
+   },
+   "phase": "Akt 4",
+   "letzterKampf": "auftrag-thorvald (St. 18 vs 18/18/18)",
+   "auftraegeBisAkt2": 2,
+   "nahrungGekauft": 40,
+   "grind": [
+    {
+     "ort": "salzwacht",
+     "stufe": 14,
+     "auftraege": 4,
+     "ep": 350
+    },
+    {
+     "ort": "grenzmarkt",
+     "stufe": 14,
+     "auftraege": 2,
+     "ep": 100
+    },
+    {
+     "ort": "bernsvik",
+     "stufe": 15,
+     "auftraege": 5,
+     "ep": 550
+    },
+    {
+     "ort": "ankerfjord",
+     "stufe": 15,
+     "auftraege": 3,
+     "ep": 450
+    },
+    {
+     "ort": "skerheim",
+     "stufe": 15,
+     "auftraege": 2,
+     "ep": 250
+    },
+    {
+     "ort": "silberholm",
+     "stufe": 15,
+     "auftraege": 2,
+     "ep": 100
+    },
+    {
+     "ort": "nebelvik",
+     "stufe": 15,
+     "auftraege": 3,
+     "ep": 150
+    },
+    {
+     "ort": "haraldstad",
+     "stufe": 16,
+     "auftraege": 5,
+     "ep": 600
+    }
+   ]
+  },
+  {
+   "faction": "haefen",
+   "role": "waechter",
+   "fehler": [],
+   "hinweise": [
+    "Reise braucht Silber: zu wenig Silber (ankerfjord → perlvik, Silber 0)"
+   ],
+   "niederlagen": 24,
+   "kaempfe": 48,
+   "etappen": 42,
+   "auftraege": 46,
+   "stufen": {
+    "prolog": 3,
+    "akt1": 4,
+    "akt2Start": 5,
+    "zweig_kronreich": 9,
+    "zweig_orden": 14,
+    "akt4": 16
+   },
+   "schritte": 470,
+   "blockiert": "Akt 4 nach 30 Versuchen nicht abgeschlossen (Schritt 0)",
+   "ende": null,
+   "silber": {
+    "prolog": 30,
+    "akt1": 75,
+    "akt3": 487
+   },
+   "dialoge": [
+    "A1.1 ⚔️ Mit Entermesser und Schwarzpulver direkt losmarschieren",
+    "A1.2 🗡️ Durch die Flutgrotte in ihre Flanke schleichen (Geschick 11)",
+    "A1.3 ⚖️ Gilden-Ordnung: Besiegele offizielle Handelsverträge mit allen Häfen",
+    "Zweig kronreich ⚔️ Den Champion der Herzöge zum Duell fordern (Stärke 13)",
+    "Zweig orden 🔥 Die Feuerprobe am Altar bestehen (Stärke oder Intelligenz 13)"
+   ],
+   "silberNot": 1,
+   "niederlageOrte": {
+    "Akt 2/3: auftrag-mutterdertiefen (St. 10 vs 10)": 1,
+    "Akt 4: auftrag-aschenschatten (St. 16 vs 16/16)": 23
+   },
+   "phase": "Akt 4",
+   "letzterKampf": "auftrag-aschenschatten (St. 16 vs 16/16)",
+   "auftraegeBisAkt2": 2,
+   "grind": [
+    {
+     "ort": "salzwacht",
+     "stufe": 14,
+     "auftraege": 4,
+     "ep": 350
+    },
+    {
+     "ort": "grenzmarkt",
+     "stufe": 14,
+     "auftraege": 2,
+     "ep": 100
+    },
+    {
+     "ort": "bernsvik",
+     "stufe": 15,
+     "auftraege": 5,
+     "ep": 550
+    },
+    {
+     "ort": "ankerfjord",
+     "stufe": 15,
+     "auftraege": 3,
+     "ep": 450
+    },
+    {
+     "ort": "skerheim",
+     "stufe": 15,
+     "auftraege": 2,
+     "ep": 250
+    },
+    {
+     "ort": "silberholm",
+     "stufe": 15,
+     "auftraege": 2,
+     "ep": 100
+    },
+    {
+     "ort": "nebelvik",
+     "stufe": 15,
+     "auftraege": 3,
+     "ep": 150
+    },
+    {
+     "ort": "haraldstad",
+     "stufe": 16,
+     "auftraege": 5,
+     "ep": 600
+    }
+   ],
+   "nahrungGekauft": 20
+  },
+  {
+   "faction": "haefen",
+   "role": "spaeher",
+   "fehler": [],
+   "hinweise": [
+    "Reise braucht Silber: zu wenig Silber (ankerfjord → perlvik, Silber 0)"
+   ],
+   "niederlagen": 11,
+   "kaempfe": 39,
+   "etappen": 68,
+   "auftraege": 46,
+   "stufen": {
+    "prolog": 3,
+    "akt1": 4,
+    "akt2Start": 5,
+    "zweig_kronreich": 9,
+    "zweig_orden": 14,
+    "akt4": 18
+   },
+   "schritte": 252,
+   "blockiert": "Akt 4 nach 30 Versuchen nicht abgeschlossen (Schritt 1)",
+   "ende": null,
+   "silber": {
+    "prolog": 30,
+    "akt1": 95,
+    "akt3": 659
+   },
+   "dialoge": [
+    "A1.1 🧠 Die Frachtpapiere des brennenden Schiffs prüfen (Intelligenz 11)",
+    "A1.2 🗡️ Durch die Flutgrotte in ihre Flanke schleichen (Geschick 11)",
+    "A1.3 ⚖️ Gilden-Ordnung: Besiegele offizielle Handelsverträge mit allen Häfen",
+    "Zweig kronreich ⚔️ Den Champion der Herzöge zum Duell fordern (Stärke 13)",
+    "Zweig orden 🔥 Die Feuerprobe am Altar bestehen (Stärke oder Intelligenz 13)"
+   ],
+   "silberNot": 1,
+   "niederlageOrte": {
+    "Akt 4: auftrag-thorvald (St. 18 vs 18/18/18)": 11
+   },
+   "phase": "Akt 4",
+   "letzterKampf": "auftrag-thorvald (St. 18 vs 18/18/18)",
+   "auftraegeBisAkt2": 2,
+   "grind": [
+    {
+     "ort": "salzwacht",
+     "stufe": 14,
+     "auftraege": 4,
+     "ep": 350
+    },
+    {
+     "ort": "grenzmarkt",
+     "stufe": 14,
+     "auftraege": 2,
+     "ep": 100
+    },
+    {
+     "ort": "bernsvik",
+     "stufe": 15,
+     "auftraege": 5,
+     "ep": 550
+    },
+    {
+     "ort": "ankerfjord",
+     "stufe": 15,
+     "auftraege": 3,
+     "ep": 450
+    },
+    {
+     "ort": "skerheim",
+     "stufe": 15,
+     "auftraege": 2,
+     "ep": 250
+    },
+    {
+     "ort": "silberholm",
+     "stufe": 15,
+     "auftraege": 2,
+     "ep": 100
+    },
+    {
+     "ort": "nebelvik",
+     "stufe": 15,
+     "auftraege": 3,
+     "ep": 150
+    },
+    {
+     "ort": "haraldstad",
+     "stufe": 16,
+     "auftraege": 5,
+     "ep": 600
+    }
+   ],
+   "nahrungGekauft": 20
+  },
+  {
+   "faction": "haefen",
+   "role": "magier",
+   "fehler": [],
+   "hinweise": [
+    "Reise braucht Silber: zu wenig Silber (ankerfjord → perlvik, Silber 0)"
+   ],
+   "niederlagen": 11,
+   "kaempfe": 40,
+   "etappen": 68,
+   "auftraege": 46,
+   "stufen": {
+    "prolog": 3,
+    "akt1": 4,
+    "akt2Start": 5,
+    "zweig_kronreich": 9,
+    "zweig_orden": 14,
+    "akt4": 18
+   },
+   "schritte": 286,
+   "blockiert": "Akt 4 nach 30 Versuchen nicht abgeschlossen (Schritt 1)",
+   "ende": null,
+   "silber": {
+    "prolog": 30,
+    "akt1": 95,
+    "akt3": 629
+   },
+   "dialoge": [
+    "A1.1 🧠 Die Frachtpapiere des brennenden Schiffs prüfen (Intelligenz 11)",
+    "A1.2 🗡️ Durch die Flutgrotte in ihre Flanke schleichen (Geschick 11)",
+    "A1.3 ⚖️ Gilden-Ordnung: Besiegele offizielle Handelsverträge mit allen Häfen",
+    "Zweig kronreich ⚔️ Den Champion der Herzöge zum Duell fordern (Stärke 13)",
+    "Zweig orden 🔥 Die Feuerprobe am Altar bestehen (Stärke oder Intelligenz 13)"
+   ],
+   "silberNot": 1,
+   "niederlageOrte": {
+    "Akt 4: auftrag-thorvald (St. 18 vs 18/18/18)": 11
+   },
+   "phase": "Akt 4",
+   "letzterKampf": "auftrag-thorvald (St. 18 vs 18/18/18)",
+   "auftraegeBisAkt2": 2,
+   "grind": [
+    {
+     "ort": "salzwacht",
+     "stufe": 14,
+     "auftraege": 4,
+     "ep": 350
+    },
+    {
+     "ort": "grenzmarkt",
+     "stufe": 14,
+     "auftraege": 2,
+     "ep": 100
+    },
+    {
+     "ort": "bernsvik",
+     "stufe": 15,
+     "auftraege": 5,
+     "ep": 550
+    },
+    {
+     "ort": "ankerfjord",
+     "stufe": 15,
+     "auftraege": 3,
+     "ep": 450
+    },
+    {
+     "ort": "skerheim",
+     "stufe": 15,
+     "auftraege": 2,
+     "ep": 250
+    },
+    {
+     "ort": "silberholm",
+     "stufe": 15,
+     "auftraege": 2,
+     "ep": 100
+    },
+    {
+     "ort": "nebelvik",
+     "stufe": 15,
+     "auftraege": 3,
+     "ep": 150
+    },
+    {
+     "ort": "haraldstad",
+     "stufe": 16,
+     "auftraege": 5,
+     "ep": 600
+    }
+   ],
+   "nahrungGekauft": 20
+  },
+  {
+   "faction": "haefen",
+   "role": "heiler",
+   "fehler": [],
+   "hinweise": [
+    "Reise braucht Silber: zu wenig Silber (ankerfjord → perlvik, Silber 0)"
+   ],
+   "niederlagen": 12,
+   "kaempfe": 37,
+   "etappen": 65,
+   "auftraege": 46,
+   "stufen": {
+    "prolog": 3,
+    "akt1": 4,
+    "akt2Start": 5,
+    "zweig_kronreich": 9,
+    "zweig_orden": 14,
+    "akt4": 18
+   },
+   "schritte": 309,
+   "blockiert": "Akt 4 nach 30 Versuchen nicht abgeschlossen (Schritt 1)",
+   "ende": null,
+   "silber": {
+    "prolog": 30,
+    "akt1": 95,
+    "akt3": 502
+   },
+   "dialoge": [
+    "A1.1 🧠 Die Frachtpapiere des brennenden Schiffs prüfen (Intelligenz 11)",
+    "A1.2 🗡️ Durch die Flutgrotte in ihre Flanke schleichen (Geschick 11)",
+    "A1.3 ⚖️ Gilden-Ordnung: Besiegele offizielle Handelsverträge mit allen Häfen",
+    "Zweig kronreich ⚔️ Den Champion der Herzöge zum Duell fordern (Stärke 13)",
+    "Zweig orden 🔥 Die Feuerprobe am Altar bestehen (Stärke oder Intelligenz 13)"
+   ],
+   "silberNot": 1,
+   "niederlageOrte": {
+    "Akt 2/3: auftrag-mutterdertiefen (St. 10 vs 10)": 1,
+    "Akt 4: auftrag-thorvald (St. 18 vs 18/18/18)": 11
+   },
+   "phase": "Akt 4",
+   "letzterKampf": "auftrag-thorvald (St. 18 vs 18/18/18)",
+   "auftraegeBisAkt2": 2,
+   "grind": [
+    {
+     "ort": "salzwacht",
+     "stufe": 14,
+     "auftraege": 4,
+     "ep": 350
+    },
+    {
+     "ort": "grenzmarkt",
+     "stufe": 14,
+     "auftraege": 2,
+     "ep": 100
+    },
+    {
+     "ort": "bernsvik",
+     "stufe": 14,
+     "auftraege": 5,
+     "ep": 550
+    },
+    {
+     "ort": "ankerfjord",
+     "stufe": 15,
+     "auftraege": 3,
+     "ep": 450
+    },
+    {
+     "ort": "skerheim",
+     "stufe": 15,
+     "auftraege": 2,
+     "ep": 250
+    },
+    {
+     "ort": "silberholm",
+     "stufe": 15,
+     "auftraege": 2,
+     "ep": 100
+    },
+    {
+     "ort": "nebelvik",
+     "stufe": 15,
+     "auftraege": 3,
+     "ep": 150
+    },
+    {
+     "ort": "haraldstad",
+     "stufe": 16,
+     "auftraege": 5,
+     "ep": 600
+    }
+   ],
+   "nahrungGekauft": 20
+  },
+  {
+   "faction": "haefen",
+   "role": "schurke",
+   "fehler": [],
+   "hinweise": [
+    "Reise braucht Silber: zu wenig Silber (ankerfjord → perlvik, Silber 0)",
+    "Reise braucht Silber: zu wenig Silber (bernsvik → nordwacht, Silber 5)",
+    "Reise braucht Silber: zu wenig Silber (bernsvik → nordwacht, Silber 14)",
+    "Reise braucht Silber: zu wenig Silber (bernsvik → nordwacht, Silber 12)",
+    "Reise braucht Silber: zu wenig Silber (bernsvik → nordwacht, Silber 12)",
+    "Reise braucht Silber: zu wenig Silber (bernsvik → nordwacht, Silber 12)",
+    "Reise braucht Silber: zu wenig Silber (bernsvik → nordwacht, Silber 12)"
+   ],
+   "niederlagen": 14,
+   "kaempfe": 34,
+   "etappen": 43,
+   "auftraege": 23,
+   "stufen": {
+    "prolog": 3,
+    "akt1": 4,
+    "akt2Start": 5,
+    "zweig_kronreich": 9
+   },
+   "schritte": 989,
+   "blockiert": "Kein Silber für die Überfahrt (zu wenig Silber)",
+   "ende": null,
+   "silber": {
+    "prolog": 30,
+    "akt1": 75
+   },
+   "dialoge": [
+    "A1.1 ⚔️ Mit Entermesser und Schwarzpulver direkt losmarschieren",
+    "A1.2 🗡️ Durch die Flutgrotte in ihre Flanke schleichen (Geschick 11)",
+    "A1.3 ⚖️ Gilden-Ordnung: Besiegele offizielle Handelsverträge mit allen Häfen",
+    "Zweig kronreich ⚔️ Den Champion der Herzöge zum Duell fordern (Stärke 13)",
+    "Zweig orden 🔥 Die Feuerprobe am Altar bestehen (Stärke oder Intelligenz 13)"
+   ],
+   "silberNot": 7,
+   "niederlageOrte": {
+    "Akt 2/3: auftrag-zelot (St. 13 vs 13)": 14
+   },
+   "phase": "Akt 2/3",
+   "letzterKampf": "auftrag-kultisten (St. 13 vs 5/5)",
+   "auftraegeBisAkt2": 2,
+   "patt": 14,
+   "nahrungGekauft": 10
+  }
+ ]
+}
