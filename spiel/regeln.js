@@ -2805,7 +2805,7 @@ const rules = (() => {
   const magierSchutzWerte = { faction: "orden", rollen: ["magier", "heiler"], schild: 0.12, weitererTreffer: 0.65 };
   // Patch 2.6.19 (Henry, B9): Heiler und Magier der Menschen heilen höchstens zweimal je Kampf, die zweite Heilung wirkt zu 70 %.
   // Krieger und Schurken bekommen +2 Rüstung; Schurken weichen jedem 5., Krieger jedem 6. Angriff aus.
-  const klassenBalance = { heilRollen: ["heiler", "magier"], heilungen: 2, zweiteHeilung: 0.7, nahkampf: ["krieger", "schurke"],
+  const klassenBalance = { heilRollen: ["magier"], heilungen: 2, zweiteHeilung: 0.7, nahkampf: ["krieger", "schurke"],
     nahkampfRuestung: 2, ausweichen: { schurke: 5, krieger: 6 } };
   const heilDeckel = (state) => menschen(state) && klassenBalance.heilRollen.includes(state.role);
   const magierSchutz = (state) => state.party.length === 0 && state.faction === magierSchutzWerte.faction &&
@@ -3712,6 +3712,10 @@ const rules = (() => {
   // Patch 2.6.18: 148 LP, Rüstung 7, Treffer höchstens 16, Akolythen 45 LP und höchstens 9.
   // Patch 2.6.19 (Henry, B8): Thorvald kämpft auf Stufe min(22, max(18, Heldenstufe)); die Werte gelten für Stufe 20,
   // je Stufe Abweichung LP ±6 % und Schaden (Einzel- und Flächendeckel) ±5 %. Rüstung und Akolythen bleiben gleich.
+  // Patch 2.6.19a (Henry, Entscheidungskarte 20. 11.): Heilungsdeckel nur noch für Magier. Der Heiler bekommt gegen
+  // Thorvald das „Gegenlied“: Schild aus einem Teil seiner LP zu Kampfbeginn, Thorvalds Treffer auf ihn schwächer.
+  const thorvaldHilfe = { rollen: ["heiler"], schild: 0.05, schaden: 0.9, name: "Gegenlied" };
+  const thorvaldHilfeAktiv = (state) => menschen(state) && state.combat?.id === "auftrag-thorvald" && thorvaldHilfe.rollen.includes(state.role);
   const bossWerte = { "auftrag-thorvald": { lp: 148, ruestung: 7, deckel: 16, flaecheDeckel: 11, bezug: 20, lpJeStufe: 0.06, schadenJeStufe: 0.05,
     stufe: (held) => Math.min(22, Math.max(18, held)), adds: { anzahl: 2, name: "Untoter Akolyth", lp: 45, deckel: 9 } } };
 
@@ -3782,6 +3786,10 @@ const rules = (() => {
     if (magierSchutz(state)) {
       combat.held.schild = Math.round(healthLimit(state) * magierSchutzWerte.schild);
       combat.held.magierSchutz = true;
+    }
+    if (thorvaldHilfeAktiv(state)) {
+      combat.held.schild += Math.round(healthLimit(state) * thorvaldHilfe.schild);
+      note(state, thorvaldHilfe.name + ": Dein Gebet hält gegen das Klagelied des Skalden.");
     }
     // Patch 2.6.2: Ungebrochener Schildwall Rang 3: einmal je Kampf mit 1 LP überleben und 20 % LP als Schild erhalten.
     if (menschen(state) && SY.talentRang(state, "TREE_UNGEBROCHENER_SCHILDWALL") >= 3 && !combat.held.todesschutz) {
@@ -4465,6 +4473,7 @@ const rules = (() => {
             if (heroTarget) {
               if (index === 0 && action === 0) { heroHit = true; heroGuarded = guarding; }
               if (hit > 0 && magierSchutz(state) && treffer++ > 0) hit = Math.round(hit * magierSchutzWerte.weitererTreffer);
+              if (hit > 0 && thorvaldHilfeAktiv(state)) hit = Math.max(1, Math.round(hit * thorvaldHilfe.schaden));
               const absorbed = Math.min(held.schild, hit);
               held.schild -= absorbed; hit -= absorbed;
               if (hit >= state.health && held.todesschutz) {
@@ -4721,7 +4730,7 @@ const rules = (() => {
     className, title, gearSkill, heroSkills, heroLimits, modifiers, skillValue, protection,
     memberHealthLimit, memberVitals, allies, memberEquipment, assigned, progression, train, trade, candidates, recruit, dismiss, targets,
     questEntries, questPlans, partyLimit, attitude, questReady, completeQuest, paySalary, craft, relationship, reputation, recruitment, promise, bondActions, bondWith,
-    healthLimit, emberLimit, heroAttributes, ending, moorConsequences, effects,
+    healthLimit, startFight, emberLimit, heroAttributes, ending, moorConsequences, effects,
     weltLeisten, leistenNamen, leistenStart, gegenkraefte, niederlagen, vorratMax, vorratStart, seewegSilber, vorratAnwerbung,
     vertragKosten, ertragMenge, ertragPause, weltRunde, aktuellerKnoten, weltOffen, betreteWelt, handlungHier, zurHandlung,
     reiseGrund, reiseZiele, reise, rastGrund, rastKosten, handelOffen,

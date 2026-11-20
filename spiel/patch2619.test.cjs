@@ -140,7 +140,7 @@ test("B8: Thorvald auf Stufe 18–22 mit ±6 % LP und ±5 % Schaden je Stufe", (
   assert.equal(rules.akt4Weiter(s).combat.gegnerStufe, 22);
 });
 
-test("B9: Heiler und Magier höchstens 2 Heilungen, Krieger und Schurke robuster", () => {
+test("B9: Magier höchstens 2 Heilungen (Heiler frei, 2.6.19a), Krieger und Schurke robuster", () => {
   assert.equal(rules.ausweichIntervall(held("kronreich", "schurke", 10, { party: ["sigrid"] })), 5);
   assert.equal(rules.ausweichIntervall(held("kronreich", "krieger", 10)), 6);
   assert.equal(rules.ausweichIntervall(held("kronreich", "magier", 10, { party: ["sigrid"] })), 0);
@@ -148,7 +148,19 @@ test("B9: Heiler und Magier höchstens 2 Heilungen, Krieger und Schurke robuster
   const heal = rules.abilities(s).find((f) => f.regel?.heilung);
   assert.ok(heal, "Heilfähigkeit");
   s = { ...s, combat: { ...s.combat, held: { ...s.combat.held, heilungen: 2 } } };
-  assert.equal(rules.abilityState(s, heal.id), "höchstens 2 Heilungen je Kampf");
+  assert.notEqual(rules.abilityState(s, heal.id), "höchstens 2 Heilungen je Kampf");
+  let m = rules.choose({ ...held("orden", "magier", 10), scene: "toll", health: 5 }, "toll-fight");
+  const mheal = rules.abilities(m).find((f) => f.regel?.heilung || f.regel?.hot);
+  if (mheal) {
+    m = { ...m, combat: { ...m.combat, held: { ...m.combat.held, heilungen: 2 } } };
+    assert.equal(rules.abilityState(m, mheal.id), "höchstens 2 Heilungen je Kampf");
+  }
+});
+
+test("2.6.19a: Gegenlied des Heilers gegen Thorvald", () => {
+  const s = held("kronreich", "heiler", 18);
+  rules.startFight(s, "auftrag-thorvald", false);
+  assert.ok(s.combat.held.schild >= Math.round(rules.healthLimit(s) * 0.05));
 });
 
 test("B10: Waffen nach Tier gestaffelt (Angriff = Waffe + 6)", () => {
