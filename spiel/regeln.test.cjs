@@ -1815,9 +1815,12 @@ console.log("Charakter-Entwurf geprüft.");
   assert.equal(brand.combat.id, "auftrag-runenfresser");
   orden = sieg(brand);
   orden = { ...orden, knoten: "glutberg" };
+  // Patch 2.6.19 (Henry, B3): „+10 Glaube“ ist Orden-Ruf +10 und Moral +5 statt +10 Vorrat.
   const vorrat = orden.ressource;
   const gnade = rules.hauptWeiter(orden, "orden_act1_mercy");
-  assert.equal(gnade.ressource, vorrat + 10);
+  assert.equal(gnade.ressource, vorrat);
+  assert.equal(rules.systeme.ruf(gnade, "orden"), rules.systeme.ruf(orden, "orden") + 10);
+  assert.equal(gnade.moral, (orden.moral ?? rules.systeme.daten.moral.start) + 5);
   assert.equal(gnade.hauptquest.wahl, "orden_act1_mercy");
   assert.equal(rules.hauptWeiter(orden, "kron_act1_truce"), orden, "nur die Wahl der eigenen Fraktion");
   assert.equal(rules.hauptquest(imOrt("hof", "kronhall")), null);
@@ -1903,8 +1906,8 @@ console.log("Aufträge am Aushang, Wegaufträge, Wegrabatt, Trophäen, Begleiter
   const imOrt = (faction, ort, extra = {}) => ({ ...rules.create("Tala", faction, "frau", 1, "krieger"), scene: "weltknoten", knoten: ort,
     xp: 300, ...extra });
   const SY = rules.systeme;
-  // Kronhall in Phase 3 (Akt 2, Ruf 40) mit gefülltem Kontor.
-  let s = imOrt("kronreich", "kronhall", { questStufe: 1, silver: 2000, ressource: 40,
+  // Kronhall in Phase 3 mit gefülltem Kontor; Patch 2.6.19: Stufe 1 erst nach Akt 2 (Quest-Stufe 2).
+  let s = imOrt("kronreich", "kronhall", { questStufe: 2, silver: 2000, ressource: 40,
     factionRuf: { groves: 45 }, kontor: { kronreich: { nahrung: 50, holz: 100, eisen: 100, stein: 100, runensplitter: 5 } } });
   let info = rules.siedlungInfo(s);
   assert.equal(info.phase.nr, 3);

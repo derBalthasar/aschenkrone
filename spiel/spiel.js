@@ -3788,6 +3788,19 @@
     }
     if (!info.teile.length) liste.append(element("p", "Keine Ausrüstung im Rucksack."));
     box.append(liste);
+    // Patch 2.6.19: Runen der Schmiedepriester (Folge der Akt-1-Wahl des Ordens).
+    const runen = rules.runenListe(state);
+    if (runen.length) {
+      box.append(element("h4", "Runen der Schmiedepriester"));
+      const runenKnoepfe = element("div");
+      runenKnoepfe.className = "actions";
+      for (const r of runen) {
+        button(runenKnoepfe, r.name + " · " + r.text + (r.grund === "schon eingeprägt" ? " · eingeprägt" : " · " + r.preis.silber + " Silber, " +
+          r.preis.runensplitter + " Runensplitter" + (r.grund ? " · " + r.grund : "")), () => update(rules.runeEinpraegen(state, r.id)), { disabled: Boolean(r.grund) });
+      }
+      box.append(runenKnoepfe);
+      if (runen.some((r) => !r.grund)) box.open = true;
+    }
     panel.append(box);
   }
   function weltHandwerk(panel) {

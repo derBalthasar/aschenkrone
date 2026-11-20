@@ -259,7 +259,7 @@ for (const faction of Object.keys(K.fraktionen)) {
       combat: { ...state.combat, feinde: [{ ...state.combat.feinde[0], lp: 2000, max: 2000 }] } };
     const ids = rules.abilities(state).map((f) => f.id);
     for (const id of ["f20", "f15", "f10", "f6", "f3", "f1"].filter((id) => ids.includes(id))) {
-      state = { ...state, health: rules.healthLimit(state), combat: { ...state.combat, held: { ...state.combat.held, abklingen: {},
+      state = { ...state, health: rules.healthLimit(state), combat: { ...state.combat, held: { ...state.combat.held, abklingen: {}, heilungen: 0,
         ausdauer: rules.kraft(state).ausdauer, mana: rules.kraft(state).mana } } };
       const next = rules.strike(state, id, highRoll);
       assert.notEqual(next, state, faction + " " + role + " " + id + " " + rules.abilityState(state, id));

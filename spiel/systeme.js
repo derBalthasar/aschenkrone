@@ -112,9 +112,10 @@ const systeme = (() => {
     const ort = N.get(ortId);
     return ort && istMensch(ort.fraktion) && ort.typ !== "dorf" ? ort.fraktion : null;
   };
+  // Patch 2.6.19 (Henry, B3): Misstraut Ragnvald dem Hof (Kronreich, harte Wahl in Akt 1), kauft der Held im Kronreich 10 % teurer.
   const preisFaktor = (state, fraktion, kaufen) => {
     const r = rufRang(ruf(state, fraktion));
-    return kaufen ? r.kauf : r.verkauf;
+    return kaufen ? r.kauf * (fraktion === "kronreich" && (state.marks ?? []).includes("ragnvald_misstraut_hof") ? 1.1 : 1) : r.verkauf;
   };
   function rohstoffPreis(state, fraktion, rohstoff, menge, kaufen) {
     const r = D.rohstoffe[rohstoff];
@@ -198,6 +199,8 @@ const systeme = (() => {
     // Patch 2.6.2: Bannerjarl Rang 2 bringt +1 Ressource je Zehnt befreiter Dörfer.
     let menge = d.ertrag + rang.zehntBonus + talentWirkung(state, "TREE_BANNERJARL", "village_tithe_bonus_resources");
     if (siedlungsStufe(state, d.stadt) >= 3) menge = Math.floor(menge * 1.5);
+    // Patch 2.6.19 (Henry, B3): Gilden-Patronat der Freien Häfen +15 % Kontor-Ertrag (aufgerundet).
+    if ((state.marks ?? []).includes("gilden_patronat")) menge = Math.ceil(menge * 1.15);
     return menge;
   }
   // Eine Reise-Etappe: Zähler, alle 6 Etappen Zehnt ins Kontor, alle 8 Etappen Überfallprüfung.
@@ -370,14 +373,17 @@ const systeme = (() => {
     if (r >= 20 && befreiteDoerfer(state, fraktion).length >= 1) return 2;
     return 1;
   }
+  const ausbauRegeln = { 1: { akt: 2, ruf: 40 }, 2: { akt: 3, ruf: 45 }, 3: { akt: 4, ruf: 60 } };
   function ausbauGrund(state, ortId) {
     const ort = N.get(ortId);
     if (!ort || !istMensch(ort.fraktion) || ort.typ === "dorf") return "nur in Städten der Menschen";
     const ziel = D.siedlungsStufen[siedlungsStufe(state, ortId) + 1];
     if (!ziel) return "höchste Stufe erreicht";
     if (phase(state, ort.fraktion) < ziel.phase) return "erst als " + D.phasen[ziel.phase - 1].titel;
-    if (akt(state) < ziel.akt) return "erst ab Akt " + ziel.akt;
-    if (ruf(state, ort.fraktion) < ziel.ruf) return "Ruf " + ziel.ruf + " nötig";
+    // Patch 2.6.19 (Henry, B2): Stufe 1 nach Akt 2 (Ruf 40), Stufe 2 nach Akt 3 (Ruf 45), Stufe 3 nach Akt 4 (Ruf 60).
+    const regel = ausbauRegeln[siedlungsStufe(state, ortId) + 1];
+    if ((state.questStufe ?? 0) < regel.akt) return "erst nach Akt " + regel.akt;
+    if (ruf(state, ort.fraktion) < regel.ruf) return "Ruf " + regel.ruf + " nötig";
     if (!bezahlbar(state, ort.fraktion, ziel.kosten)) return "Kosten: " + kostenText(ziel.kosten);
     return null;
   }
@@ -605,7 +611,8 @@ const systeme = (() => {
     if (id === "karawane" && siedlungsStufe(state, ortId) < a.stufe) return "nur in einer Wehrhaften Bollwerksstadt";
     if (id === "kaperfahrt" && !gebaeudeIn(state, ortId).includes(a.gebaeude)) return "nur in einer Hafenstadt mit Kriegswerft";
     if (id === "kaperfahrt" && state.silver < a.kosten) return "zu wenig Silber";
-    if (id === "ascheriss" && (state.questStufe ?? 0) < 5) return "erst nach der Hauptquest";
+    // Patch 2.6.19 (Henry, B1): Ascherisse öffnen mit dem Titel Bannerjarl (Quest-Stufe 4) statt erst nach Akt 5.
+    if (id === "ascheriss" && ((state.questStufe ?? 0) < 4 || !(state.marks ?? []).includes("bannerjarl"))) return "erst als Bannerjarl (nach Akt 4)";
     return null;
   }
   // Lohn nach dem gewonnenen Kampf (der Kampf selbst läuft über spiel/regeln.js).

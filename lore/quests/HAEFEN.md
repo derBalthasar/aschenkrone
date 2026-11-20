@@ -58,14 +58,14 @@ Bernsvik, Wachtfeuer, Brandstein, Glutberg
 - Wahl: Gold und Schiffe gegen Ordens-Eskorten stellen (80 Silber) → Schwere Ordenspaladine begleiten die Handelsflotte; +10 Gold.
 - Wahl: Handelsmonopol auf alle Nachschubwege des Ordens erzwingen → +120 Silber, aber geringere Moral bei den Ordenskriegern.
 
-### Akt 4 „Das Alte Reich & Der Bleiche Skalde“ (Stufe 16–18)
+### Akt 4 „Das Alte Reich & Der Bleiche Skalde“ (Stufe 16–22)
 Kronhall / Glutberg, Kronhall, Salzwacht / Perlvik · enthält Volksquest: Das Alte Reich
 
 1. **Entlarvung des Bleichen Skalden** (Kronhall / Glutberg): Durch abgefangene Handelsbriefe und Hinweise von Seherin Freydis wird der Drahtzieher hinter dem Knochenschmuggel entlarvt: Erzpriester Thorvald vom Glutberg ist der Bleiche Skalde. Über hundert Jahre hält ihn die Totenmagie des Nordens am Leben; als Preis dafür schwächt er die Ewige Flamme, damit die Untoten im hohen Norden erstarken. Du stellst ihn zum Kampf (Untoten-Bedrohung -15).
 2. **Das Große Thing** (Kronhall): Thingsprecherin Solveig Valsdottir, Kronprinzessin Astrid und Hochmeisterin Ragna Glutherz besiegeln die Vereinigung der drei Menschenfraktionen; du steigst zum Bannerjarl auf.
 3. **Die Flotte gen Norden** (Salzwacht / Perlvik): Admiral Knut Salzhand rüstet in Salzwacht und Perlvik die größte Armada der Menschen für die Überfahrt.
 
-### Akt 5 „Über das Innere Meer“ (Stufe 19–20)
+### Akt 5 „Über das Innere Meer“ (Stufe 20–26)
 Perlvik (Kriegsrat) -> Starthafen der Route -> frei wählbarer Kontinent
 
 > Änderung Henry (18. 11. 2026): Bei Gemini „Die Flotte gen Norden“. Das Ziel ist frei wählbar, darum heißt der Akt wie bei Kronreich und Orden.

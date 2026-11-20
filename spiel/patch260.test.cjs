@@ -74,7 +74,7 @@ test("Akt 2 und 3: Schwester-Zweige, Wahl, Rohstoffe, Boss und Fraktions-Spezial
   assert.equal(rules.fspezGrund(s, "FSPEC_SCHILDWALL_DER_KRONE"), "nicht freigeschaltet");
   s = reload(rules.fspezWaehlen(s, "FSPEC_MEISTER_DER_STURMFLUT"));
   assert.equal(s.akte.fspez, "FSPEC_MEISTER_DER_STURMFLUT");
-  assert.equal(rules.ausweichIntervall(s), 9);
+  assert.equal(rules.ausweichIntervall(s), 5); // Patch 2.6.19: Krieger jeder 6., Sturmflut −1
 });
 
 test("Geächtet: Söldnergeld statt Softlock", () => {
@@ -122,7 +122,7 @@ test("Akt 4: Reichssiegel, Thorvald, Großes Thing, Kriegskasse und Tor zu Akt 5
 test("Meister-Talentbäume: alte Talente werden übernommen, Ränge wirken", () => {
   let s = held("kronreich", "krieger", 30, { talente: { MT_EISENWALL: 2, MT_KLINGENSTURM: 1 } });
   assert.equal(JSON.stringify(s.talente), JSON.stringify({ TREE_EISERNE_VORHUT: 1, TREE_UNGEBROCHENER_SCHILDWALL: 2 }));
-  assert.equal(rules.ausweichIntervall(s), 9);
+  assert.equal(rules.ausweichIntervall(s), 5); // Patch 2.6.19: Krieger jeder 6., Schildwall −1
   s = reload(rules.talentLernen(s, "TREE_UNGEBROCHENER_SCHILDWALL"));
   const a = rules.aushang(s).find((x) => x.spiel.gegner && !x.spiel.weg);
   const k = rules.auftragAusfuehren(rules.auftragAnnehmen(s, a.id), a.id);

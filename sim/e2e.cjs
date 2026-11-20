@@ -235,10 +235,12 @@ function durchlauf(faction, role, wahl, boese, protokoll) {
 }
 
 const auswahl = (process.argv[2] ?? "").toLowerCase();
+// Nur einzelne Klassen prüfen: E2E_ROLLE=heiler node sim/e2e.cjs party
+const nurRolle = process.env.E2E_ROLLE ?? null;
 const ergebnis = {};
 if (!auswahl || auswahl === "party") {
   ergebnis.E2E_STANDARD_PARTY_RUN = [];
-  for (const faction of Object.keys(HAUPTSTADT)) for (const role of ROLLEN) for (const [variante, wahl] of NQ[faction].reihe.akte[0].wahl.slice(0, 2).map((w, i) => [i ? "WAHL_B" : "WAHL_A", w.id])) {
+  for (const faction of Object.keys(HAUPTSTADT)) for (const role of ROLLEN.filter((r) => !nurRolle || r === nurRolle)) for (const [variante, wahl] of NQ[faction].reihe.akte[0].wahl.slice(0, 2).map((w, i) => [i ? "WAHL_B" : "WAHL_A", w.id])) {
     const p = { profil: "E2E_STANDARD_PARTY_RUN", faction, role, variante, stufen: {}, kaempfe: [], fehler: [] };
     try { durchlauf(faction, role, wahl, false, p); } catch (e) { p.fehler.push("Absturz: " + e.message); }
     ergebnis.E2E_STANDARD_PARTY_RUN.push(p);

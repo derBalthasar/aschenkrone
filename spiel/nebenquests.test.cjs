@@ -85,7 +85,8 @@ test("Fraktionsreihe Kronreich folgt Geminis Aufbau", () => {
   assert.equal(nebenquests.zweigStufen("kronreich", 1), "11-15");
   for (const zweig of reihe.akte.filter((akt) => akt.freieReihenfolge)) assert.match(zweig.stufen, /erster Zweig/);
   const klassen = reihe.begleiter.map((begleiter) => begleiter.klasse);
-  assert.equal(new Set(klassen).size, klassen.length, "Begleiter brauchen verschiedene Klassen");
+  // Patch 2.6.19 (Henry, B5): Fenris ist wie Wulfgar Späher; die Regel „keine zwei Späher“ vom 18. 11. ist damit aufgehoben.
+  assert.deepEqual(klassen, ["waechter", "spaeher", "spaeher"]);
   const klassenDatei = fs.readFileSync(path.join(root, "spiel/klassen.js"), "utf8");
   for (const klasse of klassen) assert.ok(new RegExp("\\b" + klasse + ": k\\(").test(klassenDatei), klasse);
   const akt5 = reihe.akte.find((akt) => akt.nr === "5");
@@ -197,7 +198,8 @@ test("die erzeugte Datei entspricht Quelle und Skript", () => {
 
 // Prüfkriterien der Arbeitsanweisung „Volk der Menschen“ (Henry, 18. 11. 2026).
 test("je Fraktion 11 Städte mit q01 bis q10, 23 Dörfer mit Dorfweg, drei Begleiter verschiedener Klassen", () => {
-  const klassen = { kronreich: ["waechter", "spaeher", "krieger"], orden: ["waechter", "magier", "spaeher"], haefen: ["spaeher", "schurke", "waechter"] };
+  // Patch 2.6.19 (Henry, B5): Fenris ist Meister-Bogenschütze und damit Späher.
+  const klassen = { kronreich: ["waechter", "spaeher", "spaeher"], orden: ["waechter", "magier", "spaeher"], haefen: ["spaeher", "schurke", "waechter"] };
   const alleIds = new Set();
   for (const fraktion of Object.keys(klassen)) {
     const orte = Object.entries(D[fraktion].orte);

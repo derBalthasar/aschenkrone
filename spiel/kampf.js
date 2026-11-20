@@ -328,17 +328,18 @@ const kampf = (() => {
     ["Akt 4", "11–14", "11–14"], ["Akt 5", "14–16", "14–16"], ["Volksquest", "16–18", "16–18"], ["Weltquest, Endkampf Morbius", "18–20", "20"],
   ];
   // Eigene Stufen je Fraktion, wo die Fraktionsreihe davon abweicht (Kronreich und Orden nach Gemini, Entscheidung Henry 18. 11. 2026).
+  // Patch 2.6.19 (Henry, B7): Akt 4 16–22, Akt 5 20–26, Untoten-Norden 25–30.
   const questStufenFraktion = {
     kronreich: [["Prolog", "1–3", "1–2"], ["Akt 1 Der Thron wankt", "1–5", "1–5"], ["Akt 2/3 erster Zweig (Häfen oder Glutberg)", "6–10", "6–10"],
-      ["Akt 2/3 zweiter Zweig (der andere)", "11–15", "11–15"], ["Akt 4 Das Alte Reich ersteht neu (mit Volksquest)", "16–18", "16–18"],
-      ["Akt 5 Über das Innere Meer", "19–20", "19–20"]],
+      ["Akt 2/3 zweiter Zweig (der andere)", "11–15", "11–15"], ["Akt 4 Das Alte Reich ersteht neu (mit Volksquest)", "16–22", "16–22"],
+      ["Akt 5 Über das Innere Meer", "20–26", "20–26"], ["Untoten-Norden (Endgame)", "25–30", "25–30"]],
     orden: [["Prolog", "1–3", "1–2"], ["Akt 1 Die flackernde Flamme", "1–5", "1–5"], ["Akt 2/3 erster Zweig (Kronreich oder Häfen)", "6–10", "6–10"],
       // Im Ordensland gilt für Orden-Helden Stufe 1–5, für Kronreich- und Häfen-Helden die Stufe ihres Zweigs (nebenquests.stufenFuer).
-      ["Akt 2/3 zweiter Zweig (der andere)", "11–15", "11–15"], ["Akt 4 Verräter im Feuer & Das Alte Reich (mit Volksquest)", "16–18", "16–18"],
-      ["Akt 5 Über das Innere Meer", "19–20", "19–20"]],
+      ["Akt 2/3 zweiter Zweig (der andere)", "11–15", "11–15"], ["Akt 4 Verräter im Feuer & Das Alte Reich (mit Volksquest)", "16–22", "16–22"],
+      ["Akt 5 Über das Innere Meer", "20–26", "20–26"], ["Untoten-Norden (Endgame)", "25–30", "25–30"]],
     haefen: [["Prolog", "1–3", "1–2"], ["Akt 1 Die Zollinseln", "1–5", "1–5"], ["Akt 2/3 erster Zweig (Kronreich oder Orden)", "6–10", "6–10"],
-      ["Akt 2/3 zweiter Zweig (der andere)", "11–15", "11–15"], ["Akt 4 Das Alte Reich & Der Bleiche Skalde (mit Volksquest)", "16–18", "16–18"],
-      ["Akt 5 Über das Innere Meer", "19–20", "19–20"]],
+      ["Akt 2/3 zweiter Zweig (der andere)", "11–15", "11–15"], ["Akt 4 Das Alte Reich & Der Bleiche Skalde (mit Volksquest)", "16–22", "16–22"],
+      ["Akt 5 Über das Innere Meer", "20–26", "20–26"], ["Untoten-Norden (Endgame)", "25–30", "25–30"]],
   };
 
   // Gegner für kommende Quests. Werte ergeben sich aus gegnerWerte(rang, stufe).

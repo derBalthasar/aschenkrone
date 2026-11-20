@@ -330,6 +330,7 @@ const rules = (() => {
     state.questClock ??= 0;
     state.questLog ??= {};
     state.questStufe ??= 0;
+    state.runen ??= [];
     state.vereinigt ??= false;
     state.umschulung ??= false;
     state.rausch ??= false;
@@ -607,7 +608,8 @@ const rules = (() => {
   function hireCost(state, id, fest = null) {
     const base = fest ?? world.companions[id]?.soeldner?.kosten ?? 0;
     const presence = heroAttributes(state).presence;
-    return Math.round(base * (presence >= 20 ? 0.8 : presence >= 16 ? 0.9 : 1));
+    // Patch 2.6.19 (B3, Häfen-Schmuggler): Das Schmugglernetz senkt Söldnerkosten auf 80 %.
+    return Math.round(base * (presence >= 20 ? 0.8 : presence >= 16 ? 0.9 : 1) * (state.marks?.includes("schmuggler_netzwerk") ? 0.8 : 1));
   }
 
   function attitude(state, id) {
@@ -1771,7 +1773,9 @@ const rules = (() => {
   const uebersee = 5;
   // Seewege brauchen einen Hafen am Abfahrtsort, der dir gehört oder einem Vertragspartner.
   function schiffBereit(state, ort) {
-    return ort.hatHafen && (ort.fraktion === state.faction || (state.vertraege ?? []).includes(ort.fraktion));
+    // Patch 2.6.19 (B3, Häfen-Schmuggler): Schmuggler-Boote legen ohne Vertrag in jedem Hafen der Menschen ab.
+    return ort.hatHafen && (ort.fraktion === state.faction || (state.vertraege ?? []).includes(ort.fraktion) ||
+      (state.marks?.includes("schmuggler_netzwerk") && SY.istMensch(ort.fraktion)));
   }
 
   // Patch 2.6.0/2.6.9: Meister der Sturmflut halbiert die Kosten auf Seewegen, die Schmugglerpassage spart 5 Silber.
@@ -2251,6 +2255,26 @@ const rules = (() => {
     else if (g.id === "CON_GEGENGIFT") world.supplies[g.id] = { cure: "poison" };
     else if (g.id === "CON_BRANDSALBE") world.supplies[g.id] = { cure: "burn" };
   }
+  // Patch 2.6.19 (Henry, B10): Waffen nach Tier gestaffelt. Henrys „Angriff“ ist der Wert im Inventar einer Startfigur
+  // (Waffe + 6 aus der Fertigkeit; Startaxt 12), die Waffenkraft ist also Angriff − 6. Innerhalb eines Tiers bleibt die
+  // Reihenfolge der alten Werte erhalten (gleichmäßig über die Spanne verteilt), ebenso bei den Preisen (Verkauf = halber Kauf).
+  // Henrys Beispiel: Ahnenrunen-Langschwert (T2) Angriff 17.
+  const waffenTiers = Object.fromEntries(SY.daten.v2619.B10_waffen_tier_staffelung.tiers.map((t) => [t.tier, t]));
+  const waffenFertigkeit = SY.daten.v2619.B10_waffen_tier_staffelung.startwaffe_basis - world.gear.axt.power;
+  const waffenFest = { WPN_RUNENKLINGE_T2: SY.daten.v2619.B10_waffen_tier_staffelung.beispiel_korrektur.angriff_neu };
+  const verteilt = (index, anzahl, { min, max }) => anzahl < 2 ? Math.round((min + max) / 2) : Math.round(min + (max - min) * index / (anzahl - 1));
+  for (const [tier, t] of Object.entries(waffenTiers)) {
+    const waffen = Object.values(SY.daten.gegenstaende).filter((g) => String(g.tier) === tier && world.gear[g.id]?.slot === "weapon");
+    [...waffen].sort((a, b) => world.gear[a.id].power - world.gear[b.id].power || a.id.localeCompare(b.id)).forEach((g, i) => {
+      const angriff = waffenFest[g.id] ?? verteilt(i, waffen.length, t.angriff);
+      world.gear[g.id].power = angriff - waffenFertigkeit;
+      if (world.gear[g.id].v260?.attack) world.gear[g.id].v260 = { ...world.gear[g.id].v260, attack: angriff - waffenFertigkeit };
+    });
+    [...waffen].sort((a, b) => (a.baseBuyPrice ?? 0) - (b.baseBuyPrice ?? 0) || a.id.localeCompare(b.id)).forEach((g, i) => {
+      g.baseBuyPrice = verteilt(i, waffen.length, t.preis_silber);
+      g.baseSellPrice = Math.round(g.baseBuyPrice / 2);
+    });
+  }
   // Ähnlicher bestehender Gegner je Familie: liefert Grundwerte für Initiative und Proben, kein Bild (Bilder folgen später).
   const sysVorlage = (g) => /wolf|keiler|bär|viper|krabbler|krähe|salamander|vurm|leviathan|troll|ursa|seeschreck|schluchtenj/i.test(g.name)
     ? (/krähe/i.test(g.name) ? "galgenkraehe" : /keiler/i.test(g.name) ? "keiler" : /troll/i.test(g.name) ? "schlundtroll" : "grauwolf")
@@ -2347,7 +2371,8 @@ const rules = (() => {
   const wahlFolgen = {
     kron_act1_fight: { gegner: "urgash", leisten: { orks: -5 } },
     kron_act1_truce: { silber: 40 },
-    orden_act1_mercy: { vorrat: 10 },
+    // Patch 2.6.19 (Henry, B3): „+10 Glaube“ ist jetzt Orden-Ruf +10 und Moral +5.
+    orden_act1_mercy: { ruf: { orden: 10 }, moral: 5 },
     orden_act1_wrath: { leisten: { untote: -5 } },
     haefen_act1_guild: { vorrat: 10 },
     haefen_act1_shadow: { silberLohn: 80 },
@@ -2392,12 +2417,20 @@ const rules = (() => {
     if (state.tatOffen) return "erst über den Ausgang des letzten Auftrags entscheiden";
     if (state.knoten !== auftrag.ort) return "Aushang in " + N.get(auftrag.ort).name;
     if (!NQ.stufenFuer(auftrag.ort, state.faction)) return "nur für Helden des eigenen Volkes";
+    if (id === schattenImRat.id && !hatMarke(state, "ragnvald_misstraut_hof")) return "noch nicht ausgeschrieben";
     const eintrag = state.weltAuftraege?.[id];
     if (eintrag) return eintrag.status === "erledigt" ? "erledigt" : "angenommen";
     if (!intBetween(wahl, 0, auftrag.spiel.lohn.length - 1)) return "unbekannte Belohnung";
+    const bindung = gefaehrtenAkt[id];
+    if (bindung && (state.questStufe ?? 0) < bindung.akt - 1) {
+      return "erst ab Akt " + bindung.akt + " (empfohlen Stufe " + bindung.stufe.join("–") + ")";
+    }
     if (offeneAuftraege(state) >= auftragsBuch.max) return auftragsBuch.voll;
     return null;
   }
+  // Patch 2.6.19 (Henry, B4): Gefährten späterer Akte werben ihre Aufträge erst in diesem Akt an (Akt 2 heißt: Akt 1 abgeschlossen).
+  const gefaehrtenAkt = { rosshag_q10: { akt: 2, stufe: [6, 10] }, brandstein_q10: { akt: 2, stufe: [6, 10] },
+    ulfsborg_q10: { akt: 3, stufe: [11, 15] }, nordwacht_q10: { akt: 3, stufe: [11, 15] } };
 
   // Patch 2.5.4: Höchstens 5 offene Aushänge. Nach 10 erfüllten Aufträgen sinkt das Silber je weiterem Auftrag um 3 %,
   // bis auf die Hälfte. Vorrat über der Obergrenze geht ins Kontor der eigenen Fraktion statt verloren.
@@ -2737,8 +2770,10 @@ const rules = (() => {
   // Patch 2.6.x: Ungebrochener Schildwall Rang 2, Ausrüstung mit Ausweich-Bonus und Meister der Sturmflut verkürzen es um je 1.
   // Auslegung: Ohne Einsamen Wolf beginnt das Intervall bei 10, sobald etwas es verkürzt. Kürzestes Intervall 2.
   function ausweichIntervall(state) {
-    const basis = einsamerWolf(state) ? Math.round(100 / (state.role === "schurke" ? einsamerWolfWerte.ausweichenSchurke : einsamerWolfWerte.ausweichen)) : 0;
-    if (!menschen(state)) return basis;
+    const wolf = einsamerWolf(state) ? Math.round(100 / (state.role === "schurke" ? einsamerWolfWerte.ausweichenSchurke : einsamerWolfWerte.ausweichen)) : 0;
+    if (!menschen(state)) return wolf;
+    const klasse = klassenBalance.ausweichen[state.role] ?? 0;
+    const basis = wolf && klasse ? Math.min(wolf, klasse) : wolf || klasse;
     const kuerzer = -SY.talentWirkung(state, "TREE_UNGEBROCHENER_SCHILDWALL", "evasion_interval_delta") - gearStat(state, "evasionInterval") +
       (state.akte?.fspez === "FSPEC_MEISTER_DER_STURMFLUT" ? 1 : 0);
     if (!basis && !kuerzer) return 0;
@@ -2753,6 +2788,7 @@ const rules = (() => {
     const held = state.combat?.held ?? {};
     const untot = foe.tags.includes("untot") || foe.tags.includes("ascheriss");
     return (state.akte?.fspez === "FSPEC_EID_DER_EWIGEN_GLUT" && untot ? 0.15 : 0) + v260GruppenBonus(state) +
+      runenWert(state, "schaden") + (untot ? runenWert(state, "untot") : 0) +
       (held.lagerBuff?.damage_bonus_pct ?? 0) / 100 + (held.lagerBuff?.skill_damage_bonus_pct ?? 0) / 100 +
       (held.lagerBuff?.party_all_stats_pct ?? 0) / 100 +
       (state.gefaehrtenPerks?.includes("PERK_OR_LAEUTERUNG") && untot ? 0.1 : 0) +
@@ -2765,7 +2801,13 @@ const rules = (() => {
   const v260GruppenBonus = (state) => state.relikt === "REL_T4_BANNER_DER_EINIGUNG" ? SY.daten.gegenstaende.REL_T4_BANNER_DER_EINIGUNG.stats.partyDamagePct / 100 : 0;
   // Patch 2.5.5: Schutz für Pyromant und Kleriker der Flamme ohne Gefährten (LP der Klasse bleiben gleich):
   // Glutschild 25 % der LP zu Kampfbeginn, jeder weitere Treffer derselben Gegnerphase halbiert.
-  const magierSchutzWerte = { faction: "orden", rollen: ["magier", "heiler"], schild: 0.25, weitererTreffer: 0.5 };
+  // Patch 2.6.19 (Henry, B9): Glutschild 12 % der LP, jeder weitere Treffer derselben Gegnerphase 35 % schwächer.
+  const magierSchutzWerte = { faction: "orden", rollen: ["magier", "heiler"], schild: 0.12, weitererTreffer: 0.65 };
+  // Patch 2.6.19 (Henry, B9): Heiler und Magier der Menschen heilen höchstens zweimal je Kampf, die zweite Heilung wirkt zu 70 %.
+  // Krieger und Schurken bekommen +2 Rüstung; Schurken weichen jedem 5., Krieger jedem 6. Angriff aus.
+  const klassenBalance = { heilRollen: ["heiler", "magier"], heilungen: 2, zweiteHeilung: 0.7, nahkampf: ["krieger", "schurke"],
+    nahkampfRuestung: 2, ausweichen: { schurke: 5, krieger: 6 } };
+  const heilDeckel = (state) => menschen(state) && klassenBalance.heilRollen.includes(state.role);
   const magierSchutz = (state) => state.party.length === 0 && state.faction === magierSchutzWerte.faction &&
     magierSchutzWerte.rollen.includes(state.role);
   // Waffen- und Rüstungsrechte der Klasse, Glut- und Runengegenstände je Fraktion.
@@ -2850,6 +2892,32 @@ const rules = (() => {
     return state;
   }
   // Schmiede: Ausrüstung um eine Stufe aufwerten. Eisen und Runensplitter aus dem Kontor, Material aus dem Rucksack.
+  // Patch 2.6.19 (B3, Orden): Runen der Schmiedepriester in einer Schmiede der Menschen einprägen (wirkt dauerhaft).
+  function runenListe(state) {
+    if (!imHub(state) || !menschen(state)) return [];
+    return aktFolgen.filter((k) => k.effekt.schmiede_rezepte && hatMarke(state, k.effekt.flag)).flatMap((k) => k.effekt.schmiede_rezepte)
+      .map((id) => ({ id, ...runen[id], preis: runenPreis, grund: runeGrund(state, id) }));
+  }
+  function runeGrund(state, id) {
+    if (!runen[id] || !aktFolgen.some((k) => k.effekt.schmiede_rezepte?.includes(id) && hatMarke(state, k.effekt.flag))) return "nicht freigeschaltet";
+    if ((state.runen ?? []).includes(id)) return "schon eingeprägt";
+    const fraktion = imHub(state) && SY.kontorAm(state.knoten);
+    if (!fraktion) return "nur in Städten der Menschen";
+    if (!SY.schmiedeStufe(state, state.knoten)) return "keine Schmiede in dieser Stadt";
+    if (state.silver < runenPreis.silber) return "zu wenig Silber";
+    if (SY.kontor(state, fraktion).runensplitter < runenPreis.runensplitter) return "es fehlt Runensplitter im Kontor";
+    return null;
+  }
+  function runeEinpraegen(previous, id) {
+    if (runeGrund(previous, id)) return previous;
+    const state = structuredClone(previous);
+    state.silver -= runenPreis.silber;
+    SY.kontor(state, SY.kontorAm(state.knoten)).runensplitter -= runenPreis.runensplitter;
+    (state.runen ??= []).push(id);
+    note(state, "Die Schmiedepriester prägen „" + runen[id].name + "“ ein (" + runen[id].text + ") · −" + runenPreis.silber + " Silber, −" +
+      runenPreis.runensplitter + " Runensplitter.");
+    return state;
+  }
   function schmiedeInfo(state) {
     if (!imHub(state) || !menschen(state) || !SY.kontorAm(state.knoten)) return null;
     const stufe = SY.schmiedeStufe(state, state.knoten);
@@ -2913,7 +2981,8 @@ const rules = (() => {
 
   function aushang(state) {
     if (state.scene !== "weltknoten" || !NQ) return [];
-    return (NQ.fuerOrt(state.knoten)?.auftraege ?? []).map(auftrag => ({ ...auftragIndex[auftrag.id],
+    const extra = state.knoten === schattenImRat.ort && hatMarke(state, "ragnvald_misstraut_hof") ? [schattenImRat] : [];
+    return [...(NQ.fuerOrt(state.knoten)?.auftraege ?? []), ...extra].map(auftrag => ({ ...auftragIndex[auftrag.id],
       status: state.weltAuftraege?.[auftrag.id]?.status ?? null, wahl: state.weltAuftraege?.[auftrag.id]?.wahl ?? null,
       grund: auftragGrund(state, auftrag.id), ausfuehren: ausfuehrenGrund(state, auftrag.id),
       begleiter: begleiterNachAuftrag[auftrag.id] ?? null }));
@@ -2981,6 +3050,8 @@ const rules = (() => {
     if (folge.silberLohn) state.silver += folge.silberLohn;
     if (folge.vorrat) state.ressource = Math.min(vorratMax, state.ressource + folge.vorrat);
     for (const [leisteId, wert] of Object.entries(folge.leisten ?? {})) setzeLeiste(state, leisteId, leiste(state, leisteId) + wert);
+    for (const [fraktion, wert] of Object.entries(folge.ruf ?? {})) SY.rufAendern(state, fraktion, wert);
+    if (folge.moral) state.moral = Math.min(SY.daten.moral.max, (state.moral ?? SY.daten.moral.start) + folge.moral);
     note(state, option.label + ": " + option.folge);
     if (!state.marks.includes(stand.wahl)) state.marks.push(stand.wahl);
     stand.schritt = hauptPlan[state.faction].length;
@@ -3020,6 +3091,42 @@ const rules = (() => {
     }
   }
   const zweigHub = { kronreich: "kronhall", orden: "glutberg", haefen: "perlvik" };
+  // Patch 2.6.19 (Henry, B3): Die Wahl am Ende von Akt 1 wirkt in Akt 2 bzw. 3 nach. Sie greift, sobald der erste (Akt 2)
+  // bzw. zweite (Akt 3) Schwester-Zweig beginnt, und setzt eine Marke (flag). Henrys Wahl-Kennungen → Kennungen im Spiel.
+  const wahlKennung = { kronreich_wahl_a_strenge: "kron_act1_fight", kronreich_wahl_b_gnade: "kron_act1_truce",
+    orden_wahl_a_bewahrung: "orden_act1_mercy", orden_wahl_b_reinigung: "orden_act1_wrath",
+    haefen_wahl_a_gilde: "haefen_act1_guild", haefen_wahl_b_schmuggler: "haefen_act1_shadow" };
+  const aktFolgen = SY.daten.v2619.B3_akt1_wahlfolgen.fraktions_konsequenzen.map((k) => ({ ...k, wahl: wahlKennung[k.wahl_id] }));
+  const hatMarke = (state, marke) => (state.marks ?? []).includes(marke);
+  // Runen der Schmiedepriester (Orden): Henry nennt nur die Namen, Wirkung und Preis sind Claudes Vorschlag.
+  const runen = {
+    rune_des_lichtwalls: { name: "Rune des Lichtwalls", text: "+1 Rüstung", ruestung: 1 },
+    "rune_der_mildtätigen_glut": { name: "Rune der mildtätigen Glut", text: "+10 % Heilung", heilung: 0.1 },
+    rune_des_aschenzorns: { name: "Rune des Aschenzorns", text: "+10 % Schaden gegen Untote und Ascheriss", untot: 0.1 },
+    rune_der_brennenden_schneide: { name: "Rune der brennenden Schneide", text: "+5 % Schaden", schaden: 0.05 },
+  };
+  const runenPreis = { silber: 60, runensplitter: 1 };
+  const runenWert = (state, key) => (state.runen ?? []).reduce((s, id) => s + (runen[id]?.[key] ?? 0), 0);
+  const kultistWerte = { name: "Aschenkultist-Infiltrator", rang: "elite" };
+  function aktFolgenAnwenden(state, akt) {
+    const neu = [];
+    for (const k of aktFolgen) {
+      if (k.akt_trigger > akt || !hatMarke(state, k.wahl) || hatMarke(state, k.effekt.flag)) continue;
+      state.marks.push(k.effekt.flag);
+      note(state, k.effekt.text);
+      if (k.effekt.schmiede_rezepte) note(state, "In jeder Stadtschmiede der Menschen kannst du jetzt " +
+        k.effekt.schmiede_rezepte.map((id) => "„" + runen[id].name + "“ (" + runen[id].text + ")").join(" und ") + " einprägen lassen.");
+      if (k.effekt.freischaltung_nebenquest) note(state, "Neuer Aushang in " + N.get(schattenImRat.ort).name + ": „" + schattenImRat.titel + "“.");
+      neu.push(k.effekt);
+    }
+    return neu;
+  }
+  // Nebenquest „Schatten im Rat“ (Henry nennt nur die Kennung; Text, Gegner und Lohn sind Claudes Vorschlag).
+  const schattenImRat = { id: "nq_kronreich_schatten_im_rat", titel: "Schatten im Rat", art: "Fraktion (Folge aus Akt 1)", ort: "hagenfels",
+    fraktion: "kronreich", text: "Jarl Ragnvald traut dem Hof nicht mehr. Ein Schreiber aus Kronhall schickt nachts Boten über die Westmark. " +
+      "Fang sie ab und finde heraus, wer im Kronrat die Briefe diktiert.", lohn: "70 Silber, Spur zum Kronrat",
+    spiel: { gegner: "spione", lohn: [{ silber: 70, vorrat: 0, leisten: {}, gegenstaende: [], vermerke: ["Spur zum Kronrat"] }] } };
+  auftragIndex[schattenImRat.id] = schattenImRat;
   const zweigGegner = { kronreich: ["deserteure", "wegelagerer", "feldherr"], orden: ["kultisten", "kultisten", "zelot"],
     haefen: ["orkpiraten", "schmuggler", "kaperkapitaen"] };
   // EP je Stufe des Zweigs (Vorschlag, damit der erste Zweig von 6 auf etwa 10 und der zweite auf etwa 15 führt).
@@ -3105,6 +3212,7 @@ const rules = (() => {
       }
       note(state, "Akt " + zweig.akt + " · „" + daten.title + "“ beginnt. " + daten.summary);
     }
+    const folgen = zweig.stufe === 0 ? aktFolgenAnwenden(state, zweig.akt) : [];
     note(state, "Stufe " + (zweig.stufe + 1) + " · " + schritt.title + ": " + schritt.objective);
     if (schritt.boss_template && schritt.thorvald_cameo_allowed) {
       note(state, "Am Rand der Menge steht ein hagerer Pilger in grauer Kutte. Er beobachtet dich und ist verschwunden, bevor du ihn ansprechen kannst.");
@@ -3114,6 +3222,16 @@ const rules = (() => {
     note(state, schritt.title + ": " + world.fights[auftragKampf(typ)].name + " stellen sich dir · Stufe " + stufeGegner + ".");
     startFight(state, auftragKampf(typ), true, stufeGegner);
     if (state.combat) Object.assign(state.combat, { weiter: "weltknoten", auftrag: "zweig:" + fraktion, gegnerStufe: stufeGegner });
+    // Patch 2.6.19 (B3, Kronreich-Gnade): Der unentdeckte Kultist greift im ersten Kampf von Akt 3 als Elite mit an.
+    const kultist = folgen.find((e) => e.zusatz_gegner_id);
+    if (state.combat && kultist) {
+      const w = kampf.gegnerWerte(kultistWerte.rang, stufeGegner, 1);
+      const foe = { name: kultistWerte.name, rang: kultistWerte.rang, stufe: stufeGegner, lp: w.lp, max: w.lp, schaden: w.schaden,
+        aktionen: w.aktionen, geschick: state.combat.feinde[0].geschick, tags: ["kult"], status: {} };
+      if (state.combat.feinde.length >= gruppenSkalierung.hoechstens) state.combat.feinde[state.combat.feinde.length - 1] = foe;
+      else state.combat.feinde.push(foe);
+      state.combat.kultistBeute = kultist.bonus_beute_runensplitter;
+    }
     if (state.combat) aktGegnerSkalieren(state, ["feldherr", "zelot", "kaperkapitaen"].includes(typ));
     else if (!state.health) arrive(state, "defeat");
     return state;
@@ -3123,8 +3241,10 @@ const rules = (() => {
     for (const [id, n] of Object.entries(rohstoffe)) if (rohstoffKey[id]) k[rohstoffKey[id]] += n;
     return Object.entries(rohstoffe).map(([id, n]) => n + " " + (SY.daten.rohstoffe[rohstoffKey[id]]?.name ?? id)).join(", ");
   }
-  function aktSieg(state, auftrag) {
+  function aktSieg(state, auftrag, turn = state.combat) {
     const [art, fraktion] = auftrag.split(":");
+    if (turn?.kultistBeute) note(state, "Der Kultist trug Ascheriss-Splitter bei sich: " +
+      kontorGeben(state, { RES_RUNENSPLITTER: turn.kultistBeute }) + " ins Kontor.");
     if (art === "akt4") return akt4Sieg(state);
     const zweig = state.akte.zweige[fraktion];
     const daten = zweigDaten(fraktion);
@@ -3249,7 +3369,7 @@ const rules = (() => {
     }
     if (a.schritt === 1 && !a.wahlOffen) {
       note(state, "Akt 4 · „" + quests[1].title + "“: " + quests[1].summary);
-      akt4Kampf(state, "thorvald", Math.max(stufe, quests[1].boss_encounter.reference_level), "Die Maske fällt");
+      akt4Kampf(state, "thorvald", bossWerte["auftrag-thorvald"].stufe(level(state)), "Die Maske fällt");
       return state;
     }
     if (a.schritt === 1) {
@@ -3435,8 +3555,8 @@ const rules = (() => {
     .map((p) => ({ id: p.perk_id, name: p.name, bonus: p.bonus }));
 
   // Sieg in einem Auftrags- oder Hauptquestkampf.
-  function auftragSieg(state, auftrag) {
-    if (/^(?:zweig|akt4):/.test(auftrag)) aktSieg(state, auftrag);
+  function auftragSieg(state, auftrag, turn = state.combat) {
+    if (/^(?:zweig|akt4):/.test(auftrag)) aktSieg(state, auftrag, turn);
     else if (auftrag === "haupt") {
       const stand = state.hauptquest;
       if (hauptPlan[state.faction]?.[stand.schritt]?.wahl) aktAbschliessen(state);
@@ -3563,6 +3683,9 @@ const rules = (() => {
     const held = state.combat.held;
     if (f.einmal && held.genutzt.includes(f.id)) return { f, reason: "schon genutzt" };
     if ((held.abklingen[f.id] ?? 0) > 0) return { f, reason: "Abklingzeit " + held.abklingen[f.id] };
+    if ((f.regel?.heilung || f.regel?.hot) && heilDeckel(state) && (held.heilungen ?? 0) >= klassenBalance.heilungen) {
+      return { f, reason: "höchstens " + klassenBalance.heilungen + " Heilungen je Kampf" };
+    }
     const pool = f.zahlung === "M" ? held.mana : held.ausdauer;
     if (pool < f.kostenWert) return { f, reason: "zu wenig " + (f.zahlung === "M" ? "Mana" : "Ausdauer") };
     // Der Fraktionsvorrat sinkt im Kampf nie unter 1 (Henry, 17. 11. 2026).
@@ -3587,8 +3710,10 @@ const rules = (() => {
     3: { min: 2, max: 3, extra: 0.9 }, 4: { min: 3, max: 4, extra: 1, vierter: 0.75 } }, gefaehrtenSchutz: 0.08 };
   // Patch 2.6.17: Thorvald, der Bleiche Skalde (Bezug Stufe 20): feste Werte und höchstens zwei schwache Akolythen.
   // Patch 2.6.18: 148 LP, Rüstung 7, Treffer höchstens 16, Akolythen 45 LP und höchstens 9.
-  const bossWerte = { "auftrag-thorvald": { lp: 148, ruestung: 7, deckel: 16,
-    adds: { anzahl: 2, name: "Untoter Akolyth", lp: 45, deckel: 9 } } };
+  // Patch 2.6.19 (Henry, B8): Thorvald kämpft auf Stufe min(22, max(18, Heldenstufe)); die Werte gelten für Stufe 20,
+  // je Stufe Abweichung LP ±6 % und Schaden (Einzel- und Flächendeckel) ±5 %. Rüstung und Akolythen bleiben gleich.
+  const bossWerte = { "auftrag-thorvald": { lp: 148, ruestung: 7, deckel: 16, flaecheDeckel: 11, bezug: 20, lpJeStufe: 0.06, schadenJeStufe: 0.05,
+    stufe: (held) => Math.min(22, Math.max(18, held)), adds: { anzahl: 2, name: "Untoter Akolyth", lp: 45, deckel: 9 } } };
 
   function lineup(id, size, stufe = null, heldStufe = null) {
     const fight = world.fights[id];
@@ -3600,9 +3725,13 @@ const rules = (() => {
     if (boss) {
       const basis = kampf.gegnerWerte(spec.rang, spec.stufe, 1 + size);
       const add = kampf.gegnerWerte("mitlaeufer", spec.stufe, 1);
-      return [{ name: fight.name ?? creature.name, rang: spec.rang, stufe: spec.stufe, lp: boss.lp, max: boss.lp,
-        schaden: Math.min(basis.schaden, boss.deckel), deckel: boss.deckel, aktionen: basis.aktionen, geschick, tags: spec.tags ?? [],
-        status: {}, ruestung: boss.ruestung },
+      const abweichung = boss.bezug ? spec.stufe - boss.bezug : 0;
+      const lp = Math.round(boss.lp * (1 + (boss.lpJeStufe ?? 0) * abweichung));
+      const deckel = Math.round(boss.deckel * (1 + (boss.schadenJeStufe ?? 0) * abweichung));
+      return [{ name: fight.name ?? creature.name, rang: spec.rang, stufe: spec.stufe, lp, max: lp,
+        schaden: Math.min(basis.schaden, deckel), deckel, aktionen: basis.aktionen, geschick, tags: spec.tags ?? [],
+        status: {}, ruestung: boss.ruestung,
+        ...(boss.flaecheDeckel ? { flaecheDeckel: Math.round(boss.flaecheDeckel * (1 + (boss.schadenJeStufe ?? 0) * abweichung)) } : {}) },
       ...Array.from({ length: boss.adds.anzahl }, (_, i) => ({ name: boss.adds.name + " " + (i + 1), rang: "mitlaeufer", stufe: spec.stufe,
         lp: boss.adds.lp, max: boss.adds.lp, schaden: Math.min(add.schaden, boss.adds.deckel), deckel: boss.adds.deckel, aktionen: 1,
         geschick, tags: spec.tags ?? [], status: {} }))];
@@ -3912,7 +4041,7 @@ const rules = (() => {
     // Patch 2.6.2: Runen- & Glutresonanz Rang 1 +10 % Heilung beim Tragen von Runen- oder Glutausrüstung; Patch 2.6.5 Heilboni der Ausrüstung.
     if (menschen(state)) amount = Math.round(amount * (1 + (resonanz(state) ? SY.talentWirkung(state, "TREE_RUNEN_UND_GLUTRESONANZ", "heal_and_mana_regen_pct") / 100 : 0) +
       gearStat(state, "healPct") / 100 + (state.akte?.fspez === "FSPEC_EID_DER_EWIGEN_GLUT" ? 0.1 : 0) +
-      (state.gefaehrtenPerks?.includes("PERK_OR_LEBENDIGE_FLAMME") ? 0.1 : 0)));
+      (state.gefaehrtenPerks?.includes("PERK_OR_LEBENDIGE_FLAMME") ? 0.1 : 0) + runenWert(state, "heilung")));
     const healing = Math.max(0, Math.min(amount, healthLimit(state) - state.health));
     state.health += healing;
     if (healing) events.push({ kind: "heal", actor, value: healing });
@@ -4056,12 +4185,13 @@ const rules = (() => {
     if (/Mine/.test(ability.wirkung) && !r.mineBedingung) held.mine = true;
 
     // Direkte Heilung trifft das gewählte Gruppenziel; persönliche Schild- und Stärkungseffekte bleiben beim Helden.
+    const heilFaktor = (r.heilung || r.hot) && heilDeckel(state) ? ((held.heilungen = (held.heilungen ?? 0) + 1) > 1 ? klassenBalance.zweiteHeilung : 1) : 1;
     if (r.heilung) {
-      const amount = scaled(r.heilung, factor) + Math.max(0, skillValue(state, healSkill(state)));
+      const amount = Math.round((scaled(r.heilung, factor) + Math.max(0, skillValue(state, healSkill(state)))) * heilFaktor);
       parts.push(healAlly(state, round.allyId ?? "hero", amount, "hero", events) + " LP geheilt");
     }
     if (r.hot) {
-      held.hot = { wert: scaled(r.hot.wert, factor), runden: r.hot.runden, ally: round.allyId ?? "hero" };
+      held.hot = { wert: Math.round(scaled(r.hot.wert, factor) * heilFaktor), runden: r.hot.runden, ally: round.allyId ?? "hero" };
       parts.push("heilt " + r.hot.runden + " Runden je " + held.hot.wert);
     }
     if (r.reinigen) {
@@ -4224,7 +4354,7 @@ const rules = (() => {
     // Zufallskämpfe können sich wiederholen. Ihre EP zählen jedes Mal.
     grant(state, "kampf-" + fightId, xp, world.battleRewards[fightId]?.[1] ?? 0, result.loot, !result.random);
     arrive(state, turn.weiter ?? result.to);
-    if (turn.auftrag) auftragSieg(state, turn.auftrag);
+    if (turn.auftrag) auftragSieg(state, turn.auftrag, turn);
     if (turn.endgame) endgameSieg(state, turn.endgame);
     return true;
   }
@@ -4280,7 +4410,7 @@ const rules = (() => {
         for (let action = 0; action < foe.aktionen; action++) {
           const sonder = index === 0 && action === 0 ? special : null;
           let damage = foe.schaden - (status.langsam ? 1 : 0) - (status.schwach?.wert ?? 0) + (sonder?.damage ?? 0);
-          if (sonder?.deckel) damage = Math.min(damage, sonder.deckel);
+          if (sonder?.deckel) damage = Math.min(damage, foe.flaecheDeckel ?? sonder.deckel);
           else if (foe.deckel) damage = Math.min(damage, foe.deckel);
           // Relikte der Gruppe: Schutz vor Feuer- und Kälteangriffen.
           if (gegnerElement[turn.id] === "feuer") damage -= reliktWert(state, "fireResistance");
@@ -4320,6 +4450,7 @@ const rules = (() => {
               // Patch 2.6.2: Ungebrochener Schildwall Rang 1 +2 Rüstung; Schildwall der Krone +2; Kriegshorn des Großen Things +1 (alle).
               const klassenRuestung = (heroTarget ? (SY.daten.menschenKlassen[state.faction]?.[state.role]?.ruestung ?? 0) +
                 SY.talentWirkung(state, "TREE_UNGEBROCHENER_SCHILDWALL", "armor_bonus") + (state.akte?.fspez === "FSPEC_SCHILDWALL_DER_KRONE" ? 2 : 0) +
+                (klassenBalance.nahkampf.includes(state.role) ? klassenBalance.nahkampfRuestung : 0) + runenWert(state, "ruestung") +
                 (held.lagerBuff?.armor_bonus ?? 0) : 2) + (state.relikt === "REL_T4_BANNER_DER_EINIGUNG" ? 1 : 0) +
                 (state.gefaehrtenPerks?.includes("PERK_KR_SCHILDTREUE") ? 1 : 0);
               // Patch 2.5.3: Runen-Resonanz der Ahnen +4 % Rüstung je Rang beim Tragen von Runen- oder Glutausrüstung.
@@ -4382,7 +4513,7 @@ const rules = (() => {
     const loss = lost + bleedingLoss;
     note(state, (special?.name ?? "Gegenangriff") + " · " + loss + " LP verloren." +
       (sparedByStealth ? " Unsichtbar entgehst du einem Angriff." : "") +
-      (dodged ? " Einsamer Wolf: Du weichst " + (dodged === 1 ? "einem Angriff" : dodged + " Angriffen") + " aus." : "") +
+      (dodged ? (einsamerWolf(state) ? " Einsamer Wolf: Du weichst " : " Du weichst ") + (dodged === 1 ? "einem Angriff" : dodged + " Angriffen") + " aus." : "") +
       (stuns ? " Du bist benommen. Dein nächster Angriff ist schwächer." : "") +
       (startsBleeding ? " Die Wunde blutet zwei Runden lang." : "") +
       (stolenEmber ? " Die Irrglut entzieht dir 1 Glut." : "") +
@@ -4594,7 +4725,7 @@ const rules = (() => {
     weltLeisten, leistenNamen, leistenStart, gegenkraefte, niederlagen, vorratMax, vorratStart, seewegSilber, vorratAnwerbung,
     vertragKosten, ertragMenge, ertragPause, weltRunde, aktuellerKnoten, weltOffen, betreteWelt, handlungHier, zurHandlung,
     reiseGrund, reiseZiele, reise, rastGrund, rastKosten, handelOffen,
-    spezBereit, spezHinweis, meisterBereit, taten, tatWaehlen, ausruester, ausruesterHandel, ausruestungGrund, handwerkListe, handwerk, schmiedeInfo, schmieden, kontorInfo, kontorHandel, nahrungTragen, spenden, lage, systeme: SY, glutgabe, resonanz, kasseVollText,
+    spezBereit, spezHinweis, meisterBereit, taten, tatWaehlen, ausruester, ausruesterHandel, ausruestungGrund, handwerkListe, handwerk, schmiedeInfo, schmieden, runenListe, runeEinpraegen, kontorInfo, kontorHandel, nahrungTragen, spenden, lage, systeme: SY, glutgabe, resonanz, kasseVollText,
     siedlungInfo, siedlungAusbauen, gebaeudeBauen, strasseBauen, garnisonRekrutieren, ortReparieren, wiederaufbau,
     endgameListe, endgameStarten, aufstiegInfo, talentLernen, ahnenLernen,
     akteInfo, zweigWeiter, zweigGrund, fspezWaehlen, fspezGrund, fspezText, akt4Weiter, akt4Grund, armadaInfo, ausweichIntervall, kritChance, effektText, lagerSzeneInfo, lagerAntwort, lagerVorteile,

@@ -172,6 +172,9 @@ for (const r of handwerk) for (const z of [...r.ingredients.map((i) => i.id), r.
 // ---- Gegner (Gegnerdatei 1.5.0, Silber und Beutestufen aus Patch 1.6.0) ----
 const silberStufen = Object.fromEntries(p160b.numberListsAndRangesPatch.enemySilverAndTierLookup.map((e) => [e.enemyId, e]));
 const gegnerRegionen = {};
+// Patch 2.6.19 (Henry, B6): Miniboss „Wulfgar der Eidlose“ heißt „Varg der Eidlose“ (Gefährte Wulfgar Rossbrecher behält den Namen).
+const v2619 = JSON.parse(fs.readFileSync(path.join(__dirname, "henry", "v2619", "entscheidungen-b1-b11.json"), "utf8")).entscheidungen_b1_bis_b11;
+const umbenannt = { [v2619.B6_miniboss_umbenennung.name_alt]: v2619.B6_miniboss_umbenennung.name_neu };
 for (const nr of [4, 5, 6]) {
   const d = lies("gegner-" + nr);
   const label = lies("gegner-" + (nr - 3)).regionLabel;
@@ -179,7 +182,7 @@ for (const nr of [4, 5, 6]) {
   gegnerRegionen[fraktionVon[d.factionRegion]] = { name: label, gegner: liste.map((e) => {
     const s = silberStufen[e.id];
     pruefe(s, "Silber fehlt für " + e.id);
-    return { id: e.id, name: e.name, titel: e.title ?? null, familie: e.family, schwierigkeit: e.difficulty, miniboss: e.miniboss,
+    return { id: e.id, name: umbenannt[e.name] ?? e.name, titel: e.title ?? null, familie: e.family, schwierigkeit: e.difficulty, miniboss: e.miniboss,
       minStufe: e.minLevel, maxStufe: e.maxLevel, orte: e.spawnEdges ?? null, werte: e.stats, schwaechen: e.weaknesses, resistenzen: e.resistances,
       faehigkeiten: e.skills, beute: { ...e.loot, silverRange: undefined, equipmentTierPool: undefined, silber: [s.silverMin, s.silverMax], stufen: [s.tierMin, s.tierMax] } };
   }) };
@@ -362,7 +365,7 @@ if (fehler.length) {
 
 // Übrige Module 2.6.0–2.6.16 unverändert in Henrys Format; die Regeln lesen sie über SY.daten.v260.
 const v260 = Object.fromEntries(v260Liste.map((m) => [m.module_id ?? m.patch_id ?? m.bundle_id, m]));
-const daten = { v260, rohstoffe, rufRaenge, rufAusloeser, taten, fraktionsHandel, reise, doerfer, zehnt, wiederaufbau, stadtZustand,
+const daten = { v260, v2619, rohstoffe, rufRaenge, rufAusloeser, taten, fraktionsHandel, reise, doerfer, zehnt, wiederaufbau, stadtZustand,
   kriegskasse, moral, gegenstaende, ausruestungsRechte, handwerk, schmiede, gegnerRegionen, beutePools, klassen, signaturRaenge,
   gebaeude, siedlungsStufen, garnison, phasen, vorgebaut, endgame: endgameAktivitaeten, meisterwerk, aufstieg, kampf: kampfRegeln, ansicht, menschenKlassen };
 const ziel = path.join(__dirname, "..", "spiel", "systeme-daten.js");

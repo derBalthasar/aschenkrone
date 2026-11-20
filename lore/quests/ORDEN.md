@@ -54,7 +54,7 @@ Flammenhof, Tranvik, Bernsvik, Perlvik
 - Wahl: Tempelsilber zahlen & Handelsrouten segnen (80 Silber) → Schnelle Kriegsschiffe und erfahrene Seeleute der Freien Häfen schließen sich an.
 - Wahl: Kult-Reeder enteignen & Werften beschlagnahmen → Kostenlose Schiffe, aber Unruhe in den Häfen und Sabotagegefahr.
 
-### Akt 4 „Verräter im Feuer & Das Alte Reich“ (Stufe 16–18)
+### Akt 4 „Verräter im Feuer & Das Alte Reich“ (Stufe 16–22)
 Glutberg, Kronhall, Nordwacht / Glutvik · enthält Volksquest: Das Alte Reich
 
 1. **Entlarvung des Bleichen Skalden** (Glutberg): Seherin Freydis findet in den tiefen Gewölben des Glutbergs verbotene Totenrunen. Der wahre Anführer des Kults der Bleichen Ewigkeit wird entlarvt: Erzpriester Thorvald selbst. Über hundert Jahre hält ihn die Totenmagie des Nordens am Leben; als Preis dafür schwächt er die Ewige Flamme, damit die Untoten im Norden erstarken. Du stellst Thorvald in der Halle der Ewigen Flamme als Endgegner (Untoten-Bedrohung -15).
@@ -62,7 +62,7 @@ Glutberg, Kronhall, Nordwacht / Glutvik · enthält Volksquest: Das Alte Reich
 2. **Das Große Thing** (Kronhall): Nach Thorvalds Fall vereinen Hochmeisterin Ragna Glutherz, Kronprinzessin Astrid und Thingsprecherin Solveig Valsdottir die drei Menschenfraktionen; der Held steigt zum Bannerjarl auf.
 3. **Der Kreuzzug rüstet** (Nordwacht / Glutvik): Die Flotte sammelt sich an den Nordhäfen, und die Wachfeuer brennen wieder hell.
 
-### Akt 5 „Über das Innere Meer“ (Stufe 19–20)
+### Akt 5 „Über das Innere Meer“ (Stufe 20–26)
 Nordwacht / Glutberg (Kriegsrat) -> Starthafen der Route -> frei wählbarer Kontinent
 
 > Änderung Henry (18. 11. 2026): Bei Gemini „Über das Nordmeer“. Das Ziel ist frei wählbar, und nur der Weg zu den Untoten führt über das Nordmeer.
