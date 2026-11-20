@@ -1631,7 +1631,9 @@
   async function marschieren(route, { offenLassen = false, text = undefined } = {}) {
     if (rk.marsch || !route?.length || !state || state.scene !== "weltknoten" || state.combat) return;
     const karteWarOffen = el("reisekarte").open;
-    rk.marsch = { pfade: [], banner: reisekarte.lage(rules.aktuellerKnoten(state)) ?? [0, 0], ueberspringen: marschRuhig() };
+    // Henry wünscht die Animation ausdrücklich: Auch bei „Bewegung reduzieren“ (z. B. Windows ohne Animationseffekte)
+    // läuft der Marsch, nur die Wetterteilchen entfallen. „Marsch überspringen“ beendet ihn sofort.
+    rk.marsch = { pfade: [], banner: reisekarte.lage(rules.aktuellerKnoten(state)) ?? [0, 0], ueberspringen: false };
     if (!karteWarOffen) {
       if (el("inventory-hub").open) el("inventory-hub").close();
       if (el("character-sheet").open) el("character-sheet").close();

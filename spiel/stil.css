@@ -1681,4 +1681,4 @@ dialog.dialog-klein[open] { opacity: 1; }
 .rueckkehr-banner p { margin: .2rem 0; }
 .rueckkehr-banner strong { color: #8a3d00; }
 .auftrag-bereit strong { color: #8a3d00; }
-@media (prefers-reduced-motion: reduce) { .rk-wetter i { animation: none; display: none; } .rk-marsch-text { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .rk-wetter i { animation: none; display: none; } }
