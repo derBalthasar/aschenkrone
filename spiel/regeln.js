@@ -20,6 +20,8 @@ const rules = (() => {
   const N = knoten;
   // Spielsysteme der Menschen (Henry, 18. 11. 2026): Kontor, Ruf-Ränge, Moral, Zehnt, Taten, Bau, Stufe 30.
   const SY = systeme;
+  // Henry, 20. 11. 2026: Schwierigkeitsgrade (Daten aus quellen/henry/v2619/schwierigkeitsgrade.json).
+  const SCHWIERIG = SY.daten.v2619schwierigkeit;
   const menschen = (state) => SY.istMensch(state.faction);
   const leistenFolge = ["untote", "orks", "glut", "erzfieber", "welke"];
   const leistenStart = { untote: 35, orks: 40, glut: 30, erzfieber: 45, welke: 30 };
@@ -194,7 +196,7 @@ const rules = (() => {
       weltLeisten: { ...leistenStart }, runde: 0, knoten: null, handlung: null, vertraege: [], ertraege: {}, niederlage: null,
       weltAuftraege: {}, hauptquest: null,
       moral: SY.daten.moral.start, entkraeftet: false, etappen: 0, kontor: {}, befreit: [], tatOffen: null,
-      zuflucht: null, gefallenIn: null, grundwertAlt: 0, faehigkeitRaenge: {},
+      zuflucht: null, gefallenIn: null, grundwertAlt: 0, faehigkeitRaenge: {}, schwierigkeit: SCHWIERIG.standard_auswahl,
       party: [], companionEquipment: {}, partyVitals: {}, heroStatus: {}, companionXp: {},
       rucksack: 0, guertel: Array(beltSize).fill(null), relikt: null,
       relationships: {}, factionRuf: {}, companionQuests: {}, crafted: [], questClock: 0, questLog: {},
@@ -398,6 +400,8 @@ const rules = (() => {
     }
     state.zuflucht ??= null;
     state.gefallenIn ??= null;
+    // Henry, 20. 11. 2026: Alte Spielstände spielen auf „Leicht“ (der bisherigen Balance).
+    state.schwierigkeit ??= SCHWIERIG.standard_auswahl;
     // Patch 2.5.5: Bisher trainierte Grundwerte stammen aus alten Punkten und zählen nicht gegen die neuen Stufenpunkte.
     state.grundwertAlt ??= isRecord(state.training) ? total(state.training) : 0;
     state.faehigkeitRaenge ??= {};
@@ -431,7 +435,7 @@ const rules = (() => {
         new Set(state.vertraege).size !== state.vertraege.length ||
         !isRecord(state.ertraege) || !Object.entries(state.ertraege).every(([id, runde]) => N.get(id)?.typ === "dorf" && intBetween(runde, 0, state.runde)) ||
         (state.niederlage !== null && !own(niederlagen, state.niederlage)) ||
-        (state.zuflucht !== null && !N.get(state.zuflucht)) ||
+        (state.zuflucht !== null && !N.get(state.zuflucht)) || !schwierigkeitsGrad(state.schwierigkeit) ||
         (state.gefallenIn !== null && !(own(world.scenes, state.gefallenIn) && !["defeat", "weltende"].includes(state.gefallenIn))) ||
         !validRecord(state.weltAuftraege, auftragIndex, entry => isRecord(entry) && ["aktiv", rueckkehr.status, "erledigt"].includes(entry.status) &&
           intBetween(entry.wahl, 0, 1)) ||
@@ -938,6 +942,10 @@ const rules = (() => {
     if (once && state.rewards.includes(id)) return;
     const previousLevel = progression(state).level;
     if (once) state.rewards.push(id);
+    // Schwierigkeitsgrad (Henry, 20. 11. 2026): EP- und Silberlohn-Faktor.
+    const mod = schwierigkeitMod(state);
+    xp = Math.round(xp * mod.ep_faktor);
+    silver = Math.round(silver * mod.silber_lohn_faktor);
     // Menschen: Erbe der Baumeister +15 % Silber je Rang (Veteran von Odris entfällt mit Patch 2.6.2).
     if (menschen(state)) {
       silver = Math.round(silver * (1 + 0.15 * (state.ahnen?.perk_master_steward ?? 0)));
@@ -1477,7 +1485,9 @@ const rules = (() => {
       !hasMarks(state, choice.excludes, "some") &&
       (!choice.requiresItem || state.inventory.includes(choice.requiresItem)) &&
       (!choice.faction || reputation(state, choice.faction[0]) >= choice.faction[1]) &&
-      conditionMet(state, choice.condition)
+      conditionMet(state, choice.condition) &&
+      // Hardcore (Permadeath): keine Rettung in die Zuflucht.
+      !(choice.survive && permadeath(state))
     ).map((choice) => (choice.ohneGlut && !gabe ? { ...choice, ...choice.ohneGlut } : choice));
   }
 
@@ -1504,9 +1514,10 @@ const rules = (() => {
     state.health = niederlageFolgen.lp;
     ensureVitals(state);
     for (const id of state.party) if (memberVitals(state, id).health <= 0) changeHealth(state, id, 1);
-    const verlust = state.silver - Math.floor(state.silver * niederlageFolgen.silber);
+    const mod = schwierigkeitMod(state);
+    const verlust = state.silver - Math.floor(state.silver * mod.niederlage_silber_faktor);
     state.silver -= verlust;
-    if (menschen(state)) state.moral = Math.max(SY.daten.moral.min, (state.moral ?? SY.daten.moral.start) + niederlageFolgen.moral);
+    if (menschen(state)) state.moral = Math.max(SY.daten.moral.min, (state.moral ?? SY.daten.moral.start) + mod.niederlage_moral_abzug);
     const ziel = zuflucht(state);
     const geschichte = von && von !== "weltknoten" ? von : null;
     const geschichtsOrt = geschichte ? aktuellerKnoten({ ...state, scene: geschichte }) : null;
@@ -1515,11 +1526,11 @@ const rules = (() => {
       state.knoten = ziel;
       state.scene = "weltknoten";
       note(state, "Du schleppst dich schwer verwundet nach " + N.get(ziel).name + "." +
-        (verlust ? " " + verlust + " Silber sind verloren." : "") + (menschen(state) ? " Die Moral sinkt um 20." : ""));
+        (verlust ? " " + verlust + " Silber sind verloren." : "") + (menschen(state) ? " Die Moral sinkt um " + -mod.niederlage_moral_abzug + "." : ""));
     } else {
       state.scene = geschichte ?? startpunkte.szene(state.faction);
       note(state, "Du kommst im Dreck wieder zu dir, schwer verwundet." +
-        (verlust ? " " + verlust + " Silber sind verloren." : "") + (menschen(state) ? " Die Moral sinkt um 20." : ""));
+        (verlust ? " " + verlust + " Silber sind verloren." : "") + (menschen(state) ? " Die Moral sinkt um " + -mod.niederlage_moral_abzug + "." : ""));
     }
   }
 
@@ -1528,6 +1539,7 @@ const rules = (() => {
     if (!choice) return previous;
     const state = structuredClone(previous);
     if (choice.survive) {
+      if (permadeath(state)) return previous;
       ueberleben(state);
       return state;
     }
@@ -1839,7 +1851,7 @@ const rules = (() => {
   }
   function knotenBegegnung(state, weg, ziel, von = null) {
     const daten = von ? wegDatenFuer(state, von, ziel.id) : null;
-    const table = begegnungsTabelle(weg, daten);
+    const table = hinterhaltOffset(state, begegnungsTabelle(weg, daten));
     const roll = Math.floor(travelDice() * 100);
     let summe = 0;
     let kind = table.find(([weight]) => roll < (summe += weight))?.[1] ?? "ruhig";
@@ -2353,6 +2365,7 @@ const rules = (() => {
   // Schritte ohne Auftraggeber anderswo (Freie Häfen: Kette Zollholm → Möwenstad → Silberholm → Perlvik).
   const MARSCH = SY.daten.v2619marsch;
   const ORTGATE = SY.daten.v2619ortGate;
+
   const rueckkehr = { status: MARSCH.quest_rueckkehr_system.neuer_status,
     faktor: MARSCH.quest_rueckkehr_system["rückmarsch_regeln"].ereignis_wahrscheinlichkeit_faktor,
     banner: MARSCH.quest_rueckkehr_system["rückmarsch_regeln"].hinweis_banner_text,
@@ -2360,6 +2373,48 @@ const rules = (() => {
   const mitOrt = (text, ortId) => text.replaceAll("{auftraggeber_ort}", N.get(ortId)?.name ?? ortId);
   const marschBeispielVignetten = Object.fromEntries(MARSCH.akt1_beispiel_hagenfels.phasen.filter((p) => p.vignette)
     .map((p) => [p.phase === "hinmarsch" ? "hin" : "rueck", p.vignette]));
+
+  // ---- Vier Schwierigkeitsgrade mit Hardcore (Henry, 20. 11. 2026, quellen/henry/v2619/schwierigkeitsgrade.json) ----
+  // Leicht ist die bisherige Balance und Standard. Hardcore (Permadeath) ist erst wählbar, wenn einmal die Hauptquest bis
+  // Bannerjarl (Quest-Stufe 4) geschafft ist; die Freischaltung merkt sich der Browser. Hardcore lässt sich nur bei der
+  // Charaktererstellung wählen und nicht mehr wechseln; Leicht, Mittel und Schwer lassen sich in den Einstellungen tauschen.
+  function schwierigkeitsGrad(id) { return SCHWIERIG.schwierigkeitsgrade.find((g) => g.id === id) ?? null; }
+  const schwierigkeitMod = (state) => (schwierigkeitsGrad(state?.schwierigkeit) ?? schwierigkeitsGrad(SCHWIERIG.standard_auswahl)).modifikatoren;
+  const permadeath = (state) => Boolean(schwierigkeitsGrad(state?.schwierigkeit)?.permadeath);
+  function schwierigkeitLp(state, feinde) {
+    const f = schwierigkeitMod(state).gegner_lp_faktor;
+    if (f === 1) return feinde;
+    return feinde.map((foe) => ({ ...foe, lp: Math.max(1, Math.round(foe.lp * f)), max: Math.max(1, Math.round(foe.max * f)) }));
+  }
+  function hinterhaltOffset(state, table) {
+    const plus = Math.round(schwierigkeitMod(state).hinterhalt_chance_offset * 100);
+    if (!plus || !table.some(([, art]) => art === "jaeger")) return table;
+    const ruhig = table.findIndex(([, art]) => art === "ruhig");
+    return table.map(([w, art], i) => [art === "jaeger" ? w + plus : i === ruhig ? Math.max(0, w - plus) : w, art]);
+  }
+  const hardcoreFrei = (state) => (state?.questStufe ?? 0) >= SCHWIERIG.hardcore_freischaltung.ausloeser_bedingung.min_quest_stufe;
+  function schwierigkeitGrund(state, id, { neu = false, freigeschaltet = false } = {}) {
+    const grad = schwierigkeitsGrad(id);
+    if (!grad) return "unbekannter Schwierigkeitsgrad";
+    if (state.schwierigkeit === id) return "bereits gewählt";
+    if (permadeath(state) && !neu) return "Hardcore lässt sich im Spiel nicht wechseln";
+    if (grad.erfordert_freischaltung && !freigeschaltet) return SCHWIERIG.hardcore_freischaltung.gesperrt_anzeige_in_ui.hinweis_text;
+    if (grad.permadeath && !neu) return "nur bei der Charaktererstellung";
+    return null;
+  }
+  function schwierigkeitWaehlen(previous, id, optionen = {}) {
+    if (schwierigkeitGrund(previous, id, optionen)) return previous;
+    const state = structuredClone(previous);
+    state.schwierigkeit = id;
+    if (!optionen.neu) note(state, "Schwierigkeitsgrad: " + schwierigkeitsGrad(id).anzeigename + ".");
+    return state;
+  }
+  // Hardcore-Held erreicht Bannerjarl: Abschlusstitel „Der Ungebrochene“.
+  function ungebrochen(state) {
+    if (!permadeath(state) || !hardcoreFrei(state) || state.marks.includes("der-ungebrochene")) return;
+    state.marks.push("der-ungebrochene");
+    note(state, "Ein Leben, ein Schwur: Du trägst den Titel „" + schwierigkeitsGrad("hardcore").sonderregeln.abschluss_titel + "“.");
+  }
 
   // Hauptquest Akt 1. Die Texte kommen aus der Fraktionsreihe, die Orte und Gegner legt der Plan fest.
   const hauptPlan = {
@@ -3531,6 +3586,7 @@ const rules = (() => {
     if (!state.marks.includes("grosses-thing")) state.marks.push("grosses-thing");
     a.schritt = 3;
     state.questStufe = Math.max(state.questStufe, 4);
+    ungebrochen(state);
     grant(state, "akt4-thing", q.rewards.xp);
     note(state, "Du trägst jetzt den Titel Bannerjarl. Die Menschenreiche stehen unter einem Banner, und die Armada-Kriegskasse ist geöffnet.");
     state.lagerMeilenstein = "CAMP_MILESTONE_BANNERJARL";
@@ -3924,7 +3980,7 @@ const rules = (() => {
     const max = kraft(state);
     const combat = {
       id, round: 0, stunned: false, bleeding: 0, supportUsed: [],
-      feinde: lineup(id, state.party.length, stufe, level(state)), diener: [],
+      feinde: schwierigkeitLp(state, lineup(id, state.party.length, stufe, level(state))), diener: [],
       held: { ausdauer: max.ausdauer, mana: max.mana, schild: 0, schildRunden: 0, unsichtbar: 0, naechster: 0,
         staerkung: null, hot: null, todesschutz: null, abklingen: {}, genutzt: [], mine: false, bekehren: 0 },
     };
@@ -4570,7 +4626,7 @@ const rules = (() => {
           // Relikte der Gruppe: Schutz vor Feuer- und Kälteangriffen.
           if (gegnerElement[turn.id] === "feuer") damage -= reliktWert(state, "fireResistance");
           if (gegnerElement[turn.id] === "kaelte") damage = Math.round(damage * (1 - reliktWert(state, "coldDamageReduction")));
-          damage = Math.max(0, damage);
+          damage = Math.max(0, Math.round(damage * schwierigkeitMod(state).gegner_schaden_faktor));
           // Köder und Wälle ziehen die Angriffe auf sich, Unsichtbare werden nicht angegriffen.
           const decoy = turn.diener.find((summon) => summon.koeder && summon.lp > 0);
           const summon = decoy ?? (held.unsichtbar > 0 || index % 2 === 1 ? turn.diener.find((entry) => entry.lp > 0) : null);
@@ -4886,6 +4942,7 @@ const rules = (() => {
     endgameListe, endgameStarten, aufstiegInfo, talentLernen, ahnenLernen,
     akteInfo, zweigWeiter, zweigGrund, fspezWaehlen, fspezGrund, fspezText, akt4Weiter, akt4Grund, armadaInfo, ausweichIntervall, kritChance, effektText, lagerSzeneInfo, lagerAntwort, lagerVorteile,
     auftragGrund, auftragAnnehmen, ausfuehrenGrund, auftragAusfuehren, abgabeGrund, auftragAbgeben, rueckkehrZiele, marschRoute,
-    marschVignette, rueckmarsch, marschDaten: MARSCH, ortReise, ortGate: ORTGATE, aushang, auftraege, hauptquest, hauptGrund, hauptWeiter, auftragEp, rast, ertragGrund, ertragEinholen, vertragGrund, vertragSchliessen, entwurf,
+    marschVignette, rueckmarsch, marschDaten: MARSCH, ortReise, ortGate: ORTGATE,
+    schwierigkeitsGrad, schwierigkeitGrund, schwierigkeitWaehlen, permadeath, hardcoreFrei, schwierigkeitDaten: SCHWIERIG, aushang, auftraege, hauptquest, hauptGrund, hauptWeiter, auftragEp, rast, ertragGrund, ertragEinholen, vertragGrund, vertragSchliessen, entwurf,
     levelThresholds: Array.from({ length: kampf.maxStufe }, (_, index) => kampf.epFuer(index + 1)) };
 })();

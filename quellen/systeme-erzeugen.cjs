@@ -178,6 +178,8 @@ const v2619 = JSON.parse(fs.readFileSync(path.join(__dirname, "henry", "v2619", 
 const v2619marsch = JSON.parse(fs.readFileSync(path.join(__dirname, "henry", "v2619", "marsch-und-rueckreise.json"), "utf8"));
 // Henry, 20. 11. 2026: Globales Ort-Gate (drittes JSON mit schema_version 2.6.19).
 const v2619ortGate = JSON.parse(fs.readFileSync(path.join(__dirname, "henry", "v2619", "ort-gate.json"), "utf8"));
+// Henry, 20. 11. 2026: Vier Schwierigkeitsgrade mit Hardcore (viertes JSON mit schema_version 2.6.19).
+const v2619schwierigkeit = JSON.parse(fs.readFileSync(path.join(__dirname, "henry", "v2619", "schwierigkeitsgrade.json"), "utf8"));
 const umbenannt = { [v2619.B6_miniboss_umbenennung.name_alt]: v2619.B6_miniboss_umbenennung.name_neu };
 for (const nr of [4, 5, 6]) {
   const d = lies("gegner-" + nr);
@@ -369,7 +371,7 @@ if (fehler.length) {
 
 // Übrige Module 2.6.0–2.6.16 unverändert in Henrys Format; die Regeln lesen sie über SY.daten.v260.
 const v260 = Object.fromEntries(v260Liste.map((m) => [m.module_id ?? m.patch_id ?? m.bundle_id, m]));
-const daten = { v260, v2619, v2619marsch, v2619ortGate, rohstoffe, rufRaenge, rufAusloeser, taten, fraktionsHandel, reise, doerfer, zehnt, wiederaufbau, stadtZustand,
+const daten = { v260, v2619, v2619marsch, v2619ortGate, v2619schwierigkeit, rohstoffe, rufRaenge, rufAusloeser, taten, fraktionsHandel, reise, doerfer, zehnt, wiederaufbau, stadtZustand,
   kriegskasse, moral, gegenstaende, ausruestungsRechte, handwerk, schmiede, gegnerRegionen, beutePools, klassen, signaturRaenge,
   gebaeude, siedlungsStufen, garnison, phasen, vorgebaut, endgame: endgameAktivitaeten, meisterwerk, aufstieg, kampf: kampfRegeln, ansicht, menschenKlassen };
 const ziel = path.join(__dirname, "..", "spiel", "systeme-daten.js");

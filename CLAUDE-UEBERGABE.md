@@ -74,3 +74,13 @@ Die Regeltests waren bei der Übergabe grün. Ansichtswechsel, Speicherung und K
 Spielstandschlüssel: `aschenkrone.valmarch.v1` (Spielstandformat Version 3, ältere Stände werden beim Laden umgewandelt). Ansichtsschlüssel: `aschenkrone.layout`. Spielstände waren für den Nutzer bisher nachrangig. Ein frischer Spielstand ist für Tests geeignet.
 
 Für neue Inhalte will der Nutzer eine Welt mit echten Abzweigungen und Konsequenzen über mehrere Szenen hinweg. Gute Beute soll es bei Kämpfen, Erkundung und menschlichen Begegnungen geben. Der nächste inhaltliche Ausbau kann an das Runentor anknüpfen und frühere Entscheidungen, Gefährtenversprechen und Fraktionsruf in einer späteren Begegnung wieder aufgreifen. Steam und Unreal Engine 5 wurden als mögliche Zukunft diskutiert. Der aktuelle Arbeitsstand ist das lokale Browser-Rollenspiel.
+
+## Schwierigkeitsgrade mit Hardcore (v2.6.19d, 20. 11. 2026)
+
+Henrys JSON `quellen/henry/v2619/schwierigkeitsgrade.json` (als `SY.daten.v2619schwierigkeit`). Vier Grade: leicht (Standard), mittel, schwer, hardcore. `state.schwierigkeit` (alte Stände werden auf „leicht“ migriert).
+
+- Regeln (`spiel/regeln.js`): Gegner-LP (`schwierigkeitLp`) und Gegnerschaden beim Treffer, Hinterhalt-Verschiebung der Begegnungstabelle, Silber und Moral bei Niederlage, EP- und Silberlohn. Hilfsfunktionen `schwierigkeitsGrad`, `schwierigkeitGrund`, `schwierigkeitWaehlen`, `permadeath`, `hardcoreFrei` (Quest-Stufe 4 = Bannerjarl), Abschlusstitel „Der Ungebrochene“ (Marke `der-ungebrochene`).
+- Hardcore: keine Zuflucht-Rettung (survive-Wahlen fallen weg), kein Wegpunkt vor dem Kampf, kein Wechsel im Spiel, beim Tod wird der Spielstand gelöscht und ein Eintrag in die Ruhmeshalle (`localStorage aschenkrone_ruhmeshalle`) geschrieben.
+- Freischaltung: `localStorage aschenkrone_hardcore_unlocked = "1"`, gesetzt sobald ein Held Quest-Stufe 4 erreicht.
+- Oberfläche: Auswahl bei der Charaktererstellung (`#schwierigkeit`), Wechsel leicht/mittel/schwer in den Einstellungen (`#opt-schwierigkeit`), Ruhmeshalle dort.
+- Tests: `spiel/schwierigkeit.test.cjs`; E2E meldet die Hardcore-Freischaltung nach Akt 4.

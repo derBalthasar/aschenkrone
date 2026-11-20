@@ -201,6 +201,8 @@
   // In der Niederlage-Szene speichert das Spiel nicht automatisch; der Stand vor dem letzten Treffer bleibt erhalten.
   const vorKampfKey = key + ".vorKampf";
   function vorKampfSichern(vorher) {
+    // Hardcore (Permadeath): kein Wegpunkt vor der Schlacht.
+    if (rules.permadeath(vorher)) return;
     try {
       localStorage.setItem(vorKampfKey, JSON.stringify(vorher));
     } catch {
@@ -216,7 +218,59 @@
     }
   }
 
+  // ---- Schwierigkeitsgrade (Henry, 20. 11. 2026) ----
+  const hardcoreKey = rules.schwierigkeitDaten.hardcore_freischaltung.storage_key;
+  const ruhmKey = "aschenkrone_ruhmeshalle";
+  const hardcoreFreigeschaltet = () => { try { return localStorage.getItem(hardcoreKey) === "1"; } catch { return false; } };
+  function ruhmeshalle() { try { return JSON.parse(localStorage.getItem(ruhmKey) ?? "[]"); } catch { return []; } }
+  function ruhmEintragen(s, ausgang) {
+    try {
+      const liste = ruhmeshalle();
+      liste.unshift({ name: s.name, fraktion: klassen.fraktionen[s.faction].name, klasse: rules.title(s), stufe: rules.level(s),
+        akt: s.questStufe ?? 0, ausgang, datum: new Date().toLocaleDateString("de-DE") });
+      localStorage.setItem(ruhmKey, JSON.stringify(liste.slice(0, 20)));
+    } catch { /* Ohne Speicher keine Ruhmeshalle. */ }
+  }
+  // Permadeath: Der Spielstand wird beim Tod gelöscht, die Chronik kommt in die Ruhmeshalle.
+  function permadeathPruefen() {
+    if (state?.scene !== "defeat" || !rules.permadeath(state) || state.hardcoreBeendet) return false;
+    state.hardcoreBeendet = true;
+    ruhmEintragen(state, "Gefallen");
+    try { localStorage.removeItem(key); localStorage.removeItem(vorKampfKey); } catch { /* nichts zu löschen */ }
+    el("save-status").textContent = "Hardcore: Deine Geschichte endet hier. Der Spielstand ist gelöscht.";
+    return true;
+  }
+  function schwierigkeitOptionen(select, aktuell, { neu }) {
+    select.replaceChildren();
+    for (const g of rules.schwierigkeitDaten.schwierigkeitsgrade) {
+      const option = element("option", g.anzeigename + (g.permadeath && !hardcoreFreigeschaltet() ? " · gesperrt" : ""));
+      option.value = g.id;
+      option.disabled = g.id !== aktuell && Boolean(rules.schwierigkeitGrund(state && !neu ? state : { schwierigkeit: null }, g.id,
+        { neu, freigeschaltet: hardcoreFreigeschaltet() }));
+      select.append(option);
+    }
+    select.value = aktuell;
+  }
+  function renderSchwierigkeit() {
+    if (!state) return;
+    schwierigkeitOptionen(el("opt-schwierigkeit"), state.schwierigkeit, { neu: false });
+    el("opt-schwierigkeit").disabled = rules.permadeath(state);
+    const grad = rules.schwierigkeitsGrad(state.schwierigkeit);
+    el("opt-schwierigkeit-hinweis").textContent = grad.kurzbeschreibung + (rules.permadeath(state) ? " Hardcore lässt sich nicht wechseln." :
+      hardcoreFreigeschaltet() ? "" : " " + rules.schwierigkeitDaten.hardcore_freischaltung.gesperrt_anzeige_in_ui.hinweis_text);
+    const halle = el("ruhmeshalle");
+    halle.replaceChildren();
+    const liste = ruhmeshalle();
+    if (liste.length) {
+      halle.append(element("h4", "Ruhmeshalle"));
+      const ul = element("ul");
+      for (const e of liste) ul.append(element("li", e.name + " · " + e.fraktion + " · " + e.klasse + " · Stufe " + e.stufe + " · " + e.ausgang + " (" + e.datum + ")"));
+      halle.append(ul);
+    }
+  }
+
   function save() {
+    if (permadeathPruefen()) return;
     if (state?.scene === "defeat") {
       el("save-status").textContent = "Nicht gespeichert: Du bist gefallen.";
       return;
@@ -248,6 +302,10 @@
     const changedScene = !previous || next.scene !== previous.scene || Boolean(next.combat) !== Boolean(previous.combat);
     if (previous && !previous.combat && next.combat) vorKampfSichern(previous);
     state = next;
+    if (rules.hardcoreFrei(state) && !hardcoreFreigeschaltet()) {
+      try { localStorage.setItem(hardcoreKey, "1"); } catch { /* ohne Speicher keine Freischaltung */ }
+      if (rules.permadeath(state)) ruhmEintragen(state, "Der Ungebrochene");
+    }
     save();
     render();
     showTurnStatus(previous, next);
@@ -3091,7 +3149,12 @@
       }
       // Patch 2.5.4: Niederlage. Wegpunkt vor der Schlacht laden (nur wenn gesichert) oder die Chronik beenden.
       if (state.scene === "defeat") {
-        const wegpunkt = vorKampfStand();
+        const wegpunkt = rules.permadeath(state) ? null : vorKampfStand();
+        if (rules.permadeath(state)) {
+          const ende = element("p", "Hardcore · Aschenchronik: Deine Geschichte endet hier unwiderruflich. Dein Name steht in der Ruhmeshalle.");
+          ende.className = "welt-alarm";
+          actions.append(ende);
+        }
         if (wegpunkt) {
           const laden = button(actions, "Letzten Wegpunkt vor der Schlacht laden", () => {
             const stand = vorKampfStand();
@@ -4617,6 +4680,7 @@
   }
   function render() {
     themaSetzen(state.faction);
+    renderSchwierigkeit();
     setPortrait(el("avatar"), state);
     el("hero-name").textContent = state.name;
     el("hero-origin").textContent = klassen.voelker[klassen.fraktionen[state.faction].volk].name + " · " +
@@ -4798,7 +4862,8 @@
         showPlay(rules.retrain(state, origin.value, role.value, draftBuild()));
         return;
       }
-      const next = rules.create(name.value, origin.value, appearance.value, Number(variant.value), role.value, draftBuild());
+      let next = rules.create(name.value, origin.value, appearance.value, Number(variant.value), role.value, draftBuild());
+      next = rules.schwierigkeitWaehlen(next, el("schwierigkeit").value, { neu: true, freigeschaltet: hardcoreFreigeschaltet() });
       state = next;
       save();
       setPortrait(el("intro-portrait"), next);
@@ -4865,6 +4930,19 @@
     optionenSichern();
   });
   window.aschenkroneOptionen = optionen;
+  el("opt-schwierigkeit").addEventListener("change", (e) => {
+    const neu = rules.schwierigkeitWaehlen(state, e.currentTarget.value);
+    if (neu === state) { renderSchwierigkeit(); return; }
+    update(neu);
+  });
+  const schwierigkeitBeschreiben = () => {
+    const grad = rules.schwierigkeitsGrad(el("schwierigkeit").value);
+    el("schwierigkeit-description").textContent = grad.kurzbeschreibung +
+      (hardcoreFreigeschaltet() ? "" : " Hardcore: " + rules.schwierigkeitDaten.hardcore_freischaltung.gesperrt_anzeige_in_ui.hinweis_text.replace(/^Gesperrt: /, "gesperrt. "));
+  };
+  schwierigkeitOptionen(el("schwierigkeit"), rules.schwierigkeitDaten.standard_auswahl, { neu: true });
+  schwierigkeitBeschreiben();
+  el("schwierigkeit").addEventListener("change", schwierigkeitBeschreiben);
   el("export").addEventListener("click", () => {
     const url = URL.createObjectURL(new Blob([JSON.stringify(state, null, 2)], { type: "application/json" }));
     const download = element("a");

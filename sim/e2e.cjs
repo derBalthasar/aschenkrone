@@ -243,6 +243,9 @@ function durchlauf(faction, role, wahl, boese, protokoll) {
   s = reload(rules.akt4Weiter(bei(s, "kronhall")));
   protokoll.thing = s.marks.includes("grosses-thing");
   if (!protokoll.thing) protokoll.fehler.push("Großes Thing nicht erreicht: " + rules.akt4Grund(s));
+  // Schwierigkeitsgrade: Nach Akt 4 ist Hardcore freigeschaltet (simulator_regeln.pruefe_hardcore_freischaltung_nach_akt_4).
+  protokoll.hardcoreFrei = rules.hardcoreFrei(s);
+  if (!protokoll.hardcoreFrei) protokoll.fehler.push("Hardcore nach Akt 4 nicht freigeschaltet");
   // Kriegskasse über das eigene Kontor füllen (Rohstoffe einlagern, dann spenden).
   const kontorStadt = { kronreich: "kronhall", orden: "glutberg", haefen: "perlvik" }[faction];
   s = bei(s, kontorStadt);
@@ -305,5 +308,7 @@ for (const [profil, zeilen] of Object.entries(ergebnis)) {
 const reisen = Object.values(ergebnis).flat().reduce((t, p) => ({ etappen: t.etappen + (p.reiseEtappen ?? 0), kaempfe: t.kaempfe + (p.reiseKaempfe ?? 0),
   niederlagen: t.niederlagen + (p.reiseNiederlagen ?? 0) }), { etappen: 0, kaempfe: 0, niederlagen: 0 });
 console.log("\nOrt-Gate: " + reisen.etappen + " Reise-Etappen zu den Zielorten, " + reisen.kaempfe + " Hinterhalte unterwegs, " + reisen.niederlagen + " Niederlagen.");
+const hc = Object.values(ergebnis).flat().filter((p) => "hardcoreFrei" in p);
+console.log("Schwierigkeit: Hardcore nach Akt 4 freigeschaltet in " + hc.filter((p) => p.hardcoreFrei).length + " von " + hc.length + " Läufen (Standard: leicht).");
 console.log("\nGespeichert: sim/e2e-ergebnis.json · Fehler gesamt: " + fehler);
 process.exitCode = fehler ? 1 : 0;

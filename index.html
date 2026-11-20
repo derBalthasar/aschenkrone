@@ -81,6 +81,9 @@
         <label for="class">Klasse</label>
         <select id="class" aria-describedby="class-description"></select>
         <div id="class-description" class="class-description"></div>
+        <label for="schwierigkeit">Schwierigkeitsgrad</label>
+        <select id="schwierigkeit" aria-describedby="schwierigkeit-description"></select>
+        <p id="schwierigkeit-description" class="hint"></p>
         <div id="volk-choice" hidden>
           <label for="volk-wahl">Vielseitig · +1 auf einen Grundwert nach Wahl</label>
           <select id="volk-wahl"></select>
@@ -240,6 +243,12 @@
                 <label for="save-file-play" class="action file-label">Spielstand-Datei importieren<input type="file" id="save-file-play" accept=".json,application/json"></label>
               </div>
               <p id="load-status" role="status"></p>
+            </details>
+            <details open><summary>Schwierigkeitsgrad</summary>
+              <label class="option-row">Schwierigkeit dieses Spielstands
+                <select id="opt-schwierigkeit"></select></label>
+              <p id="opt-schwierigkeit-hinweis" class="hint"></p>
+              <div id="ruhmeshalle" class="ruhmeshalle"></div>
             </details>
             <details open><summary>Optionen</summary>
               <label class="option-row"><input type="checkbox" id="opt-punkte"> Vor Bosskämpfen an ungenutzte Aufstiegspunkte erinnern</label>
