@@ -1,0 +1,47 @@
+{
+  "quelle": "Henry, 20. 11. 2026, 10:49 Berlin (drittes JSON mit schema_version 2.6.19). Orte und NPCs der fraktions_routen_akt1 und akte_2_bis_4 weichen vom Spiel ab; siehe CLAUDE-UEBERGABE.md (Ort-Gate).",
+  "schema_version": "2.6.19",
+  "feature": "globales_ort_gate_alle_fraktionen_akt_1_bis_4",
+  "target_files": ["spiel/regeln.js", "spiel/handlung_akte.js", "ui/abenteuer.js", "sim/simulator.js"],
+  "globale_ort_regeln": {
+    "gespraech_nur_am_npc_ort": true,
+    "quest_abgabe_nur_am_auftraggeber_ort": true,
+    "aushang_abgabe_nur_am_aushang_ort": true,
+    "ausnahme_flags": ["abgabe_vor_ort"],
+    "ui_verhalten_bei_ort_abweichung": {
+      "sperre_gespraechs_button": true,
+      "zeige_reise_button": true,
+      "reise_button_vorlage": "Nach {ziel_ort_name} reisen ({grund_kurz})",
+      "hinweis_vorlage": "Du bist in {aktueller_ort_name}. Reise nach {ziel_ort_name}, um mit {npc_name} zu sprechen.",
+      "starte_marsch_animation": true
+    }
+  },
+  "fraktions_routen_akt1": [
+    { "fraktion": "kronreich", "heimatsitz": "heidvang", "schritte": [
+      { "schritt": 1, "ort": "heidvang", "npc": "kronprinzessin_astrid", "erfordert_rueckreise": false },
+      { "schritt": 2, "ort": "hagenfels", "npc": "jarl_ragnvald", "einsatz_region": "westmark_ebene", "erfordert_rueckreise": true, "rueckreise_ziel": "heidvang" },
+      { "schritt": 3, "ort": "heidvang", "npc": "kronprinzessin_astrid", "erfordert_rueckreise": false } ] },
+    { "fraktion": "orden_der_flamme", "heimatsitz": "glutberg_zitadelle", "geheimnis_regel": { "thorvald_vor_akt4_nur_unerkannt": true }, "schritte": [
+      { "schritt": 1, "ort": "glutberg_zitadelle", "npc": "ordens_kastellan", "erfordert_rueckreise": false },
+      { "schritt": 2, "ort": "aschenwacht_kloster", "npc": "priorin_sigrid", "einsatz_region": "aschland_grenze", "erfordert_rueckreise": true, "rueckreise_ziel": "glutberg_zitadelle" },
+      { "schritt": 3, "ort": "glutberg_zitadelle", "npc": "ordens_kastellan", "erfordert_rueckreise": false } ] },
+    { "fraktion": "freie_haefen", "heimatsitz": "sturmhafen", "schritte": [
+      { "schritt": 1, "ort": "sturmhafen", "npc": "gildenmeister_torben", "erfordert_rueckreise": false },
+      { "schritt": 2, "ort": "nebelbucht", "npc": "hafenmeisterin_ylva", "einsatz_region": "salzklippen_kueste", "erfordert_rueckreise": true, "rueckreise_ziel": "sturmhafen" },
+      { "schritt": 3, "ort": "sturmhafen", "npc": "gildenmeister_torben", "erfordert_rueckreise": false } ] }
+  ],
+  "akte_2_bis_4_ort_bindungen": [
+    { "akt": 2, "bereich": "schwester_zweig_1", "start_und_abgabe_ort": "gastgeber_stadt_akt2", "einsatz_orte_ausserhalb": true, "erfordert_rueckreise_zum_abschluss": true },
+    { "akt": 3, "bereich": "schwester_zweig_2", "start_und_abgabe_ort": "gastgeber_stadt_akt3", "einsatz_orte_ausserhalb": true, "erfordert_rueckreise_zum_abschluss": true },
+    { "akt": 4, "bereich": "das_alte_reich_und_thing", "stationen": [
+      { "phase": "volksquest_altes_reich", "ort": "ruinen_des_alten_reichs", "erfordert_rueckreise": true },
+      { "phase": "entlarvung_thorvald", "ort": "glutberg_heiligtum", "erfordert_rueckreise": true },
+      { "phase": "grosses_thing", "ort": "thingplatz_odris", "erfordert_rueckreise": false },
+      { "phase": "armada_kriegskasse", "ort": "armada_kriegshafen", "erfordert_rueckreise": false } ] }
+  ],
+  "simulator_anpassung": {
+    "auto_reise_vor_interaktion": true,
+    "pruefe_ort_gate_in_oberflaechen_test": true,
+    "erwartetes_verhalten_falscher_ort": "Button zeigt Reiseziel statt NPC-Dialog"
+  }
+}

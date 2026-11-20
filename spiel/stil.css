@@ -1682,3 +1682,5 @@ dialog.dialog-klein[open] { opacity: 1; }
 .rueckkehr-banner strong { color: #8a3d00; }
 .auftrag-bereit strong { color: #8a3d00; }
 @media (prefers-reduced-motion: reduce) { .rk-wetter i { animation: none; display: none; } }
+/* Globales Ort-Gate (Henry, 20. 11. 2026) */
+.ort-gate-hinweis { margin: .4rem 0; padding: .35rem .6rem; border-left: 3px solid var(--abgabe); background: #fbe3c055; font-style: italic; }

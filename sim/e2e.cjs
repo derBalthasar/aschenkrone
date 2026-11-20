@@ -153,7 +153,38 @@ function startHeld(faction, role, wahl) {
     hauptquest: { schritt: SCHRITTE_AKT1[faction], wahl }, questStufe: 1, party: BEGLEITER[faction] });
   return reload({ ...s, health: rules.healthLimit(s) });
 }
-const bei = (s, knoten) => reload({ ...s, knoten, health: rules.healthLimit(s) });
+// Ort-Gate (Henry, 20. 11. 2026, „auto_reise_vor_interaktion“): Der Simulator springt nicht mehr, er reist über die
+// kürzeste Route zum Zielort. Hinterhalte unterwegs werden ausgekämpft; Nahrung und Silber füllt er vorher auf, wie ein
+// Spieler am Markt. Am Ziel rastet er (volle LP). Ohne Weg oder nach einer Niederlage springt er und meldet es.
+function bei(s, ziel, protokoll = aktuellesProtokoll) {
+  if (s.knoten === ziel) return reload({ ...s, health: rules.healthLimit(s) });
+  const route = rules.marschRoute(s, ziel);
+  if (!route) {
+    protokoll?.fehler.push("kein Weg von " + s.knoten + " nach " + ziel);
+    return reload({ ...s, knoten: ziel, health: rules.healthLimit(s) });
+  }
+  s = reload({ ...s, ressource: Math.max(s.ressource ?? 0, 3 * route.length + 6), silver: Math.max(s.silver, 60) });
+  for (const schritt of route) {
+    const n = rules.reise(s, schritt);
+    if (n === s) {
+      protokoll?.fehler.push("Reise nach " + schritt + " blockiert: " + rules.reiseGrund(s, schritt));
+      return reload({ ...s, knoten: ziel, health: rules.healthLimit(s) });
+    }
+    if (protokoll) protokoll.reiseEtappen = (protokoll.reiseEtappen ?? 0) + 1;
+    let weiter = n;
+    if (n.combat) {
+      weiter = kampf(structuredClone(n));
+      if (protokoll) protokoll.reiseKaempfe = (protokoll.reiseKaempfe ?? 0) + 1;
+      if (weiter.combat || weiter.health <= 0 || weiter.scene !== "weltknoten") {
+        if (protokoll) protokoll.reiseNiederlagen = (protokoll.reiseNiederlagen ?? 0) + 1;
+        return reload({ ...s, knoten: ziel, health: rules.healthLimit(s) });
+      }
+    }
+    s = reload({ ...weiter, health: Math.max(1, weiter.health) });
+  }
+  return reload({ ...s, health: rules.healthLimit(s) });
+}
+let aktuellesProtokoll = null;
 
 function zweig(s, fraktion, wahlArt, protokoll) {
   s = bei(s, HAUPTSTADT[fraktion]);
@@ -171,6 +202,7 @@ function zweig(s, fraktion, wahlArt, protokoll) {
 }
 
 function durchlauf(faction, role, wahl, boese, protokoll) {
+  aktuellesProtokoll = protokoll;
   let s = startHeld(faction, role, wahl);
   pruefeZahlen(s, protokoll, "Start");
   const [erst, zweit] = SCHWESTERN[faction];
@@ -269,5 +301,9 @@ for (const [profil, zeilen] of Object.entries(ergebnis)) {
       z.thorvaldEntlarvt ? "entlarvt" : "–", z.untoteDelta ?? "–", z.tor ? "offen" : "zu", z.fehler.join("; ") || "keine"].join(" | "));
   }
 }
+// Ort-Gate: Reisen statt Springen.
+const reisen = Object.values(ergebnis).flat().reduce((t, p) => ({ etappen: t.etappen + (p.reiseEtappen ?? 0), kaempfe: t.kaempfe + (p.reiseKaempfe ?? 0),
+  niederlagen: t.niederlagen + (p.reiseNiederlagen ?? 0) }), { etappen: 0, kaempfe: 0, niederlagen: 0 });
+console.log("\nOrt-Gate: " + reisen.etappen + " Reise-Etappen zu den Zielorten, " + reisen.kaempfe + " Hinterhalte unterwegs, " + reisen.niederlagen + " Niederlagen.");
 console.log("\nGespeichert: sim/e2e-ergebnis.json · Fehler gesamt: " + fehler);
 process.exitCode = fehler ? 1 : 0;

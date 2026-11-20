@@ -2352,6 +2352,7 @@ const rules = (() => {
   // Auftraggebers. Ausnahme „abgabe_vor_ort“: Aufträge, die im Ort des Aushangs selbst erledigt werden, und Hauptquest-
   // Schritte ohne Auftraggeber anderswo (Freie Häfen: Kette Zollholm → Möwenstad → Silberholm → Perlvik).
   const MARSCH = SY.daten.v2619marsch;
+  const ORTGATE = SY.daten.v2619ortGate;
   const rueckkehr = { status: MARSCH.quest_rueckkehr_system.neuer_status,
     faktor: MARSCH.quest_rueckkehr_system["rückmarsch_regeln"].ereignis_wahrscheinlichkeit_faktor,
     banner: MARSCH.quest_rueckkehr_system["rückmarsch_regeln"].hinweis_banner_text,
@@ -2560,6 +2561,36 @@ const rules = (() => {
     if (!stand.bericht && zielId === plan.ort) return plan.vignetten.hin;
     return null;
   }
+  // Globales Ort-Gate (Henry, 20. 11. 2026, quellen/henry/v2619/ort-gate.json): Gespräch, Abgabe und Aushang nur am Ort.
+  // Ist der Held woanders, zeigt die Oberfläche statt des Gesprächs eine Reise zum Zielort (Route, Etappen, Sperrgrund).
+  function ortReise(state, zielId) {
+    const ziel = N.get(zielId);
+    if (!ziel) return null;
+    if (state.knoten === zielId) return { ziel: zielId, zielName: ziel.name, hier: true, route: [], grund: null, kurz: "hier" };
+    const route = imHub(state) ? marschRoute(state, zielId) : null;
+    const grund = !imHub(state) ? "nur in der Weltreise" : !route ? "kein Weg" : reiseGrund(state, route[0]);
+    return { ziel: zielId, zielName: ziel.name, hier: false, route: route ?? [], grund,
+      kurz: grund ?? (route.length + (route.length === 1 ? " Etappe" : " Etappen")) };
+  }
+  // Ort, an dem der nächste Schritt von Hauptquest, Schwester-Zweig oder Akt 4 wartet.
+  function hauptZielOrt(state) {
+    const stand = hauptStand(state);
+    const plan = hauptPlan[state.faction];
+    if (!plan || stand.schritt >= plan.length) return null;
+    return stand.bericht?.ort ?? plan[stand.schritt].ort;
+  }
+  function akt4ZielOrt(state) {
+    const a = akteStand(state).akt4;
+    if (!a || a.schritt >= 3) return null;
+    if (a.schritt === 0) {
+      if (a.siegel.length >= 3) return null;
+      const offen = akt4Orte.siegel.filter((o) => !a.siegel.includes(o));
+      if (offen.includes(state.knoten)) return state.knoten;
+      return offen.map((o) => [o, marschRoute(state, o)?.length ?? 99]).sort((x, y) => x[1] - y[1])[0][0];
+    }
+    return a.schritt === 1 ? akt4Orte.thorvald : akt4Orte.thing;
+  }
+
   // Text für die Marsch-Animation: Vignette des Hauptquest-Beispiels oder der Rückreise-Hinweis.
   function marschVignette(state, zielId) {
     const haupt = hauptVignette(state, zielId);
@@ -3092,7 +3123,8 @@ const rules = (() => {
     const fertig = stand.schritt >= hauptPlan[state.faction].length;
     return { akt: akt.nr, titel: akt.titel, stufen: akt.stufen, fertig, wahl: stand.wahl,
       schritt: fertig ? null : hauptInfo(state.faction, stand.schritt), grund: fertig ? "abgeschlossen" : hauptGrund(state),
-      bericht: stand.bericht ? { ort: stand.bericht.ort, ortName: N.get(stand.bericht.ort).name } : null };
+      bericht: stand.bericht ? { ort: stand.bericht.ort, ortName: N.get(stand.bericht.ort).name } : null,
+      zielOrt: fertig ? null : hauptZielOrt(state) };
   }
 
   function hauptGrund(state, wahlId = null) {
@@ -3284,7 +3316,8 @@ const rules = (() => {
       schritt: zweig.stufe >= 3 ? null : { nr: zweig.stufe + 1, id: stufe.stage_id, titel: stufe.title, text: stufe.objective,
         wahlen: stufe.three_way_options ? Object.entries(stufe.three_way_options).map(([id, o]) => ({ id, label: zweigWahlLabel[id], folge: zweigWahlText(o) })) : [],
         boss: Boolean(stufe.boss_template), rohstoffe: stufe.reward_resources ?? null },
-      spez: daten.faction_specialization_unlock, grund: zweigGrund(state, fraktion, zweig.stufe === 0 ? "good" : null) };
+      spez: daten.faction_specialization_unlock, grund: zweigGrund(state, fraktion, zweig.stufe === 0 ? "good" : null),
+      zielOrt: zweig.stufe >= 3 ? null : zweigHub[fraktion] };
   }
   const zweigWahlLabel = { good: "Gute Tat: Dörfer und Wege schützen", mercenary: "Söldnerweg: gegen Silber", evil: "Schlechte Tat: plündern und erpressen" };
   const zweigWahlText = (o) => [o.reputation_delta ? "Ruf " + (o.reputation_delta > 0 ? "+" : "") + o.reputation_delta : "",
@@ -3443,7 +3476,7 @@ const rules = (() => {
       siegel: a.siegel, wahlOffen: a.wahlOffen, wahl: a.wahl, titel: q.title, text: q.summary, ziele: q.objectives ?? [],
       wahlen: a.schritt === 1 && a.wahlOffen ? Object.entries(akt4Wahlen()).map(([id, w]) => ({ id, label: w.label, folge: akt4WahlText(w) })) : [],
       thingLabel: a.schritt === 2 ? (outlaw ? q.outlaw_compatibility.alternate_path_label : "Vor das Große Thing treten") : null,
-      grund: akt4Grund(state, a.wahlOffen ? Object.keys(akt4Wahlen())[0] : null) };
+      grund: akt4Grund(state, a.wahlOffen ? Object.keys(akt4Wahlen())[0] : null), zielOrt: akt4ZielOrt(state) };
   }
   const akt4WahlText = (w) => ["Ruf aller Menschen " + (w.reputation_delta_all_human_factions > 0 ? "+" : "") + w.reputation_delta_all_human_factions,
     w.silver_bonus ? "+" + w.silver_bonus + " Silber" : "", w.bonus_resources ? "+" + w.bonus_resources.RES_RUNENSPLITTER + " Runensplitter" : "",
@@ -4853,6 +4886,6 @@ const rules = (() => {
     endgameListe, endgameStarten, aufstiegInfo, talentLernen, ahnenLernen,
     akteInfo, zweigWeiter, zweigGrund, fspezWaehlen, fspezGrund, fspezText, akt4Weiter, akt4Grund, armadaInfo, ausweichIntervall, kritChance, effektText, lagerSzeneInfo, lagerAntwort, lagerVorteile,
     auftragGrund, auftragAnnehmen, ausfuehrenGrund, auftragAusfuehren, abgabeGrund, auftragAbgeben, rueckkehrZiele, marschRoute,
-    marschVignette, rueckmarsch, marschDaten: MARSCH, aushang, auftraege, hauptquest, hauptGrund, hauptWeiter, auftragEp, rast, ertragGrund, ertragEinholen, vertragGrund, vertragSchliessen, entwurf,
+    marschVignette, rueckmarsch, marschDaten: MARSCH, ortReise, ortGate: ORTGATE, aushang, auftraege, hauptquest, hauptGrund, hauptWeiter, auftragEp, rast, ertragGrund, ertragEinholen, vertragGrund, vertragSchliessen, entwurf,
     levelThresholds: Array.from({ length: kampf.maxStufe }, (_, index) => kampf.epFuer(index + 1)) };
 })();

@@ -61,7 +61,11 @@ function stand({ fraktion, akt }) {
     }
     await pruefe("Charakterfenster", () => page.evaluate(() => document.querySelector("[data-sheet-open]").click()), "character-sheet");
     const haupt = page.locator(".welt-hauptquest .npc-start");
-    if (await haupt.count()) await pruefe("Hauptquest-Gespräch", () => haupt.first().click(), "npc-dialog");
+    if (await haupt.count() && await haupt.first().isEnabled()) await pruefe("Hauptquest-Gespräch", () => haupt.first().click(), "npc-dialog");
+    // Ort-Gate: Ist die Auftraggeberin woanders, zeigt der Abschnitt das Reiseziel statt des Dialogs.
+    else if (await haupt.count() && !(await page.locator(".welt-hauptquest .ort-gate-reise").count())) {
+      fehler.push(`${f.fraktion}/${f.akt} · Hauptquest: gesperrter Gesprächsknopf ohne Reise-Knopf`);
+    }
     schritt = "Aushang";
     await page.locator("button", { hasText: "Hofstaat" }).first().click().catch(() => {});
     await page.waitForTimeout(200);
@@ -69,6 +73,38 @@ function stand({ fraktion, akt }) {
     if (await aushang.count()) await pruefe("Aushang-Gespräch", () => aushang.first().click(), "npc-dialog");
     else fehler.push(`${f.fraktion}/${f.akt} · Aushang: kein Auftrag zum Besprechen gefunden`);
     console.log(`${f.fraktion}/${f.akt} geprüft`);
+    await page.close();
+  }
+  // Ort-Gate (Henry, 20. 11. 2026): Am falschen Ort zeigt der Knopf das Reiseziel statt des NPC-Dialogs, und die Reise
+  // startet den Marsch. Kronreich, Schritt 2 (Hagenfels), Held in Kronhall.
+  {
+    const page = await browser.newPage({ viewport: { width: 1366, height: 900 } });
+    page.on("pageerror", (e) => fehler.push("Ort-Gate: " + e.message));
+    await page.goto(seite);
+    const json = await page.evaluate(() => {
+      let s = { ...rules.create("Prüferin", "kronreich", "frau", 2), scene: "weltknoten", knoten: "kronhall", handlung: null, hauptquest: { schritt: 1, wahl: null } };
+      s = rules.read(JSON.stringify(s));
+      s.health = rules.healthLimit(s);
+      return JSON.stringify(s);
+    });
+    await page.evaluate(([k, v]) => localStorage.setItem(k, v), [KEY, json]);
+    await page.reload();
+    await page.evaluate(() => rules.setTravelDice(() => 0));
+    await page.click("#continue");
+    await page.waitForTimeout(300);
+    const npc = page.locator(".welt-hauptquest .npc-start").first();
+    if (!(await npc.isDisabled())) fehler.push("Ort-Gate: Gesprächsknopf am falschen Ort nicht gesperrt");
+    const reise = page.locator(".welt-hauptquest .ort-gate-reise").first();
+    const text = (await reise.count()) ? await reise.textContent() : "";
+    if (!/^Nach Hagenfels reisen \(1 Etappe\)$/.test(text)) fehler.push("Ort-Gate: Reise-Knopf fehlt oder falsch: „" + text + "“");
+    const hinweis = await page.locator(".welt-hauptquest .ort-gate-hinweis").first().textContent().catch(() => "");
+    if (!hinweis.includes("Du bist in Kronhall. Reise nach Hagenfels, um mit Kronprinzessin Astrid zu sprechen.")) fehler.push("Ort-Gate: Hinweis falsch: „" + hinweis + "“");
+    await reise.click();
+    await page.waitForTimeout(400);
+    if (!(await page.evaluate(() => document.querySelector(".rk-marschiert") !== null))) fehler.push("Ort-Gate: Reise startet keinen Marsch");
+    await page.waitForFunction(() => !document.getElementById("reisekarte").open, null, { timeout: 8000 }).catch(() => fehler.push("Ort-Gate: Marsch endet nicht"));
+    if (!(await page.locator(".welt-hauptquest .npc-start").first().isEnabled())) fehler.push("Ort-Gate: Gesprächsknopf am Zielort gesperrt");
+    console.log("Ort-Gate geprüft");
     await page.close();
   }
   await browser.close();

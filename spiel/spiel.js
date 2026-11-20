@@ -3734,6 +3734,28 @@
     return box;
   }
 
+  // Globales Ort-Gate (Henry, 20. 11. 2026): Ist der Held nicht am Zielort, zeigt der Abschnitt einen Hinweis und einen
+  // Reise-Knopf „Nach … reisen (…)“, der den Marsch über die kürzeste Route startet. Liefert true, wenn gesperrt.
+  const ORTGATE = rules.ortGate.globale_ort_regeln.ui_verhalten_bei_ort_abweichung;
+  function ortGate(parent, zielId, wer = null) {
+    if (!zielId || !state || state.knoten === zielId) return false;
+    const reise = rules.ortReise(state, zielId);
+    if (!reise) return false;
+    const hier = knoten.get(state.knoten)?.name ?? "der Fremde";
+    const hinweis = element("p", wer
+      ? ORTGATE.hinweis_vorlage.replace("{aktueller_ort_name}", hier).replace("{ziel_ort_name}", reise.zielName).replace("{npc_name}", wer)
+      : "Du bist in " + hier + ". Reise nach " + reise.zielName + ", um weiterzumachen.");
+    hinweis.className = "ort-gate-hinweis";
+    parent.append(hinweis);
+    if (ORTGATE.zeige_reise_button) {
+      const knopf = button(parent, ORTGATE.reise_button_vorlage.replace("{ziel_ort_name}", reise.zielName).replace("{grund_kurz}", reise.kurz),
+        () => (ORTGATE.starte_marsch_animation ? marschieren(reise.route) : update(rules.reise(state, reise.route[0]))),
+        { disabled: Boolean(reise.grund), story: true });
+      knopf.classList.add("ort-gate-reise");
+    }
+    return true;
+  }
+
   // Hauptquest Akt 1 (Kronreich und Orden): aktueller Schritt, Ausführen am richtigen Ort, Wahl am Ende des Akts.
   function weltHauptquest() {
     const haupt = rules.hauptquest(state);
@@ -3756,13 +3778,18 @@
     }
     const auftraggeber = npcs.fuerHauptquest(state.faction);
     if (auftraggeber) {
-      // Gesprächsfenster: Schritte und Entscheidungen laufen im Dialog mit der Auftraggeberin.
+      // Gesprächsfenster: Schritte und Entscheidungen laufen im Dialog mit der Auftraggeberin – nur an ihrem Ort.
       if (schritt.wahl) box.append(element("p", "Entscheidung: " + schritt.wahlen.map(option => option.label + " → " + option.folge).join(" · ")));
-      const knopf = button(box, "Mit " + npcPerson(auftraggeber).name + " sprechen · Schritt " + schritt.nr +
-        (haupt.grund && !schritt.wahl ? " · " + haupt.grund : ""), () => hauptGespraech());
+      const name = npcPerson(auftraggeber).name;
+      const gesperrt = state.knoten !== haupt.zielOrt;
+      const knopf = button(box, "Mit " + name + " sprechen · Schritt " + schritt.nr +
+        (gesperrt ? " · in " + knoten.get(haupt.zielOrt).name : haupt.grund && !schritt.wahl ? " · " + haupt.grund : ""), () => hauptGespraech(),
+        { disabled: gesperrt && ORTGATE.sperre_gespraechs_button });
       knopf.classList.add("primary", "npc-start");
+      if (gesperrt) ortGate(box, haupt.zielOrt, name);
       return box;
     }
+    if (ortGate(box, haupt.zielOrt)) return box;
     if (schritt.wahl) {
       if (state.knoten === schritt.ort) box.append(element("p", "Entscheide, wie Akt " + haupt.akt + " endet:"));
       for (const option of schritt.wahlen) {
@@ -3811,6 +3838,8 @@
           teil.append(element("p", "Stufe " + sch.nr + " · " + sch.titel + ": " + sch.text + (sch.boss ? " (Boss)" : "") +
             (sch.rohstoffe ? " · Lohn: " + Object.entries(sch.rohstoffe).map(([id, n]) => n + " " + id.replace("RES_", "").toLowerCase()).join(", ") : "")));
           if (z.geaechtet && !z.soeldner) teil.append(element("p", "Du bist hier geächtet: Als Söldner kommst du für 150 Silber hinein."));
+          const anderer = info.zweige.some((x) => x !== z && x.fortschritt > 0 && !x.fertig);
+          if (!anderer && ortGate(teil, z.zielOrt)) { box.append(teil); continue; }
           if (sch.wahlen.length) {
             for (const w of sch.wahlen) {
               const grund = rules.zweigGrund(state, z.fraktion, w.id);
@@ -3842,7 +3871,9 @@
       box.append(element("p", a4.text));
       if (a4.schritt === 0) box.append(element("p", "Reichssiegel: " + (a4.siegel.length ? a4.siegel.map((o) => knoten.get(o).name).join(", ") : "noch keins") +
         " (" + a4.siegel.length + " von 3)" + (a4.siegel.length >= 3 ? ". Danach wartet ein Hinterhalt auf der Reichsstraße." : ".")));
-      if (a4.wahlen.length) {
+      const gesperrt4 = Boolean(a4.zielOrt) && ortGate(box, a4.zielOrt);
+      if (gesperrt4) { /* Ort-Gate: erst zum Zielort reisen. */ }
+      else if (a4.wahlen.length) {
         for (const w of a4.wahlen) {
           const grund = rules.akt4Grund(state, w.id);
           button(box, w.label + " (" + w.folge + ")" + (grund ? " · " + grund : ""), () => update(rules.akt4Weiter(state, w.id)),
