@@ -167,3 +167,15 @@ Henrys Pakete A/B/C (Zieldateien handlung_akte.js/ui/dialog.js gibt es nicht). D
 - Akt 2/3: Gastgeber-Szene (`szeneInfo`, `zweigSzeneWaehlen`) vor dem ersten Zweig-Kampf; Akt 4: Szene am Sternenanker
   (Gegenlied für jede Klasse möglich) und der Große Kriegsrat (Titel Hochfeldherr von Kharos, Marke `hochfeldherr`).
 - Aushang: Henrys Abschluss-Szene rahmt die bestehende Tat-Entscheidung (`tatSzene`), Mechanik unverändert.
+
+## Gesamtsimulation Menschen (v3.0.6, 20. 11. 2026)
+
+- `node sim/gesamt.cjs` spielt 18 Läufe (3 Fraktionen × 6 Klassen) vom Prolog bis Akt 4; `--geduldig` nimmt vor
+  Zweig- und Akt-4-Kämpfen Aushang-Aufträge bis zur Untergrenze der Akt-Stufen an und nimmt bereite Gefährten auf.
+- `node sim/zugang.cjs` misst Schrift, Tippziele, Textmenge und Fachbegriffe auf Handy und Laptop (Screenshots in
+  sim/zugang/, nicht im Repo).
+- Ergebnis 20. 11.: Akt 4 nur 1 von 36 Läufen geschafft (Thorvald-Kampf, Stufenlücken, Gruppen-Skalierung). Die neun
+  Logikprobleme mit je zwei Lösungen stehen im Bericht https://claude.ai/artifact/3j9GMi3aTmqRiHPAUYSvK9 und warten
+  auf Henrys Entscheidung (Kharos-Regel: Rechenmechanik nur auf Befehl ändern).
+- Selbst behoben (nur Anzeige): Story-Szenen ohne allgemeine Begrüßung, Stufen-Hinweis über Zweigen und Akt 4,
+  „Nahrung knapp“ im Etappen-Abzeichen.
