@@ -1794,3 +1794,13 @@ dialog.dialog-klein[open] { opacity: 1; }
 .orts-bewohner li { display: grid; justify-items: center; gap: .2rem; width: 4.6rem; font-size: .75rem; text-align: center; }
 .orts-bewohner-bild { width: 4rem; height: 4.8rem; overflow: hidden; border: 1px solid #8d6947; border-radius: 3px; background: #1d1813; }
 .orts-bewohner-bild svg, .orts-bewohner-bild img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+/* Kharos 3.0: umbenannte gedruckte Kartennamen decken den alten Namen im Kartenbild ab. */
+.rk-gedruckt text.rk-umbenannt { stroke: #140c08; stroke-width: .62em; stroke-opacity: .92; }
+/* Kharos 3.0: Völker-Proportionen in der Arena, Leeren-Aura des Archivars Malakor. */
+.arena-figur .rig { transform-origin: 50% 100%; scale: var(--volk-b, 1) var(--volk-h, 1); }
+.arena-gegner .rig { scale: calc(var(--volk-b, 1) * -1) var(--volk-h, 1); transform: none; }
+.rig-leerenringe ellipse { fill: none; stroke: #6366f1; stroke-width: 1.4; opacity: .75; animation: leerenringe 2.2s linear infinite; transform-box: view-box; transform-origin: 30px 40px; }
+.rig-leerenringe ellipse + ellipse { stroke: #38bdf8; animation-direction: reverse; }
+@keyframes leerenringe { to { transform: rotate(360deg); } }
+.arena-leere.arena-boss-aura::after { background: radial-gradient(circle at 76% 50%, rgba(99, 102, 241, .5), rgba(2, 6, 23, .2) 45%, transparent 60%); }

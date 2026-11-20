@@ -20,6 +20,14 @@ for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/faehigkeit
   vm.runInContext(fs.readFileSync(path.join(root, file), "utf8"), context, { filename: file });
 }
 const rules = vm.runInContext("rules", context);
+// Kharos 3.0: Anzeigeschicht für die Geheimnisprüfungen (Malakor vor Akt 4 nur als „Verhüllter Sternenleser“, Chronist immer geheim).
+const kharos = require(path.join(root, "spiel", "kharos.js"));
+const alleTexte = (wert, aus = []) => {
+  if (typeof wert === "string") aus.push(wert);
+  else if (wert && typeof wert === "object") for (const v of Object.values(wert)) alleTexte(v, aus);
+  return aus;
+};
+const angezeigt = (s, extra) => alleTexte([s.journal, s.notes, rules.akteInfo(s), extra]).map((t) => kharos.text(t, kharos.entlarvtIn(s)));
 const NQ = vm.runInContext("nebenquestDaten", context);
 const SY = rules.systeme;
 rules.setTravelDice(() => 0.99);
@@ -233,6 +241,10 @@ function durchlauf(faction, role, wahl, boese, protokoll) {
   if (!s) return protokoll;
   s = bei(s, "glutberg");
   const untoteVorher = s.weltLeisten?.untote ?? rules.leistenStart.untote;
+  // Geheimnis 1: Vor der Entlarvung darf kein angezeigter Text „Malakor“ nennen.
+  const vorher = angezeigt(s);
+  protokoll.malakorVerborgen = !kharos.entlarvtIn(s) && !vorher.some((t) => /Malakor/.test(t)) && vorher.some((t) => /Verhüllte/.test(t));
+  if (!protokoll.malakorVerborgen) protokoll.fehler.push("Malakor vor Akt 4 erkennbar: " + (vorher.find((t) => /Malakor/.test(t)) ?? "kein Tarnname sichtbar"));
   s = schaffen(s, (x) => rules.akt4Weiter(x), protokoll, "Akt 4 Thorvald");
   if (!s) return protokoll;
   const wahlen = rules.akteInfo(s).akt4.wahlen.map((w) => w.id);
@@ -240,6 +252,11 @@ function durchlauf(faction, role, wahl, boese, protokoll) {
   protokoll.thorvaldEntlarvt = s.marks.includes("thorvald-entlarvt");
   protokoll.untoteDelta = (s.weltLeisten?.untote ?? 0) - untoteVorher;
   protokoll.stilleFederVerborgen = !s.journal.some((t) => /Stille Feder/.test(t) && /ist|war|enthüllt/.test(t));
+  // Geheimnis 2: Nach der Entlarvung heißt er Archivar Malakor; der Schweigsame Chronist bleibt namenlos.
+  const nachher = angezeigt(s);
+  if (!kharos.entlarvtIn(s) || !nachher.some((t) => /Malakor/.test(t))) protokoll.fehler.push("Malakor nach der Entlarvung nicht genannt");
+  protokoll.chronistGeheim = !nachher.some((t) => /Schweigsamen? Chronist\w* (ist|war|heißt|hieß)\b|Chronist\w* enthüllt|wahre[rn]? Name/.test(t));
+  if (!protokoll.chronistGeheim) protokoll.fehler.push("Identität des Schweigsamen Chronisten verraten");
   s = reload(rules.akt4Weiter(bei(s, "kronhall")));
   protokoll.thing = s.marks.includes("grosses-thing");
   if (!protokoll.thing) protokoll.fehler.push("Großes Thing nicht erreicht: " + rules.akt4Grund(s));
@@ -310,5 +327,14 @@ const reisen = Object.values(ergebnis).flat().reduce((t, p) => ({ etappen: t.eta
 console.log("\nOrt-Gate: " + reisen.etappen + " Reise-Etappen zu den Zielorten, " + reisen.kaempfe + " Hinterhalte unterwegs, " + reisen.niederlagen + " Niederlagen.");
 const hc = Object.values(ergebnis).flat().filter((p) => "hardcoreFrei" in p);
 console.log("Schwierigkeit: Hardcore nach Akt 4 freigeschaltet in " + hc.filter((p) => p.hardcoreFrei).length + " von " + hc.length + " Läufen (Standard: leicht).");
+// Rest-LP des Helden (in % der Höchst-LP) je Akt-Kampf, nur gewonnene Kämpfe.
+const restLp = {};
+for (const k of Object.values(ergebnis).flat().flatMap((p) => p.kaempfe).filter((k) => k.sieg)) (restLp[k.name.replace(/ \d+$/, "")] ??= []).push(k.restLp);
+console.log("\nRest-LP (Durchschnitt / Minimum in %):");
+for (const [name, werte] of Object.entries(restLp))
+  console.log("  " + name + ": " + Math.round(werte.reduce((a, b) => a + b, 0) / werte.length) + " / " + Math.min(...werte) + " (" + werte.length + " Siege)");
+const geheim = Object.values(ergebnis).flat().filter((p) => "malakorVerborgen" in p);
+console.log("Kharos-Geheimnisse: Malakor vor Akt 4 verborgen in " + geheim.filter((p) => p.malakorVerborgen).length + " von " + geheim.length +
+  " Läufen, Schweigsamer Chronist geheim in " + geheim.filter((p) => p.chronistGeheim).length + " von " + geheim.length + ".");
 console.log("\nGespeichert: sim/e2e-ergebnis.json · Fehler gesamt: " + fehler);
 process.exitCode = fehler ? 1 : 0;

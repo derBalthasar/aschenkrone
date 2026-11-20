@@ -61,18 +61,26 @@ const kampfArena = (() => {
     glut_flamme_hand: '<path class="rig-glut" d="M12 40 Q8 30 14 24 Q14 32 18 30 Q20 36 12 40Z"/>',
     holz_buckler: '<circle class="rig-holzschild" cx="15" cy="38" r="7"/>',
   };
-  const silhouette = (typ) => daten().arena.klassen_und_gegner_silhouetten.find((s) => s.typ === typ);
+  // Kharos 3.0 (Paket 3B): Bossmodelle Archivar Malakor und Avatar von Vael-Thar.
+  const kharosBoss = (typ) => {
+    const b = typeof kharosDaten !== "undefined" && kharosDaten.arena.bosse.find((x) => "boss_" + x.boss_id === typ);
+    return b ? { typ, skalierung: b.skalierung, waffe: b.boss_id === "archivar_malakor" ? "aschen_zepter" : "runenstab",
+      helm: "ordens_kapuze", schild: "glut_flamme_hand", aura: b.aura, akzent_farbe: b.akzent_farbe, kharos: true } : null;
+  };
+  const silhouette = (typ) => kharosBoss(typ) ?? daten().arena.klassen_und_gegner_silhouetten.find((s) => s.typ === typ);
 
   function rig(typ, { gegner = false } = {}) {
     const s = silhouette(typ) ?? silhouette("deserteur_pluenderer");
-    const helm = s.typ === "boss_thorvald" ? helme.ordens_kapuze + helme.krone : helme[s.helm] ?? helme.zerfetzte_kappe;
-    const schild = s.typ === "boss_thorvald" ? schilde.glut_flamme_hand : schilde[s.schild] ?? schilde.keiner;
+    const boss = s.typ === "boss_thorvald" || s.kharos;
+    const helm = boss ? helme.ordens_kapuze + helme.krone : helme[s.helm] ?? helme.zerfetzte_kappe;
+    const schild = boss ? schilde.glut_flamme_hand : schilde[s.schild] ?? schilde.keiner;
     const svg = document.createElementNS(NS, "svg");
     svg.setAttribute("viewBox", "-4 -6 68 90");
     svg.setAttribute("class", "rig");
     svg.style.setProperty("--akzent", s.akzent_farbe);
     svg.innerHTML =
       (s.aura ? '<ellipse class="rig-aura" cx="30" cy="40" rx="30" ry="40"/>' : "") +
+      (s.kharos ? '<g class="rig-leerenringe"><ellipse cx="30" cy="40" rx="34" ry="12"/><ellipse cx="30" cy="40" rx="26" ry="8"/></g>' : "") +
       '<ellipse class="rig-schatten" cx="30" cy="80" rx="20" ry="4"/>' +
       '<g class="rig-beine"><path d="M24 52 L20 78 H26 L29 56"/><path d="M36 52 L40 78 H34 L31 56"/></g>' +
       '<path class="rig-torso" d="M20 22 Q30 18 40 22 L42 54 Q30 58 18 54Z"/><path class="rig-akzent" d="M20 44 H40 V48 H20Z"/>' +
@@ -104,6 +112,13 @@ const kampfArena = (() => {
     box.style.left = slot.x + "%";
     box.style.top = slot.y + "%";
     box.style.setProperty("--skala", f.skala ?? 1);
+    // Kharos 3.0: Völker-Proportionen (Höhe/Breite) und Akzentfarbe der Figuren.
+    const volk = typeof kharosDaten !== "undefined" && f.volk ? kharosDaten.arena.voelker.find((v) => v.volk === f.volk) : null;
+    if (volk) {
+      box.style.setProperty("--volk-h", volk.proportionen.hoehe_faktor);
+      box.style.setProperty("--volk-b", volk.proportionen.breite_faktor);
+      box.dataset.volk = volk.volk;
+    }
     box.style.animationDelay = -(slot.x * 37 % 1800) + "ms";
     if (f.bild) {
       const img = document.createElement("img");
@@ -123,7 +138,7 @@ const kampfArena = (() => {
   function bauen(beschreibung) {
     const arena = document.createElement("div");
     const b = buehne(beschreibung.buehne);
-    arena.className = "kampf-arena" + (beschreibung.aura ? " arena-boss-aura" : "");
+    arena.className = "kampf-arena" + (beschreibung.aura ? " arena-boss-aura" : "") + (beschreibung.leere ? " arena-leere" : "");
     arena.dataset.buehne = b.buehnen_id;
     arena.setAttribute("role", "img");
     arena.setAttribute("aria-label", "Kampfbühne: " + b.name);

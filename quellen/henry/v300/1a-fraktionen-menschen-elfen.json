@@ -1,0 +1,287 @@
+{
+  "quelle": "Henry, Projekt-Thread 20. 11. 2026 (Kharos 3.0)",
+  "schema_version": "3.0.0",
+  "paket": "kharos_master_teil_1a_von_1b",
+  "welt_umbenennung": {
+    "welt_name_neu": "Kharos",
+    "endfeind_unspielbar": {
+      "id": "vael_thar",
+      "name": "Vael-Thar, der Verschlinger des Atems",
+      "rolle": "Kosmischer Endfeind aller lebenden Voelker; Ziel des Rituals der Untoten."
+    },
+    "geheimnis_mapping_e2e_kompatibel": {
+      "verraeter_vor_akt4": {
+        "id": "archivar_malakor",
+        "tarnname_vor_akt4": "Verhuellter Sternenleser",
+        "wahre_rolle": "Verräter im inneren Zirkel, der heimlich die Seals zu Vael-Thar schwaecht",
+        "darf_vor_akt4_enttarnt_werden": false
+      },
+      "stille_feder": {
+        "id": "der_schweigsame_chronist",
+        "tarnname": "Der Namenlose Bote",
+        "identitaet_bleibt_immer_geheim": true
+      }
+    },
+    "unveraenderte_mechaniken": [
+      "etappen_system",
+      "waehrung_silber_und_5_kontor_ressourcen",
+      "kampfformel_div_3_5_ruestung_14",
+      "stufen_1_bis_30_und_meister_talente",
+      "ort_gate_und_2d_arena"
+    ]
+  },
+  "voelker_kampfressourcen": [
+    {
+      "volk": "menschen",
+      "ressource_id": "flammeneifer",
+      "anzeigename": "Flammeneifer",
+      "start": 5,
+      "max": 10,
+      "mechanik": "Steigt durch Angriffe & Befehle, speist Ritter- und Inquisitions-Fähigkeiten"
+    },
+    {
+      "volk": "elfen",
+      "ressource_id": "astralstrom",
+      "anzeigename": "Astralstrom",
+      "start": 5,
+      "max": 10,
+      "mechanik": "Regeneriert pro Phase, speist Licht-, Natur- und Blutweb-Magie"
+    },
+    {
+      "volk": "zwerge",
+      "ressource_id": "runenhitze",
+      "anzeigename": "Runenhitze",
+      "start": 5,
+      "max": 10,
+      "mechanik": "Baut sich bei erlittenen Treffern und Schmiedeschlägen auf"
+    },
+    {
+      "volk": "orks",
+      "ressource_id": "blutwut",
+      "anzeigename": "Blutwut",
+      "start": 5,
+      "max": 10,
+      "mechanik": "Wächst je niedriger die eigenen LP sinken und bei kritischen Treffern"
+    },
+    {
+      "volk": "untote",
+      "ressource_id": "seelenessenz",
+      "anzeigename": "Seelenessenz",
+      "start": 5,
+      "max": 10,
+      "mechanik": "Wird aus besiegten Gegnern gesaugt; speist Flüche und Untoten-Erweckung"
+    }
+  ],
+  "fraktionen_menschen_und_elfen": [
+    {
+      "fraktion_id": "menschen_kaiserreich",
+      "volk": "menschen",
+      "name": "Das Kaiserreich von Valen",
+      "heimatstadt": "Valengrad",
+      "zweite_stadt": "Eisentor",
+      "anfuehrer_npc": "Kaiserin Aurelia von Valen",
+      "zweiter_npc": "Marschall Kaelen",
+      "klassen": [
+        {
+          "klasse_id": "valen_kaiserritter",
+          "name": "Kaiserlicher Schildritter",
+          "rolle": "tank_nahkampf",
+          "primaerattribut": "staerke",
+          "ausweich_intervall": 6,
+          "faehigkeiten": [
+            "eisernes_bollwerk",
+            "kaiserlicher_spalter",
+            "banner_der_standhaftigkeit"
+          ]
+        },
+        {
+          "klasse_id": "valen_kriegstaktiker",
+          "name": "Kriegstaktiker",
+          "rolle": "support_kontrolle",
+          "primaerattribut": "intelligenz",
+          "ausweich_intervall": 7,
+          "faehigkeiten": [
+            "flankenbefehl",
+            "schwachstelle_analysieren",
+            "schlachtreihe_schliessen"
+          ]
+        }
+      ]
+    },
+    {
+      "fraktion_id": "menschen_flammenorden",
+      "volk": "menschen",
+      "name": "Der Flammenorden von Solis",
+      "heimatstadt": "Sonnenwacht",
+      "zweite_stadt": "Aschenkloster",
+      "anfuehrer_npc": "Großinquisitor Vane",
+      "zweiter_npc": "Läuterin Seraphina",
+      "klassen": [
+        {
+          "klasse_id": "solis_laeuterer",
+          "name": "Flammenschwert-Läuterer",
+          "rolle": "nahkampf_burst",
+          "primaerattribut": "staerke",
+          "ausweich_intervall": 7,
+          "faehigkeiten": [
+            "brennendes_urteil",
+            "reine_flamme_schild",
+            "scheiterhaufen_hieb"
+          ]
+        },
+        {
+          "klasse_id": "solis_sonnenpriester",
+          "name": "Sonnenpriester",
+          "rolle": "heiler_magie",
+          "primaerattribut": "intelligenz",
+          "ausweich_intervall": 7,
+          "faehigkeiten": [
+            "lichtgebet",
+            "segen_der_flamme",
+            "blendender_strahl"
+          ]
+        }
+      ]
+    },
+    {
+      "fraktion_id": "menschen_freie_kapitaene",
+      "volk": "menschen",
+      "name": "Die Freien Kapitäne von Korvath",
+      "heimatstadt": "Korvath-Bucht",
+      "zweite_stadt": "Nebelklippe",
+      "anfuehrer_npc": "Flottenfürst Draven",
+      "zweiter_npc": "Kapitänin Mirella",
+      "klassen": [
+        {
+          "klasse_id": "korvath_korsar",
+          "name": "Sturmkorsar",
+          "rolle": "schurke_nahkampf",
+          "primaerattribut": "geschick",
+          "ausweich_intervall": 5,
+          "faehigkeiten": [
+            "enterhaken_stoss",
+            "giftklinge",
+            "nebelwurf"
+          ]
+        },
+        {
+          "klasse_id": "korvath_schwarzpulver_schuetze",
+          "name": "Schwarzpulverschütze",
+          "rolle": "fernkampf",
+          "primaerattribut": "geschick",
+          "ausweich_intervall": 5,
+          "faehigkeiten": [
+            "durchschlag_salve",
+            "blendgranate",
+            "gezielter_kopfschuss"
+          ]
+        }
+      ]
+    },
+    {
+      "fraktion_id": "elfen_hochelfen",
+      "volk": "elfen",
+      "name": "Hochelfen · Die Sonnenzitadelle von Aethel",
+      "heimatstadt": "Aethel-Spitze",
+      "zweite_stadt": "Sternenwarte",
+      "anfuehrer_npc": "Erzmagierin Lyraea",
+      "zweiter_npc": "Klingenfürst Thalion",
+      "klassen": [
+        {
+          "klasse_id": "aethel_astralweber",
+          "name": "Astralweber",
+          "rolle": "magie_aoe",
+          "primaerattribut": "intelligenz",
+          "ausweich_intervall": 7,
+          "faehigkeiten": [
+            "sternenlanze",
+            "arkane_barriere",
+            "himmelssturm"
+          ]
+        },
+        {
+          "klasse_id": "aethel_sonnenwaechter",
+          "name": "Sonnenwächter",
+          "rolle": "nahkampf_geschick",
+          "primaerattribut": "geschick",
+          "ausweich_intervall": 5,
+          "faehigkeiten": [
+            "spiegelklinge",
+            "tanz_der_morgenroete",
+            "astral_konter"
+          ]
+        }
+      ]
+    },
+    {
+      "fraktion_id": "elfen_waldelfen",
+      "volk": "elfen",
+      "name": "Waldelfen · Das Dornenreich von Sylvar",
+      "heimatstadt": "Wurzelkron",
+      "zweite_stadt": "Moosgrund",
+      "anfuehrer_npc": "Hüterin Faela",
+      "zweiter_npc": "Wildläufer Corin",
+      "klassen": [
+        {
+          "klasse_id": "sylvar_dornenschuetze",
+          "name": "Dornenschütze",
+          "rolle": "fernkampf",
+          "primaerattribut": "geschick",
+          "ausweich_intervall": 5,
+          "faehigkeiten": [
+            "giftdorn_pfeil",
+            "pfeilhagel_des_waldes",
+            "schatten_rueckzug"
+          ]
+        },
+        {
+          "klasse_id": "sylvar_wurzelrufer",
+          "name": "Wurzelrufer",
+          "rolle": "heiler_natur",
+          "primaerattribut": "intelligenz",
+          "ausweich_intervall": 7,
+          "faehigkeiten": [
+            "rankenfessel",
+            "lebenssaft_heilung",
+            "zorn_der_alten_baeume"
+          ]
+        }
+      ]
+    },
+    {
+      "fraktion_id": "elfen_nachtelfen",
+      "volk": "elfen",
+      "name": "Nachtelfen · Die Blutweber von Vael’Dorn",
+      "heimatstadt": "Vael’Dorn",
+      "zweite_stadt": "Knochenspitze",
+      "anfuehrer_npc": "Blutfürst Malakorin",
+      "zweiter_npc": "Schattenkünstlerin Vespera",
+      "klassen": [
+        {
+          "klasse_id": "vael_blutklingen_taenzer",
+          "name": "Blutklingentänzer",
+          "rolle": "schurke_assassine",
+          "primaerattribut": "geschick",
+          "ausweich_intervall": 5,
+          "faehigkeiten": [
+            "arterienschnitt",
+            "schattenschritt",
+            "kunst_des_schmerzes"
+          ]
+        },
+        {
+          "klasse_id": "vael_knochenformer",
+          "name": "Knochenformer",
+          "rolle": "blutmagie_kontrolle",
+          "primaerattribut": "intelligenz",
+          "ausweich_intervall": 7,
+          "faehigkeiten": [
+            "blutlanze",
+            "knochenschild_weben",
+            "lebensraub_ritual"
+          ]
+        }
+      ]
+    }
+  ]
+}

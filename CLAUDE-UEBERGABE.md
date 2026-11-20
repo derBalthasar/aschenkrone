@@ -102,3 +102,18 @@ Henrys JSONs `npc-portraets-engine.json`, `npc-portraets-svg-teil1.json`, `npc-p
 - `spiel/npc-portraets.js` (global `npcPortraets`): `fest(npcId)`, `pool(archetyp, seed, ort)`, `fuerNpc`, `zeigen(box, eintrag)`. Lädt erst `assets/portraits/<dateiname>` (PNG, dann WebP), sonst Henrys SVG, sonst ein aus den Merkmalen erzeugtes SVG (Astrid, bauer_var_3, schmied_var_3, soeldner_var_2 haben keine Zeichnung).
 - Eingebaut: Gesprächsfenster (Astrid, Ausrufer am Aushang, Dorfvorsteher, Fährfrau, Reeder, Händler), Porträtleiste „Leute“ in Hofstaat und Kontor-Reiter.
 - Ragnvald, Kastellan, Sigrid, Torben, Ylva und die zwei geheimen Figuren sind hinterlegt, erscheinen aber erst mit den Dialog-Paketen.
+
+## Kharos 3.0: Umbenennungsschicht (20. 11. 2026)
+
+Henrys Pakete 1A–3B und das Mapping liegen in `quellen/henry/v300/`. `node quellen/kharos-erzeugen.cjs` erzeugt daraus
+`spiel/kharos-daten.js`. Verbindlich (Henry 13:08/13:11): Karte „Entwurf 3“, alle 510 Orte, IDs, Spielstände, das 6×6-
+Klassensystem und alle Rechenregeln bleiben. `spiel/kharos.js` benennt nur angezeigten Text um (MutationObserver über
+Textknoten und title/aria-label/placeholder/alt): Welt, 15 Fraktionen, 15 Haupt- und 15 Zweitstädte, Klassennamen
+(nach Rolle auf die Grundklasse gelegt), Hauptfiguren. Daten und Nachschlagen per Name bleiben unverändert.
+- Geheimnisse: Thorvald heißt vor der Entlarvung „der Verhüllte Sternenleser“, danach „Archivar Malakor“
+  (`kharos.entlarvtIn(state)`). Die Stille Feder heißt „der Schweigsame Chronist“, ihre Identität bleibt geheim.
+  `sim/e2e.cjs` prüft beides in allen 39 Läufen.
+- Miniboss-Namen, die mit Hauptfiguren kollidierten: Erzketzer Morkhal, Inquisitor Varn, Kapitän „Kielholer“ Dravik.
+- Akt 5, Untoten-Korrumpierung und nq_01–nq_20 stehen als Vorschau („Chronik von Kharos“) im Hofstaat, noch nicht spielbar.
+- Arena: Akt-4-Boss nutzt das Malakor-Modell (Skala 1,3, Leerenringe), Figuren erhalten Völker-Proportionen.
+- Die Volks-Kampfressourcen (Flammeneifer usw.) sind noch nicht eingebaut, weil sie die Kampfmechanik ändern würden.

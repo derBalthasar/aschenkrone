@@ -96,15 +96,48 @@ function stand({ fraktion, akt }) {
     if (!(await npc.isDisabled())) fehler.push("Ort-Gate: Gesprächsknopf am falschen Ort nicht gesperrt");
     const reise = page.locator(".welt-hauptquest .ort-gate-reise").first();
     const text = (await reise.count()) ? await reise.textContent() : "";
-    if (!/^Nach Hagenfels reisen \(1 Etappe\)$/.test(text)) fehler.push("Ort-Gate: Reise-Knopf fehlt oder falsch: „" + text + "“");
+    if (!/^Nach Eisentor reisen \(1 Etappe\)$/.test(text)) fehler.push("Ort-Gate: Reise-Knopf fehlt oder falsch: „" + text + "“");
     const hinweis = await page.locator(".welt-hauptquest .ort-gate-hinweis").first().textContent().catch(() => "");
-    if (!hinweis.includes("Du bist in Kronhall. Reise nach Hagenfels, um mit Kronprinzessin Astrid zu sprechen.")) fehler.push("Ort-Gate: Hinweis falsch: „" + hinweis + "“");
+    if (!hinweis.includes("Du bist in Valengrad. Reise nach Eisentor, um mit Kaiserin Aurelia zu sprechen.")) fehler.push("Ort-Gate: Hinweis falsch: „" + hinweis + "“");
     await reise.click();
     await page.waitForTimeout(400);
     if (!(await page.evaluate(() => document.querySelector(".rk-marschiert") !== null))) fehler.push("Ort-Gate: Reise startet keinen Marsch");
     await page.waitForFunction(() => !document.getElementById("reisekarte").open, null, { timeout: 8000 }).catch(() => fehler.push("Ort-Gate: Marsch endet nicht"));
     if (!(await page.locator(".welt-hauptquest .npc-start").first().isEnabled())) fehler.push("Ort-Gate: Gesprächsknopf am Zielort gesperrt");
     console.log("Ort-Gate geprüft");
+    await page.close();
+  }
+  // Kharos 3.0: Anzeigenamen der 15 Fraktionen, Städte und Figuren; Malakor vor Akt 4 nur als Tarnname.
+  {
+    const page = await browser.newPage({ viewport: { width: 1366, height: 900 } });
+    page.on("pageerror", (e) => fehler.push("Kharos: " + e.message));
+    await page.goto(seite);
+    await page.getByText("Neues Spiel").first().click();
+    await page.waitForTimeout(200);
+    const start = await page.evaluate(() => document.body.innerText);
+    for (const name of ["Kaiserreich von Valen", "Flammenorden von Solis", "Freie Kapitäne von Korvath"])
+      if (!start.includes(name)) fehler.push("Kharos: Fraktion „" + name + "“ fehlt in der Auswahl");
+    for (const alt of ["Kronreich", "Orden der Flamme", "Freie Häfen", "Odris"])
+      if (start.includes(alt)) fehler.push("Kharos: alter Name „" + alt + "“ noch sichtbar");
+    const json = await page.evaluate(() => {
+      let s = { ...rules.create("Prüferin", "kronreich", "frau", 2), scene: "weltknoten", knoten: "kronhall", handlung: null };
+      s = rules.read(JSON.stringify(s));
+      s.health = rules.healthLimit(s);
+      s.journal = ["Erzpriester Thorvald segnet die Glut. Die Stille Feder schweigt."];
+      return JSON.stringify(s);
+    });
+    await page.evaluate(([k, v]) => localStorage.setItem(k, v), [KEY, json]);
+    await page.reload();
+    await page.click("#continue");
+    await page.waitForTimeout(300);
+    await page.getByText("A · Hofstaat", { exact: false }).first().click();
+    await page.waitForTimeout(200);
+    const hub = await page.evaluate(() => document.body.innerText + " " + document.title);
+    if (!hub.includes("Valengrad")) fehler.push("Kharos: Hauptstadt Valengrad fehlt");
+    if (/Kronhall|Thorvald|Stille Feder/.test(hub)) fehler.push("Kharos: alter Name im Stadt-Hub sichtbar");
+    if (/Malakor/.test(hub)) fehler.push("Kharos: Malakor vor Akt 4 erkennbar");
+    if (!(await page.locator(".welt-chronik-kharos").count())) fehler.push("Kharos: Chronik (Akt 5 und Aushänge) fehlt im Hofstaat");
+    console.log("Kharos geprüft");
     await page.close();
   }
   await browser.close();

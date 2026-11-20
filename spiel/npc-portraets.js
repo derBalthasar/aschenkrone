@@ -8,7 +8,8 @@ const npcPortraets = (() => {
   const ORDNER = () => daten().engine.asset_ordner;
 
   // Zuordnung der Spielfiguren (spiel/npcs.js) zu Henrys Porträts. Die übrigen festen Figuren kommen mit den Dialog-Paketen.
-  const spielNpc = { astrid: "kronprinzessin_astrid" };
+  // Kharos 3.0: Die Auftraggeber tragen jetzt die Kharos-Figuren (Henrys Paket 3A).
+  const spielNpc = { astrid: "kaiserin_aurelia", ragna: "grossinquisitor_vane", zollmeister: "flottenfuerst_draven" };
   const spielPool = { dorfvorsteher: "bauer_und_dorfbewohner", faehrfrau: "bauer_und_dorfbewohner", boersenhaendler: "kontor_verwalter",
     reeder: "kontor_verwalter" };
   // Astrid hat ein fertiges Gemälde, aber keine SVG-Zeichnung: Merkmale für den Fallback aus Henrys Bildbeschreibung.
@@ -34,6 +35,8 @@ const npcPortraets = (() => {
 
   // Feste Figur nach Henrys npc_id.
   function fest(npcId) {
+    const k = typeof kharosDaten !== "undefined" ? kharosDaten.portraets.find((x) => x.npc_id === npcId) : null;
+    if (k) return { id: k.npc_id, name: k.name, datei: k.npc_id + ".png", svg: k.svg_markup || null, merkmale: null, geheim: Boolean(k.geheimnis_sperre) };
     const f = daten().engine.feste_hauptcharaktere.find((x) => x.npc_id === npcId);
     if (!f) return null;
     return { id: f.npc_id, name: f.name, datei: f.dateiname, svg: svgVon(stamm(f.dateiname)), merkmale: eigeneMerkmale[f.npc_id] ?? null,

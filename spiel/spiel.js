@@ -2778,10 +2778,11 @@
     const creature = world.creatures[combatId];
     const thorvald = /thorvald/.test(combatId);
     const name = enemy.name + " " + (world.fights[combatId]?.name ?? creature?.name ?? "");
-    const typ = thorvald && enemy.id === 0 ? "boss_thorvald" : bestienMuster.test(name) ? "bestie" :
+    // Kharos 3.0: Der Akt-4-Boss ist Archivar Malakor (Gegenlied gilt unverändert für diesen Kampf).
+    const typ = thorvald && enemy.id === 0 ? "boss_archivar_malakor" : bestienMuster.test(name) ? "bestie" :
       /zelot|ketzer|priester|hexer|pilger|kult|draugr|wiedergänger|geist|schatten|gebundene/i.test(name) ? "pyromant_kleriker" :
       /schütze|späher|spione|wilderer|jäger/i.test(name) ? "schurke_spaeher" : "deserteur_pluenderer";
-    const skala = typ === "boss_thorvald" ? kampfArena.daten().arena.klassen_und_gegner_silhouetten.find((x) => x.typ === "boss_thorvald").skalierung :
+    const skala = typ === "boss_archivar_malakor" ? kharosDaten.arena.bosse.find((x) => x.boss_id === "archivar_malakor").skalierung :
       ["anfuehrer", "endgegner"].includes(enemy.rang) ? 1.18 : 1;
     return { id: enemy.id, name: enemy.name, lp: enemy.health, max: enemy.max, typ, skala,
       bild: enemy.id === 0 && creature?.image ? creature.image : null, akzent: "#78716c",
@@ -2791,7 +2792,7 @@
   // Bühne nach Region (Henrys Katalog, auf die Orte des Spiels übertragen).
   function kampfBuehne(s) {
     const id = s.combat?.id ?? "";
-    if (/thorvald/.test(id)) return { buehne: KAMPFBUEHNEN.boss_sonderbeleuchtung.erzpriester_thorvald.ueberschreibe_buehne, aura: true };
+    if (/thorvald/.test(id)) return { buehne: KAMPFBUEHNEN.boss_sonderbeleuchtung.erzpriester_thorvald.ueberschreibe_buehne, aura: true, leere: true };
     if (/aschenschatten|runenfresser|mutterdertiefen|stollenkriecher/.test(id) || s.akte?.akt4?.siegelKampf) return { buehne: "altes_reich_ruinen" };
     const hier = rules.aktuellerKnoten(s) ?? s.knoten;
     const k = hier ? knoten.get(hier) : null;
@@ -2812,8 +2813,10 @@
     return { buehne: KAMPFBUEHNEN.standard_buehne };
   }
   function arenaBeschreibung(s) {
-    const gruppe = [{ id: "hero", name: s.name, typ: klassenSilhouette[s.role] ?? "krieger_blutritter", lp: s.health, max: rules.healthLimit(s) },
+    const gruppe = [{ id: "hero", name: s.name, typ: klassenSilhouette[s.role] ?? "krieger_blutritter", lp: s.health, max: rules.healthLimit(s),
+      volk: klassen.fraktionen[s.faction]?.volk },
       ...s.party.map((id) => ({ id, name: world.companions[id].name, typ: klassenSilhouette[world.companions[id].klasse] ?? "krieger_blutritter",
+        volk: world.companions[id].volk ?? klassen.fraktionen[s.faction]?.volk,
         lp: rules.memberVitals(s, id).health, max: rules.memberVitals(s, id).max ?? 1 }))];
     return { ...kampfBuehne(s), gruppe, gegner: rules.targets(s).map((enemy) => gegnerFigur(enemy, s.combat.id)) };
   }
@@ -4406,6 +4409,8 @@
     if (siedlung) panel.append(siedlung);
     const endgame = weltEndgame();
     if (endgame) panel.append(endgame);
+    const chronik = weltChronikKharos();
+    if (chronik) panel.append(chronik);
     panel.append(element("h3", "Hofstaat und Diplomatie"));
     const vertraege = (state.vertraege ?? []).map(id => klassen.fraktionen[id].name);
     panel.append(element("p", "Handelsverträge: " + (vertraege.length ? vertraege.join(", ") : "noch keine") +
@@ -4424,6 +4429,42 @@
     if (!renderCandidates(panel)) {
       panel.append(element("p", "Hier wartet niemand auf Anwerbung. Söldner warten in Kornwik, Heidvang, Eiswacht und Glutberg."));
     }
+  }
+
+  // Kharos 3.0 (Paket 2B/1B): Akt 5, Untoten-Korrumpierung und die 20 Aushänge als Vorschau.
+  // Noch nicht spielbar: Die Inhalte stehen als Plan im Hofstaat, Regeln und Werte bleiben unberührt.
+  function weltChronikKharos() {
+    if (typeof kharosDaten === "undefined") return null;
+    const volk = klassen.fraktionen[state.faction]?.volk;
+    const untot = volk === "untote";
+    const akt5 = kharosDaten.kampagne.akt5;
+    const box = element("details");
+    box.className = "welt-chronik-kharos";
+    box.append(element("summary", "Chronik von Kharos · Vorschau auf Akt 5 und die Aushänge"));
+    box.append(element("p", "Diese Kapitel sind angekündigt, aber noch nicht spielbar."));
+    box.append(element("h4", "Akt 5 · " + akt5.titel + " (Stufe " + akt5.stufe.min + "–" + akt5.stufe.max + ")"));
+    box.append(element("p", untot ? akt5.zielkontinente_konflikte.regeln_untote : akt5.zielkontinente_konflikte.regeln_lebende));
+    const liste = element("ul");
+    for (const k of akt5.zielkontinente_konflikte.konflikte.filter((k) => k.ziel_volk !== volk)) {
+      liste.append(element("li", k.kontinent + ": " + (untot
+        ? "Eroberung – " + k.eroberung_quest + " Korrumpierung – " + k.untoten_korrumpierung
+        : "Bündnis – " + k.buendnis_quest + " Eroberung – " + k.eroberung_quest)));
+    }
+    box.append(liste);
+    if (untot) {
+      const u = kharosDaten.untote.korrumpierung_ablauf;
+      box.append(element("p", "Korrumpierung: " + u.wirkung + ". Jedes gestürzte Volk bringt " + u.ritual_fortschritt_pro_volk +
+        " % Ritual-Fortschritt, bei " + u.ritual_ziel_vael_thar + " % öffnet sich das Tor. Diplomatie und Bündnisse sind den Untoten verwehrt."));
+    }
+    const ende = untot ? akt5.endgame_finale_vael_thar.ende_untote : akt5.endgame_finale_vael_thar.ende_lebende;
+    box.append(element("p", "Finale am " + akt5.endgame_finale_vael_thar.schauplatz + " · " + ende.titel + ": " + ende.beschreibung));
+    box.append(element("h4", "Aushänge der Chronik"));
+    const nq = element("ul");
+    for (const q of kharosDaten.nebenquests.filter((q) => q.region === volk || q.region === "endgame_riss")) {
+      nq.append(element("li", q.titel + " · Stufe " + q.stufe.min + "–" + q.stufe.max + " · " + q.belohnung_silber + " Silber, " + q.belohnung_ep + " EP"));
+    }
+    box.append(nq);
+    return box;
   }
 
   // Siedlung der Menschen (Bau-Datei): Phase, Ausbau, Gebäude, Grenzstraßen, Garnison, Reparatur und Wiederaufbau.
@@ -4859,6 +4900,7 @@
     document.documentElement.dataset.factionTheme = themaFraktion[fraktion] ?? themaVolk[volkId] ?? "THEME_KRONREICH";
   }
   function render() {
+    kharos.standSetzen(state);
     themaSetzen(state.faction);
     renderSchwierigkeit();
     setPortrait(el("avatar"), state);
@@ -5148,6 +5190,8 @@
     }
   });
 
+  // Kharos 3.0: Umbenennungsschicht über allen angezeigten Texten (IDs und Daten bleiben).
+  kharos.starten();
   try {
     const stored = localStorage.getItem(key);
     if (stored !== null) state = rules.read(stored);
