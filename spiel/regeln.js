@@ -433,12 +433,13 @@ const rules = (() => {
         (state.niederlage !== null && !own(niederlagen, state.niederlage)) ||
         (state.zuflucht !== null && !N.get(state.zuflucht)) ||
         (state.gefallenIn !== null && !(own(world.scenes, state.gefallenIn) && !["defeat", "weltende"].includes(state.gefallenIn))) ||
-        !validRecord(state.weltAuftraege, auftragIndex, entry => isRecord(entry) && ["aktiv", "erledigt"].includes(entry.status) &&
+        !validRecord(state.weltAuftraege, auftragIndex, entry => isRecord(entry) && ["aktiv", rueckkehr.status, "erledigt"].includes(entry.status) &&
           intBetween(entry.wahl, 0, 1)) ||
         !Object.entries(state.weltAuftraege).every(([id, entry]) => entry.wahl < auftragIndex[id].spiel.lohn.length) ||
         (state.hauptquest !== null && !(hauptPlan[state.faction] && isRecord(state.hauptquest) &&
           intBetween(state.hauptquest.schritt, 0, hauptPlan[state.faction].length) &&
           (state.hauptquest.wahl === null || own(wahlFolgen, state.hauptquest.wahl)) &&
+          (state.hauptquest.bericht === undefined || (isRecord(state.hauptquest.bericht) && Boolean(N.get(state.hauptquest.bericht.ort)))) &&
           (state.hauptquest.schritt < hauptPlan[state.faction].length || state.hauptquest.wahl !== null))) || ((state.scene === "weltende") !== (state.niederlage !== null)) ||
         !validList(state.rewards, (id) => typeof id === "string" && id.length <= 50, 100) ||
         !validList(state.party, (id) => own(world.companions, id), 5) ||
@@ -1842,6 +1843,8 @@ const rules = (() => {
     const roll = Math.floor(travelDice() * 100);
     let summe = 0;
     let kind = table.find(([weight]) => roll < (summe += weight))?.[1] ?? "ruhig";
+    // Rückreise-Pflicht: Auf dem Rückmarsch zum Auftraggeber kommt es nur zu 45 % der Ereignisse.
+    if (kind !== "ruhig" && rueckmarsch(state) && travelDice() >= rueckkehr.faktor) kind = "ruhig";
     // Runenkompass: Auf Seewegen bleibt ein Teil der Gefahren aus.
     if (weg.kantenTyp === "seeweg" && kind !== "ruhig" && travelDice() < reliktWert(state, "seaDangerReduction")) {
       note(state, "Der " + relikte[state.relikt].name + " weist euch einen sicheren Kurs.");
@@ -1911,6 +1914,9 @@ const rules = (() => {
       }
       setzeLeiste(state, "glut", leiste(state, "glut") + (weg.glut ?? 1));
     }
+    // Marsch-Vignette der Hauptquest (Henry, Beispiel Hagenfels) erscheint auch in der Chronik.
+    const vignette = hauptVignette(state, zielId);
+    if (vignette) note(state, vignette);
     state.knoten = zielId;
     if (sichererOrt(state, ziel)) state.zuflucht = zielId;
     weltRunde(state);
@@ -2341,18 +2347,32 @@ const rules = (() => {
       introduction, ability: begleiter.faehigkeit };
   }
 
+  // ---- Rückreise-Pflicht (Henry, 20. 11. 2026, quellen/henry/v2619/marsch-und-rueckreise.json) ----
+  // Ein Auftrag, der fern vom Auftraggeber erfüllt wird, ist erst „bereit zur Abgabe“. Lohn und Bericht gibt es am Ort des
+  // Auftraggebers. Ausnahme „abgabe_vor_ort“: Aufträge, die im Ort des Aushangs selbst erledigt werden, und Hauptquest-
+  // Schritte ohne Auftraggeber anderswo (Freie Häfen: Kette Zollholm → Möwenstad → Silberholm → Perlvik).
+  const MARSCH = SY.daten.v2619marsch;
+  const rueckkehr = { status: MARSCH.quest_rueckkehr_system.neuer_status,
+    faktor: MARSCH.quest_rueckkehr_system["rückmarsch_regeln"].ereignis_wahrscheinlichkeit_faktor,
+    banner: MARSCH.quest_rueckkehr_system["rückmarsch_regeln"].hinweis_banner_text,
+    knopf: MARSCH.quest_rueckkehr_system.ui_verhalten.ziel_ort_button_label_bei_erledigt };
+  const mitOrt = (text, ortId) => text.replaceAll("{auftraggeber_ort}", N.get(ortId)?.name ?? ortId);
+  const marschBeispielVignetten = Object.fromEntries(MARSCH.akt1_beispiel_hagenfels.phasen.filter((p) => p.vignette)
+    .map((p) => [p.phase === "hinmarsch" ? "hin" : "rueck", p.vignette]));
+
   // Hauptquest Akt 1. Die Texte kommen aus der Fraktionsreihe, die Orte und Gegner legt der Plan fest.
   const hauptPlan = {
     kronreich: [
       { schritt: 0, ort: "kronhall" },
-      { schritt: 1, ort: "hagenfels", gegner: "deserteure" },
+      // Henry, 20. 11. 2026 (Rückreise-Pflicht, Beispiel „Verbranntes Korn“): Bericht vor dem Thron in Kronhall.
+      { schritt: 1, ort: "hagenfels", gegner: "deserteure", auftraggeber: "kronhall", vignetten: marschBeispielVignetten },
       { schritt: 2, ort: "westvik", wahl: true },
     ],
     orden: [
       { schritt: 0, ort: "glutberg" },
-      { schritt: 1, ort: "lichtheim", gegner: "kultisten", titel: "Wachs aus Lichtheim",
+      { schritt: 1, ort: "lichtheim", gegner: "kultisten", auftraggeber: "glutberg", titel: "Wachs aus Lichtheim",
         text: "Im Bienental bei Lichtheim haben Kultisten das geweihte Wachs verdorben. Sie lauern noch zwischen den Stöcken." },
-      { schritt: 1, ort: "brandstein", gegner: "runenfresser", titel: "Schwefel aus Brandstein",
+      { schritt: 1, ort: "brandstein", gegner: "runenfresser", auftraggeber: "glutberg", titel: "Schwefel aus Brandstein",
         text: "In der Schwefelgrube bei Brandstein frisst ein Runenfresser die geweihten Steine. Ohne Schwefel bleiben die Runenbecken kalt." },
       { schritt: 2, ort: "glutberg", wahl: true },
     ],
@@ -2419,7 +2439,7 @@ const rules = (() => {
     if (!NQ.stufenFuer(auftrag.ort, state.faction)) return "nur für Helden des eigenen Volkes";
     if (id === schattenImRat.id && !hatMarke(state, "ragnvald_misstraut_hof")) return "noch nicht ausgeschrieben";
     const eintrag = state.weltAuftraege?.[id];
-    if (eintrag) return eintrag.status === "erledigt" ? "erledigt" : "angenommen";
+    if (eintrag) return eintrag.status === "erledigt" ? "erledigt" : eintrag.status === rueckkehr.status ? "bereit zur Abgabe" : "angenommen";
     if (!intBetween(wahl, 0, auftrag.spiel.lohn.length - 1)) return "unbekannte Belohnung";
     const bindung = gefaehrtenAkt[id];
     if (bindung && (state.questStufe ?? 0) < bindung.akt - 1) {
@@ -2436,7 +2456,7 @@ const rules = (() => {
   // bis auf die Hälfte. Vorrat über der Obergrenze geht ins Kontor der eigenen Fraktion statt verloren.
   const auftragsBuch = { max: 5, voll: "Dein Auftragsbuch ist voll (max. 5 offene Aushänge). Schließe erst laufende Aufträge ab.",
     vollerLohnBis: 10, abschlag: 0.03, boden: 0.5 };
-  const offeneAuftraege = (state) => Object.values(state.weltAuftraege ?? {}).filter((entry) => entry.status === "aktiv").length;
+  const offeneAuftraege = (state) => Object.values(state.weltAuftraege ?? {}).filter((entry) => entry.status === "aktiv" || entry.status === rueckkehr.status).length;
   const erfuellteAuftraege = (state) => Object.values(state.weltAuftraege ?? {}).filter((entry) => entry.status === "erledigt").length;
   // Anteil des Silbers für den nächsten Auftrag, wenn bereits `erfuellt` Aufträge erledigt sind.
   const lohnAnteil = (erfuellt) => Math.max(auftragsBuch.boden, 1 - auftragsBuch.abschlag * Math.max(0, erfuellt + 1 - auftragsBuch.vollerLohnBis));
@@ -2474,6 +2494,78 @@ const rules = (() => {
       auftragAbschliessen(state, id);
     }
     return state;
+  }
+
+  // Rückreise-Pflicht: Wegaufträge werden beim Auftraggeber (Ort des Aushangs) abgegeben.
+  const abgabeVorOrt = (auftrag) => Boolean(auftrag.abgabe_vor_ort ?? !auftrag.spiel.weg);
+  function abgabeGrund(state, id) {
+    const auftrag = auftragIndex[id];
+    if (!auftrag || state.weltAuftraege?.[id]?.status !== rueckkehr.status) return "nicht bereit zur Abgabe";
+    if (!imHub(state)) return "nur in der Weltreise";
+    if (state.tatOffen) return "erst über den Ausgang des letzten Auftrags entscheiden";
+    if (state.knoten !== auftrag.ort) return "nur in " + N.get(auftrag.ort).name;
+    return null;
+  }
+  function auftragAbgeben(previous, id) {
+    if (abgabeGrund(previous, id)) return previous;
+    const state = structuredClone(previous);
+    note(state, "Du erstattest in " + N.get(auftragIndex[id].ort).name + " Bericht und forderst deinen Lohn ein.");
+    auftragAbschliessen(state, id);
+    return state;
+  }
+  // Alle Orte, an denen ein Bericht wartet: Aushänge „bereit zur Abgabe“ und der Hauptquest-Bericht.
+  function rueckkehrZiele(state) {
+    const liste = Object.entries(state.weltAuftraege ?? {}).filter(([, e]) => e.status === rueckkehr.status)
+      .map(([id]) => ({ art: "aushang", id, titel: auftragIndex[id].titel, ort: auftragIndex[id].ort }));
+    const bericht = state.hauptquest?.bericht;
+    if (bericht) liste.unshift({ art: "haupt", id: "haupt", titel: hauptInfo(state.faction, state.hauptquest.schritt)?.titel ?? "Hauptquest", ort: bericht.ort });
+    return liste.map((z) => ({ ...z, ortName: N.get(z.ort).name, knopf: mitOrt(rueckkehr.knopf, z.ort), hier: state.knoten === z.ort,
+      route: state.knoten === z.ort ? [] : marschRoute(state, z.ort) }));
+  }
+  const rueckmarsch = (state) => Object.values(state.weltAuftraege ?? {}).some((e) => e.status === rueckkehr.status) || Boolean(state.hauptquest?.bericht);
+  // Kürzeste Route (Vorrat je Etappe) im Wegenetz. Seewege nur mit Schiff, fremde Völker erst nach Akt 5.
+  function marschRoute(state, zielId) {
+    const start = state.knoten;
+    if (!N.get(start) || !N.get(zielId)) return null;
+    const kosten = { [start]: 0 };
+    const vorher = {};
+    const offen = new Set([start]);
+    while (offen.size) {
+      const id = [...offen].reduce((a, b) => (kosten[a] <= kosten[b] ? a : b));
+      offen.delete(id);
+      if (id === zielId) break;
+      const ort = N.get(id);
+      for (const weg of ort.verbindungen) {
+        const ziel = N.get(weg.zielId);
+        if (!ziel || people(ziel.fraktion) !== people(state.faction)) continue;
+        if (weg.kantenTyp === "seeweg" && !schiffBereit(state, ort)) continue;
+        const k = kosten[id] + Math.max(1, weg.kostenRessource ?? 1) + (weg.kostenGold ? 1 : 0);
+        if (kosten[weg.zielId] === undefined || k < kosten[weg.zielId]) {
+          kosten[weg.zielId] = k;
+          vorher[weg.zielId] = id;
+          offen.add(weg.zielId);
+        }
+      }
+    }
+    if (kosten[zielId] === undefined) return null;
+    const route = [];
+    for (let id = zielId; id !== start; id = vorher[id]) route.unshift(id);
+    return route;
+  }
+  function hauptVignette(state, zielId) {
+    const stand = state.hauptquest;
+    const plan = stand && hauptPlan[state.faction]?.[stand.schritt];
+    if (!plan?.vignetten) return null;
+    if (stand.bericht && zielId === stand.bericht.ort) return plan.vignetten.rueck;
+    if (!stand.bericht && zielId === plan.ort) return plan.vignetten.hin;
+    return null;
+  }
+  // Text für die Marsch-Animation: Vignette des Hauptquest-Beispiels oder der Rückreise-Hinweis.
+  function marschVignette(state, zielId) {
+    const haupt = hauptVignette(state, zielId);
+    if (haupt) return haupt;
+    const ziel = rueckkehrZiele(state).find((z) => z.ort === zielId);
+    return ziel ? mitOrt(rueckkehr.banner, zielId) : null;
   }
 
   function auftragAbschliessen(state, id) {
@@ -2989,7 +3081,8 @@ const rules = (() => {
   }
   function auftraege(state, status = "aktiv") {
     return Object.entries(state.weltAuftraege ?? {}).filter(([, eintrag]) => eintrag.status === status)
-      .map(([id, eintrag]) => ({ ...auftragIndex[id], wahl: eintrag.wahl, status, ausfuehren: ausfuehrenGrund(state, id) }));
+      .map(([id, eintrag]) => ({ ...auftragIndex[id], wahl: eintrag.wahl, status, ausfuehren: ausfuehrenGrund(state, id),
+        abgabe: status === rueckkehr.status ? abgabeGrund(state, id) : null }));
   }
 
   function hauptquest(state) {
@@ -2998,7 +3091,8 @@ const rules = (() => {
     const akt = hauptAkt(state.faction);
     const fertig = stand.schritt >= hauptPlan[state.faction].length;
     return { akt: akt.nr, titel: akt.titel, stufen: akt.stufen, fertig, wahl: stand.wahl,
-      schritt: fertig ? null : hauptInfo(state.faction, stand.schritt), grund: fertig ? "abgeschlossen" : hauptGrund(state) };
+      schritt: fertig ? null : hauptInfo(state.faction, stand.schritt), grund: fertig ? "abgeschlossen" : hauptGrund(state),
+      bericht: stand.bericht ? { ort: stand.bericht.ort, ortName: N.get(stand.bericht.ort).name } : null };
   }
 
   function hauptGrund(state, wahlId = null) {
@@ -3007,6 +3101,10 @@ const rules = (() => {
     if (!imHub(state)) return "nur in der Weltreise";
     const stand = hauptStand(state);
     if (stand.schritt >= plan.length) return "abgeschlossen";
+    if (stand.bericht) {
+      if (state.knoten !== stand.bericht.ort) return "Bericht in " + N.get(stand.bericht.ort).name + " erstatten";
+      return wahlId ? "keine Wahl" : null;
+    }
     const schritt = plan[stand.schritt];
     if (state.knoten !== schritt.ort) return "weiter in " + N.get(schritt.ort).name;
     if (!schritt.wahl) return wahlId ? "keine Wahl" : null;
@@ -3020,6 +3118,12 @@ const rules = (() => {
     const state = structuredClone(previous);
     const stand = state.hauptquest ??= { schritt: 0, wahl: null };
     const info = hauptInfo(state.faction, stand.schritt);
+    if (stand.bericht) {
+      note(state, "Bericht erstattet in " + N.get(stand.bericht.ort).name + " · " + info.titel + ".");
+      delete stand.bericht;
+      hauptVoran(state);
+      return state;
+    }
     note(state, "Akt " + hauptAkt(state.faction).nr + " · " + info.titel + ": " + info.text);
     if (info.gegner) {
       auftragKampfStarten(state, info.gegner, "haupt", info.ort, info.titel);
@@ -3559,9 +3663,19 @@ const rules = (() => {
     if (/^(?:zweig|akt4):/.test(auftrag)) aktSieg(state, auftrag, turn);
     else if (auftrag === "haupt") {
       const stand = state.hauptquest;
-      if (hauptPlan[state.faction]?.[stand.schritt]?.wahl) aktAbschliessen(state);
-      else hauptVoran(state);
-    } else if (state.weltAuftraege?.[auftrag]?.status === "aktiv") auftragAbschliessen(state, auftrag);
+      const plan = hauptPlan[state.faction]?.[stand.schritt];
+      if (plan?.wahl) aktAbschliessen(state);
+      else if (plan?.auftraggeber && plan.auftraggeber !== state.knoten) {
+        stand.bericht = { ort: plan.auftraggeber };
+        note(state, mitOrt(rueckkehr.banner, plan.auftraggeber));
+      } else hauptVoran(state);
+    } else if (state.weltAuftraege?.[auftrag]?.status === "aktiv") {
+      if (abgabeVorOrt(auftragIndex[auftrag])) auftragAbschliessen(state, auftrag);
+      else {
+        state.weltAuftraege[auftrag].status = rueckkehr.status;
+        note(state, "Auftrag erfüllt: " + auftragIndex[auftrag].titel + ". " + mitOrt(rueckkehr.banner, auftragIndex[auftrag].ort).replace(/^Auftrag erfüllt\. /, ""));
+      }
+    }
   }
 
   // Charakter-Entwurf: Stufenpunkte, Spezialisierung und Meisterklasse in einem Schritt festschreiben.
@@ -4738,6 +4852,7 @@ const rules = (() => {
     siedlungInfo, siedlungAusbauen, gebaeudeBauen, strasseBauen, garnisonRekrutieren, ortReparieren, wiederaufbau,
     endgameListe, endgameStarten, aufstiegInfo, talentLernen, ahnenLernen,
     akteInfo, zweigWeiter, zweigGrund, fspezWaehlen, fspezGrund, fspezText, akt4Weiter, akt4Grund, armadaInfo, ausweichIntervall, kritChance, effektText, lagerSzeneInfo, lagerAntwort, lagerVorteile,
-    auftragGrund, auftragAnnehmen, ausfuehrenGrund, auftragAusfuehren, aushang, auftraege, hauptquest, hauptGrund, hauptWeiter, auftragEp, rast, ertragGrund, ertragEinholen, vertragGrund, vertragSchliessen, entwurf,
+    auftragGrund, auftragAnnehmen, ausfuehrenGrund, auftragAusfuehren, abgabeGrund, auftragAbgeben, rueckkehrZiele, marschRoute,
+    marschVignette, rueckmarsch, marschDaten: MARSCH, aushang, auftraege, hauptquest, hauptGrund, hauptWeiter, auftragEp, rast, ertragGrund, ertragEinholen, vertragGrund, vertragSchliessen, entwurf,
     levelThresholds: Array.from({ length: kampf.maxStufe }, (_, index) => kampf.epFuer(index + 1)) };
 })();

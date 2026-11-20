@@ -1638,3 +1638,47 @@ dialog.dialog-klein[open] { opacity: 1; }
 /* Patch 2.6.7: Einwurf eines Gefährten und gestellte Fragen im Gespräch. */
 .npc-einwurf { font-style: italic; border-left: 2px solid var(--accent, #b5862b); padding-left: .5rem; }
 .npc-frage { font-weight: 600; margin-top: .6rem; }
+
+/* ---- Marsch-Animation und Rückreise-Pflicht (Henry, 20. 11. 2026, v2.6.19) ---- */
+:root { --abgabe: #d97706; }
+.rk-abgabering { fill: none; stroke: var(--abgabe); stroke-width: 2.4; pointer-events: none; }
+.rk-abgabe .rk-punkt { fill: var(--abgabe); }
+.rk-abgabe-hinweis { color: #f5b45a; font-weight: 600; }
+.rk-key-abgabe::before { width: .7rem; height: .7rem; border: 2px solid var(--abgabe); border-radius: 50%; }
+.rk-marsch-pfad { fill: none; stroke: #ffd38a; stroke-width: 4.5; stroke-linecap: round; vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 2px #0008); }
+.rk-marsch-banner { pointer-events: none; }
+.rk-banner-stange { stroke: #2a1a0e; stroke-width: 1.6; }
+.rk-banner-tuch { fill: #b3261e; stroke: #2a1a0e; stroke-width: .8; }
+.rk-banner-fuss { fill: #f3d9a4; stroke: #2a1a0e; stroke-width: .5; }
+.rk-marsch-weiter { display: none; }
+.rk-marschiert .rk-marsch-weiter { display: inline-flex; }
+.rk-marschiert :is(.rk-tools, .rk-info) { opacity: .55; pointer-events: none; }
+.rk-marschiert .rk-weg.rk-aktiv { stroke: #e3c98c; stroke-width: 2.2; opacity: .45; }
+.rk-marschiert .rk-zielring { display: none; }
+.rk-atmo { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.rk-vignette { position: absolute; inset: 0;
+  background: radial-gradient(ellipse at center, transparent 45%, rgba(8, 5, 3, var(--rk-vignette, .65)) 100%); }
+.rk-wetter { position: absolute; inset: 0; }
+.rk-wetter i { position: absolute; top: calc(-4% + var(--y, 0%)); left: var(--x); display: block; animation-delay: var(--d); animation-iteration-count: infinite;
+  animation-timing-function: linear; }
+.fx-ash-drift i { width: calc(7px * var(--s)); height: calc(7px * var(--s)); border-radius: 50%; background: #3b3530; opacity: .75;
+  box-shadow: 0 0 4px #e0703055;
+  animation-name: fx-ash; animation-duration: calc(6s * var(--s)); }
+.fx-rain-slant i { width: 2px; height: 24px; background: linear-gradient(#bcd4e600, #bcd4e6cc); transform: rotate(16deg);
+  animation-name: fx-rain; animation-duration: calc(.9s * var(--s)); }
+.fx-snow-gust i { width: calc(5px * var(--s)); height: calc(5px * var(--s)); border-radius: 50%; background: #f4f8fb; opacity: .85;
+  animation-name: fx-snow; animation-duration: calc(4.5s * var(--s)); }
+@keyframes fx-ash { to { transform: translate(-60px, 115vh) rotate(160deg); opacity: .2; } }
+@keyframes fx-rain { to { transform: translate(-90px, 120vh) rotate(16deg); } }
+@keyframes fx-snow { 50% { transform: translate(-80px, 55vh); } to { transform: translate(40px, 115vh); } }
+.rk-marsch-text { position: absolute; left: 50%; bottom: 1.2rem; transform: translateX(-50%); max-width: min(36rem, 90%); margin: 0;
+  padding: .55rem 1rem; text-align: center; font-family: var(--font-title); font-style: italic; color: #f6e7c8;
+  background: #140d08cc; border: 1px solid #8c6d3f; border-radius: 4px; opacity: 0; transition: opacity var(--rk-fade, 450ms) ease; pointer-events: none; }
+.rk-marsch-text.rk-sichtbar { opacity: 1; }
+.rueckkehr-banner { margin: 0 0 1rem; padding: .75rem 1rem; border: 1px solid var(--abgabe); border-left-width: 5px; border-radius: 4px;
+  background: #fbe3c0; color: #3a2410; }
+.rueckkehr-banner p { margin: .2rem 0; }
+.rueckkehr-banner strong { color: #8a3d00; }
+.auftrag-bereit strong { color: #8a3d00; }
+@media (prefers-reduced-motion: reduce) { .rk-wetter i { animation: none; display: none; } .rk-marsch-text { transition: none; } }

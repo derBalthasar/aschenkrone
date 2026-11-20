@@ -1360,6 +1360,7 @@
     // Ortsmarken der Menschen und Überseehäfen: feste Größe auf dem Bildschirm, wie Stecknadeln.
     const orteGruppe = svgElement("g", { class: "rk-orte" }, board);
     rkMarken = [];
+    const abgabeOrte = new Set(rules.rueckkehrZiele(state).map(z => z.ort));
     for (const ort of [...reisekarte.orte].reverse()) {
       const weg = ziele.get(ort.id);
       const wichtig = ort.id === hier || weg || ort.id === rk.auswahl;
@@ -1377,6 +1378,11 @@
       if (ort.id === hier) svgElement("circle", { r: 11, class: "rk-puls" }, gruppe);
       if (ort.id === rk.auswahl) svgElement("circle", { r: 9, class: "rk-ring" }, gruppe);
       if (weg) svgElement("circle", { r: 7.5, class: "rk-zielring" }, gruppe);
+      // Rückreise-Pflicht: Orte, an denen ein Bericht wartet, tragen einen Zielmarker (Henry: #d97706).
+      if (abgabeOrte.has(ort.id)) {
+        gruppe.classList.add("rk-abgabe");
+        svgElement("circle", { r: 10.5, class: "rk-abgabering" }, gruppe);
+      }
       if (ort.uebersee) svgElement("rect", { x: -4, y: -4, width: 8, height: 8, transform: "rotate(45)", class: "rk-punkt" }, gruppe);
       else svgElement("circle", { r: ort.typ === "dorf" ? 2.6 : ort.typ === "hauptstadt" ? 5 : 3.8, class: "rk-punkt" }, gruppe);
       if (ort.typ === "hauptstadt") svgElement("circle", { r: 2, class: "rk-kern" }, gruppe);
@@ -1409,6 +1415,7 @@
       }
     }
 
+    if (rk.marsch) marschZeichnen(board);
     rkAnwenden();
     renderReisekarteInfo(hier, ziele);
   }
@@ -1493,6 +1500,194 @@
     rkZeigen([x + w / 2, y + h / 2], Math.max(w, h * cw / ch) * 1.04);
   }
 
+  // ---- Marsch-Animation (Henry, 20. 11. 2026, quellen/henry/v2619/marsch-und-rueckreise.json) ----
+  // Die Karte zoomt auf die Route (Faktor 1,28, Schwenk 800 ms), der Pfad zeichnet sich gestrichelt (6, 6), das Banner
+  // zieht je Etappe 1200 ms mit ease-in-out. Rand-Vignette 65 %, Wetter je Weg (Asche Westmark, Regen Norden, Schnee am
+  // Pass), Text blendet in 450 ms ein. Jede Etappe ist eine echte Reise (Nahrung, Begegnung); ein Kampf beendet den Marsch.
+  const MARSCH = rules.marschDaten.marsch_animation;
+  const marschWetter = Object.fromEntries(MARSCH.atmosphaere_layer.wetter_effekte.map(w => [w.id, w]));
+  const marschRuhig = () => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  const warte = ms => new Promise(fertig => setTimeout(fertig, ms));
+  const easeInOut = t => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+  function rkAnimieren(dauer, schritt) {
+    if (!dauer || rk.marsch?.ueberspringen) { schritt(1); return Promise.resolve(); }
+    return new Promise(fertig => {
+      const start = performance.now();
+      const frame = jetzt => {
+        const t = Math.min(1, (jetzt - start) / dauer);
+        schritt(rk.marsch?.ueberspringen ? 1 : t);
+        if (t < 1 && !rk.marsch?.ueberspringen) requestAnimationFrame(frame);
+        else fertig();
+      };
+      requestAnimationFrame(frame);
+    });
+  }
+  // Kamera sanft auf einen Ausschnitt schwenken.
+  function rkSchwenk([px, py], breite, dauer) {
+    const [cw, ch] = rkRahmen();
+    const von = { ...rk.ansicht };
+    const nach = { x: px - breite / 2, y: py - breite * ch / cw / 2, w: breite };
+    return rkAnimieren(dauer, t => {
+      const e = easeInOut(t);
+      rk.ansicht = { x: von.x + (nach.x - von.x) * e, y: von.y + (nach.y - von.y) * e, w: von.w + (nach.w - von.w) * e };
+      rkAnwenden();
+    });
+  }
+  // Wetter einer Etappe: Schnee am Pass, Asche in der Westmark (Hagenfels und seine Dörfer), Regen im Norden der Menschenlande.
+  function marschWetterFuer(von, nach) {
+    const weg = knoten.verbindung(von, nach);
+    if (weg?.kantenTyp === "pass") return marschWetter.schnee_pass;
+    const westmark = new Set(["hagenfels", ...knoten.doerfer("hagenfels")]);
+    if (westmark.has(von) || westmark.has(nach)) return marschWetter.rauch_westmark;
+    const [, ry, , rh] = reisekarte.regionen.menschen ?? [0, 0, 0, 1];
+    const y = (reisekarte.lage(von)[1] + reisekarte.lage(nach)[1]) / 2;
+    return y < ry + rh * 0.35 ? marschWetter.regen_nord : null;
+  }
+  function marschAtmosphaere(wetter, text) {
+    const box = el("rk-scroll");
+    let schicht = box.querySelector(".rk-atmo");
+    if (!schicht) {
+      schicht = element("div");
+      schicht.className = "rk-atmo";
+      schicht.setAttribute("aria-hidden", "true");
+      schicht.style.setProperty("--rk-vignette", MARSCH.atmosphaere_layer.vignette_rand_dunkelheit);
+      schicht.append(element("div"), element("div"));
+      schicht.children[0].className = "rk-wetter";
+      schicht.children[1].className = "rk-vignette";
+      box.append(schicht);
+      const zeile = element("p");
+      zeile.className = "rk-marsch-text";
+      zeile.setAttribute("role", "status");
+      zeile.style.setProperty("--rk-fade", MARSCH.atmosphaere_layer.text_fade_ms + "ms");
+      box.append(zeile);
+    }
+    const feld = schicht.querySelector(".rk-wetter");
+    if (feld.dataset.wetter !== (wetter?.id ?? "")) {
+      feld.dataset.wetter = wetter?.id ?? "";
+      feld.className = "rk-wetter" + (wetter ? " " + wetter.css_klasse : "");
+      feld.replaceChildren();
+      for (let i = 0; wetter && !marschRuhig() && i < wetter.partikel_anzahl; i++) {
+        const teil = element("i");
+        teil.style.setProperty("--x", ((i * 37) % 100) + "%");
+        teil.style.setProperty("--y", ((i * 53) % 60) + "%");
+        teil.style.setProperty("--d", (i * 0.23 % 2.4).toFixed(2) + "s");
+        teil.style.setProperty("--s", (0.7 + (i * 13 % 7) / 10).toFixed(2));
+        feld.append(teil);
+      }
+    }
+    const zeile = box.querySelector(".rk-marsch-text");
+    if (text !== undefined && zeile.textContent !== (text ?? "")) {
+      zeile.classList.remove("rk-sichtbar");
+      setTimeout(() => {
+        zeile.textContent = text ?? "";
+        if (text) zeile.classList.add("rk-sichtbar");
+      }, zeile.textContent ? MARSCH.atmosphaere_layer.text_fade_ms : 0);
+    }
+  }
+  function marschAufraeumen() {
+    el("rk-scroll").querySelector(".rk-atmo")?.remove();
+    el("rk-scroll").querySelector(".rk-marsch-text")?.remove();
+    el("reisekarte").classList.remove("rk-marschiert");
+    rk.marsch = null;
+  }
+  // Gezeichnete Etappen und Banner überstehen das Neuzeichnen der Karte nach jeder Etappe.
+  function marschZeichnen(board) {
+    const m = rk.marsch;
+    const schicht = svgElement("g", { class: "rk-marsch", "aria-hidden": "true" }, board);
+    for (const [a, b, anteil] of m.pfade) {
+      const [x1, y1] = reisekarte.lage(a);
+      const [x2, y2] = reisekarte.lage(b);
+      svgElement("line", { x1, y1, x2: x1 + (x2 - x1) * anteil, y2: y1 + (y2 - y1) * anteil, class: "rk-marsch-pfad",
+        "stroke-dasharray": MARSCH.pfad_stil.svg_stroke_dasharray }, schicht);
+    }
+    const banner = svgElement("g", { class: "rk-marsch-banner" }, schicht);
+    svgElement("line", { x1: 0, y1: 0, x2: 0, y2: -20, class: "rk-banner-stange" }, banner);
+    svgElement("path", { d: "M0 -20 L15 -16.5 L11 -13.5 L15 -10.5 L0 -10 Z", class: "rk-banner-tuch" }, banner);
+    svgElement("circle", { r: 2.6, class: "rk-banner-fuss" }, banner);
+    banner.dataset.x = m.banner[0];
+    banner.dataset.y = m.banner[1];
+    rkMarken.push(banner);
+  }
+  function marschSetzen() {
+    const board = el("rk-svg");
+    const m = rk.marsch;
+    const schicht = board.querySelector(".rk-marsch");
+    if (!schicht) return;
+    const linien = schicht.querySelectorAll(".rk-marsch-pfad");
+    const letzte = m.pfade[m.pfade.length - 1];
+    if (letzte && linien[m.pfade.length - 1]) {
+      const [x1, y1] = reisekarte.lage(letzte[0]);
+      const [x2, y2] = reisekarte.lage(letzte[1]);
+      linien[m.pfade.length - 1].setAttribute("x2", x1 + (x2 - x1) * letzte[2]);
+      linien[m.pfade.length - 1].setAttribute("y2", y1 + (y2 - y1) * letzte[2]);
+    }
+    const banner = schicht.querySelector(".rk-marsch-banner");
+    banner.dataset.x = m.banner[0];
+    banner.dataset.y = m.banner[1];
+    rkAnwenden();
+  }
+
+  // Marsch über eine Route (Liste von Zielorten ab dem Standort). Ohne Animation (reduzierte Bewegung) reist er sofort.
+  async function marschieren(route, { offenLassen = false, text = undefined } = {}) {
+    if (rk.marsch || !route?.length || !state || state.scene !== "weltknoten" || state.combat) return;
+    const karteWarOffen = el("reisekarte").open;
+    rk.marsch = { pfade: [], banner: reisekarte.lage(rules.aktuellerKnoten(state)) ?? [0, 0], ueberspringen: marschRuhig() };
+    if (!karteWarOffen) {
+      if (el("inventory-hub").open) el("inventory-hub").close();
+      if (el("character-sheet").open) el("character-sheet").close();
+      rk.auswahl = null;
+      el("reisekarte").showModal();
+      if (!rk.ansicht) rkZuMir();
+    }
+    el("reisekarte").classList.add("rk-marschiert");
+    renderReisekarte();
+    el("rk-marsch-weiter")?.focus();
+    // Kamera: Ausschnitt um die ganze Route, um den Faktor 1,28 näher.
+    const punkte = [rules.aktuellerKnoten(state), ...route].map(id => reisekarte.lage(id));
+    const xs = punkte.map(p => p[0]);
+    const ys = punkte.map(p => p[1]);
+    const [cw, ch] = rkRahmen();
+    const breite = Math.max(cw * 0.6, (Math.max(...xs) - Math.min(...xs)) * 1.6, (Math.max(...ys) - Math.min(...ys)) * 1.6 * cw / ch) / MARSCH.kamera_zoom_faktor;
+    marschAtmosphaere(marschWetterFuer(rules.aktuellerKnoten(state), route[0]));
+    await rkSchwenk([(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...ys) + Math.max(...ys)) / 2], breite, MARSCH.kamera_pan_transition_ms);
+    let ok = true;
+    for (const ziel of route) {
+      const von = rules.aktuellerKnoten(state);
+      const grund = rules.reiseGrund(state, ziel);
+      if (grund) {
+        marschAtmosphaere(null, "Der Marsch stockt in " + knoten.get(von).name + ": " + grund + ".");
+        ok = false;
+        break;
+      }
+      marschAtmosphaere(marschWetterFuer(von, ziel), text ?? rules.marschVignette(state, ziel) ??
+        "Unterwegs nach " + knoten.get(ziel).name + " · " + knoten.kantenNamen[knoten.verbindung(von, ziel).kantenTyp] + ".");
+      const [x1, y1] = reisekarte.lage(von);
+      const [x2, y2] = reisekarte.lage(ziel);
+      const etappe = [von, ziel, 0];
+      rk.marsch.pfade.push(etappe);
+      renderReisekarte();
+      await rkAnimieren(MARSCH.etappen_dauer_ms, t => {
+        const e = easeInOut(t);
+        etappe[2] = MARSCH.pfad_stil.animierte_pfad_zeichnung ? e : 1;
+        rk.marsch.banner = [x1 + (x2 - x1) * e, y1 + (y2 - y1) * e];
+        marschSetzen();
+      });
+      update(rules.reise(state, ziel));
+      if (state.combat || state.scene !== "weltknoten" || rules.aktuellerKnoten(state) !== ziel) { ok = false; break; }
+    }
+    const kampf = state.combat || state.scene !== "weltknoten";
+    if (!kampf && ok && !rk.marsch.ueberspringen) await warte(MARSCH.atmosphaere_layer.text_fade_ms);
+    marschAufraeumen();
+    // Ein Hinterhalt oder eine Szene der Handlung braucht das Hauptfenster.
+    if (kampf || (!offenLassen && !karteWarOffen)) el("reisekarte").close();
+    else { renderReisekarte(); el("rk-scroll").focus(); }
+  }
+
+  // Rückkehr zum Auftraggeber: Marsch über die kürzeste Route.
+  function rueckkehrAntreten(ziel) {
+    if (ziel.route?.length) marschieren(ziel.route, { offenLassen: el("reisekarte").open, text: rules.marschVignette(state, ziel.ort) });
+  }
+
   function renderReisekarteInfo(hier, ziele) {
     const info = el("rk-info");
     info.replaceChildren();
@@ -1512,6 +1707,11 @@
       element("dt", "Fraktion"), element("dd", klassen.fraktionen[ort.fraktion]?.name ?? ort.fraktion));
     info.append(herkunft);
     if (id === hier) info.append(element("p", "Du bist hier."));
+    for (const ziel of rules.rueckkehrZiele(state).filter(z => z.ort === id)) {
+      const hinweis = element("p", "Bericht erwartet: " + ziel.titel + ".");
+      hinweis.className = "rk-abgabe-hinweis";
+      info.append(hinweis);
+    }
     // Fremde Völker: nur das Grundlegende, ihr Wegenetz entsteht noch.
     if (!reisekarte.hat(id)) {
       const hinweis = element("p", "Die Wege dieses Volkes werden noch ausgearbeitet.");
@@ -1549,11 +1749,8 @@
       button(reise, "Reise nach " + ort.name + (weg.grund ? " · " + weg.grund : ""), () => {
         rk.auswahl = null;
         welt.tab = "aufbruch";
-        update(rules.reise(state, id));
-        // Ein Hinterhalt oder eine Szene der Handlung braucht das Hauptfenster.
-        if (state.combat || state.scene !== "weltknoten") el("reisekarte").close();
-        else el("rk-scroll").focus();
-      }, { disabled: !reisen || Boolean(weg.grund), story: true });
+        marschieren([id], { offenLassen: true });
+      }, { disabled: !reisen || Boolean(weg.grund) || Boolean(rk.marsch), story: true });
       info.append(reise);
     } else if (id !== hier) {
       info.append(element("p", hier && reisekarte.hat(hier) ? "Kein direkter Weg von deinem Standort. Reisen geht nur von Ort zu Ort, jede Etappe einzeln." :
@@ -1602,6 +1799,8 @@
 
   for (const opener of document.querySelectorAll("[data-reisekarte-open]")) opener.addEventListener("click", openReisekarte);
   el("rk-close").addEventListener("click", () => el("reisekarte").close());
+  el("rk-marsch-weiter").addEventListener("click", () => { if (rk.marsch) rk.marsch.ueberspringen = true; });
+  el("reisekarte").addEventListener("close", () => { if (rk.marsch) rk.marsch.ueberspringen = true; });
   el("reisekarte").addEventListener("click", event => {
     if (event.target === event.currentTarget) event.currentTarget.close();
   });
@@ -2321,8 +2520,9 @@
   let questFilter = "active";
   // Patch 2.6.12: Aushänge (Weltaufträge) erscheinen in der Chronik und zählen bei Offen und Erfüllt mit.
   function chronikEintraege() {
-    const aushaenge = ["aktiv", "erledigt"].flatMap((status) => rules.auftraege(state, status).map((a) => ({
-      id: a.id, aushang: true, status: status === "aktiv" ? "active" : "done", type: "Aushang · " + a.art,
+    const aushaenge = ["aktiv", "bereit_zur_abgabe", "erledigt"].flatMap((status) => rules.auftraege(state, status).map((a) => ({
+      id: a.id, aushang: true, status: status === "erledigt" ? "done" : "active",
+      type: "Aushang · " + a.art + (status === "bereit_zur_abgabe" ? " · bereit zur Abgabe in " + (knoten.get(a.ort)?.name ?? a.ort) : ""),
       giver: knoten.get(a.ort)?.name ?? a.ort, title: a.titel, text: a.text, lohn: a.lohn,
       wahlText: a.spiel.lohn.length > 1 ? (a.wahl === 0 ? "Erster Weg gewählt" : "Zweiter Weg gewählt") : "",
     })));
@@ -3221,7 +3421,11 @@
       const schritt = haupt.schritt;
       absaetze.push({ text: "Schritt " + schritt.nr + " von " + schritt.von + " · " + schritt.titel + " · " + knoten.get(schritt.ort).name, art: "regie" },
         { text: schritt.text });
-      optionen = schritt.wahl
+      if (haupt.bericht) absaetze.push({ text: "Du kommst aus " + knoten.get(schritt.ort).name + " zurück und erstattest Bericht.", art: "regie" });
+      optionen = haupt.bericht
+        ? [{ label: "Bericht erstatten · " + schritt.titel, badges: [], hinweis: haupt.grund ?? "", disabled: Boolean(haupt.grund),
+          aktion: () => gespraechWahl(() => rules.hauptWeiter(state)) }]
+        : schritt.wahl
         ? schritt.wahlen.map(option => {
           const grund = rules.hauptGrund(state, option.id);
           return { label: option.label, badges: [["Entscheidung", "probe"]], hinweis: option.folge + (grund ? " · " + grund : ""),
@@ -3435,6 +3639,8 @@
       if (rules.handlungHier(state)) button(krise, "Zur Handlung zurückkehren", () => update(rules.zurHandlung(state)), { story: true });
     }
     content.append(krise);
+    const rueck = weltRueckkehr();
+    if (rueck) krise.before(rueck);
     const tat = weltTat();
     if (tat) content.append(tat);
     const offen = weltAuftraege();
@@ -3542,6 +3748,10 @@
     const kopf = element("p");
     kopf.append(element("strong", "Schritt " + schritt.nr + " von " + schritt.von + " · " + schritt.titel), " · " + knoten.get(schritt.ort).name);
     box.append(kopf, element("p", schritt.text));
+    if (haupt.bericht) {
+      box.append(element("p", "Erfüllt. Bericht erwartet in " + haupt.bericht.ortName + " (siehe oben)."));
+      return box;
+    }
     const auftraggeber = npcs.fuerHauptquest(state.faction);
     if (auftraggeber) {
       // Gesprächsfenster: Schritte und Entscheidungen laufen im Dialog mit der Auftraggeberin.
@@ -3662,16 +3872,62 @@
   const auftragOrt = (auftrag) => auftrag.spiel.weg ? "unterwegs auf " + auftrag.spiel.weg + " " + nebenquests.wegName(auftrag.spiel.weg)
     : "in " + knoten.get(auftrag.ort).name;
 
+  // Rückreise-Pflicht (Henry, 20. 11. 2026): Hinweis-Banner und Knopf „Rückkehr nach … antreten“; die Abgabe
+  // ist nur am Ort des Auftraggebers aktiv.
+  function rueckkehrKnopf(parent, ziel) {
+    if (ziel.hier) {
+      const grund = ziel.art === "haupt" ? rules.hauptGrund(state) : rules.abgabeGrund(state, ziel.id);
+      const knopf = button(parent, "Bericht erstatten · " + ziel.titel + (grund ? " · " + grund : ""),
+        () => ziel.art === "haupt" && npcs.fuerHauptquest(state.faction) ? hauptGespraech()
+          : update(ziel.art === "haupt" ? rules.hauptWeiter(state) : rules.auftragAbgeben(state, ziel.id)),
+        { disabled: Boolean(grund), story: true });
+      knopf.classList.add("primary");
+      return knopf;
+    }
+    const erster = ziel.route?.[0];
+    const grund = !ziel.route ? "kein Weg" : rules.reiseGrund(state, erster);
+    return button(parent, ziel.knopf + (ziel.route ? " · " + ziel.route.length + (ziel.route.length === 1 ? " Etappe" : " Etappen") : "") +
+      (grund ? " · " + grund : ""), () => rueckkehrAntreten(ziel), { disabled: Boolean(grund), story: true });
+  }
+  function weltRueckkehr() {
+    const ziele = rules.rueckkehrZiele(state);
+    if (!ziele.length) return null;
+    const box = element("section");
+    box.className = "rueckkehr-banner";
+    box.setAttribute("aria-label", "Bericht erstatten");
+    for (const ziel of ziele) {
+      const zeile = element("p");
+      zeile.append(element("strong", ziel.titel + ": "), ziel.hier ? "Du bist in " + ziel.ortName + ". Erstatte Bericht und fordere deinen Lohn ein."
+        : "Auftrag erfüllt. Reise zurück nach " + ziel.ortName + ", um Bericht zu erstatten und deinen Lohn einzufordern.");
+      box.append(zeile);
+      const knoepfe = element("div");
+      knoepfe.className = "actions";
+      rueckkehrKnopf(knoepfe, ziel);
+      box.append(knoepfe);
+    }
+    return box;
+  }
+
   // Angenommene Aufträge an allen Orten, mit Ausführen-Knopf am richtigen Ort.
   function weltAuftraege() {
     const offen = rules.auftraege(state, "aktiv");
+    const bereit = rules.auftraege(state, "bereit_zur_abgabe");
     const erledigt = rules.auftraege(state, "erledigt");
-    if (!offen.length && !erledigt.length) return null;
+    if (!offen.length && !erledigt.length && !bereit.length) return null;
     const box = element("details");
     box.className = "welt-aushang welt-auftraege";
-    box.open = offen.length > 0;
-    box.append(element("summary", "Deine Aufträge · " + offen.length + " offen · " + erledigt.length + " erledigt"));
+    box.open = offen.length + bereit.length > 0;
+    box.append(element("summary", "Deine Aufträge · " + offen.length + " offen" + (bereit.length ? " · " + bereit.length + " bereit zur Abgabe" : "") +
+      " · " + erledigt.length + " erledigt"));
     const liste = element("ul");
+    for (const auftrag of bereit) {
+      const item = element("li");
+      item.className = "auftrag-bereit";
+      const kopf = element("p");
+      kopf.append(element("strong", auftrag.titel), " · bereit zur Abgabe in " + knoten.get(auftrag.ort).name);
+      item.append(kopf, element("p", "Lohn: " + lohnText(auftrag, auftrag.wahl)));
+      liste.append(item);
+    }
     for (const auftrag of offen) {
       const item = element("li");
       const kopf = element("p");
@@ -4131,7 +4387,7 @@
       }
       wegweiserNachfrage.ziel = null;
       welt.tab = "aufbruch";
-      update(rules.reise(state, weg.zielId));
+      marschieren([weg.zielId]);
     });
     return item;
   }

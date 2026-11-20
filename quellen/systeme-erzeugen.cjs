@@ -174,6 +174,8 @@ const silberStufen = Object.fromEntries(p160b.numberListsAndRangesPatch.enemySil
 const gegnerRegionen = {};
 // Patch 2.6.19 (Henry, B6): Miniboss „Wulfgar der Eidlose“ heißt „Varg der Eidlose“ (Gefährte Wulfgar Rossbrecher behält den Namen).
 const v2619 = JSON.parse(fs.readFileSync(path.join(__dirname, "henry", "v2619", "entscheidungen-b1-b11.json"), "utf8")).entscheidungen_b1_bis_b11;
+// Henry, 20. 11. 2026: Marsch-Animation und Rückreise-Pflicht (zweites JSON mit schema_version 2.6.19).
+const v2619marsch = JSON.parse(fs.readFileSync(path.join(__dirname, "henry", "v2619", "marsch-und-rueckreise.json"), "utf8"));
 const umbenannt = { [v2619.B6_miniboss_umbenennung.name_alt]: v2619.B6_miniboss_umbenennung.name_neu };
 for (const nr of [4, 5, 6]) {
   const d = lies("gegner-" + nr);
@@ -365,7 +367,7 @@ if (fehler.length) {
 
 // Übrige Module 2.6.0–2.6.16 unverändert in Henrys Format; die Regeln lesen sie über SY.daten.v260.
 const v260 = Object.fromEntries(v260Liste.map((m) => [m.module_id ?? m.patch_id ?? m.bundle_id, m]));
-const daten = { v260, v2619, rohstoffe, rufRaenge, rufAusloeser, taten, fraktionsHandel, reise, doerfer, zehnt, wiederaufbau, stadtZustand,
+const daten = { v260, v2619, v2619marsch, rohstoffe, rufRaenge, rufAusloeser, taten, fraktionsHandel, reise, doerfer, zehnt, wiederaufbau, stadtZustand,
   kriegskasse, moral, gegenstaende, ausruestungsRechte, handwerk, schmiede, gegnerRegionen, beutePools, klassen, signaturRaenge,
   gebaeude, siedlungsStufen, garnison, phasen, vorgebaut, endgame: endgameAktivitaeten, meisterwerk, aufstieg, kampf: kampfRegeln, ansicht, menschenKlassen };
 const ziel = path.join(__dirname, "..", "spiel", "systeme-daten.js");

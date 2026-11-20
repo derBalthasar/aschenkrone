@@ -1,0 +1,49 @@
+{
+  "schema_version": "2.6.19",
+  "feature": "marsch_animation_und_rueckreise_pflicht",
+  "quelle": "Henry, 20. 11. 2026, 10:17 Berlin. target_files sind Henrys Vorschlag; im Spiel liegen Regeln in spiel/regeln.js, Karte in spiel/spiel.js, Stil in spiel/stil.css.",
+  "target_files": ["spiel/regeln.js", "spiel/handlung_akte.js", "ui/karte.js", "style/karte.css"],
+  "marsch_animation": {
+    "kamera_zoom_faktor": 1.28,
+    "kamera_pan_transition_ms": 800,
+    "etappen_dauer_ms": 1200,
+    "pfad_stil": { "svg_stroke_dasharray": "6, 6", "animierte_pfad_zeichnung": true, "banner_bewegung_easing": "ease-in-out" },
+    "atmosphaere_layer": {
+      "vignette_rand_dunkelheit": 0.65,
+      "wetter_effekte": [
+        { "id": "rauch_westmark", "css_klasse": "fx-ash-drift", "partikel_anzahl": 18 },
+        { "id": "regen_nord", "css_klasse": "fx-rain-slant", "partikel_anzahl": 28 },
+        { "id": "schnee_pass", "css_klasse": "fx-snow-gust", "partikel_anzahl": 22 }
+      ],
+      "text_fade_ms": 450
+    }
+  },
+  "quest_rueckkehr_system": {
+    "neuer_status": "bereit_zur_abgabe",
+    "standard_abgabe_ort": "auftraggeber_ort",
+    "ausnahme_flag": "abgabe_vor_ort",
+    "rückmarsch_regeln": {
+      "ereignis_wahrscheinlichkeit_faktor": 0.45,
+      "nahrungsverbrauch_aktiv": true,
+      "hinweis_banner_text": "Auftrag erfüllt. Reise zurück nach {auftraggeber_ort}, um Bericht zu erstatten und deinen Lohn einzufordern."
+    },
+    "ui_verhalten": {
+      "ziel_ort_button_label_bei_erledigt": "Rückkehr nach {auftraggeber_ort} antreten",
+      "abgabe_button_nur_am_zielort_aktiv": true,
+      "karten_zielmarker_farbe": "#d97706"
+    }
+  },
+  "akt1_beispiel_hagenfels": {
+    "quest_id": "hq_akt1_schritt2_verbranntes_korn",
+    "auftraggeber_ort": "kronstadt_burg",
+    "einsatz_ort": "hagenfels_westmark",
+    "abgabe_vor_ort": false,
+    "phasen": [
+      { "phase": "hinmarsch", "route": ["kronstadt_burg", "westmark_ebene", "hagenfels_westmark"],
+        "vignette": "Der Wind trägt den Geruch verbrannten Korns von den Höfen bei Hagenfels herüber." },
+      { "phase": "einsatz", "ort": "hagenfels_westmark", "aktion": "Verteidigung der Höfe gegen Deserteure und Plünderer" },
+      { "phase": "rueckmarsch", "route": ["hagenfels_westmark", "westmark_ebene", "kronstadt_burg"],
+        "vignette": "Die Höfe der Westmark sind gesichert. Nun gilt es, die Nachricht vor den Thron zu bringen." }
+    ]
+  }
+}
