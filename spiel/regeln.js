@@ -596,8 +596,12 @@ const rules = (() => {
 
   // Söldner warten in den Städten mit Zentrallager, Story-Gefährten an ihren Treffpunkten.
   const sceneMap = (state) => state.scene === "weltknoten" ? N.knotenZuKarte(state.knoten) : world.scenes[state.scene]?.map;
+  // v3.0.3: Auf der Weltreise warten die Söldner auch in den Kharos-Städten Valengrad (Kronhall) und Eisentor (Hagenfels):
+  // Kornwik und Heidvang → Kronhall, Eiswacht → Hagenfels. Glutberg bleibt.
+  const soeldnerStadt = { weidenkamm: "kronhall", kraehenfurt: "kronhall", hochwacht: "hagenfels", "skarn-gate": "glutberg" };
   const mercenaryHere = (state, companion) => Boolean(companion.soeldner && storageSite(state) &&
-    companion.soeldner.orte.includes(sceneMap(state)));
+    (companion.soeldner.orte.includes(sceneMap(state)) ||
+      (state.scene === "weltknoten" && companion.soeldner.orte.some((ort) => soeldnerStadt[ort] === state.knoten))));
   function candidates(state) {
     if (state.combat || !state.health) return [];
     return Object.entries(world.companions).filter(([id, companion]) =>

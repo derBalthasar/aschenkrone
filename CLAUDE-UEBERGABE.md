@@ -130,3 +130,16 @@ Quelle: `quellen/henry/v300/gefaehrten-pool.json`. Regeln in `spiel/regeln.js` (
   Champions und nehmen nur Untote/Korrumpierte auf.
 - Synergien werden angezeigt; nur „Pakt aus Stahl & Flamme“ (+1 Rüstung) wirkt im Kampf. Die übrigen drei brauchen noch
   fehlende Systeme (Kampfressourcen, Ausweichen nach Kampfphase, Krit-Schaden).
+
+## UI-Aufräumen v3.0.2–v3.0.4 (20. 11. 2026)
+
+Quellen: `quellen/henry/v300/ui-302…`, `ui-303…`, `ui-304…`. Henrys Zieldateien (ui/abenteuer.js usw.) gibt es nicht;
+alles steckt in `spiel/spiel.js`, `spiel/stil.css`, `spiel/kharos.js`, `spiel/systeme.js`, `spiel/regeln.js`.
+- v3.0.2: Nur die aktive Quest ist offen (`questSchritt`, 2 Zeilen Text, „Jetzt“-Marke); abgeschlossene oder gesperrte
+  Akte und nicht laufende Zweige sind `<details>`. Reiseliste: Questziel → Landwege → Seewege, gesperrte Ziele hinter
+  „Gesperrte Seewege anzeigen (n)“. Kapitel-1-Übersicht = Henrys Kharos-Text (`KAPITEL1`).
+- v3.0.3: Tab A hat die Sub-Reiter A1/A2/A3 (`hofReiter`); der Aushang erscheint in A1 als Kacheln. Doppelte
+  „Kosten:“-Gründe heißen „zu wenig Silber oder Material“. Die Anzeigeschicht entfernt „(Henry, …)“-Notizen und macht aus
+  „n Gold“ „n Silber“. Söldner warten auch in Kronhall/Valengrad und Hagenfels/Eisentor (`soeldnerStadt`).
+- v3.0.4: Schatz-Banner im Handel, kurze Rohstoffnamen (systeme.js), SVG-Symbole (`SYMBOLE`), Tier-Kante
+  (`data-tier`), Rüstungs-Silhouette hinter den Slots. Ascheriss-Fangzahn → Leerenriss-Fangzahn (Anzeige).

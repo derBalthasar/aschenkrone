@@ -72,6 +72,11 @@ const kharos = (() => {
     ["Die Stille Feder", "Der Schweigsame Chronist"], ["die Stille Feder", "der Schweigsame Chronist"], ["der Stillen Feder", "des Schweigsamen Chronisten"],
     ["Stillen Feder", "Schweigsamen Chronisten"], ["Stille Feder", "Schweigsame Chronist"],
     ["Odris", WELT],
+    // v3.0.2–v3.0.4: Altlasten aus Odris in angezeigten Texten.
+    ["König Harald IV\\.", "Kaiser Aurelian IV."], ["Harald IV\\.", "Aurelian IV."],
+    ["Jarl Ragnvalds?", "Marschall Kaelen"], ["Ragnvalds", "Kaelens"], ["Ragnvald", "Kaelen"],
+    ["Aldric Vaelthar III\\.", "Grabkönig Sethek"], ["Aldric", "Sethek"],
+    ["(R|r)unengeätzte([rn]?) Ascheriss-Fangzahn", "$1unengeätzte$2 Leerenriss-Fangzahn"],
     // Namensgleichheit mit bestehenden Minibossen: Malakor, Vane und Draven gehören jetzt den Kharos-Hauptfiguren.
     ["Erzketzer Malakor", "Erzketzer Morkhal"], ["Inquisitor Vane der Verbrannte", "Inquisitor Varn der Verbrannte"],
     ["Kapitän „Kielholer“ Draven", "Kapitän „Kielholer“ Dravik"],
@@ -82,7 +87,7 @@ const kharos = (() => {
   const regelnOffen = regel([...figuren(false), ...fraktionen, ...klassen, ...glutberg, ...staedte.map(([a, n]) => [a + "(s?)", n + "$1"])]);
   const regelnEntlarvt = regel([...figuren(true), ...fraktionen, ...klassen, ...glutberg, ...staedte.map(([a, n]) => [a + "(s?)", n + "$1"])]);
   const schnelltest = new RegExp([...fraktionen.map(([a]) => a.split("(")[0]), ...staedte.map(([a]) => a), "Astrid", "Ragna", "Zollmeister",
-    "Thorvald", "Bleich", "Stille", "Odris", ...(D?.klassenNamen ?? []).map((k) => k.alt), "Erzketzer Malakor", "Inquisitor Vane", "Kielholer“ Draven"].map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|"));
+    "Thorvald", "Bleich", "Stille", "Odris", "Harald", "Ragnvald", "Aldric", "Ascheriss-Fangzahn", " Gold", "Henry", ...(D?.klassenNamen ?? []).map((k) => k.alt), "Erzketzer Malakor", "Inquisitor Vane", "Kielholer“ Draven"].map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|"));
 
   // Grammatik nach dem Tausch: Die neuen Titel sind männlich und tragen den Artikel. Dativ nach Präpositionen,
   // Akkusativ nach typischen Verben, großer Artikel am Satzanfang.
@@ -94,6 +99,10 @@ const kharos = (() => {
     [new RegExp("\\b(gegen|für|durch|um|stellst|stellt|besiegst|besiegt|entlarvst|entlarvt|suchst|sucht|triffst|trifft) der " + TITEL + " (Sternenleser|Chronist)\\b", "g"),
       (_, p, t, n) => p + " den " + schwach(t, n)],
     [new RegExp("(^|[.!?:]\\s+|[„\"»]\\s*)der " + TITEL, "g"), "$1Der $2"],
+    // v3.0.3: Belohnungen in Gold heißen Silber; Entwicklernotizen wie „(Henry, 18. 11. 2026):“ verschwinden aus der Anzeige.
+    [/([+−-]?\d+) Gold\b/g, "$1 Silber"],
+    [/\s*\((?:Henry|Patch|Errata)[^()]*\d{4}\)/g, ""],
+    [/\bHenry,\s*/g, ""],
   ];
   // Text umbenennen. entlarvt: Hat der Held Thorvald/Malakor schon entlarvt (Akt 4)?
   function text(wert, entlarvt = false) {

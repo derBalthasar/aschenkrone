@@ -862,6 +862,58 @@
   }
   const filterArten = [["alle", "Alle"], ["ausruestung", "Ausrüstung"], ["verbrauch", "Verbrauch"], ["material", "Material/Quest"]];
   const filterVon = (id) => world.gear[id]?.slot ? "ausruestung" : world.supplies[id] ? "verbrauch" : "material";
+  // v3.0.4: kleine SVG-Symbole für Gegenstände und Rohstoffe, Tier-Kante am Kartenrand.
+  const SYMBOLE = {
+    axt: "M6 21 17 6M14 3c4 0 7 3 7 7l-5-1-3-3z",
+    schwert: "M5 19 17 7l2-4-4 2L3 17M7 13l4 4M4 20l2-2",
+    hammer: "M6 21 15 12M11 4l9 9-3 3-9-9z",
+    dolch: "M7 17 17 7l1-3-3 1L5 15M6 14l4 4M4 20l2-2",
+    stab: "M7 21 17 5M15 3a3 3 0 1 0 4 4",
+    bogen: "M6 3c8 3 12 7 15 15M6 3 21 18M4 12h11",
+    ruestung_koerper: "M7 4 4 7v6c0 4 4 7 8 8 4-1 8-4 8-8V7l-3-3-5 2z",
+    handschuhe: "M8 21v-7L5 10V6h2v4h1V4h2v6h1V3h2v7h1V5h2v9l-3 7z",
+    stiefel: "M8 3h5v10l6 3v4H6l2-6z",
+    helm: "M4 15a8 8 0 0 1 16 0v3H4zM12 7V4M9 18v3M15 18v3",
+    amulett: "M6 3c0 5 3 8 6 8s6-3 6-8M12 11v2M9 16a3 3 0 1 0 6 0 3 3 0 1 0-6 0",
+    ring: "M7 15a5 5 0 1 0 10 0 5 5 0 1 0-10 0M10 6l2-3 2 3-2 3z",
+    trank: "M10 3h4M11 3v5l-5 8a3 3 0 0 0 3 5h6a3 3 0 0 0 3-5l-5-8V3M8 15h8",
+    silber: "M12 3a9 9 0 1 0 0 18 9 9 0 1 0 0-18M12 7v10M9 9.5c0-1.5 6-1.5 6 0s-6 1.5-6 3 6 1.5 6 0",
+    beutel: "M8 7h8l3 13H5zM9 7c0-2 1-4 3-4s3 2 3 4",
+    truhe: "M3 10h18v10H3zM3 10l2-5h14l2 5M11 12h2v3h-2z",
+    nahrung: "M5 13c0-4 3-7 7-7s7 3 7 7v2H5zM3 17h18",
+    holz: "M4 8h16v4H4zM4 14h16v4H4zM7 8v4M15 14v4",
+    eisen: "M3 17 6 9h12l3 8zM8 9l1-3h6l1 3",
+    stein: "M5 18 3 11l5-6 8 1 5 6-3 6z",
+    runensplitter: "M12 2 6 12l6 10 6-10zM12 7v10M9 12h6",
+  };
+  function symbol(art, klasse = "inv-symbol") {
+    const pfad = SYMBOLE[art];
+    if (!pfad) return null;
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("aria-hidden", "true");
+    svg.setAttribute("class", klasse + " symbol-" + art);
+    const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    p.setAttribute("d", pfad);
+    svg.append(p);
+    return svg;
+  }
+  function itemArt(id) {
+    const gear = world.gear[id];
+    const name = world.items[id] ?? "";
+    if (gear?.slot === "weapon") return /axt|beil/i.test(name) ? "axt" : /hammer|kolben|keule|morgenstern/i.test(name) ? "hammer"
+      : /dolch|messer|klinge der nacht/i.test(name) ? "dolch" : /stab|zepter|stecken/i.test(name) ? "stab"
+      : /bogen|armbrust|büchse|pistole/i.test(name) ? "bogen" : "schwert";
+    return { armor: "ruestung_koerper", offhand: "ruestung_koerper", hands: "handschuhe", legs: "stiefel", head: "helm", neck: "amulett", ring: "ring" }[gear?.slot]
+      ?? (world.supplies[id] ? "trank" : null);
+  }
+  const itemTier = (id) => rules.systeme.daten.gegenstaende[id]?.tier ?? null;
+  function itemSchmuck(entry, id, name) {
+    const tier = itemTier(id);
+    if (tier) entry.dataset.tier = tier;
+    const s = symbol(itemArt(id));
+    if (s) name.prepend(s);
+  }
   const tierText = (id) => {
     const sys = rules.systeme.daten.gegenstaende[id];
     return [kindLabels[kindOf(id)], sys?.tier ? "Tier " + sys.tier : world.rarity[id]].filter(Boolean).join(" · ");
@@ -887,6 +939,7 @@
     const name = element("span");
     name.className = "inv-row-name";
     name.append(element("strong", world.items[id] + (count > 1 ? " ×" + count : "")), element("small", tierText(id)));
+    itemSchmuck(entry, id, name);
     const wert = element("span", kennwert(id));
     wert.className = "inv-kennwert";
     auf.append(punkt, name, wert);
@@ -1088,6 +1141,8 @@
     const name = element("span");
     name.className = "inv-row-name";
     name.append(element("strong", text[0]), element("small", text[1] ?? ""));
+    if (id) itemSchmuck(entry, id, name);
+    else if (text.rohstoff) { const s = symbol(text.rohstoff); if (s) name.prepend(s); }
     const punkt = element("span");
     punkt.className = "inv-punkt";
     punkt.setAttribute("aria-hidden", "true");
@@ -1123,13 +1178,13 @@
     const info = rules.kontorInfo(state);
     if (info) {
       // Patch 2.6.11: fünf gleich breite Rohstoffkarten (große Zahl, kurzer Name) und eine Proviantleiste in einer Zeile.
-      const kurz = { nahrung: "Nahrung", holz: "Bauholz", eisen: "Roheisen", stein: "Bruchstein", runensplitter: "Splitter" };
+      const kurz = { nahrung: "Nahrung", holz: "Bauholz", eisen: "Roheisen", stein: "Bruchstein", runensplitter: "Runensplitter" };
       const karten = element("ul");
       karten.className = "kontor-karten";
       for (const r of info.rohstoffe) {
         const karte = element("li");
         karte.title = r.name;
-        karte.append(element("strong", String(r.menge)), element("span", kurz[r.id] ?? r.name));
+        karte.append(symbol(r.id, "kontor-symbol") ?? "", element("strong", String(r.menge)), element("span", kurz[r.id] ?? r.name));
         karten.append(karte);
       }
       const nahrung = element("div");
@@ -1210,25 +1265,44 @@
   }
 
   // Handel: Kontor-Rohstoffe und Ausrüster mit Ruf-Modifikator, Händler für Vorräte und Trophäen.
+  // v3.0.4: Schatz-Banner über den Kontor-Rohstoffen (Silber, Rucksack, Kontor-Vorräte).
+  function schatzBanner(container) {
+    const banner = element("div");
+    banner.className = "schatz-banner";
+    banner.setAttribute("aria-label", "Silber und Vorräte");
+    const info = rules.kontorInfo(state);
+    const felder = [["silber", "Dein Silber", state.silver, "schatz-silber"], ["beutel", "Rucksack", rules.slotsUsed(state) + "/" + rules.bagLimit(state), ""],
+      ...(info ? [["truhe", "Kontor-Vorräte", info.rohstoffe.reduce((n, r) => n + r.menge, 0), ""]] : [])];
+    for (const [art, label, wert, klasse] of felder) {
+      const feld = element("div");
+      feld.className = "schatz-feld " + klasse;
+      feld.append(symbol(art, "schatz-symbol"), element("span", label), element("strong", String(wert)));
+      banner.append(feld);
+    }
+    container.append(banner);
+  }
   function renderHandel(container) {
     if (!handelJetzt()) {
-      const hinweis = element("p", "Hier ist kein Händler. Handel gibt es in Städten mit Zentrallager oder Kontor und an der Zeugkammer von Eiswacht.");
+      const hinweis = element("p", "Hier ist kein Händler. Handel gibt es in Städten mit Zentrallager oder Kontor.");
       hinweis.className = "inv-hinweis";
       container.append(hinweis);
       return;
     }
+    schatzBanner(container);
     const info = rules.kontorInfo(state);
     if (info) {
       const mod = element("p", "Ruf " + signed(info.ruf) + " (" + info.rang.name + ") bei " + info.name + " · Kauf ×" +
         String(info.rang.kauf).replace(".", ",") + " · Verkauf ×" + String(info.rang.verkauf).replace(".", ",") +
         (info.rang.handel ? "" : " · geächtet: kein Handel"));
       mod.className = "inv-hinweis";
-      // Patch 2.6.6: festes Raster (Name, Bestand, Preise, Knöpfe) mit kurzen Namen ohne Umbruch.
-      const kurzNamen = { nahrung: "Pökelfleisch & Brot", holz: "Asch-Bauholz", eisen: "Roheisenbarren", stein: "Bruchstein", runensplitter: "Runensplitter" };
+      // Patch 2.6.6: festes Raster (Name, Bestand, Preise, Knöpfe); v3.0.4: kompakte Namen mit Symbol, kein Abschneiden.
+      const kurzNamen = { nahrung: "Nahrung", holz: "Bauholz", eisen: "Roheisen", stein: "Bruchstein", runensplitter: "Runensplitter" };
       const liste = element("ul");
       liste.className = "inv-list rohstoff-raster";
       for (const r of info.rohstoffe) {
-        liste.append(handelZeile(null, [kurzNamen[r.id] ?? r.name, r.menge + " im Kontor"], r.kauf + " / +" + r.verkauf, [
+        const text = [kurzNamen[r.id] ?? r.name, r.menge + " im Kontor"];
+        text.rohstoff = r.id;
+        liste.append(handelZeile(null, text, r.kauf + " / +" + r.verkauf, [
           primaerKnopf("Kauf 1", () => hubAction(rules.kontorHandel(state, r.id, 1, true)), Boolean(r.kaufGrund), r.kaufGrund ?? r.kauf + " Silber"),
           primaerKnopf("Kauf 10", () => hubAction(rules.kontorHandel(state, r.id, 10, true)), Boolean(r.kauf10Grund), r.kauf10Grund ?? r.kauf10 + " Silber"),
           primaerKnopf("Verkauf 1", () => hubAction(rules.kontorHandel(state, r.id, 1, false)), Boolean(r.verkaufGrund), r.verkaufGrund ?? "+" + r.verkauf + " Silber"),
@@ -1305,7 +1379,7 @@
     if (hub.offen && !state.inventory.includes(hub.offen)) hub.offen = null;
     const site = rules.storageSite(state);
     el("hub-place").textContent = rules.storageOpen(state) ? site : state.combat ? "Im Kampf" : world.scenes[state.scene].place ?? "";
-    el("hub-silver").textContent = state.silver + " Silber";
+    el("hub-silver").replaceChildren(symbol("silber", "schatz-symbol"), element("strong", String(state.silver)), " Silber");
     renderMember();
     renderSlots();
     renderStats();
@@ -3993,49 +4067,23 @@
   }
 
   // Fraktionsreihe als Plan (Gemini-Aufbau, spiel/nebenquests.js). Nur lesbar, die Akte sind noch nicht spielbar.
+  // v3.0.2: Kapitel-1-Übersicht in der Kharos-Fassung (ersetzt den alten Plan mit Harald IV., Ragnvald, Aldric, Kornwik).
+  const KAPITEL1 = { titel: "Hauptquest · Akt 1: Risse im eigenen Banner", eintraege: [
+    ["Der Schweigsame Chronist", "Niemand kennt sein wahres Gesicht. Er taucht in allen Reichen auf und spielt den Anführern die Wahrheit über die drohende Finsternis zu."],
+    ["Der innere Konflikt", "Bevor dein Volk gegen die äußeren Feinde bestehen kann, musst du die Abtrünnigen an deinen Grenzen bezwingen und dein Banner einen."]] };
   function weltReihe(fraktion) {
     const reihe = typeof nebenquests !== "undefined" ? nebenquests.reihe(fraktion) : null;
     if (!reihe) return null;
     const box = element("details");
     box.className = "welt-aushang welt-reihe";
-    box.append(element("summary", "Hauptquest · Kapitel " + reihe.kapitel + " · " + reihe.akte.length + " Akte"));
-    box.append(element("p", "Prolog „" + reihe.prolog.titel + "“: " + reihe.prolog.text));
+    box.append(element("summary", KAPITEL1.titel));
     const liste = element("ul");
-    for (const akt of reihe.akte) {
+    for (const [titel, text] of KAPITEL1.eintraege) {
       const item = element("li");
-      const kopf = element("p");
-      kopf.append(element("strong", "Akt " + akt.nr + " · " + akt.titel), " · Stufe " + akt.stufen +
-        (akt.freieReihenfolge ? " · freie Reihenfolge (empfohlen als " + akt.empfohlen + "., mit " + akt.schwester + ")" : ""));
-      item.append(kopf, element("p", akt.ort + (akt.volksquest ? " · enthält " + akt.volksquest : "")));
-      if (akt.vermerk) {
-        const vermerk = element("p", akt.vermerk);
-        vermerk.className = "welt-aushang-hinweis";
-        item.append(vermerk);
-      }
-      const schritte = element("ol");
-      for (const schritt of akt.schritte) {
-        const zeile = element("li");
-        zeile.append(element("strong", schritt.titel), " (" + schritt.ort + "): " + schritt.text);
-        if (schritt.vermerk) {
-          const vermerk = element("p", schritt.vermerk);
-          vermerk.className = "welt-aushang-hinweis";
-          zeile.append(vermerk);
-        }
-        schritte.append(zeile);
-      }
-      item.append(schritte);
-      for (const option of akt.wahl) item.append(element("p", "Wahl: " + option.label + " → " + option.folge));
+      item.append(element("strong", titel + ": "), text);
       liste.append(item);
     }
     box.append(liste);
-    box.append(element("p", "Fraktions-Spezialisierung (" + reihe.spezialisierung.ausloeser + ", " + reihe.spezialisierung.zusaetzlich + "): " +
-      reihe.spezialisierung.optionen.map(o => o.name + " – " + o.bonus).join(" · ")));
-    box.append(element("p", "Begleiter: " + reihe.begleiter.map(b => b.name + " (" + b.rolle + ", " +
-      (klassen.fraktionen[fraktion]?.klassen[b.klasse]?.name ?? b.klasse) + ", " + knoten.get(b.ort).name +
-      ", Akt " + b.akt + ")").join(", ")));
-    const stand = element("p", "Plan der Hauptquest. " + (rules.hauptquest(state) ? "Akt 1 ist spielbar, ab Akt 2 folgen die Akte noch." : "Die Akte werden noch gebaut."));
-    stand.className = "welt-aushang-stand";
-    box.append(stand);
     return box;
   }
 
@@ -4062,21 +4110,45 @@
   }
 
   // Hauptquest Akt 1 (Kronreich und Orden): aktueller Schritt, Ausführen am richtigen Ort, Wahl am Ende des Akts.
+  // v3.0.2: aktueller Schritt und Ort hervorgehoben, Beschreibung auf 2 Zeilen gekürzt (aufklappbar per Klick).
+  function questSchritt(titel, ort, text) {
+    const teil = element("div");
+    const kopf = element("p");
+    kopf.className = "quest-schritt";
+    const marke = element("span", "Jetzt");
+    marke.className = "quest-badge";
+    kopf.append(marke, element("strong", titel), " · ");
+    const wo = element("span", ort);
+    wo.className = "quest-ort";
+    kopf.append(wo);
+    teil.append(kopf);
+    if (text) {
+      const kurz = element("p", text);
+      kurz.className = "quest-kurztext";
+      kurz.title = "Klicken, um den ganzen Text zu lesen";
+      kurz.addEventListener("click", () => kurz.classList.toggle("offen"));
+      teil.append(kurz);
+    }
+    return teil;
+  }
+
   function weltHauptquest() {
     const haupt = rules.hauptquest(state);
     if (!haupt) return null;
-    const box = element("div");
-    box.className = "welt-hauptquest";
-    box.append(element("h4", "Hauptquest · Akt " + haupt.akt + ", „" + haupt.titel + "“ · Stufe " + haupt.stufen));
+    const kopfzeile = "Hauptquest · Akt " + haupt.akt + ", „" + haupt.titel + "“ · Stufe " + haupt.stufen;
     if (haupt.fertig) {
+      // v3.0.2: Abgeschlossene Akte stehen eingeklappt als Akkordeon-Zeile.
+      const zu = element("details");
+      zu.className = "welt-hauptquest quest-akkordeon";
       const wahl = nebenquests.reihe(state.faction).akte[0].wahl.find(option => option.id === haupt.wahl);
-      box.append(element("p", "Abgeschlossen" + (wahl ? ": " + wahl.label + "." : ".")));
-      return box;
+      zu.append(element("summary", kopfzeile + " · abgeschlossen"), element("p", "Abgeschlossen" + (wahl ? ": " + wahl.label + "." : ".")));
+      return zu;
     }
+    const box = element("div");
+    box.className = "welt-hauptquest quest-aktiv";
+    box.append(element("h4", kopfzeile));
     const schritt = haupt.schritt;
-    const kopf = element("p");
-    kopf.append(element("strong", "Schritt " + schritt.nr + " von " + schritt.von + " · " + schritt.titel), " · " + knoten.get(schritt.ort).name);
-    box.append(kopf, element("p", schritt.text));
+    box.append(questSchritt("Schritt " + schritt.nr + " von " + schritt.von + " · " + schritt.titel, knoten.get(schritt.ort).name, schritt.text));
     if (haupt.bericht) {
       box.append(element("p", "Erfüllt. Bericht erwartet in " + haupt.bericht.ortName + " (siehe oben)."));
       return box;
@@ -4117,8 +4189,10 @@
     const box = element("div");
     box.className = "welt-hauptquest welt-akte";
     if (info.grund) {
-      box.append(element("h4", "Akt 2 und 3 · Schwester-Zweige"), element("p", "Noch gesperrt: " + info.grund + "."));
-      return box;
+      const zu = element("details");
+      zu.className = "welt-hauptquest welt-akte quest-akkordeon";
+      zu.append(element("summary", "Akt 2 und 3 · Schwester-Zweige · gesperrt"), element("p", "Noch gesperrt: " + info.grund + "."));
+      return zu;
     }
     const a4 = info.akt4;
     // Patch 2.6.10: Erinnerung an ungenutzte Aufstiegspunkte vor Bosskämpfen (abschaltbar in den Einstellungen).
@@ -4131,16 +4205,20 @@
     }
     if (!a4.offen) {
       box.append(element("h4", "Akt 2 und 3 · Schwester-Zweige (freie Reihenfolge)"));
+      // v3.0.2: Nur der laufende Zweig (sonst der Zweig am aktuellen Ort) ist offen, alle anderen sind eingeklappt.
+      const laufend = info.zweige.find((z) => z.fortschritt > 0 && !z.fertig) ?? info.zweige.find((z) => !z.fertig && z.hub === state.knoten);
       for (const z of info.zweige) {
-        const teil = element("div");
-        teil.className = "akt-zweig" + (z.fertig ? " fertig" : "");
-        teil.append(element("p", ""));
-        teil.firstChild.append(element("strong", "„" + z.titel + "“"), " · " + klassen.fraktionen[z.fraktion].name + " · " +
+        const teil = element("details");
+        teil.className = "akt-zweig quest-akkordeon" + (z.fertig ? " fertig" : "") + (z === laufend ? " quest-aktiv" : "");
+        teil.open = z === laufend;
+        const zeile = element("summary");
+        zeile.append(element("strong", "„" + z.titel + "“"), " · " + klassen.fraktionen[z.fraktion].name + " · " +
           knoten.get(z.hub).name + " · " + (z.fertig ? "abgeschlossen" : "Akt " + z.akt + ", Stufe " + z.stufen + " · " + z.fortschritt + " von 3"));
+        teil.append(zeile);
         if (!z.fertig) {
-          if (!z.fortschritt) teil.append(element("p", z.text));
           const sch = z.schritt;
-          teil.append(element("p", "Stufe " + sch.nr + " · " + sch.titel + ": " + sch.text + (sch.boss ? " (Boss)" : "") +
+          teil.append(questSchritt("Stufe " + sch.nr + " · " + sch.titel + (sch.boss ? " (Boss)" : ""), knoten.get(z.zielOrt ?? z.hub).name,
+            (!z.fortschritt ? z.text + " " : "") + sch.text +
             (sch.rohstoffe ? " · Lohn: " + Object.entries(sch.rohstoffe).map(([id, n]) => n + " " + id.replace("RES_", "").toLowerCase()).join(", ") : "")));
           if (z.geaechtet && !z.soeldner) teil.append(element("p", "Du bist hier geächtet: Als Söldner kommst du für 150 Silber hinein."));
           const anderer = info.zweige.some((x) => x !== z && x.fortschritt > 0 && !x.fertig);
@@ -4284,7 +4362,7 @@
   }
 
   // Aushang: Nebenquests des Ortes (Gemini-Ausarbeitung, spiel/nebenquests.js). Kronreich- und Orden-Helden nehmen sie an.
-  function weltAushang(ort) {
+  function weltAushang(ort, kompakt = false) {
     const eintrag = typeof nebenquests !== "undefined" ? nebenquests.fuerOrt(ort.id) : null;
     if (!eintrag?.auftraege.length) return null;
     const spielbar = Object.fromEntries(rules.aushang(state).map(auftrag => [auftrag.id, auftrag]));
@@ -4296,12 +4374,41 @@
     stand.className = "welt-aushang-stand";
     box.append(stand);
     const liste = element("ul");
+    if (kompakt) liste.className = "aushang-kacheln";
     for (const auftrag of eintrag.auftraege) {
       const item = element("li");
+      const wege = nebenquests.wegeImText(auftrag.text + " " + auftrag.lohn);
+      if (kompakt) {
+        // v3.0.3: Kurz-Kachel mit Titel, Stufen- und Weg-Badge, Lohn und Knopf; der Text liegt aufklappbar darunter.
+        item.className = "aushang-kachel";
+        const kopf = element("p");
+        kopf.append(element("strong", auftrag.titel));
+        const badges = element("p");
+        badges.className = "aushang-badges";
+        const badge = (text, klasse) => { const b = element("span", text); b.className = "quest-badge " + klasse; badges.append(b); };
+        if (stufen) badge("Stufe " + stufen, "badge-stufe");
+        badge(auftrag.art, "badge-art");
+        for (const k of wege) badge("Weg " + nebenquests.wegName(k), "badge-weg");
+        item.append(kopf, badges, element("p", "Lohn: " + auftrag.lohn));
+        const mehr = element("details");
+        mehr.append(element("summary", "Worum geht es?"), element("p", auftrag.text));
+        if (auftrag.hinweis) mehr.append(element("p", auftrag.hinweis));
+        item.append(mehr);
+        const spiel = spielbar[auftrag.id];
+        if (spiel?.status) {
+          const fertig = element("p", spiel.status === "erledigt" ? "✓ Erledigt" : "Angenommen · " + auftragOrt(spiel));
+          fertig.className = "welt-auftrag-stand";
+          item.append(fertig);
+        } else if (spiel && !spiel.grund) {
+          button(item, "Annehmen · " + (spiel.spiel.gegner ? "Kampf" : "ohne Kampf") + " · " + rules.auftragEp + " EP",
+            () => aushangGespraech(ort, auftrag, spiel)).classList.add("npc-start");
+        }
+        liste.append(item);
+        continue;
+      }
       const kopf = element("p");
       kopf.append(element("strong", auftrag.titel), " · " + auftrag.art);
       item.append(kopf, element("p", auftrag.text), element("p", "Lohn: " + auftrag.lohn));
-      const wege = nebenquests.wegeImText(auftrag.text + " " + auftrag.lohn);
       if (wege.length) item.append(element("p", "Wege: " + wege.map(k => k + " " + nebenquests.wegName(k)).join(", ")));
       if (auftrag.hinweis) {
         const hinweis = element("p", auftrag.hinweis);
@@ -4477,17 +4584,47 @@
     weltSchmiede(panel);
   }
 
+  // v3.0.3: Tab A in drei Sub-Reiter (Aushang & NPCs, Siedlung & Bau, Hofstaat & Rekrutierung).
+  let hofReiter = "a1";
+  const HOF_REITER = [["a1", "A1 · Aushang & NPCs"], ["a2", "A2 · Siedlung & Bau"], ["a3", "A3 · Hofstaat & Rekrutierung"]];
   function weltHofstaat(panel, ort) {
-    if (rules.lage(state)) {
-      ortsBewohner(panel, ort, rules.kontorInfo(state) ? ["wachhauptmann_aushang", "schankwirt", "soeldner_anwerber"] : ["bauer_und_dorfbewohner", "schankwirt"]);
-      const aushang = weltAushang(ort);
-      if (aushang) {
-        aushang.open = true;
-        panel.append(aushang);
-      }
+    const leiste = element("div");
+    leiste.className = "welt-subtabs";
+    leiste.setAttribute("role", "tablist");
+    leiste.setAttribute("aria-label", "Hofstaat & Aushang");
+    for (const [id, label] of HOF_REITER) {
+      const knopf = element("button", label);
+      knopf.type = "button";
+      knopf.id = "hof-reiter-" + id;
+      knopf.className = "welt-subtab" + (hofReiter === id ? " aktiv" : "");
+      knopf.setAttribute("role", "tab");
+      knopf.setAttribute("aria-selected", String(hofReiter === id));
+      knopf.addEventListener("click", () => { hofReiter = id; renderScene(); el("hof-reiter-" + id)?.focus(); });
+      leiste.append(knopf);
     }
+    panel.append(leiste);
+    const inhalt = element("div");
+    inhalt.className = "welt-subpanel";
+    inhalt.dataset.reiter = hofReiter;
+    inhalt.setAttribute("role", "tabpanel");
+    inhalt.setAttribute("aria-labelledby", "hof-reiter-" + hofReiter);
+    panel.append(inhalt);
+    ({ a1: hofAushang, a2: hofSiedlung, a3: hofDiplomatie })[hofReiter](inhalt, ort);
+  }
+  function hofAushang(panel, ort) {
+    if (!rules.lage(state)) { panel.append(element("p", "Hier hängt kein Aushang der Menschen.")); return; }
+    ortsBewohner(panel, ort, rules.kontorInfo(state) ? ["wachhauptmann_aushang", "schankwirt", "soeldner_anwerber"] : ["bauer_und_dorfbewohner", "schankwirt"]);
+    const aushang = weltAushang(ort, true);
+    if (aushang) {
+      aushang.open = true;
+      panel.append(aushang);
+    } else panel.append(element("p", "Am Aushang hängt hier nichts."));
+  }
+  function hofSiedlung(panel) {
     const siedlung = weltSiedlung();
-    if (siedlung) panel.append(siedlung);
+    panel.append(siedlung ?? element("p", "Hier gibt es nichts zu bauen."));
+  }
+  function hofDiplomatie(panel, ort) {
     const endgame = weltEndgame();
     if (endgame) panel.append(endgame);
     const chronik = weltChronikKharos();
@@ -4508,7 +4645,7 @@
     panel.append(element("p", "Gruppe: " + (state.party.length + 1) + " von " + (rules.partyLimit + 1) + " Helden. " +
       "Untote und Lebende reisen nicht zusammen, Orks und Zwerge ebenso wenig."));
     if (!renderCandidates(panel)) {
-      panel.append(element("p", "Hier wartet niemand auf Anwerbung. Söldner warten in Kornwik, Heidvang, Eiswacht und Glutberg."));
+      panel.append(element("p", "Hier wartet niemand auf Anwerbung. Söldner warten in Kronhall, Hagenfels und Glutberg."));
     }
   }
 
@@ -4549,6 +4686,8 @@
   }
 
   // Siedlung der Menschen (Bau-Datei): Phase, Ausbau, Gebäude, Grenzstraßen, Garnison, Reparatur und Wiederaufbau.
+  // v3.0.3: Gründe, die nur die Kosten wiederholen („Kosten: …“), werden im Knopf zu einem kurzen Hinweis.
+  const ohneKostenDoppel = (grund) => grund && /^Kosten:/.test(grund) ? "zu wenig Silber oder Material" : grund;
   function weltSiedlung() {
     const info = rules.siedlungInfo(state);
     if (!info) return null;
@@ -4562,13 +4701,13 @@
         " · Garnison " + info.garnison + " · Bauplätze " + info.stufe.plaetze + "."));
       if (info.naechste) {
         button(box, "Ausbauen zu " + info.naechste.name + " · " + rules.systeme.kostenText(info.naechste.kosten) +
-          (info.ausbauGrund ? " · " + info.ausbauGrund : ""), () => update(rules.siedlungAusbauen(state)), { disabled: Boolean(info.ausbauGrund) });
+          (info.ausbauGrund ? " · " + ohneKostenDoppel(info.ausbauGrund) : ""), () => update(rules.siedlungAusbauen(state)), { disabled: Boolean(info.ausbauGrund) });
       }
-      button(box, "Truppe für die Garnison anwerben · " + info.rekrutierenKosten + (info.rekrutierenGrund ? " · " + info.rekrutierenGrund : ""),
+      button(box, "Truppe für die Garnison anwerben · " + info.rekrutierenKosten + (info.rekrutierenGrund ? " · " + ohneKostenDoppel(info.rekrutierenGrund) : ""),
         () => update(rules.garnisonRekrutieren(state)), { disabled: Boolean(info.rekrutierenGrund) });
     }
     if (info.beschaedigt) {
-      button(box, "Wieder aufbauen · " + info.reparaturKosten + (info.reparierenGrund ? " · " + info.reparierenGrund : ""),
+      button(box, "Wieder aufbauen · " + info.reparaturKosten + (info.reparierenGrund ? " · " + ohneKostenDoppel(info.reparierenGrund) : ""),
         () => update(rules.ortReparieren(state)), { disabled: Boolean(info.reparierenGrund) });
     }
     const liste = element("ul");
@@ -4577,7 +4716,7 @@
       const zeile = element("li");
       zeile.append(element("strong", g.name), element("span", " · " + g.wirkung));
       if (g.steht) zeile.append(element("em", " · steht"));
-      else button(zeile, "Bauen · " + rules.systeme.kostenText(g.kosten) + (g.grund ? " · " + g.grund : ""),
+      else button(zeile, "Bauen · " + rules.systeme.kostenText(g.kosten) + (g.grund ? " · " + ohneKostenDoppel(g.grund) : ""),
         () => update(rules.gebaeudeBauen(state, g.id)), { disabled: Boolean(g.grund) });
       liste.append(zeile);
     }
@@ -4586,13 +4725,13 @@
       box.append(element("h4", "Grenzstraßen pflastern · " + info.strassenKosten));
       for (const w of info.strassen) {
         if (w.gepflastert) box.append(element("p", "Straße nach " + w.ziel + ": gepflastert."));
-        else button(box, "Straße nach " + w.ziel + " pflastern" + (w.grund ? " · " + w.grund : ""), () => update(rules.strasseBauen(state, w.id)), { disabled: Boolean(w.grund) });
+        else button(box, "Straße nach " + w.ziel + " pflastern" + (w.grund ? " · " + ohneKostenDoppel(w.grund) : ""), () => update(rules.strasseBauen(state, w.id)), { disabled: Boolean(w.grund) });
       }
     }
     for (const w of info.wiederaufbau) {
       box.append(element("h4", "Wiederaufbau: " + w.titel));
       box.append(element("p", w.wirkung + " Lohn: " + w.silber + " Silber, Ruf +" + w.ruf + "."));
-      if (!w.fertig) button(box, "Wiederaufbau beginnen · " + rules.systeme.kostenText(w.kosten) + (w.grund ? " · " + w.grund : ""),
+      if (!w.fertig) button(box, "Wiederaufbau beginnen · " + rules.systeme.kostenText(w.kosten) + (w.grund ? " · " + ohneKostenDoppel(w.grund) : ""),
         () => update(rules.wiederaufbau(state, w.id)), { disabled: Boolean(w.grund) });
     }
     return box;
@@ -4720,12 +4859,37 @@
   // Ein Klick auf die Zeile bricht auf. Ab erhöhter Gefahr (Hinterhalt ab 30 %) fragt die Zeile einmal nach.
   const wegweiserGefahr = 0.3;
   const wegweiserNachfrage = { ziel: null };
-  const reiseZieleSortiert = () => rules.reiseZiele(state)
-    .sort((a, b) => (a.ziel.typ === "dorf") - (b.ziel.typ === "dorf") || a.ziel.name.localeCompare(b.ziel.name, "de"));
+  // v3.0.2: Ziele aktiver Quests (Hauptquest, laufender Zweig, Akt 4, offene Berichte) und der erste Schritt dorthin.
+  function aktiveQuestZiele() {
+    const ziele = [];
+    const haupt = rules.hauptquest(state);
+    if (haupt && !haupt.fertig) ziele.push(haupt.bericht?.ort ?? haupt.zielOrt);
+    const akte = rules.akteInfo(state);
+    if (akte && !akte.grund) {
+      const laufend = akte.zweige.find((z) => z.fortschritt > 0 && !z.fertig);
+      if (laufend) ziele.push(laufend.zielOrt);
+      if (akte.akt4.offen && !akte.akt4.fertig) ziele.push(akte.akt4.zielOrt);
+    }
+    const naechste = new Set();
+    for (const ziel of ziele.filter(Boolean)) {
+      if (ziel === state.knoten) continue;
+      const schritt = rules.ortReise(state, ziel)?.route?.[0];
+      if (schritt) naechste.add(schritt);
+    }
+    return naechste;
+  }
+  // Reihenfolge: 1. aktives Questziel (oder Auftrag unterwegs), 2. erreichbare Landwege, 3. erreichbare Seewege, dann gesperrte.
+  const reiseZieleSortiert = () => {
+    const quest = aktiveQuestZiele();
+    const rang = (w) => w.grund ? 3 : quest.has(w.zielId) || w.auftrag ? 0 : w.kantenTyp === "seeweg" ? 2 : 1;
+    return rules.reiseZiele(state).map((w) => ({ ...w, questZiel: !w.grund && (quest.has(w.zielId) || Boolean(w.auftrag)) }))
+      .sort((a, b) => rang(a) - rang(b) || (a.ziel.typ === "dorf") - (b.ziel.typ === "dorf") || a.ziel.name.localeCompare(b.ziel.name, "de"));
+  };
+  let gesperrteZeigen = false;
 
   function wegweiser(weg, kompakt = false) {
     const item = element("li");
-    item.className = "wegweiser welt-" + weg.sicherheit + (weg.gefahr >= wegweiserGefahr ? " wegweiser-gefahr" : "");
+    item.className = "wegweiser welt-" + weg.sicherheit + (weg.gefahr >= wegweiserGefahr ? " wegweiser-gefahr" : "") + (weg.questZiel ? " wegweiser-quest" : "");
     const knopf = element("button");
     knopf.type = "button";
     knopf.className = "wegweiser-knopf";
@@ -4735,6 +4899,7 @@
     links.className = "wegweiser-ziel";
     const typ = element("small", knoten.typNamen[weg.ziel.typ] + " · " + klassen.fraktionen[weg.ziel.fraktion].name);
     links.append(element("strong", weg.ziel.name), typ);
+    if (weg.questZiel) { const marke = element("span", "Questziel"); marke.className = "quest-badge"; links.prepend(marke); }
     const mitte = element("span");
     mitte.className = "wegweiser-weg";
     const gefahr = element("em", "Hinterhalt " + rkPercent(weg.gefahr));
@@ -4798,8 +4963,24 @@
         "Jeder Weg hat seine eigene Gefahr für einen Hinterhalt. Klick auf eine Zeile, um aufzubrechen."));
     const list = element("ul");
     list.className = "welt-ziele wegweiser-liste";
-    for (const weg of reiseZieleSortiert()) list.append(wegweiser(weg));
+    const ziele = reiseZieleSortiert();
+    for (const weg of ziele.filter((w) => !w.grund)) list.append(wegweiser(weg));
     panel.append(list);
+    // v3.0.2: Gesperrte Ziele stehen eingeklappt hinter einem Umschalter.
+    const gesperrt = ziele.filter((w) => w.grund);
+    if (gesperrt.length) {
+      const nurSee = gesperrt.every((w) => w.kantenTyp === "seeweg");
+      const umschalter = button(panel, (gesperrteZeigen ? "Gesperrte " + (nurSee ? "Seewege" : "Ziele") + " ausblenden"
+        : "Gesperrte " + (nurSee ? "Seewege" : "Ziele") + " anzeigen") + " (" + gesperrt.length + ")", () => { gesperrteZeigen = !gesperrteZeigen; renderScene(); });
+      umschalter.classList.add("gesperrt-umschalter");
+      umschalter.setAttribute("aria-expanded", String(gesperrteZeigen));
+      if (gesperrteZeigen) {
+        const zu = element("ul");
+        zu.className = "welt-ziele wegweiser-liste wegweiser-gesperrt";
+        for (const weg of gesperrt) zu.append(wegweiser(weg));
+        panel.append(zu);
+      }
+    }
   }
 
   // Gefährten und Söldner vor Ort, in Szenen der Handlung und im Hofstaat des Stadt-Hubs.

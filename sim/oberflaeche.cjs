@@ -69,7 +69,7 @@ function stand({ fraktion, akt }) {
     schritt = "Aushang";
     await page.locator("button", { hasText: "Hofstaat" }).first().click().catch(() => {});
     await page.waitForTimeout(200);
-    const aushang = page.locator(".npc-start:visible", { hasText: "Auftrag" });
+    const aushang = page.locator(".npc-start:visible", { hasText: "Annehmen" });
     if (await aushang.count()) await pruefe("Aushang-Gespräch", () => aushang.first().click(), "npc-dialog");
     else fehler.push(`${f.fraktion}/${f.akt} · Aushang: kein Auftrag zum Besprechen gefunden`);
     console.log(`${f.fraktion}/${f.akt} geprüft`);
@@ -120,7 +120,7 @@ function stand({ fraktion, akt }) {
     for (const alt of ["Kronreich", "Orden der Flamme", "Freie Häfen", "Odris"])
       if (start.includes(alt)) fehler.push("Kharos: alter Name „" + alt + "“ noch sichtbar");
     const json = await page.evaluate(() => {
-      let s = { ...rules.create("Prüferin", "kronreich", "frau", 2), scene: "weltknoten", knoten: "kronhall", handlung: null };
+      let s = { ...rules.create("Prüferin", "kronreich", "frau", 2), scene: "weltknoten", knoten: "kronhall", handlung: null, silver: 100, hauptquest: { schritt: 1, wahl: null } };
       s = rules.read(JSON.stringify(s));
       s.health = rules.healthLimit(s);
       s.journal = ["Erzpriester Thorvald segnet die Glut. Die Stille Feder schweigt."];
@@ -132,11 +132,61 @@ function stand({ fraktion, akt }) {
     await page.waitForTimeout(300);
     await page.getByText("A · Hofstaat", { exact: false }).first().click();
     await page.waitForTimeout(200);
+    // v3.0.3: drei Sub-Reiter, Standard A1; die Chronik liegt in A3.
+    const reiter = await page.$$eval(".welt-subtab", (k) => k.map((x) => x.textContent));
+    if (reiter.join("|") !== "A1 · Aushang & NPCs|A2 · Siedlung & Bau|A3 · Hofstaat & Rekrutierung") fehler.push("v3.0.3: Sub-Reiter falsch: " + reiter.join(", "));
+    if (!(await page.locator(".welt-subpanel[data-reiter=a1] .aushang-kachel").count())) fehler.push("v3.0.3: A1 zeigt keine Aushang-Kacheln");
+    await page.click("#hof-reiter-a2");
+    await page.waitForTimeout(150);
+    const bau = await page.locator(".welt-subpanel[data-reiter=a2]").innerText();
+    if (!/Siedlung und Bau/.test(bau)) fehler.push("v3.0.3: A2 zeigt keine Siedlung");
+    if (/Kosten:/.test(bau)) fehler.push("v3.0.3: doppelte Kosten-Nennung in A2");
+    await page.click("#hof-reiter-a3");
+    await page.waitForTimeout(150);
+    if (!(await page.locator(".welt-subpanel[data-reiter=a3] h3", { hasText: "Hofstaat und Diplomatie" }).count())) fehler.push("v3.0.3: A3 ohne Hofstaat");
     const hub = await page.evaluate(() => document.body.innerText + " " + document.title);
     if (!hub.includes("Valengrad")) fehler.push("Kharos: Hauptstadt Valengrad fehlt");
-    if (/Kronhall|Thorvald|Stille Feder/.test(hub)) fehler.push("Kharos: alter Name im Stadt-Hub sichtbar");
+    if (/Kronhall|Thorvald|Stille Feder|Harald IV|Ragnvald|Aldric\b|\(Henry,|\d Gold\b/.test(hub)) fehler.push("Kharos: alter Name oder Entwicklernotiz sichtbar: " +
+      (hub.match(/.{30}(Kronhall|Thorvald|Stille Feder|Harald IV|Ragnvald|Aldric\b|\(Henry,|\d Gold\b).{30}/)?.[0] ?? ""));
     if (/Malakor/.test(hub)) fehler.push("Kharos: Malakor vor Akt 4 erkennbar");
     if (!(await page.locator(".welt-chronik-kharos").count())) fehler.push("Kharos: Chronik (Akt 5 und Aushänge) fehlt im Hofstaat");
+    // v3.0.2: Reiseliste – Questziel zuerst, gesperrte Ziele hinter dem Umschalter.
+    await page.click("#welt-tab-aufbruch");
+    await page.waitForTimeout(150);
+    const reise = await page.evaluate(() => ({
+      erstes: document.querySelector(".welt-panel .wegweiser-liste li")?.className ?? "",
+      gesperrtSichtbar: document.querySelectorAll(".welt-panel .wegweiser-liste .wegweiser-knopf:disabled").length,
+      umschalter: document.querySelector(".gesperrt-umschalter")?.textContent ?? "" }));
+    if (!/wegweiser-quest/.test(reise.erstes)) fehler.push("v3.0.2: Questziel steht nicht oben in der Reiseliste");
+    if (reise.gesperrtSichtbar) fehler.push("v3.0.2: gesperrte Ziele sind nicht eingeklappt");
+    if (reise.umschalter && !/^Gesperrte (Seewege|Ziele) anzeigen \(\d+\)$/.test(reise.umschalter)) fehler.push("v3.0.2: Umschalter falsch: " + reise.umschalter);
+    if (reise.umschalter) {
+      await page.click(".gesperrt-umschalter");
+      await page.waitForTimeout(100);
+      if (!(await page.locator(".wegweiser-gesperrt li").count())) fehler.push("v3.0.2: Umschalter zeigt die gesperrten Ziele nicht");
+    }
+    if (!(await page.locator(".welt-hauptquest.quest-aktiv .quest-kurztext").count())) fehler.push("v3.0.2: aktive Quest ohne Kurztext");
+    if (await page.locator(".welt-akte:not(details)").count()) fehler.push("v3.0.2: gesperrte Zweige nicht eingeklappt");
+    // v3.0.4: Handel mit Schatz-Banner, Symbolen und funktionierendem Kauf/Verkauf.
+    await page.click("#welt-tab-kontor").catch(() => {});
+    await page.waitForTimeout(100);
+    await page.getByRole("button", { name: "Handel öffnen" }).first().click();
+    await page.waitForTimeout(200);
+    const handel = await page.evaluate(() => ({
+      banner: document.querySelector(".schatz-banner")?.innerText ?? "",
+      rohstoffe: [...document.querySelectorAll(".rohstoff-raster .inv-row-name strong")].map((x) => x.textContent),
+      symbole: document.querySelectorAll(".rohstoff-raster .inv-symbol").length,
+      silber: Number(document.querySelector(".schatz-silber strong")?.textContent) }));
+    if (!/Dein Silber/.test(handel.banner) || !/Rucksack/.test(handel.banner) || !/Kontor-Vorräte/.test(handel.banner)) fehler.push("v3.0.4: Schatz-Banner unvollständig: " + handel.banner);
+    if (handel.rohstoffe.join("|") !== "Nahrung|Bauholz|Roheisen|Bruchstein|Runensplitter") fehler.push("v3.0.4: Rohstoffnamen: " + handel.rohstoffe.join(", "));
+    if (handel.symbole !== 5) fehler.push("v3.0.4: Rohstoff-Symbole fehlen (" + handel.symbole + ")");
+    const kauf = page.locator(".rohstoff-raster button:not(:disabled)", { hasText: "Kauf 1" }).first();
+    if (await kauf.count()) {
+      await kauf.click();
+      await page.waitForTimeout(150);
+      const nachher = Number(await page.locator(".schatz-silber strong").textContent());
+      if (!(nachher < handel.silber)) fehler.push("v3.0.4: Kauf 1 ändert das Silber nicht (" + handel.silber + " → " + nachher + ")");
+    } else fehler.push("v3.0.4: kein aktiver Kauf-Knopf im Handel");
     console.log("Kharos geprüft");
     await page.close();
   }

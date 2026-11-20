@@ -1046,25 +1046,25 @@ const world = (() => {
   Object.assign(companions, {
     steppenreiter: {
       klasse: "krieger", name: "Steppenreiter Arne", volk: "menschen", health: 30, scenes: [],
-      soeldner: { kosten: 50, orte: ["weidenkamm", "kraehenfurt"] }, place: "Söldner in Kornwik und Heidvang",
+      soeldner: { kosten: 50, orte: ["weidenkamm", "kraehenfurt"] }, place: "Söldner in Kronhall",
       introduction: "Arne hat sein Pferd an der Grenze verloren, nicht aber seinen Säbel. Für Sold reitet er mit, wohin du willst.",
       ability: "Sturmangriff", damage: 10,
     },
     grenzbogner: {
       klasse: "spaeher", name: "Grenzbognerin Ylva", volk: "menschen", health: 26, scenes: [],
-      soeldner: { kosten: 50, orte: ["weidenkamm", "kraehenfurt", "hochwacht"] }, place: "Söldnerin in Kornwik, Heidvang und Eiswacht",
+      soeldner: { kosten: 50, orte: ["weidenkamm", "kraehenfurt", "hochwacht"] }, place: "Söldnerin in Kronhall und Hagenfels",
       introduction: "Ylva zählt die Pfeile in ihrem Köcher zweimal. Sie hat für die Grenzwache gejagt, bis der Sold ausblieb.",
       ability: "Pfeilhagel", damage: 9, airborne: 3,
     },
     flammenknecht: {
       klasse: "waechter", name: "Flammenknecht Hal", volk: "menschen", health: 32, scenes: [],
-      soeldner: { kosten: 50, orte: ["hochwacht", "skarn-gate"] }, place: "Söldner in Eiswacht und Glutberg",
+      soeldner: { kosten: 50, orte: ["hochwacht", "skarn-gate"] }, place: "Söldner in Hagenfels und Glutberg",
       introduction: "Hal trägt das Zeichen des Ordens der Flamme auf dem Schild, aber keinen Eid mehr. Er schützt, wer ihn bezahlt.",
       ability: "Flammenschild", guard: 9,
     },
     feldscherin: {
       klasse: "heiler", name: "Feldscherin Ute", volk: "menschen", health: 24, scenes: [],
-      soeldner: { kosten: 50, orte: ["hochwacht", "skarn-gate"] }, place: "Söldnerin in Eiswacht und Glutberg",
+      soeldner: { kosten: 50, orte: ["hochwacht", "skarn-gate"] }, place: "Söldnerin in Hagenfels und Glutberg",
       introduction: "Ute rollt ihre Verbände so fest, dass sie wie Kerzen aussehen. Für Silber flickt sie jeden, der noch atmet.",
       ability: "Feldverband", heal: 8,
     },

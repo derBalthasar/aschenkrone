@@ -1,0 +1,42 @@
+{
+  "schema_version": "3.0.2",
+  "feature": "abenteuer_ansicht_entruempeln_und_reiseliste_sortieren",
+  "target_files": [
+    "ui/abenteuer.js",
+    "ui/karte.js",
+    "spiel/handlung_akte.js",
+    "style/layout.css"
+  ],
+  "ui_entruempelung_abenteuer": {
+    "quest_fokus_prinzip": {
+      "zeige_nur_aktive_quest_offen": true,
+      "inaktive_zweige_und_kapitel_eingeklappt": true,
+      "max_beschreibung_zeilen_pro_karte": 2,
+      "hebe_aktuellen_schritt_und_ort_hervor": true
+    },
+    "reiseliste_aufbruch_sortierung": {
+      "reihenfolge": [
+        "1_aktives_quest_ziel",
+        "2_erreichbare_landwege",
+        "3_erreichbare_seewege"
+      ],
+      "gesperrte_ziele_standardmaessig_einklappen": true,
+      "toggle_label_vorlage": "Gesperrte Seewege anzeigen ({anzahl})"
+    }
+  },
+  "story_bereinigung_altlasten": {
+    "entferne_alte_odris_texte": [
+      "Harald IV.",
+      "Jarl Ragnvald",
+      "Kornwik",
+      "Aldric"
+    ],
+    "ersetze_kapitel1_zusammenfassung_kharos": {
+      "titel": "Hauptquest · Akt 1: Risse im eigenen Banner",
+      "eintraege": [
+        "Der Schweigsame Chronist: Niemand kennt sein wahres Gesicht. Er taucht in allen Reichen auf und spielt den Anführern die Wahrheit über die drohende Finsternis zu.",
+        "Der innere Konflikt: Bevor dein Volk gegen die äußeren Feinde bestehen kann, musst du die Abtrünnigen an deinen Grenzen bezwingen und dein Banner einen."
+      ]
+    }
+  }
+}

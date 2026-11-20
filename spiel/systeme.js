@@ -7,6 +7,10 @@
 // Die Funktionen verändern den übergebenen Spielstand direkt; spiel/regeln.js klont vorher.
 const systeme = (() => {
   const D = typeof systemDaten !== "undefined" ? systemDaten : require("./systeme-daten.js");
+  // v3.0.4 (Henry): kompakte Rohstoffnamen, damit in Kontor und Handel nichts abgeschnitten wird.
+  for (const [id, name] of Object.entries({ nahrung: "Nahrung", holz: "Bauholz", eisen: "Roheisen", stein: "Bruchstein", runensplitter: "Runensplitter" })) {
+    if (D.rohstoffe?.[id]) D.rohstoffe[id].name = name;
+  }
   const N = typeof knoten !== "undefined" ? knoten : require("./knoten.js");
 
   const MENSCHEN = ["kronreich", "orden", "haefen"];
