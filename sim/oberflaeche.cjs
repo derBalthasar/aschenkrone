@@ -277,6 +277,41 @@ function stand({ fraktion, akt }) {
     console.log("Fragenkatalog geprüft");
     await page.close();
   }
+  // v3.0.5 (Henry, 20. 11. 2026): Szenen-Gespräch in Akt 1 mit drei Antworten, Probe-Anzeige und Folgen.
+  {
+    const page = await browser.newPage({ viewport: { width: 1366, height: 900 } });
+    page.on("pageerror", (e) => fehler.push("v3.0.5: " + e.message));
+    await page.goto(seite);
+    const json = await page.evaluate(() => {
+      let s = { ...rules.create("Prüferin", "kronreich", "frau", 2, "krieger"), scene: "weltknoten", knoten: "kronhall", handlung: null,
+        hauptquest: { schritt: 0, wahl: null, plan: 305 } };
+      s = rules.read(JSON.stringify(s));
+      s.health = rules.healthLimit(s);
+      return JSON.stringify(s);
+    });
+    await page.evaluate(([k, v]) => localStorage.setItem(k, v), [KEY, json]);
+    await page.reload();
+    await page.click("#continue");
+    await page.waitForTimeout(300);
+    await page.locator(".welt-hauptquest .npc-start").first().click();
+    await page.waitForTimeout(300);
+    const dialog = await page.evaluate(() => ({ text: document.getElementById("npc-text").innerText,
+      optionen: [...document.querySelectorAll("#npc-optionen .npc-option")].map((b) => b.innerText) }));
+    if (!/Blut im Thronsaal/.test(dialog.text) || !/Wem in diesen Mauern/.test(dialog.text)) fehler.push("v3.0.5: Szene oder Eröffnung fehlt");
+    const antworten = dialog.optionen.filter((o) => /Leiche|Eisentor aufbrechen|Rationen/.test(o));
+    if (antworten.length !== 3) fehler.push("v3.0.5: " + antworten.length + " statt 3 Antworten");
+    if (!/Intelligenz \d+\/11 · (gelingt|misslingt)/.test(antworten[0] ?? "")) fehler.push("v3.0.5: Probe-Anzeige fehlt: " + antworten[0]);
+    if (dialog.optionen.some((o) => /Auftrag ausführen|Auftrag erledigen/.test(o))) fehler.push("v3.0.5: generisches Label im Dialog");
+    await page.screenshot({ path: path.join(__dirname, "..", "..", "v305-dialog.png") }).catch(() => {});
+    await page.locator("#npc-optionen .npc-option", { hasText: "Sofort nach Eisentor" }).click();
+    await page.waitForTimeout(300);
+    const danach = await page.evaluate(() => document.getElementById("npc-text").innerText);
+    if (!/Marschall Kaelen wartet/.test(danach)) fehler.push("v3.0.5: Antworttext fehlt nach der Wahl: " + danach.slice(0, 120));
+    const stand = await page.evaluate(() => JSON.parse(localStorage.getItem("aschenkrone.valmarch.v1")).hauptquest.schritt);
+    if (stand !== 1) fehler.push("v3.0.5: Schritt nach der Antwort ist " + stand);
+    console.log("v3.0.5 Szenen-Gespräch geprüft");
+    await page.close();
+  }
   await browser.close();
   console.log(fehler.length ? "FEHLER:\n" + fehler.join("\n") : "Keine Fehler.");
   process.exitCode = fehler.length ? 1 : 0;

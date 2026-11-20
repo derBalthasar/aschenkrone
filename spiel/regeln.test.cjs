@@ -8,7 +8,7 @@ const vm = require("node:vm");
 const root = path.join(__dirname, "..");
 const context = vm.createContext({ structuredClone });
 
-for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/faehigkeiten.js", "spiel/kampf.js", "spiel/startpunkte.js", "spiel/welt.js", "spiel/knoten-daten.js", "spiel/knoten.js", "spiel/nebenquests-daten.js", "spiel/nebenquests.js", "spiel/systeme-daten.js", "spiel/systeme.js", "spiel/regeln.js"]) {
+for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/faehigkeiten.js", "spiel/kampf.js", "spiel/startpunkte.js", "spiel/welt.js", "spiel/knoten-daten.js", "spiel/knoten.js", "spiel/nebenquests-daten.js", "spiel/nebenquests.js", "spiel/systeme-daten.js", "spiel/systeme.js", "spiel/akt-dialoge.js", "spiel/regeln.js"]) {
   vm.runInContext(fs.readFileSync(path.join(root, file), "utf8"), context, { filename: file });
 }
 
@@ -226,7 +226,7 @@ for (const faction of factionIds) {
     assert.equal(sent.scene, "weltknoten");
     assert.equal(sent.knoten, hauptstadt);
     assert.deepEqual(plain(sent.handlung), { szene: "ankunft", knoten: "kornwik" });
-    assert.deepEqual(plain(reload(sent).hauptquest), { schritt: 0, wahl: null });
+    assert.deepEqual(plain(reload(sent).hauptquest), { schritt: 0, wahl: null, plan: 305 });
     sent = rules.zurHandlung({ ...sent, knoten: "kornwik" });
   }
   assert.equal(sent.scene, "ankunft");
@@ -1796,92 +1796,92 @@ console.log("Charakter-Entwurf geprüft.");
   assert.equal(rules.candidates({ ...duell, knoten: "glutberg" }).some(([id]) => id === "halvar"), false, "Orden-Begleiter nur für Orden");
   for (const id of ["sigrid", "wulfgar", "fenris", "halvar", "gunhild", "malte"]) assert.ok(world.companions[id], id);
 
-  // Hauptquest Kronreich: Kronhall → Hagenfels (Deserteure) → Westvik (Wahl).
-  let akt = { ...held, hauptquest: { schritt: 0, wahl: null } };
-  assert.equal(rules.hauptquest(akt).schritt.titel, "Der Schwur am Krankenbett");
-  akt = reload(rules.hauptWeiter(akt));
+  // Hauptquest Kronreich (v3.0.5): Valengrad/Kronhall (Gespräch) → Eisentor/Hagenfels (Gespräch, Deserteure) → Kronhall (Urteil).
+  let akt = { ...held, hauptquest: { schritt: 0, wahl: null, plan: 305 } };
+  assert.equal(rules.hauptquest(akt).schritt.titel, "Blut im Thronsaal");
+  assert.equal(rules.hauptquest(akt).schritt.wahlen.length, 3, "drei Antworten je Szene");
+  assert.equal(rules.hauptGrund(akt), "Antwort wählen");
+  assert.equal(rules.hauptWeiter(akt), akt, "ohne Antwort geht es nicht weiter");
+  assert.match(rules.hauptGrund({ ...akt, ressource: 1 }, "valen_s1_opfer"), /^zu wenig /);
+  const opfer = reload(rules.hauptWeiter({ ...akt, ressource: 3 }, "valen_s1_opfer"));
+  assert.equal(opfer.ressource, 1);
+  assert.equal(opfer.hinterhaltSchutz, true);
+  assert.equal(opfer.szenen["akt1:0"], "valen_s1_opfer");
+  akt = reload(rules.hauptWeiter(akt, "valen_s1_direkt"));
   assert.equal(akt.hauptquest.schritt, 1);
+  assert.equal(akt.moral, (held.moral ?? rules.systeme.daten.moral.start) + 4);
   assert.equal(rules.hauptGrund(akt), "weiter in Hagenfels");
   assert.equal(rules.marschVignette(akt, "hagenfels"), "Der Wind trägt den Geruch verbrannten Korns von den Höfen bei Hagenfels herüber.");
-  akt = rules.hauptWeiter({ ...akt, knoten: "hagenfels" });
+  const eisentor = { ...akt, knoten: "hagenfels", silver: 30 };
+  // Silber statt Kampf: der Rädelsführer zieht ab.
+  const gekauft = reload(rules.hauptWeiter(eisentor, "valen_s2_verhandlung"));
+  assert.equal(gekauft.combat, null);
+  assert.equal(gekauft.silver, 5);
+  assert.equal(gekauft.hauptquest.schritt, 2);
+  assert.equal(rules.hauptGrund({ ...eisentor, silver: 20 }, "valen_s2_verhandlung"), "zu wenig Silber");
+  // Probe ohne Zufall: Stärke gegen 12. Gelingt sie, fehlt im Kampf ein Gegner.
+  const probe = rules.hauptquest(eisentor).schritt.wahlen.find((w) => w.id === "valen_s2_staerke");
+  assert.deepEqual(plain(probe.probe), { attribut: "strength", wert: 12 });
+  const ohneProbe = rules.hauptWeiter({ ...eisentor, szenen: {} }, "valen_s2_geschick");
+  akt = rules.hauptWeiter(eisentor, "valen_s2_staerke");
   assert.equal(akt.combat.id, "auftrag-deserteure");
   assert.equal(akt.combat.auftrag, "haupt");
+  const staerke = rules.heroAttributes(eisentor).strength;
+  if (staerke >= 12) assert.equal(akt.combat.feinde.length, Math.max(1, ohneProbe.combat.feinde.length - 1));
+  else assert.equal(akt.combat.feinde.length, ohneProbe.combat.feinde.length);
   akt = sieg(reload(akt));
-  // Rückreise-Pflicht (Henry, 20. 11. 2026, Beispiel „Verbranntes Korn“): Bericht vor dem Thron in Kronhall.
-  assert.equal(akt.hauptquest.schritt, 1);
-  assert.equal(reload(akt).hauptquest.bericht.ort, "kronhall");
-  assert.ok(akt.journal.some((e) => e.includes("Reise zurück nach Kronhall, um Bericht zu erstatten")));
-  assert.equal(rules.hauptGrund(akt), "Bericht in Kronhall erstatten");
-  assert.equal(rules.rueckkehrZiele(akt)[0].knopf, "Rückkehr nach Kronhall antreten");
-  assert.equal(rules.marschVignette(akt, "kronhall"), "Die Höfe der Westmark sind gesichert. Nun gilt es, die Nachricht vor den Thron zu bringen.");
-  akt = reload(rules.hauptWeiter({ ...akt, knoten: "kronhall" }));
-  assert.equal(akt.hauptquest.schritt, 2);
-  assert.equal(akt.hauptquest.bericht, undefined);
-  const westvik = { ...akt, knoten: "westvik", silver: 50, health: rules.healthLimit(akt) };
-  assert.equal(rules.hauptGrund(westvik), "Wahl fehlt");
-  assert.equal(rules.hauptGrund({ ...westvik, silver: 39 }, "kron_act1_truce"), "zu wenig Silber");
-  const frieden = reload(rules.hauptWeiter(westvik, "kron_act1_truce"));
-  assert.equal(frieden.silver, 10);
+  assert.equal(akt.hauptquest.schritt, 2, "Kein Bericht mehr nötig: Schritt 3 ist die Rückkehr nach Valengrad");
+  assert.equal(rules.hauptGrund(akt), "weiter in Kronhall");
+  const thron = { ...akt, knoten: "kronhall", silver: 0, health: rules.healthLimit(akt) };
+  assert.equal(rules.hauptGrund(thron), "Antwort wählen");
+  const frieden = reload(rules.hauptWeiter(thron, "kron_act1_truce"));
   assert.equal(frieden.hauptquest.schritt, 3);
+  assert.equal(frieden.hauptquest.wahl, "kron_act1_truce");
   assert.equal(frieden.questStufe, 1);
-  assert.ok(frieden.marks.includes("kron_act1_truce"));
+  assert.ok(frieden.marks.includes("kron_act1_truce") && frieden.marks.includes("valen_pfad_gnade"));
+  assert.equal(frieden.kontor.kronreich.runensplitter, (thron.kontor?.kronreich?.runensplitter ?? 0) + 3);
   assert.ok(frieden.rewards.includes("akt1-kronreich"));
-  assert.equal(frieden.xp, westvik.xp + 300);
   assert.equal(rules.hauptquest(frieden).fertig, true);
   assert.equal(rules.hauptWeiter(frieden), frieden);
-  let kampf = rules.hauptWeiter(westvik, "kron_act1_fight");
-  assert.equal(kampf.combat.feinde[0].name, "Kapitän Urgash");
-  assert.equal(kampf.combat.feinde[0].rang, "elite");
-  const orks = kampf.weltLeisten.orks;
-  kampf = sieg(kampf);
-  assert.equal(kampf.hauptquest.schritt, 3);
-  assert.equal(kampf.weltLeisten.orks, orks - 5);
-  assert.ok(kampf.marks.includes("kron_act1_fight"));
+  const haerte = rules.hauptWeiter(thron, "kron_act1_fight");
+  assert.equal(haerte.combat, null, "Das Urteil ist kein Kampf mehr");
+  assert.equal(haerte.silver, 40);
+  assert.ok(haerte.marks.includes("valen_pfad_haerte"));
 
-  // Hauptquest Orden: Glutberg → Lichtheim → Brandstein → Glutberg (Wahl).
+  // Hauptquest Orden: Sonnenwacht/Glutberg → Aschenkloster (Kultisten) → Glutberg (Urteil).
   let orden = imOrt("orden", "glutberg");
-  orden = { ...orden, health: rules.healthLimit(orden), hauptquest: { schritt: 0, wahl: null } };
-  orden = rules.hauptWeiter(orden);
-  orden = sieg(rules.hauptWeiter({ ...orden, knoten: "lichtheim" }));
-  assert.equal(rules.hauptGrund(orden), "Bericht in Glutberg erstatten");
-  orden = rules.hauptWeiter({ ...orden, knoten: "glutberg" });
+  orden = { ...orden, health: rules.healthLimit(orden), hauptquest: { schritt: 0, wahl: null, plan: 305 } };
+  orden = rules.hauptWeiter(orden, "solis_s1_direkt");
+  assert.equal(rules.hauptGrund(orden), "weiter in Aschenkloster");
+  const kloster = rules.hauptWeiter({ ...orden, knoten: "aschenkloster" }, "solis_s2_predigt");
+  assert.equal(kloster.combat.id, "auftrag-kultisten");
+  orden = sieg(kloster);
   assert.equal(orden.hauptquest.schritt, 2);
-  const brand = rules.hauptWeiter({ ...orden, knoten: "brandstein" });
-  assert.equal(brand.combat.id, "auftrag-runenfresser");
-  orden = sieg(brand);
-  orden = rules.hauptWeiter({ ...orden, knoten: "glutberg" });
-  assert.equal(orden.hauptquest.schritt, 3);
-  // Patch 2.6.19 (Henry, B3): „+10 Glaube“ ist Orden-Ruf +10 und Moral +5 statt +10 Vorrat.
-  const vorrat = orden.ressource;
+  orden = { ...orden, knoten: "glutberg" };
   const gnade = rules.hauptWeiter(orden, "orden_act1_mercy");
-  assert.equal(gnade.ressource, vorrat);
-  assert.equal(rules.systeme.ruf(gnade, "orden"), rules.systeme.ruf(orden, "orden") + 10);
-  assert.equal(gnade.moral, (orden.moral ?? rules.systeme.daten.moral.start) + 5);
   assert.equal(gnade.hauptquest.wahl, "orden_act1_mercy");
+  assert.ok(gnade.marks.includes("solis_pfad_bewahrung"));
   assert.equal(rules.hauptWeiter(orden, "kron_act1_truce"), orden, "nur die Wahl der eigenen Fraktion");
   assert.equal(rules.hauptquest(imOrt("hof", "kronhall")), null);
+  // Alte Spielstände: Orden-Schritt 3 von 4 wird Schritt 2 von 3.
+  assert.equal(reload({ ...orden, hauptquest: { schritt: 3, wahl: null } }).hauptquest.schritt, 2);
 
-  // Hauptquest Freie Häfen: Zollholm → Möwenstad → Silberholm → Perlvik (Wahl), Aushang und Begleiter.
+  // Hauptquest Freie Häfen: Korvath-Bucht/Perlvik → Nebelklippe/Nebelvik (Korsaren) → Perlvik (Urteil).
   let haefen = imOrt("haefen", "zollholm");
-  haefen = { ...haefen, health: rules.healthLimit(haefen), hauptquest: { schritt: 0, wahl: null } };
+  haefen = { ...haefen, health: rules.healthLimit(haefen), hauptquest: { schritt: 0, wahl: null, plan: 305 } };
   assert.equal(rules.hauptquest(haefen).titel, "Die Zollinseln");
   assert.equal(rules.aushang(haefen).length, 10);
-  const versteck = rules.hauptWeiter(haefen);
-  assert.equal(versteck.combat.id, "auftrag-schmuggler");
-  haefen = sieg(versteck);
-  assert.equal(haefen.hauptquest.schritt, 1);
-  assert.equal(rules.hauptGrund(haefen), "weiter in Möwenstad");
-  const kuriere = rules.hauptWeiter({ ...haefen, knoten: "moewenstad", health: rules.healthLimit(haefen) });
-  assert.equal(kuriere.combat.id, "auftrag-spione");
-  haefen = rules.hauptWeiter({ ...sieg(kuriere), knoten: "silberholm" });
-  assert.equal(haefen.hauptquest.schritt, 3);
-  haefen = { ...haefen, knoten: "perlvik" };
+  assert.equal(rules.hauptGrund(haefen), "weiter in Perlvik");
+  haefen = rules.hauptWeiter({ ...haefen, knoten: "perlvik" }, "korvath_s1_direkt");
+  const klippe = rules.hauptWeiter({ ...haefen, knoten: "nebelvik", health: rules.healthLimit(haefen) }, "korvath_s2_geschick");
+  assert.equal(klippe.combat.id, "auftrag-schmuggler");
+  haefen = { ...sieg(klippe), knoten: "perlvik" };
+  assert.equal(haefen.hauptquest.schritt, 2);
   const silber = haefen.silver;
   const schatten = reload(rules.hauptWeiter(haefen, "haefen_act1_shadow"));
-  assert.equal(schatten.silver, silber + 80, "Wahl im Schatten bringt 80 Silber");
-  assert.ok(schatten.marks.includes("haefen_act1_shadow"));
+  assert.ok(schatten.marks.includes("haefen_act1_shadow") && schatten.marks.includes("korvath_pfad_schmuggler"));
   const gilde = rules.hauptWeiter(haefen, "haefen_act1_guild");
-  assert.ok(gilde.ressource > haefen.ressource || gilde.ressource === rules.vorratMax, "Wahl der Gilde bringt Gold");
+  assert.equal(gilde.silver, silber + 45);
   assert.equal(rules.hauptWeiter(haefen, "orden_act1_mercy"), haefen, "nur die Wahl der eigenen Fraktion");
   // Begleiterin Karen Salzklinge nach perlvik_q10; Gold ist der Vorrat der Häfen.
   let karen = rules.auftragAnnehmen(haefen, "perlvik_q10");
@@ -2102,3 +2102,18 @@ console.log("Gefährten-Pool und Hauptstadt-Tausch geprüft.");
   assert.equal(amboss.find((s) => s.name === "Zorn der Alten Wildnis").wert.ausweichenFrueh, 1);
 }
 console.log("Völker-Synergien geprüft.");
+// v3.0.5: Gastgeber-Szene vor dem ersten Kampf eines Schwester-Zweigs.
+{
+  const s = reload({ ...rules.create("Tala", "kronreich", "frau", 1, "krieger"), scene: "weltknoten", knoten: "glutberg",
+    xp: rules.systeme.epFuer(6), hauptquest: { schritt: 3, wahl: "kron_act1_truce", plan: 305 }, questStufe: 1, silver: 100 });
+  const sz = rules.szeneInfo(s, "zweig", "orden");
+  assert.equal(sz.titel, "Asche, Eid und läuterndes Feuer");
+  assert.equal(sz.optionen.length, 3);
+  assert.match(rules.zweigGrund(s, "orden", "good") ?? "", /sprechen/);
+  assert.equal(rules.zweigSzeneWaehlen(s, "orden", "zweig_solis_runen"), s, "Runensplitter fehlen");
+  const nach = reload(rules.zweigSzeneWaehlen(s, "orden", "zweig_solis_soeldner"));
+  assert.equal(nach.szenen["zweig:orden"], "zweig_solis_soeldner");
+  assert.equal(rules.zweigGrund(nach, "orden", "good"), null);
+  assert.equal(rules.zweigSzeneWaehlen(nach, "orden", "zweig_solis_probe"), nach, "nur einmal");
+}
+console.log("Gastgeber-Szenen geprüft.");

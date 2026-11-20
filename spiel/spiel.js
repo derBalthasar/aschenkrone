@@ -3718,7 +3718,7 @@
 
   function abschluss(text) {
     gespraech.art = "ende";
-    gespraechZeigen({ ...gespraech.kopf, absaetze: [{ text, art: "antwort" }], ohneZusatz: true,
+    gespraechZeigen({ ...gespraech.kopf, absaetze: [].concat(text).map((t) => ({ text: t, art: "antwort" })), ohneZusatz: true,
       optionen: [{ label: "Weiter", badges: [["Gespräch beenden", "ende"]], aktion: gespraechEnde }] });
   }
 
@@ -3744,8 +3744,11 @@
     gespraech.auto = sprecher ? state.scene : null;
     if (state === vorher) return;
     const neu = vorher.journal.at(-1) !== state.journal.at(-1) ? state.journal.at(-1) : null;
+    // v3.0.5: Nach einer Antwort im Szenen-Gespräch zeigt das Fenster alle neuen Einträge (Probe, Antwort, Folgen).
+    const neueEintraege = state.journal.length > vorher.journal.length ? state.journal.slice(vorher.journal.length) : neu ? [neu] : [];
     if (state.combat || state.health <= 0 || ["defeat", "weltende"].includes(state.scene)) return gespraechEnde();
-    if (art === "haupt") return hauptGespraech(neu);
+    if (art === "haupt") return hauptGespraech(neueEintraege.slice(1));
+    if (art === "szene305") return abschluss(neueEintraege.slice(-3));
     if (art === "aushang") return abschluss(neu ?? "Abgemacht. Der Auftrag steht jetzt in deinem Questlog.");
     if (sprecher) return szenenGespraech(neu);
     if (art === "wahl" && state.scene === vorher.scene) return wahlFolge(gespraech.wahlNpc, neu);
@@ -3799,15 +3802,38 @@
   }
 
   // Hauptquest: Schritte und Entscheidungen im Gespräch mit der Auftraggeberin der Fraktionsreihe.
+  // v3.0.5: Antworten mit Probe zeigen den eigenen Grundwert und ob die Probe gelingt (ohne Zufall).
+  function dialogBadges(option, schritt = null) {
+    const badges = [];
+    const probe = option.probe && (option.probe.gelingt !== undefined ? option.probe : rules.probeInfo(state, option.probe));
+    if (probe) badges.push([probe.name + " " + probe.wert + "/" + probe.ziel + (probe.gelingt ? " · gelingt" : " · misslingt"), probe.gelingt ? "gut" : "probe"]);
+    if (/kein Kampf/.test(option.folge ?? "")) badges.push(["Kein Kampf", "gut"]);
+    else if (schritt?.gegner) badges.push(["Danach Kampf", "kampf"]);
+    if (schritt?.urteil) badges.push(["Urteil", "probe"]);
+    return badges;
+  }
+  const dialogHinweis = (option, grund) => (option.folge ?? "").replace(/^Probe [^,]+(, )?/, "") + (grund ? (option.folge ? " · " : "") + grund : "");
+  // Gastgeber-Szene (Akt 2/3) und Szenen in Akt 4 im Gesprächsfenster.
+  function szeneGespraech(sz, ort, waehlen) {
+    gespraech.art = "szene305";
+    const npc = sz.npc ?? "archivar_malakor";
+    gespraechZeigen({ npc, person: sz.sprecher ?? undefined, ort, absaetze: [{ text: sz.titel, art: "regie" }, { text: sz.text }, { text: "„" + sz.eroeffnung + "“" }],
+      optionen: [...sz.optionen.map((o) => ({ label: o.label, badges: dialogBadges(o), hinweis: dialogHinweis(o, o.grund),
+        disabled: Boolean(o.grund), aktion: () => gespraechWahl(() => waehlen(o.id)) })),
+      { label: "Später", badges: [["Gespräch beenden", "ende"]], aktion: gespraechEnde }] });
+  }
   // Fragenkatalog 1 A: Jeder Schritt hat seine eigene Auftraggeberin, Berichte gehen an die Anführerin.
   const hauptNpc = (haupt = rules.hauptquest(state)) => haupt?.schritt
     ? npcs.fuerHauptquest(state.faction, haupt.schritt.schritt, Boolean(haupt.bericht)) : npcs.fuerHauptquest(state.faction);
   function hauptGespraech(nachricht = null) {
     const haupt = rules.hauptquest(state);
     const npc = hauptNpc(haupt);
-    if (!haupt || !npc) return nachricht ? abschluss(nachricht) : gespraechEnde();
+    const meldung = [].concat(nachricht ?? []).filter(Boolean);
+    if (!haupt || !npc) return meldung.length ? abschluss(meldung) : gespraechEnde();
+    // v3.0.5: Wartet der nächste Schritt woanders, endet das Gespräch mit der Antwort (keine fremde Person am falschen Ort).
+    if (meldung.length && !haupt.fertig && !haupt.bericht && haupt.zielOrt !== state.knoten) return abschluss(meldung);
     gespraech.art = "haupt";
-    const absaetze = [{ text: nachricht, art: "antwort" }];
+    const absaetze = meldung.map((text) => ({ text, art: "antwort" }));
     let optionen;
     if (haupt.fertig) {
       absaetze.push({ text: "Akt " + haupt.akt + " ist abgeschlossen. Die Schwester-Zweige (Akt 2 und 3) beginnen in den Hauptstädten der anderen Reiche.", art: "regie" });
@@ -3816,6 +3842,7 @@
       const schritt = haupt.schritt;
       absaetze.push({ text: "Schritt " + schritt.nr + " von " + schritt.von + " · " + schritt.titel + " · " + knoten.get(schritt.ort).name, art: "regie" },
         { text: schritt.text });
+      if (schritt.eroeffnung && !haupt.bericht) absaetze.push({ text: "„" + schritt.eroeffnung + "“" });
       if (haupt.bericht) absaetze.push({ text: "Du kommst aus " + knoten.get(schritt.ort).name + " zurück und erstattest Bericht.", art: "regie" });
       optionen = haupt.bericht
         ? [{ label: "Bericht erstatten · " + schritt.titel, badges: [], hinweis: haupt.grund ?? "", disabled: Boolean(haupt.grund),
@@ -3823,7 +3850,7 @@
         : schritt.wahl
         ? schritt.wahlen.map(option => {
           const grund = rules.hauptGrund(state, option.id);
-          return { label: option.label, badges: [["Entscheidung", "probe"]], hinweis: option.folge + (grund ? " · " + grund : ""),
+          return { label: option.label, badges: dialogBadges(option, schritt), hinweis: dialogHinweis(option, grund),
             disabled: Boolean(grund), aktion: () => gespraechWahl(() => rules.hauptWeiter(state, option.id)) };
         })
         : [{ label: (schritt.gegner ? "Kämpfen · " : "Weiter · ") + schritt.titel, badges: schritt.gegner ? [["Kampf", "kampf"]] : [],
@@ -4170,7 +4197,6 @@
     const auftraggeber = hauptNpc(haupt);
     if (auftraggeber) {
       // Gesprächsfenster: Schritte und Entscheidungen laufen im Dialog mit der Auftraggeberin – nur an ihrem Ort.
-      if (schritt.wahl) box.append(element("p", "Entscheidung: " + schritt.wahlen.map(option => option.label + " → " + option.folge).join(" · ")));
       const name = npcPerson(auftraggeber).name;
       const gesperrt = state.knoten !== haupt.zielOrt;
       const knopf = button(box, "Mit " + name + " sprechen · Schritt " + schritt.nr +
@@ -4233,12 +4259,22 @@
           const sch = z.schritt;
           const gastgeber = npcs.anfuehrer(z.fraktion);
           if (gastgeber) teil.append(element("p", "Auftrag von " + npcPerson(gastgeber).name + " in " + knoten.get(z.hub).name + "."));
+          const szene = !z.fortschritt ? rules.szeneInfo(state, "zweig", z.fraktion) : null;
           teil.append(questSchritt("Stufe " + sch.nr + " · " + sch.titel + (sch.boss ? " (Boss)" : ""), knoten.get(z.zielOrt ?? z.hub).name,
             (!z.fortschritt ? z.text + " " : "") + sch.text +
             (sch.rohstoffe ? " · Lohn: " + Object.entries(sch.rohstoffe).map(([id, n]) => n + " " + id.replace("RES_", "").toLowerCase()).join(", ") : "")));
           if (z.geaechtet && !z.soeldner) teil.append(element("p", "Du bist hier geächtet: Als Söldner kommst du für 150 Silber hinein."));
           const anderer = info.zweige.some((x) => x !== z && x.fortschritt > 0 && !x.fertig);
           if (!anderer && ortGate(teil, z.zielOrt)) { box.append(teil); continue; }
+          // v3.0.5: Erst das Gespräch mit der Gastgeber-Anführung, dann der Weg in den Zweig.
+          if (szene && !szene.erledigt && !anderer) {
+            const name = npcPerson(szene.npc).name;
+            const knopf = button(teil, "Mit " + name + " sprechen · „" + szene.titel + "“",
+              () => szeneGespraech(szene, "Akt " + z.akt + " · „" + z.titel + "“", (id) => rules.zweigSzeneWaehlen(state, z.fraktion, id)));
+            knopf.classList.add("primary", "npc-start");
+            box.append(teil);
+            continue;
+          }
           if (sch.wahlen.length) {
             for (const w of sch.wahlen) {
               const grund = rules.zweigGrund(state, z.fraktion, w.id);
@@ -4274,6 +4310,14 @@
         " (" + a4.siegel.length + " von 3)" + (a4.siegel.length >= 3 ? ". Danach wartet ein Hinterhalt auf der Reichsstraße." : ".")));
       const gesperrt4 = Boolean(a4.zielOrt) && ortGate(box, a4.zielOrt);
       if (gesperrt4) { /* Ort-Gate: erst zum Zielort reisen. */ }
+      else if (a4.szene && !a4.wahlen.length) {
+        // v3.0.5: Szene am Sternenanker (vor dem Kampf) bzw. der Große Kriegsrat.
+        const malakor = a4.schritt === 1;
+        const knopf = button(box, (malakor ? "Dem Verhüllten Sternenleser entgegentreten" : "Mit " + npcPerson(a4.szene.npc).name + " sprechen") +
+          " · „" + a4.szene.titel + "“", () => szeneGespraech(a4.szene, "Akt 4 · „" + a4.titel + "“", (id) => rules.akt4Weiter(state, id)),
+          { disabled: Boolean(a4.grund) && !/Antwort/.test(a4.grund) });
+        knopf.classList.add("primary", "npc-start");
+      }
       else if (a4.wahlen.length) {
         for (const w of a4.wahlen) {
           const grund = rules.akt4Grund(state, w.id);
@@ -4285,7 +4329,8 @@
           : a4.schritt === 1 ? "Kämpfen · Thorvald stellen" : a4.thingLabel;
         button(box, label + (a4.grund ? " · " + a4.grund : ""), () => update(rules.akt4Weiter(state)), { disabled: Boolean(a4.grund), story: true });
       }
-    } else box.append(element("p", "Abgeschlossen. Du bist Bannerjarl der vereinten Menschenreiche."));
+    } else box.append(element("p", state.marks.includes("hochfeldherr") ? "Abgeschlossen. Du bist Hochfeldherr von Kharos."
+      : "Abgeschlossen. Du bist Bannerjarl der vereinten Menschenreiche."));
     const arm = info.armada;
     if (arm.offen) {
       box.append(element("p", "Armada-Kriegskasse: " + Object.entries(arm.bedarf).map(([r, n]) => r + " " + arm.kasse[r] + "/" + n).join(" · ")));
@@ -4455,7 +4500,10 @@
     if (!wahl.length) return null;
     const box = element("section");
     box.className = "welt-krise welt-tat";
-    box.append(element("h3", "Wie endest du den Auftrag?"));
+    // v3.0.5 (Henry): Abschluss-Szene statt eines leeren „Auftrag erledigen“; die drei Taten bleiben die Entscheidung.
+    const rahmen = rules.tatSzene(state);
+    box.append(element("h3", rahmen ? rahmen.titel : "Wie endest du den Auftrag?"));
+    if (rahmen) box.append(element("p", rahmen.text + " Wie endest du den Auftrag?"));
     for (const t of wahl) {
       const folgen = ["Ruf " + (t.ruf > 0 ? "+" : "") + t.ruf, t.silber ? "+" + t.silber + " Silber" : "",
         t.nahrung ? "+" + t.nahrung + " Nahrung" : "", t.befreit ? "befreit die Dörfer der Stadt" : ""].filter(Boolean).join(" · ");

@@ -1,5 +1,5 @@
 {
- "stand": "2026-11-20T13:55:47.565Z",
+ "stand": "2026-11-20T14:04:31.637Z",
  "ergebnis": {
   "E2E_STANDARD_PARTY_RUN": [
    {
@@ -65,6 +65,7 @@
     "fehler": [],
     "reiseEtappen": 21,
     "reiseKaempfe": 9,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -145,6 +146,7 @@
     "fehler": [],
     "reiseEtappen": 21,
     "reiseKaempfe": 9,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -225,6 +227,7 @@
     "fehler": [],
     "reiseEtappen": 21,
     "reiseKaempfe": 9,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -305,6 +308,7 @@
     "fehler": [],
     "reiseEtappen": 21,
     "reiseKaempfe": 9,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -385,6 +389,7 @@
     "fehler": [],
     "reiseEtappen": 21,
     "reiseKaempfe": 9,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -465,6 +470,7 @@
     "fehler": [],
     "reiseEtappen": 21,
     "reiseKaempfe": 9,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -545,6 +551,7 @@
     "fehler": [],
     "reiseEtappen": 21,
     "reiseKaempfe": 9,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -625,6 +632,7 @@
     "fehler": [],
     "reiseEtappen": 21,
     "reiseKaempfe": 9,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -705,6 +713,7 @@
     "fehler": [],
     "reiseEtappen": 21,
     "reiseKaempfe": 9,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -785,6 +794,7 @@
     "fehler": [],
     "reiseEtappen": 21,
     "reiseKaempfe": 9,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -817,7 +827,7 @@
       "name": "Zweig haefen 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 77
+      "restLp": 87
      },
      {
       "name": "Zweig haefen 2",
@@ -829,25 +839,25 @@
       "name": "Zweig haefen 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 76
+      "restLp": 73
      },
      {
       "name": "Zweig orden 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 84
+      "restLp": 100
      },
      {
       "name": "Zweig orden 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 44
+      "restLp": 84
      },
      {
       "name": "Zweig orden 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 49
+      "restLp": 71
      },
      {
       "name": "Akt 4 Hinterhalt",
@@ -865,6 +875,7 @@
     "fehler": [],
     "reiseEtappen": 21,
     "reiseKaempfe": 9,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -897,7 +908,7 @@
       "name": "Zweig haefen 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 77
+      "restLp": 87
      },
      {
       "name": "Zweig haefen 2",
@@ -909,25 +920,25 @@
       "name": "Zweig haefen 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 76
+      "restLp": 73
      },
      {
       "name": "Zweig orden 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 84
+      "restLp": 100
      },
      {
       "name": "Zweig orden 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 44
+      "restLp": 84
      },
      {
       "name": "Zweig orden 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 49
+      "restLp": 71
      },
      {
       "name": "Akt 4 Hinterhalt",
@@ -945,6 +956,7 @@
     "fehler": [],
     "reiseEtappen": 21,
     "reiseKaempfe": 9,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -1025,6 +1037,7 @@
     "fehler": [],
     "reiseEtappen": 22,
     "reiseKaempfe": 10,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -1105,6 +1118,7 @@
     "fehler": [],
     "reiseEtappen": 22,
     "reiseKaempfe": 10,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -1185,6 +1199,7 @@
     "fehler": [],
     "reiseEtappen": 22,
     "reiseKaempfe": 10,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -1265,6 +1280,7 @@
     "fehler": [],
     "reiseEtappen": 22,
     "reiseKaempfe": 10,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -1345,6 +1361,7 @@
     "fehler": [],
     "reiseEtappen": 22,
     "reiseKaempfe": 10,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -1425,6 +1442,7 @@
     "fehler": [],
     "reiseEtappen": 22,
     "reiseKaempfe": 10,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -1505,6 +1523,7 @@
     "fehler": [],
     "reiseEtappen": 22,
     "reiseKaempfe": 10,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -1585,6 +1604,7 @@
     "fehler": [],
     "reiseEtappen": 22,
     "reiseKaempfe": 10,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -1665,6 +1685,7 @@
     "fehler": [],
     "reiseEtappen": 22,
     "reiseKaempfe": 10,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -1745,6 +1766,7 @@
     "fehler": [],
     "reiseEtappen": 22,
     "reiseKaempfe": 10,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -1801,7 +1823,7 @@
       "name": "Zweig haefen 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 92
+      "restLp": 100
      },
      {
       "name": "Zweig haefen 3",
@@ -1825,6 +1847,7 @@
     "fehler": [],
     "reiseEtappen": 22,
     "reiseKaempfe": 10,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -1881,7 +1904,7 @@
       "name": "Zweig haefen 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 92
+      "restLp": 100
      },
      {
       "name": "Zweig haefen 3",
@@ -1905,6 +1928,7 @@
     "fehler": [],
     "reiseEtappen": 22,
     "reiseKaempfe": 10,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -1985,6 +2009,7 @@
     "fehler": [],
     "reiseEtappen": 21,
     "reiseKaempfe": 9,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -2065,6 +2090,7 @@
     "fehler": [],
     "reiseEtappen": 21,
     "reiseKaempfe": 9,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -2145,6 +2171,7 @@
     "fehler": [],
     "reiseEtappen": 21,
     "reiseKaempfe": 9,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -2225,6 +2252,7 @@
     "fehler": [],
     "reiseEtappen": 21,
     "reiseKaempfe": 9,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -2305,6 +2333,7 @@
     "fehler": [],
     "reiseEtappen": 21,
     "reiseKaempfe": 9,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -2385,6 +2414,7 @@
     "fehler": [],
     "reiseEtappen": 21,
     "reiseKaempfe": 9,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -2465,6 +2495,7 @@
     "fehler": [],
     "reiseEtappen": 21,
     "reiseKaempfe": 9,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -2545,6 +2576,7 @@
     "fehler": [],
     "reiseEtappen": 21,
     "reiseKaempfe": 9,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -2625,6 +2657,7 @@
     "fehler": [],
     "reiseEtappen": 21,
     "reiseKaempfe": 9,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -2705,6 +2738,7 @@
     "fehler": [],
     "reiseEtappen": 21,
     "reiseKaempfe": 9,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -2785,6 +2819,7 @@
     "fehler": [],
     "reiseEtappen": 21,
     "reiseKaempfe": 9,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -2865,6 +2900,7 @@
     "fehler": [],
     "reiseEtappen": 21,
     "reiseKaempfe": 9,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -2946,7 +2982,8 @@
     ],
     "fehler": [],
     "reiseEtappen": 21,
-    "reiseKaempfe": 12,
+    "reiseKaempfe": 11,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -2985,19 +3022,19 @@
       "name": "Zweig kronreich 2",
       "versuch": 1,
       "sieg": true,
-      "restLp": 80
+      "restLp": 86
      },
      {
       "name": "Zweig kronreich 3",
       "versuch": 1,
       "sieg": true,
-      "restLp": 70
+      "restLp": 78
      },
      {
       "name": "Zweig haefen 1",
       "versuch": 1,
       "sieg": true,
-      "restLp": 84
+      "restLp": 88
      },
      {
       "name": "Zweig haefen 2",
@@ -3026,7 +3063,8 @@
     ],
     "fehler": [],
     "reiseEtappen": 22,
-    "reiseKaempfe": 12,
+    "reiseKaempfe": 11,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -3038,7 +3076,7 @@
     "kontorEinzahlung": true,
     "tor": true,
     "ueberzaehlig": {
-     "grundwerte": 11,
+     "grundwerte": 9,
      "raenge": 1,
      "talente": 0
     },
@@ -3106,7 +3144,8 @@
     ],
     "fehler": [],
     "reiseEtappen": 21,
-    "reiseKaempfe": 11,
+    "reiseKaempfe": 10,
+    "szenen": 2,
     "doppelteSpezialisierung": true,
     "malakorVerborgen": true,
     "thorvaldEntlarvt": true,
@@ -3118,7 +3157,7 @@
     "kontorEinzahlung": true,
     "tor": true,
     "ueberzaehlig": {
-     "grundwerte": 11,
+     "grundwerte": 9,
      "raenge": 1,
      "talente": 0
     },

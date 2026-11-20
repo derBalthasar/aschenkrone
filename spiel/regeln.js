@@ -195,7 +195,7 @@ const rules = (() => {
       xp: 0, silver: 5, training: {}, stufenpunkte: 0, ressource: vorratStart, rewards: [],
       weltLeisten: { ...leistenStart }, runde: 0, knoten: null, handlung: null, vertraege: [], ertraege: {}, niederlage: null,
       weltAuftraege: {}, hauptquest: null,
-      moral: SY.daten.moral.start, entkraeftet: false, etappen: 0, kontor: {}, befreit: [], tatOffen: null,
+      moral: SY.daten.moral.start, entkraeftet: false, etappen: 0, kontor: {}, befreit: [], tatOffen: null, szenen: {}, questVorteil: null, hinterhaltSchutz: false,
       zuflucht: null, gefallenIn: null, grundwertAlt: 0, faehigkeitRaenge: {}, schwierigkeit: SCHWIERIG.standard_auswahl,
       // Porträt-Paket (20. 11. 2026): Lauf-Seed für die NPC-Porträt-Pools, bleibt im Lauf gleich, wechselt beim Neustart.
       laufSeed: Math.floor(Math.random() * 2147483647),
@@ -396,6 +396,14 @@ const rules = (() => {
     state.niederlage ??= null;
     state.weltAuftraege ??= {};
     state.hauptquest ??= null;
+    // v3.0.5: Akt 1 hat bei Orden und Häfen nur noch 3 Schritte (vorher 4). Alte Stände rücken ab Schritt 3 um einen zurück.
+    if (isRecord(state.hauptquest) && state.hauptquest.plan === undefined) {
+      if (["orden", "haefen"].includes(state.faction) && Number.isInteger(state.hauptquest.schritt) && state.hauptquest.schritt >= 2) state.hauptquest.schritt--;
+      state.hauptquest.plan = AKT1_PLAN;
+    }
+    state.szenen ??= {};
+    state.questVorteil ??= null;
+    state.hinterhaltSchutz ??= false;
     // Patch 2.5.4: Glut nur für den Orden (alte Stände werden gekürzt), Zuflucht und Ort der letzten Niederlage.
     if (SY.istMensch(state.faction)) {
       if (Number.isInteger(state.ember) && state.ember >= 0) state.ember = Math.min(state.ember, emberLimit(state));
@@ -445,6 +453,9 @@ const rules = (() => {
         !validRecord(state.weltAuftraege, auftragIndex, entry => isRecord(entry) && ["aktiv", rueckkehr.status, "erledigt"].includes(entry.status) &&
           intBetween(entry.wahl, 0, 1)) ||
         !Object.entries(state.weltAuftraege).every(([id, entry]) => entry.wahl < auftragIndex[id].spiel.lohn.length) ||
+        !isRecord(state.szenen) || !Object.values(state.szenen).every((v) => typeof v === "string") || typeof state.hinterhaltSchutz !== "boolean" ||
+        (state.questVorteil !== null && !(isRecord(state.questVorteil) && Array.isArray(state.questVorteil.taktik) &&
+          intBetween(state.questVorteil.weniger, 0, 2))) ||
         (state.hauptquest !== null && !(hauptPlan[state.faction] && isRecord(state.hauptquest) &&
           intBetween(state.hauptquest.schritt, 0, hauptPlan[state.faction].length) &&
           (state.hauptquest.wahl === null || own(wahlFolgen, state.hauptquest.wahl)) &&
@@ -1713,7 +1724,7 @@ const rules = (() => {
       state.handlung = { szene: choice.to, knoten: "kornwik" };
       state.knoten = choice.welt;
       state.scene = "weltknoten";
-      state.hauptquest ??= { schritt: 0, wahl: null };
+      state.hauptquest ??= { schritt: 0, wahl: null, plan: AKT1_PLAN };
       return state;
     }
     if (choice.fight) {
@@ -1967,6 +1978,12 @@ const rules = (() => {
     let kind = table.find(([weight]) => roll < (summe += weight))?.[1] ?? "ruhig";
     // Rückreise-Pflicht: Auf dem Rückmarsch zum Auftraggeber kommt es nur zu 45 % der Ereignisse.
     if (kind !== "ruhig" && rueckmarsch(state) && travelDice() >= rueckkehr.faktor) kind = "ruhig";
+    // v3.0.5: Ein Schleichweg aus einem Gespräch schützt vor der nächsten Gefahr unterwegs.
+    if (kind === "jaeger" && state.hinterhaltSchutz) {
+      state.hinterhaltSchutz = false;
+      note(state, "Der Schleichweg, den man dir verraten hat, führt euch an einem Hinterhalt vorbei.");
+      kind = "ruhig";
+    }
     // Runenkompass: Auf Seewegen bleibt ein Teil der Gefahren aus.
     if (weg.kantenTyp === "seeweg" && kind !== "ruhig" && travelDice() < reliktWert(state, "seaDangerReduction")) {
       note(state, "Der " + relikte[state.relikt].name + " weist euch einen sicheren Kurs.");
@@ -2188,6 +2205,8 @@ const rules = (() => {
   // Erfolg. Gegner kämpfen auf der Gebietsstufe (nebenquests.stufenFuer, auf die Heldenstufe begrenzt), die Zahl der
   // Gegner im Text ist erzählerisch. Jeder Auftrag gibt 50 EP, Akt 1 gibt 300 EP.
   const NQ = typeof nebenquests !== "undefined" ? nebenquests : null;
+  // v3.0.5 (Henry, 20. 11. 2026): Szenen und verzweigte Dialoge für Akt 1–4 und den Aushang (spiel/akt-dialoge.js).
+  const AD = typeof aktDialoge !== "undefined" ? aktDialoge : null;
   const auftragEp = 50;
   const auftragIndex = {};
   if (NQ) for (const fraktion of ["kronreich", "orden", "haefen"]) {
@@ -2530,43 +2549,29 @@ const rules = (() => {
     note(state, "Ein Leben, ein Schwur: Du trägst den Titel „" + schwierigkeitsGrad("hardcore").sonderregeln.abschluss_titel + "“.");
   }
 
-  // Hauptquest Akt 1. Die Texte kommen aus der Fraktionsreihe, die Orte und Gegner legt der Plan fest.
+  // Hauptquest Akt 1. v3.0.5 (Henry, 20. 11. 2026): Jede Reihe hat drei Szenen mit Gespräch: Hauptstadt → zweite Stadt
+  // (Kampf, außer er wird umgangen) → zurück in die Hauptstadt zum Urteil. Szenen, Texte und Antworten: spiel/akt-dialoge.js.
+  const AKT1_PLAN = 305;
   const hauptPlan = {
     kronreich: [
       { schritt: 0, ort: "kronhall" },
-      // Henry, 20. 11. 2026 (Rückreise-Pflicht, Beispiel „Verbranntes Korn“): Bericht vor dem Thron in Kronhall.
-      { schritt: 1, ort: "hagenfels", gegner: "deserteure", auftraggeber: "kronhall", vignetten: marschBeispielVignetten },
-      { schritt: 2, ort: "westvik", wahl: true },
+      { schritt: 1, ort: "hagenfels", gegner: "deserteure", vignetten: marschBeispielVignetten },
+      { schritt: 2, ort: "kronhall", wahl: true },
     ],
     orden: [
       { schritt: 0, ort: "glutberg" },
-      { schritt: 1, ort: "lichtheim", gegner: "kultisten", auftraggeber: "glutberg", titel: "Wachs aus Lichtheim",
-        text: "Im Bienental bei Lichtheim haben Kultisten das geweihte Wachs verdorben. Sie lauern noch zwischen den Stöcken." },
-      { schritt: 1, ort: "brandstein", gegner: "runenfresser", auftraggeber: "glutberg", titel: "Schwefel aus Brandstein",
-        text: "In der Schwefelgrube bei Brandstein frisst ein Runenfresser die geweihten Steine. Ohne Schwefel bleiben die Runenbecken kalt." },
+      { schritt: 1, ort: "aschenkloster", gegner: "kultisten" },
       { schritt: 2, ort: "glutberg", wahl: true },
     ],
-    // Freie Häfen: Start in Zollholm nach der Flucht aus Perlvik. Schritt 2 führt über M31 nach Möwenstad und M30 nach Silberholm,
-    // Schritt 3 über M40 zurück nach Perlvik (Gemini, 18. 11. 2026). Jede Überfahrt kostet 15 Silber.
     haefen: [
-      { schritt: 0, ort: "zollholm", gegner: "schmuggler" },
-      { schritt: 1, ort: "moewenstad", gegner: "spione", titel: "Kuriere in Möwenstad",
-        text: "Über den Seeweg M31 bist du nach Möwenstad gesegelt. Im Hafen warten Kuriere mit verschlüsselten Briefen auf ein Schiff nach Norden. Fang sie ab, bevor sie ablegen." },
-      { schritt: 1, ort: "silberholm", titel: "Die Briefe der Stillen Feder",
-        text: "In Silberholm wartet eine Nachricht der Stillen Feder. Wer sie schreibt, bleibt im Dunkeln. Sie entschlüsselt die Briefe: Kult-Reeder schmuggeln Knochen aus dem Norden, und einer sitzt im Hafenthing von Perlvik." },
+      { schritt: 0, ort: "perlvik" },
+      { schritt: 1, ort: "nebelvik", gegner: "schmuggler" },
       { schritt: 2, ort: "perlvik", wahl: true },
     ],
   };
-  // Folgen der Wahl am Ende von Akt 1 (Gemini). Freischaltungen und spätere Folgen werden als Marke gespeichert.
-  const wahlFolgen = {
-    kron_act1_fight: { gegner: "urgash", leisten: { orks: -5 } },
-    kron_act1_truce: { silber: 40 },
-    // Patch 2.6.19 (Henry, B3): „+10 Glaube“ ist jetzt Orden-Ruf +10 und Moral +5.
-    orden_act1_mercy: { ruf: { orden: 10 }, moral: 5 },
-    orden_act1_wrath: { leisten: { untote: -5 } },
-    haefen_act1_guild: { vorrat: 10 },
-    haefen_act1_shadow: { silberLohn: 80 },
-  };
+  // Wahl-Kennungen am Ende von Akt 1 (bleiben wegen Akt 2–5 und alter Spielstände). Die Folgen stehen jetzt an den
+  // Antworten der Urteils-Szene (akt-dialoge.js, Feld wahl).
+  const wahlFolgen = { kron_act1_fight: {}, kron_act1_truce: {}, orden_act1_mercy: {}, orden_act1_wrath: {}, haefen_act1_guild: {}, haefen_act1_shadow: {} };
   const hauptAkt = (fraktion) => NQ?.reihe(fraktion)?.akte[0] ?? null;
   const hauptStand = (state) => state.hauptquest ?? { schritt: 0, wahl: null };
   function hauptInfo(fraktion, index) {
@@ -2574,9 +2579,126 @@ const rules = (() => {
     const akt = hauptAkt(fraktion);
     if (!plan || !akt) return null;
     const quelle = akt.schritte[plan.schritt];
-    return { ...plan, titel: plan.titel ?? quelle.titel, text: plan.text ?? quelle.text, nr: index + 1, von: hauptPlan[fraktion].length,
+    const szene = AD?.akt1[fraktion]?.[index];
+    if (!szene) return { ...plan, titel: plan.titel ?? quelle.titel, text: plan.text ?? quelle.text, nr: index + 1, von: hauptPlan[fraktion].length,
       wahlen: plan.wahl ? akt.wahl : [] };
+    // Jeder Schritt ist ein Gespräch mit Antworten (wahl = true); die Urteils-Szene liefert die alten Wahl-Kennungen.
+    return { ...plan, titel: szene.titel, text: szene.beschreibung, eroeffnung: szene.eroeffnung, npc: szene.npc, nr: index + 1,
+      von: hauptPlan[fraktion].length, wahl: true, urteil: Boolean(plan.wahl),
+      wahlen: szene.optionen.map((o) => ({ id: o.wahl ?? o.id, label: o.label, folge: dialogFolgen(o), probe: o.probe ?? null })) };
   }
+  const hauptOption = (fraktion, index, id) => AD?.akt1[fraktion]?.[index]?.optionen.find((o) => (o.wahl ?? o.id) === id) ?? null;
+
+  // ---- Szenen-Dialoge (v3.0.5) ----
+  // Proben ohne Zufall: Der (höchste genannte) Grundwert muss den Wert erreichen.
+  const probeWert = (state, probe) => Math.max(...[].concat(probe.attribut).map((a) => heroAttributes(state)[a] ?? 0));
+  const probeName = (probe) => [].concat(probe.attribut).map((a) => K.grundwerte[a]).join(" oder ");
+  const kontorBestand = (state, r) => state.kontor?.[state.faction]?.[r] ?? 0;
+  const DIALOG_ROHSTOFFE = ["nahrung", "eisen", "runensplitter"];
+  function dialogGrund(state, option) {
+    if (!option) return "Antwort fehlt";
+    const b = option.bedingung ?? {};
+    if (b.silber && state.silver < b.silber) return "zu wenig Silber";
+    if (b.proviant && (state.ressource ?? 0) < b.proviant) return "zu wenig " + resourceName(state);
+    for (const r of DIALOG_ROHSTOFFE) if (b[r] && kontorBestand(state, r) < b[r]) return "zu wenig " + SY.daten.rohstoffe[r].name + " im Kontor";
+    return null;
+  }
+  function dialogFolgen(option) {
+    const teile = [];
+    const e = option.effekt ?? {};
+    const plus = (n) => (n > 0 ? "+" : "") + n;
+    if (option.probe) teile.push("Probe " + probeName(option.probe) + " " + option.probe.wert);
+    if (e.silber) teile.push(plus(e.silber) + " Silber");
+    if (e.proviant) teile.push(plus(e.proviant) + " Rationen");
+    for (const r of DIALOG_ROHSTOFFE) if (e[r]) teile.push(plus(e[r]) + " " + SY.daten.rohstoffe[r].name);
+    if (e.ruf) teile.push("Ruf " + plus(e.ruf));
+    for (const [f, n] of Object.entries(e.rufBei ?? {})) teile.push("Ruf " + K.fraktionen[f].name + " " + plus(n));
+    if (e.moral) teile.push("Moral " + plus(e.moral));
+    if (e.ep) teile.push(plus(e.ep) + " EP");
+    if (e.ohneKampf) teile.push("kein Kampf");
+    if (e.hinterhaltSchutz) teile.push("kein Hinterhalt auf der nächsten Reise");
+    if (e.gegenlied) teile.push("Gegenlied-Hilfe im Kampf");
+    if (e.weniger) teile.push(e.weniger + " Gegner weniger im Kampf");
+    if (e.taktik) teile.push("Vorteil „" + (AD?.taktik[e.taktik]?.name ?? e.taktik) + "“ im nächsten Questkampf");
+    if (option.erfolgEffekt) {
+      const erfolg = dialogFolgen({ effekt: option.erfolgEffekt });
+      if (erfolg) teile.push("bei Erfolg: " + erfolg);
+    }
+    return teile.join(", ");
+  }
+  function dialogOptionen(state, optionen) {
+    return optionen.map((o) => {
+      const wert = o.probe ? probeWert(state, o.probe) : null;
+      return { id: o.wahl ?? o.id, label: o.label, folge: dialogFolgen(o), grund: dialogGrund(state, o),
+        probe: o.probe ? { name: probeName(o.probe), wert, ziel: o.probe.wert, gelingt: wert >= o.probe.wert } : null };
+    });
+  }
+  // Wendet eine Antwort an und merkt sie unter state.szenen[kennung]. Gibt die wirksamen Effekte zurück.
+  function dialogAnwenden(state, option, kennung) {
+    const gelungen = option.probe ? probeWert(state, option.probe) >= option.probe.wert : null;
+    const e = { ...(option.effekt ?? {}), ...(gelungen ? option.erfolgEffekt ?? {} : {}) };
+    const text = gelungen === null ? option.text : gelungen ? option.erfolg : option.misserfolg;
+    note(state, (option.probe ? probeName(option.probe) + " " + probeWert(state, option.probe) + " gegen " + option.probe.wert + " · " +
+      (gelungen ? "gelungen" : "misslungen") + ". " : "") + (text ?? ""));
+    if (e.silber) state.silver = Math.max(0, state.silver + e.silber);
+    if (e.proviant) state.ressource = Math.max(0, Math.min(vorratMax, (state.ressource ?? 0) + e.proviant));
+    for (const r of DIALOG_ROHSTOFFE) if (e[r]) { const k = SY.kontor(state, state.faction); k[r] = Math.max(0, k[r] + e[r]); }
+    if (e.ruf) SY.rufAendern(state, state.faction, e.ruf);
+    for (const [f, n] of Object.entries(e.rufBei ?? {})) SY.rufAendern(state, f, n);
+    if (e.moral) state.moral = Math.max(0, Math.min(SY.daten.moral.max, (state.moral ?? SY.daten.moral.start) + e.moral));
+    if (e.flag && !state.marks.includes(e.flag)) state.marks.push(e.flag);
+    if (e.taktik || e.weniger) {
+      const v = state.questVorteil ??= { taktik: [], weniger: 0 };
+      if (e.taktik && !v.taktik.includes(e.taktik)) v.taktik.push(e.taktik);
+      v.weniger = Math.min(2, v.weniger + (e.weniger ?? 0));
+    }
+    if (e.hinterhaltSchutz) state.hinterhaltSchutz = true;
+    (state.szenen ??= {})[kennung] = option.id;
+    const folgen = dialogFolgen({ effekt: e });
+    if (folgen) note(state, "Folgen: " + folgen + ".");
+    if (e.ep) grant(state, "dialog-" + kennung, e.ep);
+    return e;
+  }
+  // Kampfvorteile aus Gesprächen: im nächsten Questkampf (Hauptquest, Schwester-Zweig, Akt 4) verbraucht.
+  function questVorteilAnwenden(state) {
+    const v = state.questVorteil;
+    if (!v || !state.combat) return;
+    const feinde = state.combat.feinde;
+    let weg = 0;
+    while (weg < v.weniger && feinde.length > 1) { feinde.pop(); weg++; }
+    if (weg) note(state, "Vorteil aus dem Gespräch: " + weg + (weg === 1 ? " Gegner weniger." : " Gegner weniger."));
+    for (const id of v.taktik) {
+      const t = AD?.taktik[id];
+      if (!t) continue;
+      if (t.art === "erstschlag") {
+        for (const f of feinde) f.lp = Math.max(1, Math.round(f.lp * 0.85));
+        note(state, t.name + ": Die Gegner beginnen mit 15 % weniger Lebenspunkten.");
+      } else {
+        state.combat.held.schild += Math.round(healthLimit(state) * 0.1);
+        note(state, t.name + ": Du beginnst mit einem Schild von 10 % deiner Lebenspunkte.");
+      }
+    }
+    state.questVorteil = null;
+  }
+  // Gastgeber-Szene der Schwester-Zweige und Akt-4-Szenen für die Oberfläche.
+  function szeneInfo(state, art, fraktion = null) {
+    const kennung = art === "zweig" ? "zweig:" + fraktion : "akt4:" + art;
+    const szene = art === "zweig" ? AD?.zweige[fraktion] : AD?.akt4[art];
+    if (!szene) return null;
+    return { kennung, npc: szene.npc, sprecher: szene.sprecher ?? null, titel: szene.titel, text: szene.beschreibung, eroeffnung: szene.eroeffnung,
+      erledigt: Boolean(state.szenen?.[kennung]), antwort: state.szenen?.[kennung] ?? null, optionen: dialogOptionen(state, szene.optionen) };
+  }
+  function zweigSzeneWaehlen(previous, fraktion, id) {
+    const szene = AD?.zweige[fraktion];
+    const option = szene?.optionen.find((o) => o.id === id);
+    if (!option || previous.szenen?.["zweig:" + fraktion] || dialogGrund(previous, option) || !imHub(previous) ||
+      previous.knoten !== zweigHub[fraktion] || fraktion === previous.faction) return previous;
+    const state = structuredClone(previous);
+    note(state, "„" + szene.titel + "“: " + szene.beschreibung);
+    dialogAnwenden(state, option, "zweig:" + fraktion);
+    return state;
+  }
+
 
   // Gebietsstufe für Auftragsgegner: der Bereich des Aushangs, auf die Heldenstufe begrenzt.
   function gebietsStufe(state, ortId) {
@@ -2812,6 +2934,10 @@ const rules = (() => {
   // bei q01 einer Stadt befreit alle Dörfer dieser Stadt.
   // Der Lohn der Tat folgt demselben Anteil wie der Auftrag selbst (Patch 2.5.4); der Auftrag zählt schon als erfüllt.
   const tatLohn = (state, id) => Math.round((auftragsLohn(state, id).silber ?? 0) * lohnAnteil(Math.max(0, erfuellteAuftraege(state) - 1)));
+  // v3.0.5 (Henry): atmosphärischer Rahmen für den Ausgang eines Aushang-Auftrags (Kampf oder Bergung).
+  const tatSzene = (state) => state.tatOffen && AD ? AD.aushang[auftragIndex[state.tatOffen]?.spiel.gegner ? "kampf" : "bergung"] : null;
+  const probeInfo = (state, probe) => probe ? { name: probeName(probe), wert: probeWert(state, probe), ziel: probe.wert,
+    gelingt: probeWert(state, probe) >= probe.wert } : null;
   function taten(state) {
     if (!state.tatOffen) return [];
     const lohn = tatLohn(state, state.tatOffen);
@@ -3308,16 +3434,19 @@ const rules = (() => {
     }
     const schritt = plan[stand.schritt];
     if (state.knoten !== schritt.ort) return "weiter in " + N.get(schritt.ort).name;
+    if (AD?.akt1[state.faction]?.[stand.schritt]) {
+      if (!wahlId) return "Antwort wählen";
+      return dialogGrund(state, hauptOption(state.faction, stand.schritt, wahlId));
+    }
     if (!schritt.wahl) return wahlId ? "keine Wahl" : null;
     if (!hauptAkt(state.faction).wahl.some(option => option.id === wahlId) || !own(wahlFolgen, wahlId)) return "Wahl fehlt";
-    if (wahlFolgen[wahlId].silber && state.silver < wahlFolgen[wahlId].silber) return "zu wenig Silber";
     return null;
   }
 
   function hauptWeiter(previous, wahlId = null) {
     if (hauptGrund(previous, wahlId)) return previous;
     const state = structuredClone(previous);
-    const stand = state.hauptquest ??= { schritt: 0, wahl: null };
+    const stand = state.hauptquest ??= { schritt: 0, wahl: null, plan: AKT1_PLAN };
     const info = hauptInfo(state.faction, stand.schritt);
     if (stand.bericht) {
       note(state, "Bericht erstattet in " + N.get(stand.bericht.ort).name + " · " + info.titel + ".");
@@ -3326,14 +3455,25 @@ const rules = (() => {
       return state;
     }
     note(state, "Akt " + hauptAkt(state.faction).nr + " · " + info.titel + ": " + info.text);
+    const option = hauptOption(state.faction, stand.schritt, wahlId);
+    if (option) {
+      const e = dialogAnwenden(state, option, "akt1:" + stand.schritt);
+      if (info.urteil) {
+        stand.wahl = option.wahl;
+        aktAbschliessen(state);
+      } else if (info.gegner && !e.ohneKampf) {
+        auftragKampfStarten(state, info.gegner, "haupt", info.ort, info.titel);
+        questVorteilAnwenden(state);
+      } else hauptVoran(state);
+      return state;
+    }
     if (info.gegner) {
       auftragKampfStarten(state, info.gegner, "haupt", info.ort, info.titel);
       return state;
     }
     if (info.wahl) {
       stand.wahl = wahlId;
-      if (wahlFolgen[wahlId].gegner) auftragKampfStarten(state, wahlFolgen[wahlId].gegner, "haupt", info.ort, info.titel);
-      else aktAbschliessen(state);
+      aktAbschliessen(state);
       return state;
     }
     hauptVoran(state);
@@ -3349,15 +3489,9 @@ const rules = (() => {
 
   function aktAbschliessen(state) {
     const stand = state.hauptquest;
-    const folge = wahlFolgen[stand.wahl];
+    // v3.0.5: Die Folgen der Urteils-Antwort wurden schon im Gespräch angewendet (dialogAnwenden).
     const option = hauptAkt(state.faction).wahl.find(entry => entry.id === stand.wahl);
-    if (folge.silber) state.silver -= folge.silber;
-    if (folge.silberLohn) state.silver += folge.silberLohn;
-    if (folge.vorrat) state.ressource = Math.min(vorratMax, state.ressource + folge.vorrat);
-    for (const [leisteId, wert] of Object.entries(folge.leisten ?? {})) setzeLeiste(state, leisteId, leiste(state, leisteId) + wert);
-    for (const [fraktion, wert] of Object.entries(folge.ruf ?? {})) SY.rufAendern(state, fraktion, wert);
-    if (folge.moral) state.moral = Math.min(SY.daten.moral.max, (state.moral ?? SY.daten.moral.start) + folge.moral);
-    note(state, option.label + ": " + option.folge);
+    if (option && !AD) note(state, option.label + ": " + option.folge);
     if (!state.marks.includes(stand.wahl)) state.marks.push(stand.wahl);
     stand.schritt = hauptPlan[state.faction].length;
     state.questStufe = Math.max(state.questStufe, 1);
@@ -3467,6 +3601,7 @@ const rules = (() => {
     if (state.knoten !== zweigHub[fraktion]) return "weiter in " + N.get(zweigHub[fraktion]).name;
     const stufe = zweig?.stufe ?? 0;
     if (stufe === 0) {
+      if (AD?.zweige[fraktion] && !state.szenen?.["zweig:" + fraktion]) return "erst mit " + (AD.zweige[fraktion].npc ? "der Anführung" : "dem Gastgeber") + " sprechen";
       if (!["good", "mercenary", "evil"].includes(wahl)) return "Weg wählen";
       if (geaechtetBei(state, fraktion) && !zweig?.soeldner && state.silver < V260.rahmen.outlaw_run_compatibility.mercenary_entry_silver_cost) {
         return "geächtet: " + V260.rahmen.outlaw_run_compatibility.mercenary_entry_silver_cost + " Silber Söldnergeld nötig";
@@ -3538,8 +3673,10 @@ const rules = (() => {
       else state.combat.feinde.push(foe);
       state.combat.kultistBeute = kultist.bonus_beute_runensplitter;
     }
-    if (state.combat) aktGegnerSkalieren(state, ["feldherr", "zelot", "kaperkapitaen"].includes(typ));
-    else if (!state.health) arrive(state, "defeat");
+    if (state.combat) {
+      aktGegnerSkalieren(state, ["feldherr", "zelot", "kaperkapitaen"].includes(typ));
+      questVorteilAnwenden(state);
+    } else if (!state.health) arrive(state, "defeat");
     return state;
   }
   function kontorGeben(state, rohstoffe) {
@@ -3632,9 +3769,13 @@ const rules = (() => {
     if (a.schritt === 1) {
       if (state.knoten !== akt4Orte.thorvald) return "weiter in " + N.get(akt4Orte.thorvald).name;
       if (a.wahlOffen) return own(akt4Wahlen(), wahl) ? null : "Urteil wählen";
+      // v3.0.5: Vor dem Kampf die Konfrontation am Sternenanker (zwei Antworten, beide führen in den Kampf).
+      if (AD?.akt4.malakor && !state.szenen?.["akt4:malakor"]) return AD.akt4.malakor.optionen.some((o) => o.id === wahl) ? null : "Antwort wählen";
       return null;
     }
-    return state.knoten === akt4Orte.thing ? null : "weiter in " + N.get(akt4Orte.thing).name;
+    if (state.knoten !== akt4Orte.thing) return "weiter in " + N.get(akt4Orte.thing).name;
+    if (AD?.akt4.kriegsrat) return AD.akt4.kriegsrat.optionen.some((o) => o.id === wahl) ? null : "Antwort wählen";
+    return null;
   }
   function akt4Info(state) {
     const stand = akteStand(state);
@@ -3645,7 +3786,18 @@ const rules = (() => {
       siegel: a.siegel, wahlOffen: a.wahlOffen, wahl: a.wahl, titel: q.title, text: q.summary, ziele: q.objectives ?? [],
       wahlen: a.schritt === 1 && a.wahlOffen ? Object.entries(akt4Wahlen()).map(([id, w]) => ({ id, label: w.label, folge: akt4WahlText(w) })) : [],
       thingLabel: a.schritt === 2 ? (outlaw ? q.outlaw_compatibility.alternate_path_label : "Vor das Große Thing treten") : null,
-      grund: akt4Grund(state, a.wahlOffen ? Object.keys(akt4Wahlen())[0] : null), zielOrt: akt4ZielOrt(state) };
+      grund: akt4Grund(state, a.wahlOffen ? Object.keys(akt4Wahlen())[0] : akt4SzeneOffen(state)?.optionen[0].id ??
+        (a.schritt === 1 && AD ? AD.akt4.malakor.optionen[0].id : null)), zielOrt: akt4ZielOrt(state),
+      szene: akt4SzeneOffen(state) };
+  }
+  // v3.0.5: Offene Akt-4-Szene (Malakor vor dem Kampf, Kriegsrat statt Thing) als Gespräch für die Oberfläche.
+  function akt4SzeneOffen(state) {
+    const a = akteStand(state).akt4;
+    if (!AD || !a) return null;
+    // Die Maske fällt erst am Sternenanker selbst: Vorher bleibt die Szene (mit Malakors Namen) verborgen.
+    if (a.schritt === 1 && !a.wahlOffen && !state.szenen?.["akt4:malakor"]) return state.knoten === akt4Orte.thorvald ? szeneInfo(state, "malakor") : null;
+    if (a.schritt === 2) return szeneInfo(state, "kriegsrat");
+    return null;
   }
   const akt4WahlText = (w) => ["Ruf aller Menschen " + (w.reputation_delta_all_human_factions > 0 ? "+" : "") + w.reputation_delta_all_human_factions,
     w.silver_bonus ? "+" + w.silver_bonus + " Silber" : "", w.bonus_resources ? "+" + w.bonus_resources.RES_RUNENSPLITTER + " Runensplitter" : "",
@@ -3656,6 +3808,7 @@ const rules = (() => {
     if (state.combat) Object.assign(state.combat, { weiter: "weltknoten", auftrag: "akt4:" + state.akte.akt4.schritt, gegnerStufe: stufe });
     if (state.combat && state.combat.id !== "auftrag-thorvald") aktGegnerSkalieren(state, false);
     else if (!state.health) arrive(state, "defeat");
+    if (state.combat) questVorteilAnwenden(state);
   }
   function akt4Weiter(previous, wahl = null) {
     if (akt4Grund(previous, wahl)) return previous;
@@ -3675,6 +3828,11 @@ const rules = (() => {
     }
     if (a.schritt === 1 && !a.wahlOffen) {
       note(state, "Akt 4 · „" + quests[1].title + "“: " + quests[1].summary);
+      const malakor = AD?.akt4.malakor.optionen.find((o) => o.id === wahl);
+      if (malakor && !state.szenen?.["akt4:malakor"]) {
+        note(state, "„" + AD.akt4.malakor.titel + "“: " + AD.akt4.malakor.beschreibung);
+        dialogAnwenden(state, malakor, "akt4:malakor");
+      }
       akt4Kampf(state, "thorvald", bossWerte["auftrag-thorvald"].stufe(level(state)), "Die Maske fällt");
       return state;
     }
@@ -3692,9 +3850,13 @@ const rules = (() => {
       note(state, "Nächster Schritt: „" + quests[2].title + "“ in " + N.get(akt4Orte.thing).name + ".");
       return state;
     }
-    // Das Große Thing
+    // Das Große Thing – v3.0.5: der Große Kriegsrat in Valengrad.
     const q = quests[2];
-    note(state, "Akt 4 · „" + q.title + "“: " + q.summary);
+    const rat = AD?.akt4.kriegsrat;
+    if (rat) {
+      note(state, "Akt 4 · „" + rat.titel + "“: " + rat.beschreibung);
+      dialogAnwenden(state, rat.optionen.find((o) => o.id === wahl), "akt4:kriegsrat");
+    } else note(state, "Akt 4 · „" + q.title + "“: " + q.summary);
     if (geaechtetBei(state, state.faction)) note(state, q.outlaw_compatibility.alternate_path_label + ".");
     if (!state.marks.includes("bannerjarl")) state.marks.push("bannerjarl");
     if (!state.marks.includes("grosses-thing")) state.marks.push("grosses-thing");
@@ -3702,7 +3864,8 @@ const rules = (() => {
     state.questStufe = Math.max(state.questStufe, 4);
     ungebrochen(state);
     grant(state, "akt4-thing", q.rewards.xp);
-    note(state, "Du trägst jetzt den Titel Bannerjarl. Die Menschenreiche stehen unter einem Banner, und die Armada-Kriegskasse ist geöffnet.");
+    note(state, "Du trägst jetzt den Titel " + (rat ? "Hochfeldherr von Kharos" : "Bannerjarl") +
+      ". Die Menschenreiche stehen unter einem Banner, und die Armada-Kriegskasse ist geöffnet.");
     state.lagerMeilenstein = "CAMP_MILESTONE_BANNERJARL";
     return state;
   }
@@ -4032,7 +4195,9 @@ const rules = (() => {
   // Patch 2.6.19a (Henry, Entscheidungskarte 20. 11.): Heilungsdeckel nur noch für Magier. Der Heiler bekommt gegen
   // Thorvald das „Gegenlied“: Schild aus einem Teil seiner LP zu Kampfbeginn, Thorvalds Treffer auf ihn schwächer.
   const thorvaldHilfe = { rollen: ["heiler"], schild: 0.05, schaden: 0.9, name: "Gegenlied" };
-  const thorvaldHilfeAktiv = (state) => menschen(state) && state.combat?.id === "auftrag-thorvald" && thorvaldHilfe.rollen.includes(state.role);
+  // v3.0.5: Wer am Sternenanker das Gegenlied anstimmt, bekommt die Hilfe in jeder Klasse.
+  const thorvaldHilfeAktiv = (state) => menschen(state) && state.combat?.id === "auftrag-thorvald" &&
+    (thorvaldHilfe.rollen.includes(state.role) || state.szenen?.["akt4:malakor"] === "malakor_gegenlied");
   const bossWerte = { "auftrag-thorvald": { lp: 148, ruestung: 7, deckel: 16, flaecheDeckel: 11, bezug: 20, lpJeStufe: 0.06, schadenJeStufe: 0.05,
     stufe: (held) => Math.min(22, Math.max(18, held)), adds: { anzahl: 2, name: "Untoter Akolyth", lp: 45, deckel: 9 } } };
 
@@ -5077,6 +5242,6 @@ const rules = (() => {
     akteInfo, zweigWeiter, zweigGrund, fspezWaehlen, fspezGrund, fspezText, akt4Weiter, akt4Grund, armadaInfo, ausweichIntervall, kritChance, effektText, lagerSzeneInfo, lagerAntwort, lagerVorteile,
     auftragGrund, auftragAnnehmen, ausfuehrenGrund, auftragAusfuehren, abgabeGrund, auftragAbgeben, rueckkehrZiele, marschRoute,
     marschVignette, rueckmarsch, marschDaten: MARSCH, ortReise, ortGate: ORTGATE,
-    schwierigkeitsGrad, schwierigkeitGrund, schwierigkeitWaehlen, permadeath, hardcoreFrei, schwierigkeitDaten: SCHWIERIG, aushang, auftraege, hauptquest, hauptGrund, hauptWeiter, auftragEp, rast, ertragGrund, ertragEinholen, vertragGrund, vertragSchliessen, entwurf,
+    schwierigkeitsGrad, schwierigkeitGrund, schwierigkeitWaehlen, permadeath, hardcoreFrei, schwierigkeitDaten: SCHWIERIG, aushang, auftraege, hauptquest, hauptGrund, hauptWeiter, szeneInfo, zweigSzeneWaehlen, dialogOptionen, tatSzene, probeInfo, auftragEp, rast, ertragGrund, ertragEinholen, vertragGrund, vertragSchliessen, entwurf,
     levelThresholds: Array.from({ length: kampf.maxStufe }, (_, index) => kampf.epFuer(index + 1)) };
 })();

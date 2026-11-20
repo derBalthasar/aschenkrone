@@ -153,3 +153,17 @@ alles steckt in `spiel/spiel.js`, `spiel/stil.css`, `spiel/kharos.js`, `spiel/sy
 - Bilder: Nur Dateien aus `npcs.bilder` (assets/npcs) und `npcPortraets.vorhanden` (assets/portraits) werden geladen.
   Neues Bild ablegen und dort eintragen.
 - `sim/simulator.cjs`: Maßstab Held + 3 Gefährten (Gegner auf Gruppengröße), Lauf S = Held allein als Info.
+
+## Quest- und Dialog-Upgrade v3.0.5 (20. 11. 2026)
+
+Henrys Pakete A/B/C (Zieldateien handlung_akte.js/ui/dialog.js gibt es nicht). Daten: `spiel/akt-dialoge.js`
+(Szenen, Antworten, Proben, Effekte, Taktik-Vorteile), Regeln in `spiel/regeln.js` (Abschnitt „Szenen-Dialoge“).
+- Akt 1: drei Szenen je Fraktion, Hauptstadt → zweite Stadt (Eisentor/Hagenfels, Aschenkloster, Nebelklippe/Nebelvik) →
+  Hauptstadt (Urteil). Jede Szene ist ein Gespräch mit 2–3 Antworten (`hauptInfo().wahlen`, `hauptWeiter(state, id)`).
+  Die Urteils-Antworten tragen die alten Wahl-Kennungen (kron_act1_* …), damit Akt 2–5 gleich bleiben.
+- Proben ohne Zufall: Grundwert ≥ Wert. Effekte: Silber, Rationen, Kontor-Rohstoffe, Ruf, Moral, EP, Marke,
+  `questVorteil` (Gegner −1, Erstschlag −15 % LP, Schild 10 %) für den nächsten Questkampf, `hinterhaltSchutz`.
+- Spielstände: `hauptquest.plan = 305`; ältere Orden/Häfen-Stände rücken ab Schritt 3 um einen zurück.
+- Akt 2/3: Gastgeber-Szene (`szeneInfo`, `zweigSzeneWaehlen`) vor dem ersten Zweig-Kampf; Akt 4: Szene am Sternenanker
+  (Gegenlied für jede Klasse möglich) und der Große Kriegsrat (Titel Hochfeldherr von Kharos, Marke `hochfeldherr`).
+- Aushang: Henrys Abschluss-Szene rahmt die bestehende Tat-Entscheidung (`tatSzene`), Mechanik unverändert.

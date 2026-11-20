@@ -16,7 +16,7 @@ const root = path.join(__dirname, "..");
 const context = vm.createContext({ structuredClone });
 for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/faehigkeiten.js", "spiel/kampf.js", "spiel/startpunkte.js",
   "spiel/welt.js", "spiel/knoten-daten.js", "spiel/knoten.js", "spiel/nebenquests-daten.js", "spiel/nebenquests.js",
-  "spiel/systeme-daten.js", "spiel/systeme.js", "spiel/regeln.js"]) {
+  "spiel/systeme-daten.js", "spiel/systeme.js", "spiel/akt-dialoge.js", "spiel/regeln.js"]) {
   vm.runInContext(fs.readFileSync(path.join(root, file), "utf8"), context, { filename: file });
 }
 const rules = vm.runInContext("rules", context);
@@ -196,6 +196,13 @@ let aktuellesProtokoll = null;
 
 function zweig(s, fraktion, wahlArt, protokoll) {
   s = bei(s, HAUPTSTADT[fraktion]);
+  // v3.0.5: Erst das Gespräch mit der Gastgeber-Anführung (erste mögliche Antwort, Söldner-Läufe die letzte).
+  const szene = rules.szeneInfo(s, "zweig", fraktion);
+  if (szene && !szene.erledigt) {
+    const frei = szene.optionen.filter((o) => !o.grund);
+    s = reload(rules.zweigSzeneWaehlen(s, fraktion, (wahlArt === "good" ? frei[0] : frei[frei.length - 1]).id));
+    protokoll.szenen = (protokoll.szenen ?? 0) + 1;
+  }
   for (let stufe = 0; stufe < 3; stufe++) {
     const grund = rules.zweigGrund(s, fraktion, stufe === 0 ? wahlArt : null);
     if (grund && /Silber/.test(grund)) s = reload({ ...s, silver: s.silver + 200 });
@@ -239,13 +246,14 @@ function durchlauf(faction, role, wahl, boese, protokoll) {
   for (const ort of ["kronhall", "glutberg", "perlvik"]) s = reload(rules.akt4Weiter(bei(s, ort)));
   s = schaffen(s, (x) => rules.akt4Weiter(x), protokoll, "Akt 4 Hinterhalt");
   if (!s) return protokoll;
+  // Geheimnis 1: Vor der Entlarvung (bis zur Ankunft am Sternenanker) darf kein angezeigter Text „Malakor“ nennen.
+  const vorher = angezeigt(s);
   s = bei(s, "glutberg");
   const untoteVorher = s.weltLeisten?.untote ?? rules.leistenStart.untote;
-  // Geheimnis 1: Vor der Entlarvung darf kein angezeigter Text „Malakor“ nennen.
-  const vorher = angezeigt(s);
   protokoll.malakorVerborgen = !kharos.entlarvtIn(s) && !vorher.some((t) => /Malakor/.test(t)) && vorher.some((t) => /Verhüllte/.test(t));
   if (!protokoll.malakorVerborgen) protokoll.fehler.push("Malakor vor Akt 4 erkennbar: " + (vorher.find((t) => /Malakor/.test(t)) ?? "kein Tarnname sichtbar"));
-  s = schaffen(s, (x) => rules.akt4Weiter(x), protokoll, "Akt 4 Thorvald");
+  // v3.0.5: Szene am Sternenanker – Heiler stimmen das Gegenlied an, die anderen stürmen.
+  s = schaffen(s, (x) => rules.akt4Weiter(x, role === "heiler" ? "malakor_gegenlied" : "malakor_sturmangriff"), protokoll, "Akt 4 Thorvald");
   if (!s) return protokoll;
   const wahlen = rules.akteInfo(s).akt4.wahlen.map((w) => w.id);
   s = reload(rules.akt4Weiter(s, boese ? wahlen[wahlen.length - 1] : wahlen.find((w) => /good/.test(w)) ?? wahlen[0]));
@@ -257,8 +265,8 @@ function durchlauf(faction, role, wahl, boese, protokoll) {
   if (!kharos.entlarvtIn(s) || !nachher.some((t) => /Malakor/.test(t))) protokoll.fehler.push("Malakor nach der Entlarvung nicht genannt");
   protokoll.chronistGeheim = !nachher.some((t) => /Schweigsamen? Chronist\w* (ist|war|heißt|hieß)\b|Chronist\w* enthüllt|wahre[rn]? Name/.test(t));
   if (!protokoll.chronistGeheim) protokoll.fehler.push("Identität des Schweigsamen Chronisten verraten");
-  s = reload(rules.akt4Weiter(bei(s, "kronhall")));
-  protokoll.thing = s.marks.includes("grosses-thing");
+  s = reload(rules.akt4Weiter(bei(s, "kronhall"), "kriegsrat_annehmen"));
+  protokoll.thing = s.marks.includes("grosses-thing") && s.marks.includes("hochfeldherr");
   if (!protokoll.thing) protokoll.fehler.push("Großes Thing nicht erreicht: " + rules.akt4Grund(s));
   // Schwierigkeitsgrade: Nach Akt 4 ist Hardcore freigeschaltet (simulator_regeln.pruefe_hardcore_freischaltung_nach_akt_4).
   protokoll.hardcoreFrei = rules.hardcoreFrei(s);

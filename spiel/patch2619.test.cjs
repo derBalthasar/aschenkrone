@@ -9,7 +9,7 @@ const vm = require("node:vm");
 
 const root = path.join(__dirname, "..");
 const context = vm.createContext({ structuredClone });
-for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/faehigkeiten.js", "spiel/kampf.js", "spiel/startpunkte.js", "spiel/welt.js", "spiel/knoten-daten.js", "spiel/knoten.js", "spiel/nebenquests-daten.js", "spiel/nebenquests.js", "spiel/systeme-daten.js", "spiel/systeme.js", "spiel/regeln.js"]) {
+for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/faehigkeiten.js", "spiel/kampf.js", "spiel/startpunkte.js", "spiel/welt.js", "spiel/knoten-daten.js", "spiel/knoten.js", "spiel/nebenquests-daten.js", "spiel/nebenquests.js", "spiel/systeme-daten.js", "spiel/systeme.js", "spiel/akt-dialoge.js", "spiel/regeln.js"]) {
   vm.runInContext(fs.readFileSync(path.join(root, file), "utf8"), context, { filename: file });
 }
 const rules = vm.runInContext("rules", context);
@@ -20,6 +20,8 @@ const reload = (state) => rules.read(JSON.stringify(state));
 const held = (faction, role, stufe, extra = {}) => {
   const s = { ...rules.create("Tala", faction, "frau", 1, role), scene: "weltknoten", knoten: "kronhall", xp: SY.epFuer(stufe),
     hauptquest: { schritt: { kronreich: 3, orden: 4, haefen: 4 }[faction], wahl: { kronreich: "kron_act1_truce", orden: "orden_act1_mercy", haefen: "haefen_act1_guild" }[faction] },
+    // v3.0.5: Die Gastgeber-Gespräche und die Szene am Sternenanker gelten hier als geführt (eigene Tests in regeln.test.cjs).
+    szenen: { "zweig:kronreich": "test", "zweig:orden": "test", "zweig:haefen": "test", "akt4:malakor": "malakor_sturmangriff" },
     questStufe: 1, ...extra };
   return reload({ ...s, health: rules.healthLimit(s) });
 };
