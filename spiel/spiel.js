@@ -2648,7 +2648,8 @@
   }
 
   function renderParty() {
-    el("party-count").textContent = "Gefährten · " + state.party.length + " / " + rules.partyLimit;
+    const poolStand = rules.poolInfo(state);
+    el("party-count").textContent = "Aktiver Kampftrupp (" + poolStand.trupp + "/" + poolStand.truppMax + ")";
     const vorteile = rules.lagerVorteile(state);
     let vorteilBox = el("party-vorteile");
     if (!vorteilBox) {
@@ -2664,6 +2665,8 @@
     for (const id of state.party) {
       const companion = world.companions[id];
       const row = element("li");
+      row.className = "gef-karte";
+      row.append(gefPortrait(id));
       row.append(element("strong", companion.name + " · " + klassen.grundklassen[companion.klasse].name +
         " · Stufe " + rules.memberLevel(state, id) + (companion.soeldner ? " · Söldner" : "")));
       row.append(element("div", companion.ability + " · " + companionEffect(companion) + " · Einmal pro Kampf"));
@@ -2681,12 +2684,18 @@
       for (const action of rules.bondActions(state, id)) {
         button(row, labels[action], () => update(rules.bondWith(state, id, action)));
       }
+      if (!rules.tauschGrund(state, id)) {
+        const knopf = button(row, "In Reserve", () => update(rules.inReserve(state, id)),
+          { disabled: poolStand.pool.length >= poolStand.poolMax });
+        knopf?.classList?.add("gef-tausch");
+      }
       if ((state.scene === "watch-yard" || rules.storageSite(state)) && !state.combat) {
         button(row, companion.name + " verabschieden", () => update(rules.dismiss(state, id)));
       }
       members.append(row);
     }
     if (!state.party.length) members.append(element("li", "Du reist allein."));
+    renderGefaehrtenZonen(poolStand);
     renderQuestLog();
     const leads = Object.entries(world.companions).filter(([id, companion]) => companion.klasse !== state.role && !state.party.includes(id))
       .map(([id, companion]) => companion.name + " · " + klassen.grundklassen[companion.klasse].name + " · " +
@@ -2697,6 +2706,78 @@
       return label + " · " + (score > 0 ? "+" : "") + score +
         (score >= 25 ? " · Wohlgesinnt" : score <= -25 ? " · Feindselig" : " · Neutral");
     }), "Keine Fraktionen bekannt.");
+  }
+
+  // v3.0.0 Gefährten-Pool: Synergiezeile (Zone 1), Quartier-Reserve mit Filter (Zone 2), Völker-Gesandte (Zone 3).
+  let gefFilter = "alle";
+  function gefPortrait(id) {
+    const bild = element("div");
+    bild.className = "gef-portrait";
+    bild.setAttribute("aria-hidden", "true");
+    const [datei, variante] = companionPortrait(id);
+    const art = portraits.get(datei, variante);
+    bild.style.backgroundImage = 'url("profilbilder/bilder/' + art.file + '")';
+    bild.style.backgroundPosition = art.position;
+    return bild;
+  }
+  const gefEigen = (id) => {
+    const c = world.companions[id];
+    return !c.champion && (c.volk ?? "menschen") === klassen.fraktionen[state.faction]?.volk && (!c.fraktion || c.fraktion === state.faction);
+  };
+  function renderGefaehrtenZonen(info) {
+    const aktiv = info.synergien.filter((s) => s.aktiv);
+    el("party-synergien").textContent = aktiv.length
+      ? "Synergie: " + aktiv.map((s) => s.name + " (" + s.effekt + (s.wirkt ? "" : ", wirkt noch nicht") + ")").join(" · ")
+      : "Keine Völker-Synergie aktiv · Gemischte Völker im Trupp schalten Boni frei.";
+    const reserve = el("gef-reserve");
+    reserve.replaceChildren();
+    const titel = element("h4", "Quartier-Reserve (Pool) · " + info.pool.length + "/" + info.poolMax);
+    titel.id = "gef-reserve-titel";
+    reserve.append(titel);
+    const pills = element("div");
+    pills.className = "gef-filter";
+    pills.setAttribute("role", "group");
+    pills.setAttribute("aria-label", "Reserve filtern");
+    for (const [id, label] of [["alle", "Alle"], ["eigene", "Eigene"], ["verbuendete", "Verbündete"]]) {
+      const pill = element("button", label);
+      pill.type = "button";
+      pill.className = "gef-pill" + (gefFilter === id ? " aktiv" : "");
+      pill.setAttribute("aria-pressed", String(gefFilter === id));
+      pill.addEventListener("click", () => { gefFilter = id; renderGefaehrtenZonen(rules.poolInfo(state)); });
+      pills.append(pill);
+    }
+    reserve.append(pills);
+    const liste = element("ul");
+    liste.className = "inventory-list gef-pool";
+    const sichtbar = info.pool.filter((id) => gefFilter === "alle" || (gefFilter === "eigene") === gefEigen(id));
+    for (const id of sichtbar) {
+      const c = world.companions[id];
+      const row = element("li");
+      row.className = "gef-karte";
+      row.append(gefPortrait(id));
+      row.append(element("strong", c.name + " · " + klassen.grundklassen[c.klasse].name + " · Stufe " + rules.memberLevel(state, id) +
+        (c.champion ? " · Champion" : c.soeldner ? " · Söldner" : gefEigen(id) ? "" : " · Abgesandter")));
+      const grund = rules.tauschGrund(state, id) ?? (state.party.length >= rules.partyLimit ? "Trupp voll (4/4)" : null);
+      const knopf = button(row, "In Trupp", () => update(rules.inTrupp(state, id)), { disabled: Boolean(grund) });
+      knopf?.classList?.add("gef-tausch");
+      if (grund) row.append(element("small", grund));
+      liste.append(row);
+    }
+    if (!sichtbar.length) liste.append(element("li", info.pool.length ? "Keine Gefährten in diesem Filter." :
+      "Die Reserve ist leer. Wer bei vollem Trupp angeworben wird, wartet hier."));
+    reserve.append(liste);
+    if (info.grund) reserve.append(element("p", "Ein- und Auswechseln: " + info.grund + "."));
+
+    const gesandte = el("gef-gesandte");
+    gesandte.replaceChildren();
+    const titel3 = element("h4", "Völker-Gesandte & Freischaltungen");
+    titel3.id = "gef-gesandte-titel";
+    gesandte.append(titel3);
+    const uebersicht = element("ul");
+    uebersicht.className = "gef-gesandte-liste";
+    for (const g of info.abgesandte) uebersicht.append(element("li", "Abgesandter · " + g.name + " (" + klassen.fraktionen[g.fraktion].name + ") · " + g.status));
+    for (const c of info.champions) uebersicht.append(element("li", "Champion · " + c.name + " (" + c.rolle + ") · " + c.status));
+    gesandte.append(uebersicht);
   }
 
   const companionPortraits = {
@@ -4728,8 +4809,12 @@
       const recruitment = element("section");
       recruitment.className = "recruitment";
       recruitment.append(element("h3", "Gefährten vor Ort"));
-      if (state.party.length >= rules.partyLimit) {
-        recruitment.append(element("p", "Deine Gruppe ist voll. Am Wachhof oder in einer Stadt mit Zentrallager kannst du jemanden verabschieden."));
+      const pool = rules.poolInfo(state);
+      const voll = state.party.length >= rules.partyLimit && pool.pool.length >= pool.poolMax;
+      if (voll) {
+        recruitment.append(element("p", "Trupp und Quartier-Reserve sind voll. Am Wachhof oder in einer Stadt mit Zentrallager kannst du jemanden verabschieden."));
+      } else if (state.party.length >= rules.partyLimit) {
+        recruitment.append(element("p", "Dein Trupp ist voll (4/4). Neue Gefährten warten in der Quartier-Reserve (" + pool.pool.length + "/" + pool.poolMax + ")."));
       }
       for (const [id, companion] of candidates) {
         const candidate = element("article");
@@ -4743,16 +4828,16 @@
           candidate.append(element("p", "Söldner · startet auf Erfahrungsstufe " + Math.max(1, rules.level(state) - 1) +
             (cost < companion.soeldner.kosten ? " · Charisma-Rabatt" : "")));
           button(candidate, companion.name + " anwerben · " + cost + " Silber", () => update(rules.hire(state, id)),
-            { disabled: state.party.length >= rules.partyLimit || state.silver < cost });
+            { disabled: voll || state.silver < cost });
           // Technische Spezifikation: alternativ 15 Fraktionsvorrat (mit Charisma-Rabatt), der Vorrat bleibt über 0.
           const supply = rules.hireCost(state, id, rules.vorratAnwerbung);
           button(candidate, companion.name + " anwerben · " + supply + " " + rules.resourceName(state), () => update(rules.hire(state, id, "vorrat")),
-            { disabled: state.party.length >= rules.partyLimit || state.ressource - supply < 1 });
+            { disabled: voll || state.ressource - supply < 1 });
         } else if (status === "incompatible") {
           candidate.append(element("p", "Volksgrenzen: Untote und Lebende reisen nicht zusammen, Orks und Zwerge ebenso wenig."));
         } else if (status === "ready") {
           button(candidate, companion.name + " mitnehmen", () => update(rules.recruit(state, id)),
-            { disabled: state.party.length >= rules.partyLimit });
+            { disabled: voll });
         } else if (status === "auftrag") {
           candidate.append(element("p", "Erst nach dem Auftrag „" + nebenquests.fuerOrt(companion.knoten).auftraege
             .find(auftrag => auftrag.id === companion.auftrag).titel + "“ am Aushang von " + knoten.get(companion.knoten).name + "."));

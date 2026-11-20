@@ -1804,3 +1804,18 @@ dialog.dialog-klein[open] { opacity: 1; }
 .rig-leerenringe ellipse + ellipse { stroke: #38bdf8; animation-direction: reverse; }
 @keyframes leerenringe { to { transform: rotate(360deg); } }
 .arena-leere.arena-boss-aura::after { background: radial-gradient(circle at 76% 50%, rgba(99, 102, 241, .5), rgba(2, 6, 23, .2) 45%, transparent 60%); }
+/* v3.0.0 Gefährten-Pool: drei Zonen im Tab „Gefährten“ (Kachel-Optik wie v2.6.16). */
+.gef-karte { display: grid; grid-template-columns: 2.6rem 1fr; column-gap: .55rem; align-items: start; }
+.gef-karte > :not(.gef-portrait) { grid-column: 2; }
+.gef-portrait { grid-row: 1 / span 3; width: 2.6rem; height: 2.6rem; border-radius: 6px; background-size: 400% auto; background-color: #1b130d;
+  border: 1px solid color-mix(in srgb, var(--accent, #b5862b) 45%, transparent); }
+.gef-synergien { margin: .35rem 0 .6rem; padding: .3rem .55rem; font-size: .82rem; border-left: 3px solid var(--accent, #b5862b);
+  background: color-mix(in srgb, var(--accent, #b5862b) 10%, transparent); }
+.gef-zone { margin-top: .8rem; padding-top: .55rem; border-top: 1px solid color-mix(in srgb, var(--accent, #b5862b) 30%, transparent); }
+.gef-zone h4 { margin: 0 0 .4rem; font-size: .9rem; letter-spacing: .03em; }
+.gef-filter { display: flex; flex-wrap: wrap; gap: .3rem; margin-bottom: .45rem; }
+.gef-pill { font: inherit; font-size: .78rem; padding: .12rem .65rem; border-radius: 999px; cursor: pointer; color: inherit;
+  border: 1px solid color-mix(in srgb, var(--accent, #b5862b) 50%, transparent); background: transparent; }
+.gef-pill.aktiv { background: color-mix(in srgb, var(--accent, #b5862b) 35%, transparent); }
+.gef-gesandte-liste { margin: 0; padding-left: 1.1rem; font-size: .82rem; }
+.gef-karte small { display: block; opacity: .75; }

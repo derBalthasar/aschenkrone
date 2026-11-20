@@ -140,6 +140,51 @@ function stand({ fraktion, akt }) {
     console.log("Kharos geprüft");
     await page.close();
   }
+  // v3.0.0 Gefährten-Pool: drei Zonen, Tausch in der Hauptstadt, Sperre unterwegs.
+  for (const [ort, hauptstadt] of [["kronhall", true], ["hagenfels", false]]) {
+    const page = await browser.newPage({ viewport: { width: 1366, height: 900 } });
+    page.on("pageerror", (e) => fehler.push("Gefährten-Pool: " + e.message));
+    await page.goto(seite);
+    const json = await page.evaluate((knoten) => {
+      let s = { ...rules.create("Prüferin", "kronreich", "frau", 2, "krieger"), scene: "weltknoten", knoten, handlung: null,
+        party: ["knight", "mage", "priest"], gefaehrtenPool: ["ranger"] };
+      s = rules.read(JSON.stringify(s));
+      s.health = rules.healthLimit(s);
+      return JSON.stringify(s);
+    }, ort);
+    await page.evaluate(([k, v]) => localStorage.setItem(k, v), [KEY, json]);
+    await page.reload();
+    await page.click("#continue");
+    await page.waitForTimeout(300);
+    await page.click("#side-tab-gefaehrten");
+    await page.waitForTimeout(150);
+    const zonen = await page.evaluate(() => ({
+      trupp: document.getElementById("party-count").textContent, synergie: document.getElementById("party-synergien").textContent,
+      reserve: document.querySelector("#gef-reserve h4")?.textContent ?? "", pills: document.querySelectorAll("#gef-reserve .gef-pill").length,
+      gesandte: document.querySelector("#gef-gesandte h4")?.textContent ?? "", champions: document.querySelectorAll("#gef-gesandte li").length }));
+    if (zonen.trupp !== "Aktiver Kampftrupp (4/4)") fehler.push("Gefährten-Pool: Zone 1 falsch: „" + zonen.trupp + "“");
+    if (!zonen.synergie) fehler.push("Gefährten-Pool: Synergiezeile fehlt");
+    if (!/^Quartier-Reserve \(Pool\) · 1\/16$/.test(zonen.reserve) || zonen.pills !== 3) fehler.push("Gefährten-Pool: Zone 2 falsch: „" + zonen.reserve + "“, " + zonen.pills + " Filter");
+    if (zonen.gesandte !== "Völker-Gesandte & Freischaltungen" || zonen.champions < 4) fehler.push("Gefährten-Pool: Zone 3 falsch");
+    const inTrupp = page.locator("#gef-reserve button.gef-tausch").first();
+    const reserveKnoepfe = await page.locator("#party-members button.gef-tausch").count();
+    if (hauptstadt) {
+      if (reserveKnoepfe !== 3) fehler.push("Gefährten-Pool: In der Hauptstadt fehlen die Knöpfe „In Reserve“ (" + reserveKnoepfe + ")");
+      await page.locator("#party-members button.gef-tausch").first().click();
+      await page.waitForTimeout(150);
+      await page.locator("#gef-reserve button.gef-tausch", { hasText: "In Trupp" }).filter({ hasNot: page.locator(":disabled") }).first().click().catch(() => {});
+      const party = await page.evaluate(() => document.getElementById("party-count").textContent);
+      if (party !== "Aktiver Kampftrupp (4/4)" || !(await page.evaluate(() => document.querySelector("#party-members").textContent.includes("Neri"))))
+        fehler.push("Gefährten-Pool: Tausch in der Hauptstadt hat nicht funktioniert (" + party + ")");
+    } else {
+      if (reserveKnoepfe) fehler.push("Gefährten-Pool: Unterwegs darf es keinen Knopf „In Reserve“ geben");
+      if (!(await inTrupp.isDisabled())) fehler.push("Gefährten-Pool: „In Trupp“ unterwegs nicht gesperrt");
+      const hinweis = await page.locator("#gef-reserve small").first().textContent().catch(() => "");
+      if (hinweis !== "Nur in Hauptstädten möglich") fehler.push("Gefährten-Pool: Hinweis unterwegs falsch: „" + hinweis + "“");
+    }
+    console.log("Gefährten-Pool " + (hauptstadt ? "in der Hauptstadt" : "unterwegs") + " geprüft");
+    await page.close();
+  }
   await browser.close();
   console.log(fehler.length ? "FEHLER:\n" + fehler.join("\n") : "Keine Fehler.");
   process.exitCode = fehler.length ? 1 : 0;

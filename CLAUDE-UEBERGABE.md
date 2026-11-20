@@ -117,3 +117,16 @@ Textknoten und title/aria-label/placeholder/alt): Welt, 15 Fraktionen, 15 Haupt-
 - Akt 5, Untoten-Korrumpierung und nq_01–nq_20 stehen als Vorschau („Chronik von Kharos“) im Hofstaat, noch nicht spielbar.
 - Arena: Akt-4-Boss nutzt das Malakor-Modell (Skala 1,3, Leerenringe), Figuren erhalten Völker-Proportionen.
 - Die Volks-Kampfressourcen (Flammeneifer usw.) sind noch nicht eingebaut, weil sie die Kampfmechanik ändern würden.
+
+## Gefährten-Pool und Hauptstadt-Tausch (v3.0.0, 20. 11. 2026)
+
+Quelle: `quellen/henry/v300/gefaehrten-pool.json`. Regeln in `spiel/regeln.js` (`poolInfo`, `inReserve`, `inTrupp`,
+`tauschGrund`, `synergien`), Anzeige in `renderParty`/`renderGefaehrtenZonen` (`spiel/spiel.js`), Tab „Gefährten“ mit
+3 Zonen (Trupp + Synergiezeile, Quartier-Reserve mit Filtern, Völker-Gesandte).
+- Trupp: Held + 3 Begleiter. Wer bei vollem Trupp angeworben wird, kommt in `state.gefaehrtenPool` (max. 16).
+- Tausch nur in einer der 15 Hauptstädte; in einer fremden Hauptstadt, in der der Held geächtet ist, nur Söldner.
+- Akt 2/3: Nach abgeschlossenem Schwester-Zweig wartet deren Q10-Gefährte als Abgesandter an seinem Ort.
+- Akt 5: Elite-Champions (`gef_*`) treten bei Marke `buendnis_<volk>` kostenlos der Reserve bei. Untote bekommen keine
+  Champions und nehmen nur Untote/Korrumpierte auf.
+- Synergien werden angezeigt; nur „Pakt aus Stahl & Flamme“ (+1 Rüstung) wirkt im Kampf. Die übrigen drei brauchen noch
+  fehlende Systeme (Kampfressourcen, Ausweichen nach Kampfphase, Krit-Schaden).

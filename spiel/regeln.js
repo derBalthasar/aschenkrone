@@ -319,6 +319,7 @@ const rules = (() => {
     state.training ??= {};
     state.rewards ??= [];
     state.party ??= [];
+    state.gefaehrtenPool ??= [];
     state.companionEquipment ??= {};
     state.partyVitals ??= {};
     state.heroStatus ??= {};
@@ -452,6 +453,8 @@ const rules = (() => {
         !validList(state.rewards, (id) => typeof id === "string" && id.length <= 50, 100) ||
         !validList(state.party, (id) => own(world.companions, id), 5) ||
         new Set(state.party).size !== state.party.length ||
+        !validList(state.gefaehrtenPool, (id) => own(world.companions, id) && !state.party.includes(id), poolLimit) ||
+        new Set(state.gefaehrtenPool).size !== state.gefaehrtenPool.length ||
         !validRecord(state.companionQuests, world.companions, quest => quest &&
           ["active", "done", "failed"].includes(quest.status) && intBetween(quest.debt, 0, world.recruitmentQuests.warrior.salary)) ||
         !Object.entries(state.companionQuests).every(([id, quest]) => !quest.debt || (id === "warrior" && quest.status === "done")) ||
@@ -502,9 +505,12 @@ const rules = (() => {
         if (!state.combat.feinde.some(foe => foe.lp > 0)) state.combat.feinde[state.combat.feinde.length - 1].lp = 1;
         state.combat.supportUsed = (state.combat.supportUsed ?? []).filter(id => state.party.includes(id));
       }
+      const reserve = waiting.filter((id) => !state.gefaehrtenPool.includes(id)).slice(0, poolLimit - state.gefaehrtenPool.length);
+      state.gefaehrtenPool.push(...reserve);
       note(state, "Maximal drei Begleiter: " + waiting.map(id => world.companions[id].name).join(", ") +
-        " warten am Wachhof. Ihre Ausrüstung liegt im Gruppenvorrat.");
+        (reserve.length ? " warten in der Quartier-Reserve." : " warten am Wachhof.") + " Ihre Ausrüstung liegt im Gruppenvorrat.");
     }
+    championsAufnehmen(state);
     ensureVitals(state);
     syncQuests(state);
     return state;
@@ -595,10 +601,99 @@ const rules = (() => {
   function candidates(state) {
     if (state.combat || !state.health) return [];
     return Object.entries(world.companions).filter(([id, companion]) =>
-      companion.klasse !== state.role && !state.party.includes(id) &&
+      companion.klasse !== state.role && !state.party.includes(id) && !pool(state).includes(id) && !companion.champion &&
       (companion.soeldner ? mercenaryHere(state, companion)
-        : companion.auftrag ? state.scene === "weltknoten" && state.knoten === companion.knoten && companion.fraktion === state.faction
+        : companion.auftrag ? state.scene === "weltknoten" && state.knoten === companion.knoten &&
+          (companion.fraktion === state.faction || abgesandter(state, id))
         : companion.scenes.includes(state.scene)));
+  }
+
+  // ---- Gefährten-Pool und Hauptstadt-Tausch (Henry, v3.0.0, quellen/henry/v300/gefaehrten-pool.json) ----
+  // Aktiver Trupp: Held + höchstens 3 Begleiter. Alle weiteren Gefährten warten in der Quartier-Reserve (16 Plätze).
+  // Ein- und Auswechseln nur in einer der 15 Hauptstädte; wer dort geächtet ist, tauscht nur Söldner.
+  const poolLimit = 16;
+  const pool = (state) => state.gefaehrtenPool ?? [];
+  const truppUndPoolVoll = (state) => state.party.length >= partyLimit && pool(state).length >= poolLimit;
+  // Akt 2 und 3: Nach einem abgeschlossenen Schwester-Zweig schickt die geeinte Fraktion ihren Gefährten als Abgesandten.
+  const abgesandter = (state, id) => {
+    const c = world.companions[id];
+    return Boolean(c?.auftrag && c.fraktion !== state.faction && K.fraktionen[c.fraktion]?.volk === people(state.faction) &&
+      (state.akte?.zweige?.[c.fraktion]?.stufe ?? 0) >= 3);
+  };
+  // Völker-Synergien des aktiven Trupps. Nur „Pakt aus Stahl & Flamme“ hat schon einen Wert im Kampf; die übrigen
+  // brauchen Systeme, die es noch nicht gibt (Kampfressourcen, Ausweichen nach Kampfphase, Krit-Schaden).
+  const SYNERGIEN = [
+    { voelker: ["menschen", "zwerge"], name: "Pakt aus Stahl & Flamme", effekt: "+1 Rüstung für die gesamte aktive Gruppe", wert: { ruestung: 1 } },
+    { voelker: ["elfen", "orks"], name: "Zorn der Alten Wildnis", effekt: "+10 % Ausweichen in der ersten Kampfphase", wert: null },
+    { voelker: ["menschen", "elfen"], name: "Astrale Kriegsführung", effekt: "+1 Start-Kampfressource (Flammeneifer / Astralstrom)", wert: null },
+    { voelker: ["zwerge", "orks"], name: "Donner & Amboss", effekt: "+12 % kritischer Schaden im Nahkampf", wert: null },
+  ];
+  const truppVoelker = (state) => new Set([people(state.faction), ...state.party.map(memberPeople)]);
+  function synergien(state) {
+    const voelker = truppVoelker(state);
+    return SYNERGIEN.map((s) => ({ ...s, aktiv: s.voelker.every((v) => voelker.has(v)), wirkt: Boolean(s.wert) }));
+  }
+  const synergieWert = (state, wert) => synergien(state).filter((s) => s.aktiv && s.wert).reduce((n, s) => n + (s.wert[wert] ?? 0), 0);
+  // Akt 5: Elite-Champions verbündeter Völker treten kostenlos der Reserve bei (Marke „buendnis_<volk>“).
+  const CHAMPIONS = [
+    { id: "gef_menschen_valen", name: "Ritterhauptmann Cassian", volk: "menschen", fraktion: "kronreich", klasse: "waechter", rolle: "Schildwall", freischaltung: "buendnis_menschen" },
+    { id: "gef_elfen_aethel", name: "Sternenklinge Sylas", volk: "elfen", fraktion: "dornenklingen", klasse: "magier", rolle: "Flächenmagie", freischaltung: "buendnis_elfen" },
+    { id: "gef_elfen_vael", name: "Schattenweberin Nyxara", volk: "elfen", fraktion: "schattenbluete", klasse: "schurke", rolle: "Assassine", freischaltung: "buendnis_elfen" },
+    { id: "gef_zwerge_khaz", name: "Runenmeisterin Dagna", volk: "zwerge", fraktion: "tiefes-koenigreich", klasse: "heiler", rolle: "Unterstützung", freischaltung: "buendnis_zwerge" },
+    { id: "gef_orks_grom", name: "Kriegsrufer Nazgrel", volk: "orks", fraktion: "gruene-banner", klasse: "krieger", rolle: "Nahkampf", freischaltung: "buendnis_orks" },
+  ];
+  function championsAufnehmen(state) {
+    if (people(state.faction) === "untote") return;
+    for (const c of CHAMPIONS) {
+      if (c.volk === people(state.faction) || !state.marks.includes(c.freischaltung) || state.party.includes(c.id) ||
+          state.gefaehrtenPool.includes(c.id) || state.gefaehrtenPool.length >= poolLimit) continue;
+      state.gefaehrtenPool.push(c.id);
+      state.companionXp ??= {};
+      state.companionXp[c.id] = Math.max(state.companionXp[c.id] ?? 0, memberStartXp(state));
+      note(state, c.name + " (" + c.rolle + ") tritt als Elite-Champion des Bündnisses kostenlos deiner Reserve bei.");
+    }
+  }
+  function championInfo(state) {
+    const eigenes = people(state.faction);
+    return CHAMPIONS.filter((c) => c.volk !== eigenes).map((c) => ({ ...c,
+      status: eigenes === "untote" ? "Untote schließen keine Bündnisse"
+        : state.party.includes(c.id) || pool(state).includes(c.id) ? "gewonnen"
+        : "Bündnis mit den " + c.volk.charAt(0).toUpperCase() + c.volk.slice(1) + " in Akt 5" }));
+  }
+  function abgesandteInfo(state) {
+    return Object.entries(world.companions).filter(([id, c]) => c.auftrag && c.fraktion !== state.faction &&
+      K.fraktionen[c.fraktion]?.volk === people(state.faction)).map(([id, c]) => ({ id, name: c.name, fraktion: c.fraktion, ort: c.knoten,
+      status: state.party.includes(id) || pool(state).includes(id) ? "gewonnen" : abgesandter(state, id) ? "wartet in " + N.get(c.knoten).name
+        : "nach dem Schwester-Zweig" }));
+  }
+  function tauschGrund(state, id = null) {
+    if (state.scene !== "weltknoten" || state.combat || !state.health) return "Nur in Hauptstädten möglich";
+    const ort = N.get(state.knoten);
+    if (ort?.typ !== "hauptstadt") return "Nur in Hauptstädten möglich";
+    if (id && !world.companions[id]?.soeldner && ort.fraktion !== state.faction && geaechtetBei(state, ort.fraktion)) return "In " + ort.name + " geächtet: nur Söldner";
+    return null;
+  }
+  function poolInfo(state) {
+    return { trupp: state.party.length + 1, truppMax: partyLimit + 1, pool: pool(state), poolMax: poolLimit, grund: tauschGrund(state),
+      synergien: synergien(state), champions: championInfo(state), abgesandte: abgesandteInfo(state) };
+  }
+  function inReserve(previous, id) {
+    if (tauschGrund(previous, id) || !previous.party.includes(id) || pool(previous).length >= poolLimit) return previous;
+    const state = structuredClone(previous);
+    state.party = state.party.filter((member) => member !== id);
+    (state.gefaehrtenPool ??= []).push(id);
+    if (state.companionEquipment) delete state.companionEquipment[id];
+    note(state, world.companions[id].name + " bezieht Quartier in der Reserve. Die Ausrüstung kommt in den Gruppenvorrat.");
+    return state;
+  }
+  function inTrupp(previous, id) {
+    if (tauschGrund(previous, id) || !pool(previous).includes(id) || previous.party.length >= partyLimit || !compatible(previous, id)) return previous;
+    const state = structuredClone(previous);
+    state.gefaehrtenPool = state.gefaehrtenPool.filter((member) => member !== id);
+    state.party.push(id);
+    ensureVitals(state);
+    note(state, world.companions[id].name + " verlässt das Quartier und reiht sich in den Kampftrupp ein.");
+    return state;
   }
 
   // Errata 9: Volksgrenzen. Untote nehmen keine Lebenden auf und umgekehrt, Orks und Zwerge reisen nie zusammen.
@@ -609,6 +704,10 @@ const rules = (() => {
   }
   function compatible(state, id) {
     const companion = world.companions[id];
+    // v3.0.0: Untote nehmen nur Untote und korrumpierte Verräter auf.
+    if (people(state.faction) === "untote" && memberPeople(id) !== "untote" && !companion.korrumpiert) return false;
+    // Elite-Champions aus Akt-5-Bündnissen reisen trotz alter Feindschaft mit Orks und Zwergen (Empfehlung, Henry offen).
+    if (companion.champion) return people(state.faction) !== "untote" && state.party.every((m) => memberPeople(m) !== "untote");
     if (!companion.soeldner && !companion.gesandter) return true;
     const volk = memberPeople(id);
     return !peopleClash(people(state.faction), volk) && state.party.every(member => !peopleClash(memberPeople(member), volk));
@@ -636,6 +735,7 @@ const rules = (() => {
     }
     // Begleiter aus Aufträgen am Aushang: bereit, sobald ihr Auftrag erledigt ist.
     if (world.companions[id].auftrag) {
+      if (abgesandter(state, id)) return "ready";
       return state.weltAuftraege?.[world.companions[id].auftrag]?.status === "erledigt" ? "ready" : "auftrag";
     }
     const bond = relationship(state, id);
@@ -716,14 +816,17 @@ const rules = (() => {
   const memberLevel = (state, id) => kampf.stufeAus(state.companionXp?.[id] ?? memberStartXp(state));
 
   function join(state, id) {
-    state.party.push(id);
+    if (state.party.length >= partyLimit) {
+      (state.gefaehrtenPool ??= []).push(id);
+      note(state, world.companions[id].name + " wartet in der Quartier-Reserve, bis du in einer Hauptstadt den Trupp umstellst.");
+    } else state.party.push(id);
     state.companionXp ??= {};
     state.companionXp[id] = Math.max(state.companionXp[id] ?? 0, memberStartXp(state));
     ensureVitals(state);
   }
 
   function recruit(previous, id) {
-    if (previous.party.length >= partyLimit || !candidates(previous).some(([candidate]) => candidate === id) ||
+    if (truppUndPoolVoll(previous) || !candidates(previous).some(([candidate]) => candidate === id) ||
         recruitment(previous, id) !== "ready" || !compatible(previous, id)) return previous;
     const state = structuredClone(previous);
     join(state, id);
@@ -735,7 +838,7 @@ const rules = (() => {
   // Statt Silber geht auch Fraktionsvorrat (15, mit demselben Charisma-Rabatt). Der Vorrat bleibt dabei über 0.
   function hire(previous, id, zahlung = "silber") {
     const cost = zahlung === "vorrat" ? hireCost(previous, id, vorratAnwerbung) : hireCost(previous, id);
-    if (previous.party.length >= partyLimit || !candidates(previous).some(([candidate]) => candidate === id) ||
+    if (truppUndPoolVoll(previous) || !candidates(previous).some(([candidate]) => candidate === id) ||
         recruitment(previous, id) !== "hire" ||
         (zahlung === "vorrat" ? previous.ressource - cost < 1 : zahlung !== "silber" || previous.silver < cost)) return previous;
     const state = structuredClone(previous);
@@ -2362,6 +2465,10 @@ const rules = (() => {
       place: N.get(begleiter.ort).name + " · nach dem Auftrag „" + auftragIndex[begleiter.auftrag].titel + "“",
       introduction, ability: begleiter.faehigkeit };
   }
+
+  for (const c of CHAMPIONS) world.companions[c.id] = { klasse: c.klasse, name: c.name, volk: c.volk, scenes: [], ...klassenWerte[c.klasse],
+    champion: true, fraktion: c.fraktion, place: "Elite-Champion · Bündnis in Akt 5", introduction: c.name + " kämpft für das Bündnis.",
+    ability: c.rolle };
 
   // ---- Rückreise-Pflicht (Henry, 20. 11. 2026, quellen/henry/v2619/marsch-und-rueckreise.json) ----
   // Ein Auftrag, der fern vom Auftraggeber erfüllt wird, ist erst „bereit zur Abgabe“. Lohn und Bericht gibt es am Ort des
@@ -4659,7 +4766,8 @@ const rules = (() => {
                 continue;
               }
             }
-            const armor = (heroTarget ? gearBonus(state, "armor") : memberGearBonus(state, victim.id, "armor")) + reliktWert(state, "partyResistance");
+            const armor = (heroTarget ? gearBonus(state, "armor") : memberGearBonus(state, victim.id, "armor")) + reliktWert(state, "partyResistance") +
+              synergieWert(state, "ruestung");
             const defense = heroTarget && round.guarding ? Math.max(6, round.ward) : round.ward;
             const guarding = defense > 0;
             let hit;
@@ -4942,7 +5050,7 @@ const rules = (() => {
     attributes, baseAttributes, defaultBuild, suggestSkills, buildProblem, skillLimits, skillPoints, cap, modifier, originOf, profile,
     className, title, gearSkill, heroSkills, heroLimits, modifiers, skillValue, protection,
     memberHealthLimit, memberVitals, allies, memberEquipment, assigned, progression, train, trade, candidates, recruit, dismiss, targets,
-    questEntries, questPlans, partyLimit, attitude, questReady, completeQuest, paySalary, craft, relationship, reputation, recruitment, promise, bondActions, bondWith,
+    questEntries, questPlans, partyLimit, poolLimit, poolInfo, inReserve, inTrupp, tauschGrund, synergien, attitude, questReady, completeQuest, paySalary, craft, relationship, reputation, recruitment, promise, bondActions, bondWith,
     healthLimit, startFight, emberLimit, heroAttributes, ending, moorConsequences, effects,
     weltLeisten, leistenNamen, leistenStart, gegenkraefte, niederlagen, vorratMax, vorratStart, seewegSilber, vorratAnwerbung,
     vertragKosten, ertragMenge, ertragPause, weltRunde, aktuellerKnoten, weltOffen, betreteWelt, handlungHier, zurHandlung,

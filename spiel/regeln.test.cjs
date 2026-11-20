@@ -947,7 +947,7 @@ console.log('Gruppenausrüstung, Besitz, Kampfboni und Spielstandmigration gepr�
 
 // Aufnahme erst nach angenommenem und abgegebenem Auftrag; kein mehrfacher Rufgewinn.
 const questStart = { ...rules.create("Tala", "kronreich", "frau", 1, "magier"), scene: "watch-yard", silver: 30 };
-for (const id of Object.keys(world.companions).filter(id => id !== questStart.role && !world.companions[id].soeldner && !world.companions[id].auftrag)) {
+for (const id of Object.keys(world.companions).filter(id => id !== questStart.role && !world.companions[id].soeldner && !world.companions[id].auftrag && !world.companions[id].champion)) {
   const applicant = { ...rules.create("Tala", "kronreich", "frau", 1, world.companions[id].klasse === "waechter" ? "heiler" : "waechter"), scene: "watch-yard", silver: 30 };
   const accepted = rules.promise(applicant, id);
   assert.equal(rules.recruit(accepted, id), accepted, id + ': Auftrag noch nicht abgegeben');
@@ -969,7 +969,14 @@ for (const id of Object.keys(world.companions).filter(id => id !== questStart.ro
 }
 const capacity = { ...atYard, companionQuests: { ...atYard.companionQuests, paladin: { status: 'done', debt: 0 } } };
 assert.equal(rules.recruitment(capacity, 'paladin'), 'ready');
-assert.equal(rules.recruit(capacity, 'paladin'), capacity, 'Auch erfüllte Quests umgehen das Gruppenlimit nicht');
+// v3.0.0: Bei vollem Trupp kommt der Gefährte in die Quartier-Reserve; erst bei voller Reserve (16) ist Schluss.
+const inReserve = rules.recruit(capacity, 'paladin');
+assert.equal(inReserve.party.length, rules.partyLimit, 'Auch erfüllte Quests umgehen das Gruppenlimit nicht');
+assert.equal(JSON.stringify(inReserve.gefaehrtenPool), '["paladin"]', 'Überzählige Gefährten warten in der Reserve');
+assert.equal(JSON.stringify(reload(inReserve).gefaehrtenPool), '["paladin"]');
+const reserveVoll = { ...capacity, gefaehrtenPool: Object.keys(world.companions).filter(id => !capacity.party.includes(id) && id !== 'paladin').slice(0, rules.poolLimit) };
+assert.equal(rules.poolLimit, 16);
+assert.equal(rules.recruit(reserveVoll, 'paladin'), reserveVoll, 'Volle Reserve nimmt niemanden auf');
 const herbalist = { ...questStart, inventory: [...questStart.inventory.filter(id => id !== 'galgenwurz'), 'galgenwurz', 'galgenwurz'] };
 const craftedBandage = rules.craft(herbalist, 'harzverband');
 assert.ok(craftedBandage.inventory.includes('harzverband'));
@@ -2025,3 +2032,52 @@ console.log("Siedlung, Bau, Garnison, Endgame, Stufe 30, Meister-Talente und Ahn
   if (runen) assert.equal(rules.resonanz({ ...held, equipment: { ...held.equipment, ring1: runen.id } }), true);
 }
 console.log("Patch 2.5.3 geprüft.");
+
+// v3.0.0 (Henry, 20. 11. 2026): Gefährten-Pool, Hauptstadt-Tausch, Freischaltung und Völker-Synergien.
+{
+  const truppIds = ["knight", "mage", "priest"].filter((id) => world.companions[id]);
+  const basis = (ort, extra = {}) => reload({ ...rules.create("Tala", "kronreich", "frau", 1, "krieger"), scene: "weltknoten", knoten: ort,
+    party: truppIds, gefaehrtenPool: ["ranger"], ...extra });
+  const hauptstadt = basis("kronhall");
+  assert.equal(rules.tauschGrund(hauptstadt), null, "Tausch in der Hauptstadt erlaubt");
+  const unterwegs = basis("hagenfels");
+  assert.equal(rules.tauschGrund(unterwegs), "Nur in Hauptstädten möglich");
+  assert.equal(rules.inReserve(unterwegs, truppIds[0]), unterwegs, "Unterwegs kein Auswechseln");
+  assert.equal(rules.inTrupp(unterwegs, "ranger"), unterwegs, "Unterwegs kein Einwechseln");
+  assert.equal(rules.inTrupp(hauptstadt, "ranger"), hauptstadt, "Trupp bleibt bei 4 Personen gedeckelt");
+  const raus = rules.inReserve(hauptstadt, truppIds[0]);
+  assert.equal(raus.party.length, truppIds.length - 1);
+  assert.ok(raus.gefaehrtenPool.includes(truppIds[0]));
+  const rein = rules.inTrupp(raus, "ranger");
+  assert.ok(rein.party.includes("ranger") && !rein.gefaehrtenPool.includes("ranger"));
+  assert.equal(reload(rein).party.length, truppIds.length);
+  // Fremde Hauptstadt, dort geächtet: nur Söldner wechseln.
+  const fremd = basis("glutberg");
+  rules.systeme.rufAendern(fremd, "orden", -60);
+  assert.match(rules.tauschGrund(fremd, truppIds[0]) ?? "", /geächtet/);
+  // Doppelt in Trupp und Reserve ist ein beschädigter Stand.
+  assert.throws(() => rules.read(JSON.stringify({ ...hauptstadt, gefaehrtenPool: [truppIds[0]] })));
+  // Akt-5-Champion: Bündnismarke bringt ihn kostenlos in die Reserve, Untote bekommen keinen.
+  const buendnis = reload({ ...hauptstadt, marks: [...hauptstadt.marks, "buendnis_zwerge"] });
+  assert.ok(buendnis.gefaehrtenPool.includes("gef_zwerge_khaz"));
+  const mitZwergin = rules.inTrupp(rules.inReserve(buendnis, truppIds[0]), "gef_zwerge_khaz");
+  assert.ok(mitZwergin.party.includes("gef_zwerge_khaz"));
+  const pakt = rules.synergien(mitZwergin).find((s) => s.name === "Pakt aus Stahl & Flamme");
+  assert.ok(pakt.aktiv && pakt.wirkt, "Mensch + Zwerg: +1 Rüstung");
+  assert.ok(!rules.synergien(hauptstadt).some((s) => s.aktiv), "Reiner Menschentrupp ohne Synergie");
+  const untot = reload({ ...rules.create("Tala", "hof", "frau", 1, "krieger"), marks: ["buendnis_zwerge"] });
+  assert.equal(untot.gefaehrtenPool.length, 0, "Untote schließen keine Bündnisse");
+  assert.ok(rules.poolInfo(untot).champions.every((c) => /Untote/.test(c.status)));
+}
+// Akt 2/3: Abgesandte der geeinten Schwester-Fraktion (Orden-Gefährte für einen Kronreich-Helden).
+{
+  const [id, gesandt] = Object.entries(world.companions).find(([, c]) => c.auftrag && c.fraktion === "orden" && c.klasse !== "krieger");
+  const vorher = reload({ ...rules.create("Tala", "kronreich", "frau", 1, "krieger"), scene: "weltknoten", knoten: gesandt.knoten });
+  assert.ok(!rules.candidates(vorher).some(([c]) => c === id), "Vor dem Zweig kein Abgesandter");
+  const geeint = { ...vorher, akte: { zweige: { orden: { stufe: 3, akt: 2, wahl: "good", soeldner: false } }, fspez: null,
+    akt4: { schritt: 0, siegel: [], wahlOffen: false, wahl: null } } };
+  assert.ok(rules.candidates(geeint).some(([c]) => c === id), "Nach dem Zweig wartet der Abgesandte");
+  assert.equal(rules.recruitment(geeint, id), "ready");
+  assert.ok(rules.recruit(geeint, id).party.includes(id));
+}
+console.log("Gefährten-Pool und Hauptstadt-Tausch geprüft.");
