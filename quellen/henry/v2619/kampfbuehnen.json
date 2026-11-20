@@ -1,0 +1,182 @@
+{
+  "quelle": "Henry, Projekt-Thread 20. 11. 2026 11:11 Berlin (Kampf-Paket)",
+  "schema_version": "2.6.19",
+  "feature": "2d_kampfbuehnen_hintergruende_nach_region",
+  "target_files": [
+    "ui/kampf_arena_2d.js",
+    "style/kampf.css"
+  ],
+  "standard_buehne": "westmark_ebene",
+  "buehnen_katalog": [
+    {
+      "buehnen_id": "westmark_ebene",
+      "name": "Brennende Höfe der Westmark",
+      "regionen_trigger": [
+        "westmark_ebene",
+        "hagenfels",
+        "heidvang_umland"
+      ],
+      "lichtstimmung": {
+        "himmel_gradient": [
+          "#1c1917",
+          "#442318",
+          "#7c2d12"
+        ],
+        "horizont_glimmen": "rgba(234, 88, 12, 0.35)"
+      },
+      "ebenen": {
+        "hintergrund": "Dunkle Hügelkette mit aufsteigenden Rauchsäulen am Horizont",
+        "mittelgrund": "Verkohlte Dachbalken eines Gehöfts und schiefe Holzzäune",
+        "boden": "Aufgewühlter Schlammweg mit zerbrochenen Wagenrädern und Ascheflecken"
+      },
+      "partikel_effekt": {
+        "typ": "aufsteigende_glutfunken",
+        "farbe": "#fb923c",
+        "anzahl": 16
+      }
+    },
+    {
+      "buehnen_id": "glutberg_und_aschland",
+      "name": "Aschland & Glutberg-Hallen",
+      "regionen_trigger": [
+        "glutberg_zitadelle",
+        "aschenwacht_kloster",
+        "aschland_grenze",
+        "glutberg_heiligtum"
+      ],
+      "lichtstimmung": {
+        "himmel_gradient": [
+          "#09090b",
+          "#271313",
+          "#991b1b"
+        ],
+        "horizont_glimmen": "rgba(220, 38, 38, 0.45)"
+      },
+      "ebenen": {
+        "hintergrund": "Zackige Basaltfelsen und glühende Lavarisse in der Ferne",
+        "mittelgrund": "Schwarze Ordenssäulen mit brennenden Kohlenbecken",
+        "boden": "Dunkler Schieferstein bedeckt mit grauer Asche und Runenrissen"
+      },
+      "partikel_effekt": {
+        "typ": "schwebende_asche_und_funken",
+        "farbe": "#f59e0b",
+        "anzahl": 22
+      }
+    },
+    {
+      "buehnen_id": "salzklippen_und_kueste",
+      "name": "Sturmgepeitschte Salzklippen",
+      "regionen_trigger": [
+        "sturmhafen",
+        "nebelbucht",
+        "salzklippen_kueste",
+        "armada_kriegshafen"
+      ],
+      "lichtstimmung": {
+        "himmel_gradient": [
+          "#0f172a",
+          "#1e293b",
+          "#334155"
+        ],
+        "horizont_glimmen": "rgba(148, 163, 184, 0.25)"
+      },
+      "ebenen": {
+        "hintergrund": "Aufgewühlte dunkle See mit schemenhaften Langschiff-Masten im Nebel",
+        "mittelgrund": "Nasse Schieferklippen und verwitterte Holzpfähle eines Anlegers",
+        "boden": "Nasse Bohlen und dunkler Kieselstrand mit Gischt am Rand"
+      },
+      "partikel_effekt": {
+        "typ": "schraeger_kuestenregen_und_nebel",
+        "farbe": "#94a3b8",
+        "anzahl": 24
+      }
+    },
+    {
+      "buehnen_id": "altes_reich_ruinen",
+      "name": "Versunkene Hallen des Alten Reichs",
+      "regionen_trigger": [
+        "ruinen_des_alten_reichs",
+        "ascheriss_dungeon",
+        "runentor"
+      ],
+      "lichtstimmung": {
+        "himmel_gradient": [
+          "#020617",
+          "#0f172a",
+          "#1e1b4b"
+        ],
+        "horizont_glimmen": "rgba(56, 189, 248, 0.25)"
+      },
+      "ebenen": {
+        "hintergrund": "Eingestürzte Gewölbebögen und monolithische Runensteine",
+        "mittelgrund": "Verwitterte Ahnenstatuen mit schwach blau glimmenden Runen",
+        "boden": "Geborstene Steinplatten mit leuchtenden Runenadern in den Fugen"
+      },
+      "partikel_effekt": {
+        "typ": "runen_staub_schwebend",
+        "farbe": "#38bdf8",
+        "anzahl": 14
+      }
+    },
+    {
+      "buehnen_id": "eispass_und_norden",
+      "name": "Eispass & Untoten-Ödland",
+      "regionen_trigger": [
+        "eispass",
+        "untoten_norden",
+        "thingplatz_odris"
+      ],
+      "lichtstimmung": {
+        "himmel_gradient": [
+          "#0f172a",
+          "#1e293b",
+          "#475569"
+        ],
+        "horizont_glimmen": "rgba(226, 232, 240, 0.3)"
+      },
+      "ebenen": {
+        "hintergrund": "Schroffe, schneebedeckte Gipfel unter einem bleigrauen Winterhimmel",
+        "mittelgrund": "Eisverkrustete Felsen und verlassene Wachfeuer",
+        "boden": "Festgetretener Schnee und dunkles Eis"
+      },
+      "partikel_effekt": {
+        "typ": "schneegestoeber",
+        "farbe": "#e2e8f0",
+        "anzahl": 26
+      }
+    },
+    {
+      "buehnen_id": "duesterwald_und_grenzhaus",
+      "name": "Dornenforst & Grenzpfad",
+      "regionen_trigger": [
+        "grenzhaus",
+        "saatstreifen",
+        "wald_hinterhalt"
+      ],
+      "lichtstimmung": {
+        "himmel_gradient": [
+          "#052e16",
+          "#14532d",
+          "#1c1917"
+        ],
+        "horizont_glimmen": "rgba(163, 230, 53, 0.15)"
+      },
+      "ebenen": {
+        "hintergrund": "Dichte, knorrige Nadelbäume im Bodennebel",
+        "mittelgrund": "Moosbewachsene Findlinge und umgestürzte Baumstämme",
+        "boden": "Dunkler Waldboden mit Wurzeln und trockenem Laub"
+      },
+      "partikel_effekt": {
+        "typ": "bodennebel_drift",
+        "farbe": "#a8a29e",
+        "anzahl": 12
+      }
+    }
+  ],
+  "boss_sonderbeleuchtung": {
+    "erzpriester_thorvald": {
+      "ueberschreibe_buehne": "glutberg_und_aschland",
+      "zusatz_effekt": "pulsierende_blutrote_aura_im_hintergrund"
+    }
+  }
+}

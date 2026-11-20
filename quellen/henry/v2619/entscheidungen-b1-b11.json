@@ -1,0 +1,49 @@
+{
+  "schema_version": "2.6.19",
+  "quelle": "Henry, 20. 11. 2026, Antwort auf die Fehler- und Logikliste B1–B11",
+  "target_files": ["spiel/regeln.js", "spiel/handlung_akte.js", "sim/simulator.js"],
+  "entscheidungen_b1_bis_b11": {
+    "B1_ascheriss_freischaltung": { "bedingung_neu": { "min_quest_stufe": 4, "erforderlicher_titel": "Bannerjarl" }, "kommentar": "Ersetzt alte Bedingung quest_stufe >= 5." },
+    "B2_stadtausbau_regeln": { "stufen": [
+      { "tier": 1, "min_akt_abgeschlossen": 2, "min_ruf": 40 },
+      { "tier": 2, "min_akt_abgeschlossen": 3, "min_ruf": 45 },
+      { "tier": 3, "min_akt_abgeschlossen": 4, "min_ruf": 60 } ] },
+    "B3_akt1_wahlfolgen": {
+      "ersetze_ressource_glaube": { "alt": "glaube_10", "neu": { "fraktions_ruf_orden": 10, "moral": 5 } },
+      "fraktions_konsequenzen": [
+        { "fraktion": "kronreich", "wahl_id": "kronreich_wahl_a_strenge", "akt_trigger": 2, "effekt": { "typ": "dialog_und_modifikator", "npc": "Ragnvald", "flag": "ragnvald_misstraut_hof", "shop_rabatt_prozent": -10, "freischaltung_nebenquest": "nq_kronreich_schatten_im_rat", "text": "Ragnvald mustert dich kalt. Der Hof traut deinen Klingen, nicht deinem Wort." } },
+        { "fraktion": "kronreich", "wahl_id": "kronreich_wahl_b_gnade", "akt_trigger": 3, "effekt": { "typ": "hinterhalt_und_beute", "flag": "kultist_unentdeckt", "zusatz_gegner_id": "kult_infiltrator_elite", "bonus_beute_runensplitter": 4, "text": "Aus den Reihen der Verschonten tritt ein Aschenkultist mit gezücktem Dolch hervor." } },
+        { "fraktion": "orden_der_flamme", "wahl_id": "orden_wahl_a_bewahrung", "akt_trigger": 2, "effekt": { "typ": "runen_freischaltung", "flag": "schutz_heilrunen_aktiv", "schmiede_rezepte": ["rune_des_lichtwalls", "rune_der_mildtätigen_glut"], "text": "Die Schmiedepriester prägen dir die alten Schutz- und Heilrunen in den Stahl." } },
+        { "fraktion": "orden_der_flamme", "wahl_id": "orden_wahl_b_reinigung", "akt_trigger": 2, "effekt": { "typ": "runen_freischaltung", "flag": "glutwaffen_runen_aktiv", "schmiede_rezepte": ["rune_des_aschenzorns", "rune_der_brennenden_schneide"], "text": "Deine Klinge singt im Takt der Kriegsglut. Offensive Glutrunen sind nun verfügbar." } },
+        { "fraktion": "freie_haefen", "wahl_id": "haefen_wahl_a_gilde", "akt_trigger": 2, "effekt": { "typ": "handels_bonus", "flag": "gilden_patronat", "kontor_ertrag_prozent": 15, "text": "Die Kapitänsgilde gewährt dir Vorzugszölle in allen Kontoren." } },
+        { "fraktion": "freie_haefen", "wahl_id": "haefen_wahl_b_schmuggler", "akt_trigger": 3, "effekt": { "typ": "schwarzmarkt_zugang", "flag": "schmuggler_netzwerk", "soeldner_kosten_faktor": 0.8, "text": "Schmuggler-Boote bringen dich ohne Rufprüfung an jeder Hafenwache vorbei." } }
+      ] },
+    "B4_gefaehrten_akt_bindung": [
+      { "gefaehrte_id": "hauptgefaehrte_fraktion", "min_akt": 1, "empfohlene_stufe": { "min": 2, "max": 5 } },
+      { "gefaehrte_id": "wulfgar_rossbrecher", "min_akt": 2, "empfohlene_stufe": { "min": 6, "max": 10 } },
+      { "gefaehrte_id": "gunhild", "min_akt": 2, "empfohlene_stufe": { "min": 6, "max": 10 } },
+      { "gefaehrte_id": "fenris_ulfsson", "min_akt": 3, "empfohlene_stufe": { "min": 11, "max": 15 } },
+      { "gefaehrte_id": "malte", "min_akt": 3, "empfohlene_stufe": { "min": 11, "max": 15 } } ],
+    "B5_fenris_korrektur": { "gefaehrte_id": "fenris_ulfsson", "klasse_neu": "spaeher", "primaerattribut": "geschick", "kampfstil": "fernkampf" },
+    "B6_miniboss_umbenennung": { "gegner_id": "kronreich_schwarze_kompanie_hauptmann", "name_alt": "Wulfgar der Eidlose", "name_neu": "Varg der Eidlose" },
+    "B7_akt_stufenbereiche": [
+      { "akt": 1, "stufe": { "min": 1, "max": 5 } }, { "akt": 2, "stufe": { "min": 6, "max": 10 } }, { "akt": 3, "stufe": { "min": 11, "max": 15 } },
+      { "akt": 4, "stufe": { "min": 16, "max": 22 } }, { "akt": 5, "stufe": { "min": 20, "max": 26 } }, { "akt_endgame_norden": 6, "stufe": { "min": 25, "max": 30 } } ],
+    "B8_thorvald_skalierung": { "boss_id": "erzpriester_thorvald", "stufen_formel": "Math.min(22, Math.max(18, held.stufe))",
+      "basiswerte_stufe_20": { "lp": 148, "ruestung": 7, "schaden_einzel": 16, "schaden_aoe": 11 },
+      "skalierung_pro_stufe_abweichung": { "lp_faktor": 0.06, "schaden_faktor": 0.05 } },
+    "B9_klassen_balance_anpassung": {
+      "heiler_und_magier_deckel": { "max_heilungen_pro_kampf": 2, "zweite_heilung_wirkungsfaktor": 0.7, "solo_glutschild_anteil_max_lp": 0.12, "folgetreffer_reduktion_schild": 0.35 },
+      "krieger_und_schurke_staerkung": { "ruestungsbonus_nahkampf_klassen": 2, "ausweichen_schurke_intervall": 5, "ausweichen_krieger_intervall": 6 },
+      "zielwerte_sim_rest_lp_prozent": { "standardkampf_akt_2_bis_4": { "min": 55, "max": 75 }, "bosskampf_thorvald": { "min": 35, "max": 55 } } },
+    "B10_waffen_tier_staffelung": { "startwaffe_basis": 12, "tiers": [
+      { "tier": 1, "angriff": { "min": 13, "max": 15 }, "preis_silber": { "min": 35, "max": 60 } },
+      { "tier": 2, "angriff": { "min": 16, "max": 19 }, "preis_silber": { "min": 85, "max": 140 } },
+      { "tier": 3, "angriff": { "min": 20, "max": 24 }, "preis_silber": { "min": 180, "max": 280 } },
+      { "tier": 4, "angriff": { "min": 25, "max": 30 }, "preis_silber": { "min": 350, "max": 520 } } ],
+      "beispiel_korrektur": { "item_id": "runenklinge_t2", "angriff_alt": 10, "angriff_neu": 17 } },
+    "B11_ep_und_silber_bestaetigung": { "status": "bestaetigt",
+      "akt_2_zweig_ep": "(im Original leer, bestätigt den Bestand 500/600/900)", "akt_3_zweig_ep": "(im Original leer, bestätigt den Bestand 800/900/1400)",
+      "zweig_silber": "(im Original leer, bestätigt den Bestand 60/100)", "thorvald_sieg_ep": 3500 }
+  }
+}

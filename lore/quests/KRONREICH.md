@@ -58,12 +58,12 @@ Entscheidung:
 - **Eiserne Krone:** schwere Infanterie, höhere Rüstung, −25 % Kornkosten auf Reisen.
 - **Banner der Glut:** runengeschmiedete Waffen (+Feuerschaden gegen Untote), Söldner-Boni. Es sind Runenwaffen, also im Kronreich erlaubt.
 
-### Akt 4 „Das Alte Reich ersteht neu“ (Stufe 16–18, mit der Volksquest „Das Alte Reich“)
+### Akt 4 „Das Alte Reich ersteht neu“ (Stufe 16–22, mit der Volksquest „Das Alte Reich“)
 1. **Entlarvung des Bleichen Skalden** (Katakomben von Kronhall): Der stumme Heiler am Krankenbett wird als Grabwächter des Kults entlarvt, seine 8-köpfige Zelle wird zerschlagen. Seine Briefe führen zum Bleichen Skalden selbst: **Erzpriester Thorvald vom Glutberg**. Seit über hundert Jahren hält ihn die Totenmagie des Nordens am Leben. Als Preis dafür schwächt er die Ewige Flamme, und je schwächer sie brennt, desto stärker werden die Untoten im hohen Norden. Der Held stellt ihn in den Katakomben (Endgegner). Untoten-Bedrohung −15 (Welt-Hebel nach `lore/ERRATA.md`).
 2. **Das Große Thing** (Kronhall): Astrid, Jarl Ragnvald, Solveig Valsdottir und Ragna Glutherz vereinen die drei Menschenfraktionen. Der Spieler steigt zum Bannerjarl auf.
 3. **Rüstung der Armada** (Salzwacht, Perlvik): Fertigstellung der Kriegsschiffe, Verladung von Korn und Truppen für die Überfahrt.
 
-### Akt 5 „Über das Innere Meer“ (Stufe 19–20)
+### Akt 5 „Über das Innere Meer“ (Stufe 20–26)
 1. **Kriegsrat und Auslaufen der Armada** (Perlvik): Im Haupthafen Perlvik tagt der letzte Kriegsrat der vereinten Menschen. Hier wählst du das Ziel der Armada: die Elfen im Osten, die Orks im Südwesten oder die Zwerge im Südosten, jeweils als Bündnis oder um sie zu unterwerfen, oder als extrem schweren Weg die Untoten im hohen Norden. Danach verlegt die Flotte in den Starthafen ihrer Route und läuft dort aus (Tabelle unten).
    > Änderung Henry (18. 11. 2026): Kriegsrat mit Zielwahl im Haupthafen, Abfahrt aus dem echten Starthafen der Route.
 2. **Totenschiffe im Nebel** (Inneres Meer): Abwehr eines Angriffs untoter Kriegsschiffe aus dem hohen Norden auf hoher See.

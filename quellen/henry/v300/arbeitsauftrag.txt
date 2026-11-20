@@ -1,0 +1,40 @@
+AUFGABE: Vollständiges Welt-, Story- und UI-Upgrade auf Version 3.0.0 („KHAROS – Der Krieg um den letzten Atem“) im Repository `derBalthasar/aschenkrone`.
+
+WICHTIGE GRUNDSÄTZE (STRIKT EINHALTEN):
+1. Verändere KEINE bestehenden mathematischen Spielmechaniken (Etappen-System, Silber & die 5 Kontor-Ressourcen, Vorratsdeckel 100, Kampfformel ÷ 3,5, Rüstungskonstante 14, Stufenaufstieg 1–30 + Meister-Talente, deterministisches Ausweichen 5./7. Treffer, max. 4 Gegner pro Begegnung).
+2. Wahre strikt die beiden unveränderlichen Weltgeheimnisse für die E2E-Tests:
+   - `archivar_malakor` darf vor Akt 4 auftreten, aber AUSSCHLIESSLICH unerkannt unter dem Tarnnamen „Verhüllter Sternenleser“ (`darf_vor_akt4_enttarnt_werden: false`).
+   - `der_schweigsame_chronist` („Der Namenlose Bote“) bleibt in seiner wahren Identität IMMER komplett geheim (`identitaet_bleibt_immer_geheim: true`).
+3. Alle Texte sind auf Deutsch im düsteren, epischen Dark-Fantasy-Stil verfasst.
+
+UMSETZUNGSREIHENFOLGE IN 5 SCHRITTEN:
+
+Schritt 1: Logik-, Balance- & System-Fixes (Patch v2.6.19) einbauen
+- B1–B11 umsetzen: Ascheriss/Leerenriss-Dungeons ab Rang „Hochfeldherr / Herold“ (nach Akt 4) freischalten; Stadtausbau streng nach Regel 2.6.0 (Tier 1 nach Akt 2 / Ruf 40, Tier 2 nach Akt 3 / Ruf 45, Tier 3 nach Akt 4 / Ruf 60); Heiler- & Magier-Selbstheilung auf max. 2× pro Kampf deckeln (2. Wirkung × 0,7) und Glutschild/Astralschild auf 12 % max. LP senken; Nahkämpfer +2 Grundrüstung; Tier-1–4-Waffen ab Startwert 12 aufwärts staffeln.
+- 4 Schwierigkeitsgrade einbauen (`spiel/regeln.js`, `ui/charaktererstellung.js`, `ui/einstellungen.js`): „Leicht · Pfad der Asche“ (aktuelle v2.6.19-Balance, Standard), „Mittel · Eiserner Schwur“, „Schwer · Blut der Ahnen“ und „Hardcore · Aschenchronik (Permadeath)“ (erst nach Abschluss der Hauptquest über `localStorage` freigeschaltet, löscht Spielstand bei 0 LP und schreibt Ruhmeshallen-Eintrag).
+
+Schritt 2: Welt-Umbenennung & alle 15 Fraktionen (JSON-Pakete 1A & 1B) einbauen
+- Welt auf „Kharos“ umstellen.
+- Alle 5 Völker (Menschen, Elfen, Zwerge, Orks, Untote) mit ihren je 3 Fraktionen (15 Fraktionen gesamt), Heimatstädten, Anführern, 30 Klassen und 90 Fähigkeiten in `spiel/regeln.js` eintragen.
+- Jedem Volk seine eigene Kampfressource (Start 5, Max 10) zuweisen: Flammeneifer (Menschen), Astralstrom (Elfen), Runenhitze (Zwerge), Blutwut (Orks), Seelenessenz (Untote).
+- Für das Volk „Untote“ (schwierigster Modus) das Diplomatie-/Bündnissystem sperren und durch die Korrumpierungs-Mechanik (Ruf-Manipulation & Söldner-/Verräter-Übernahme, +25 % Ritual-Fortschritt pro Volk bis 100 %) ersetzen.
+
+Schritt 3: Hauptkampagne Akte 1–5 & 20 Nebenquests (JSON-Pakete 2A & 2B) einbauen
+- In `spiel/handlung_akte.js` alle Hauptquests (Akt 1 Bürgerkrieg -> Akt 2 & 3 Schwester-Zweige zur Einigung des eigenen Volkes -> Akt 4 Sternenanker, Entlarvung von Archivar Malakor, Kriegsrat & Armada-Kriegskasse -> Akt 5 Übersee-Feldzug zu den anderen Kontinenten mit Wahl zwischen Bündnis oder Eroberung bzw. Korrumpierung bei Untoten, gipfelnd im Endkampf gegen den unspielbaren Endfeind „Vael-Thar, der Verschlinger des Atems“) integrieren.
+- Die 20 neuen Aushang-Nebenquests (`nq_01` bis `nq_20`) einfügen.
+
+Schritt 4: Reisegefühl, Globales Ort-Gate & Lebendige Dialoge einbauen
+- Globales `ort_gate` für alle Haupt- und Nebenquests aktivieren: NPC-Gespräche und Quest-Abgaben sind NUR am physischen Aufenthaltsort des NPCs/Auftraggebers möglich; andernfalls zeigt der Button die Reise dorthin an.
+- Rückreise-Pflicht (`status: "bereit_zur_abgabe"`) für Aufträge mit Berichterstattung einbauen.
+- SVG-Marsch-Animation mit Etappen-Vignetten (`ui/karte.js`) und die 3-stufige `dialogue_assembly_pipeline` (Regie & Weltgedächtnis -> Tonfall & Proben -> Gefährten-Einwurf & Taktik-Rückfragen) aktivieren.
+
+Schritt 5: Porträt-Engine & FF6-Stil 2D-Kampfarena (JSON-Pakete 3A & 3B) einbauen
+- `ui/portraet_engine.js` anlegen: Feste Hauptcharaktere laden ihre PNG- (falls unter `assets/portraits/` vorhanden) oder direkten SVG-Porträts; Neben-NPCs (Wirte, Schmiede, Bauern, Wachen, Heiler, Kontorvögte, Söldner) wählen anhand des `run_seed` pro Spieldurchlauf eine feste Variante aus ihrem Porträt-Pool.
+- In `ui/kampf.js` und `ui/kampf_arena_2d.js` die 2D-Seitenansicht-Arena (Spielergruppe links, bis zu 4 Gegner rechts) mit mehrteiligen 2D-SVG-Silhouetten für alle 5 Völker, Vorsturm-Animationen, schwebenden Schadenszahlen, verzögertem LP-Balken und den 6 Regions-Bühnenhintergründen einbauen.
+- Seitenleisten-Fix: Tab-Label „Gefährten“ mit `white-space: nowrap` vor Zeilenumbruch schützen.
+
+ABSCHLUSS-PRÜFUNG:
+- Passe `sim/simulator.js` und `sim/oberflaeche.cjs` an das `ort_gate`, die Rückreise-Pflicht und die 15 Kharos-Fraktionen an (im Headless-Simulator Animations-Wartezeiten überspringen).
+- Führe alle Regeltests, E2E-Simulationen (inkl. Geheimnis-Checks für Malakor und den Schweigsamen Chronisten) und den Browser-UI-Test aus und melde das Ergebnis sowie die Rest-LP-Werte.
+
+KLÄRUNG HENRY 20. 11. 2026 13:08/13:11 (verbindlich): Karte Entwurf 3 und alle 510 Orte bleiben, nur die 15 Haupt- und 15 Zweitstädte werden per mapping-entwurf3.json umbenannt (IDs und Spielstände unverändert). 6×6-Klassensystem bleibt, nur Namen/Texte plus Volksressourcen. Heiler ohne Deckel bleibt, Gegenlied geht auf Archivar Malakor über. Akte 1–4, Dialog-Pipeline und Porträt-Engine bleiben technisch; Texte, NPC-Namen und Porträts werden auf Kharos gemappt (Astrid → Kaiserin Aurelia, Thorvald → Archivar Malakor, vor Akt 4 unerkannt, Stille Feder → Der Schweigsame Chronist, immer geheim), dazu Untoten-Korrumpierung und Akt 5 mit Vael-Thar.

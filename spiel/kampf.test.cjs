@@ -8,7 +8,7 @@ const vm = require("node:vm");
 
 const root = path.join(__dirname, "..");
 const context = vm.createContext({ structuredClone });
-for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/faehigkeiten.js", "spiel/kampf.js", "spiel/startpunkte.js", "spiel/welt.js", "spiel/knoten-daten.js", "spiel/knoten.js", "spiel/nebenquests-daten.js", "spiel/nebenquests.js", "spiel/systeme-daten.js", "spiel/systeme.js", "spiel/regeln.js"]) {
+for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/faehigkeiten.js", "spiel/kampf.js", "spiel/startpunkte.js", "spiel/welt.js", "spiel/knoten-daten.js", "spiel/knoten.js", "spiel/nebenquests-daten.js", "spiel/nebenquests.js", "spiel/systeme-daten.js", "spiel/systeme.js", "spiel/akt-dialoge.js", "spiel/regeln.js"]) {
   vm.runInContext(fs.readFileSync(path.join(root, file), "utf8"), context, { filename: file });
 }
 const rules = vm.runInContext("rules", context);
@@ -92,8 +92,10 @@ assert.equal(rules.healthLimit(rules.create("Tala", "kronreich", "frau", 1, "mag
 assert.equal(rules.healthLimit(rules.create("Brom", "tiefgraeber", "mann", 0, "krieger")), 34, "andere Völker unverändert");
 
 // ---- Ausdauer und Mana ----
-same(rules.kraft(huskarl), { ausdauer: 10, mana: 0 });
-same(rules.kraft({ ...huskarl, xp: 19000 }), { ausdauer: 19, mana: 0 });
+// Patch 2.5.4: Menschen 15 Ausdauer, ab Stufe 6 alle 3 Stufen +1 (Stufe 20: 15 + 5).
+same(rules.kraft(huskarl), { ausdauer: 15, mana: 0 });
+same(rules.kraft({ ...huskarl, xp: 1500 }), { ausdauer: 16, mana: 0 });
+same(rules.kraft({ ...huskarl, xp: 19000 }), { ausdauer: 20, mana: 0 });
 const priest = rules.create("Tala", "orden", "frau", 1, "magier");
 // Pyromant (Patch 2.4.0): 12 + Willenskraft + Intelligenz/2.
 const priestWerte = rules.heroAttributes(priest);
@@ -129,7 +131,7 @@ const keilerFight = (faction, role, xp = 0) => {
 const start = keilerFight("kronreich", "krieger");
 assert.equal(start.combat.feinde[0].max, 20);
 assert.equal(start.combat.feinde[0].schaden, 5);
-assert.equal(start.combat.held.ausdauer, 10);
+assert.equal(start.combat.held.ausdauer, 15);
 same(rules.abilities(start).filter((f) => f.frei).map((f) => f.id), ["f1"]);
 
 // Grundangriff: Schaden der Stufe-1-Fähigkeit + Nahkampf + Bonus aus Stärke + Waffe (Axt 6: +1).
@@ -150,8 +152,8 @@ const level3Kampf = keilerFight("kronreich", "krieger", 300);
 const level3 = { ...level3Kampf, combat: { ...level3Kampf.combat, feinde: [{ ...level3Kampf.combat.feinde[0], lp: 500, max: 500 }] } };
 assert.equal(rules.progression(level3).level, 3);
 const shove = rules.strike(level3, "f3", highRoll);
-assert.equal(rules.kraft(level3).ausdauer, 11); // +1 je zwei Erfahrungsstufen
-assert.equal(shove.combat.held.ausdauer, 11 - 3 + 2);
+assert.equal(rules.kraft(level3).ausdauer, 15); // Patch 2.5.4: Menschen erst ab Stufe 6 +1
+assert.equal(shove.combat.held.ausdauer, 15 - 3 + 2);
 assert.equal(rules.abilityState(shove, "f3"), "Abklingzeit 1");
 assert.equal(rules.strike(shove, "f3"), shove);
 const afterCooldown = rules.strike(shove, "guard");
@@ -257,7 +259,7 @@ for (const faction of Object.keys(K.fraktionen)) {
       combat: { ...state.combat, feinde: [{ ...state.combat.feinde[0], lp: 2000, max: 2000 }] } };
     const ids = rules.abilities(state).map((f) => f.id);
     for (const id of ["f20", "f15", "f10", "f6", "f3", "f1"].filter((id) => ids.includes(id))) {
-      state = { ...state, health: rules.healthLimit(state), combat: { ...state.combat, held: { ...state.combat.held, abklingen: {},
+      state = { ...state, health: rules.healthLimit(state), combat: { ...state.combat, held: { ...state.combat.held, abklingen: {}, heilungen: 0,
         ausdauer: rules.kraft(state).ausdauer, mana: rules.kraft(state).mana } } };
       const next = rules.strike(state, id, highRoll);
       assert.notEqual(next, state, faction + " " + role + " " + id + " " + rules.abilityState(state, id));
@@ -294,7 +296,8 @@ assert.equal(upgraded.ressource, 42);
 same(upgraded.weltLeisten, { untote: 35, orks: 40, glut: 30, erzfieber: 45, welke: 30 });
 assert.ok(upgraded.health > 0 && upgraded.health <= rules.healthLimit(upgraded));
 const trained = rules.train(upgraded, "will");
-assert.equal(trained.stufenpunkte, 2);
+// Patch 2.5.5: Menschen verbrauchen Stufenpunkte nicht mehr; frei = 2 je Stufe + alte Punkte − trainierte Grundwerte.
+assert.equal(rules.progression(trained).points, rules.progression(upgraded).points - 1);
 assert.equal(reload(trained).training.will, 1);
 
 

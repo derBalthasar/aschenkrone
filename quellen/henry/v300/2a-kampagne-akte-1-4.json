@@ -1,0 +1,132 @@
+{
+  "quelle": "Henry, Projekt-Thread 20. 11. 2026 (Kharos 3.0)",
+  "schema_version": "3.0.0",
+  "paket": "kharos_kampagne_teil_2a_von_2b_akte_1_bis_4",
+  "target_file": "spiel/handlung_akte.js",
+  "kampagnen_struktur": {
+    "lebende_voelker": [
+      "menschen",
+      "elfen",
+      "zwerge",
+      "orks"
+    ],
+    "untotes_volk": [
+      "untote"
+    ],
+    "geheimnis_regeln": {
+      "archivar_malakor_vor_akt4_unerkannt": true,
+      "der_schweigsame_chronist_immer_geheim": true
+    }
+  },
+  "akte_1_bis_4": [
+    {
+      "akt": 1,
+      "stufe": {
+        "min": 1,
+        "max": 5
+      },
+      "titel": "Risse im eigenen Banner",
+      "beschreibung_lebende": "Bevor dein Volk nach außen blicken kann, droht es von innen zu zerreißen. Schlage die erste Rebellion an deinen Grenzen nieder und decke auf, wer die Unruhen schürt.",
+      "beschreibung_untote": "Die Siegel der Tiefe beginnen zu bröckeln. Erhebe deine erste Legion, vernichte die Grenzwachen der Lebenden und korrumpiere den ersten sterblichen Hauptmann.",
+      "schritte": [
+        {
+          "schritt": 1,
+          "ort": "heimatstadt_fraktion",
+          "npc": "anfuehrer_npc",
+          "aufgabe": "Lagebesprechung und erste Bewährungsprobe gegen Plünderer/Kultisten an der Grenze",
+          "erfordert_rueckreise": false
+        },
+        {
+          "schritt": 2,
+          "ort": "zweite_stadt_fraktion",
+          "npc": "zweiter_npc",
+          "aufgabe": "Befreiung der belagerten Außenposten und Sicherung eines seltsamen Leeren-Splitters",
+          "erfordert_rueckreise": true,
+          "rueckreise_ziel": "heimatstadt_fraktion"
+        },
+        {
+          "schritt": 3,
+          "ort": "heimatstadt_fraktion",
+          "npc": "anfuehrer_npc",
+          "aufgabe": "Bericht erstatten und die erste große Richtungs-Entscheidung deiner Fraktion treffen",
+          "fraktions_wahl_konsequenz": {
+            "pfad_a_buendnis": "Stärkt Ehre und öffnet diplomatische Wege in Akt 2–5",
+            "pfad_b_eroberung": "Stärkt militärische Härte und Beute, erschwert spätere Bündnisse"
+          }
+        }
+      ]
+    },
+    {
+      "akt": 2,
+      "stufe": {
+        "min": 6,
+        "max": 10
+      },
+      "titel": "Der Bruderkrieg · Erster Schwester-Zweig",
+      "mechanik_basis": "Nutzt bestehende Schwester-Zweig-Logik (Stadtstufe Tier 1, Ruf +40 oder Söldner-Bypass)",
+      "beschreibung_lebende": "Du reist in das Gebiet einer Rivalen-Fraktion deines eigenen Volkes (z. B. Hochelfen -> Waldelfen oder Kaiserreich -> Flammenorden). Zwinge sie durch einen gemeinsamen Sieg oder ein Duell der Anführer unter ein Banner.",
+      "beschreibung_untote": "Du infiltrierst eine rivalisierende Nekropolen-Fraktion, brichst den Willen ihres Lords oder raubst ihr Seelen-Relikt für das Große Ritual.",
+      "boss_typ": "elite",
+      "erfordert_rueckreise_zum_abschluss": true
+    },
+    {
+      "akt": 3,
+      "stufe": {
+        "min": 11,
+        "max": 15
+      },
+      "titel": "Die Einigung des Volkes · Zweiter Schwester-Zweig",
+      "mechanik_basis": "Nutzt bestehende Schwester-Zweig-Logik (Stadtstufe Tier 2, Ruf +45, doppelte Spezialisierung)",
+      "beschreibung_lebende": "Die dritte Fraktion deines Volkes steht am Abgrund oder paktiert heimlich mit dunklen Mächten. Einige dein gesamtes Volk, bevor der Sturm aus dem Norden losbricht.",
+      "beschreibung_untote": "Alle drei Untoten-Fraktionen beugen sich deinem Banner. Das erste große Welt-Siegel wird im Schatten gebrochen (Ritual-Fortschritt 25 %).",
+      "boss_typ": "elite",
+      "erfordert_rueckreise_zum_abschluss": true
+    },
+    {
+      "akt": 4,
+      "stufe": {
+        "min": 16,
+        "max": 22
+      },
+      "titel": "Der Verrat am Sternenanker & Die Kriegsflotte",
+      "phasen": [
+        {
+          "phase": 1,
+          "id": "volksquest_alte_anker",
+          "titel": "Die Vergessenen Sternenanker",
+          "beschreibung": "In den uralten Ruinen entdeckst du, dass die Kriege zwischen den Völkern künstlich geschürt wurden, um das Gefängnis von Vael-Thar zu schwächen."
+        },
+        {
+          "phase": 2,
+          "id": "entlarvung_malakor",
+          "titel": "Die Maske fällt",
+          "boss_id": "archivar_malakor",
+          "beschreibung_lebende": "Der bisher unerkannte Verhüllte Sternenleser entpuppt sich als Archivar Malakor, ein Diener von Vael-Thar. Du stellst und besiegst ihn im Kampf (senkt Leeren-Leiste um -15).",
+          "beschreibung_untote": "Archivar Malakor übergibt dir den gestohlenen Sternenschlüssel, bevor du ihn opferst, um die Macht des Schlüssels selbst an dich zu reißen."
+        },
+        {
+          "phase": 3,
+          "id": "hochrat_der_voelker",
+          "titel": "Der Große Kriegsrat",
+          "titel_belohnung": "Hochfeldherr von Kharos (Untote: Herold der Stille)",
+          "schaltet_frei": [
+            "leerenriss_mini_dungeons",
+            "akt_5_uebersee_karten"
+          ]
+        },
+        {
+          "phase": 4,
+          "id": "armada_kriegskasse",
+          "titel": "Die Segel der Armada",
+          "ressourcen_ziel": {
+            "res_nahrung": 30,
+            "res_holz": 25,
+            "res_eisen": 25,
+            "res_stein": 20
+          },
+          "beschreibung": "Sammle die Vorräte für die Überfahrt über das Sturmmeer zu den Kontinenten der anderen Völker."
+        }
+      ]
+    }
+  ]
+}

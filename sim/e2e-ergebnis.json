@@ -1,0 +1,3168 @@
+{
+ "stand": "2026-11-20T14:21:53.405Z",
+ "ergebnis": {
+  "E2E_STANDARD_PARTY_RUN": [
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "kronreich",
+    "role": "krieger",
+    "variante": "WAHL_A",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 91
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 91
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 79
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 92
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 55
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 76
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 92
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 21,
+    "reiseKaempfe": 9,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "kronreich",
+    "role": "krieger",
+    "variante": "WAHL_B",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 91
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 91
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 79
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 92
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 55
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 76
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 92
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 21,
+    "reiseKaempfe": 9,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "kronreich",
+    "role": "waechter",
+    "variante": "WAHL_A",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 99
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 99
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 93
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 97
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 87
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 92
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 21,
+    "reiseKaempfe": 9,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 2,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "kronreich",
+    "role": "waechter",
+    "variante": "WAHL_B",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 99
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 99
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 93
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 97
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 87
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 92
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 21,
+    "reiseKaempfe": 9,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 2,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "kronreich",
+    "role": "spaeher",
+    "variante": "WAHL_A",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 98
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 98
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 73
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 55
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 32
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 71
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 51
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 21,
+    "reiseKaempfe": 9,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "kronreich",
+    "role": "spaeher",
+    "variante": "WAHL_B",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 98
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 98
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 73
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 55
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 32
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 71
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 51
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 21,
+    "reiseKaempfe": 9,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "kronreich",
+    "role": "magier",
+    "variante": "WAHL_A",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 75
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 92
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 66
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 21,
+    "reiseKaempfe": 9,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 2,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "kronreich",
+    "role": "magier",
+    "variante": "WAHL_B",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 75
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 92
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 66
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 21,
+    "reiseKaempfe": 9,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 2,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "kronreich",
+    "role": "heiler",
+    "variante": "WAHL_A",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 79
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 87
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 77
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 83
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 21,
+    "reiseKaempfe": 9,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "kronreich",
+    "role": "heiler",
+    "variante": "WAHL_B",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 79
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 87
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 77
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 83
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 21,
+    "reiseKaempfe": 9,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "kronreich",
+    "role": "schurke",
+    "variante": "WAHL_A",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 87
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 78
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 73
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 84
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 71
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 87
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 54
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 21,
+    "reiseKaempfe": 9,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "kronreich",
+    "role": "schurke",
+    "variante": "WAHL_B",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 87
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 78
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 73
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 84
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 71
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 87
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 54
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 21,
+    "reiseKaempfe": 9,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "orden",
+    "role": "krieger",
+    "variante": "WAHL_A",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 86
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 80
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 70
+     },
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 84
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 61
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 60
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 80
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 22,
+    "reiseKaempfe": 10,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "orden",
+    "role": "krieger",
+    "variante": "WAHL_B",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 86
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 80
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 70
+     },
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 84
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 61
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 60
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 80
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 22,
+    "reiseKaempfe": 10,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "orden",
+    "role": "waechter",
+    "variante": "WAHL_A",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 94
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 93
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 70
+     },
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 65
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 66
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 83
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 75
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 22,
+    "reiseKaempfe": 10,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 2,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "orden",
+    "role": "waechter",
+    "variante": "WAHL_B",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 94
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 93
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 70
+     },
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 65
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 66
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 83
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 75
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 22,
+    "reiseKaempfe": 10,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 2,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "orden",
+    "role": "spaeher",
+    "variante": "WAHL_A",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 78
+     },
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 79
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 98
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 45
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 22,
+    "reiseKaempfe": 10,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "orden",
+    "role": "spaeher",
+    "variante": "WAHL_B",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 78
+     },
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 79
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 98
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 45
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 22,
+    "reiseKaempfe": 10,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "orden",
+    "role": "magier",
+    "variante": "WAHL_A",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 96
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 87
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 75
+     },
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 95
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 86
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 52
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 79
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 22,
+    "reiseKaempfe": 10,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "orden",
+    "role": "magier",
+    "variante": "WAHL_B",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 96
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 87
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 75
+     },
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 95
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 86
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 52
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 79
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 22,
+    "reiseKaempfe": 10,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "orden",
+    "role": "heiler",
+    "variante": "WAHL_A",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 71
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 88
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 83
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 22,
+    "reiseKaempfe": 10,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "orden",
+    "role": "heiler",
+    "variante": "WAHL_B",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 71
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 88
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 83
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 22,
+    "reiseKaempfe": 10,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "orden",
+    "role": "schurke",
+    "variante": "WAHL_A",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 87
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 89
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 71
+     },
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 92
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 72
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 77
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 38
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 22,
+    "reiseKaempfe": 10,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "orden",
+    "role": "schurke",
+    "variante": "WAHL_B",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 87
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 89
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 71
+     },
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 92
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 72
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 77
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 38
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 22,
+    "reiseKaempfe": 10,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "haefen",
+    "role": "krieger",
+    "variante": "WAHL_A",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 86
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 87
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 75
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 47
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 40
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 52
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 67
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 54
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 21,
+    "reiseKaempfe": 9,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "haefen",
+    "role": "krieger",
+    "variante": "WAHL_B",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 86
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 87
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 75
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 47
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 40
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 52
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 67
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 54
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 21,
+    "reiseKaempfe": 9,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "haefen",
+    "role": "waechter",
+    "variante": "WAHL_A",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 94
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 95
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 91
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 76
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 68
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 95
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 87
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 21,
+    "reiseKaempfe": 9,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 2,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "haefen",
+    "role": "waechter",
+    "variante": "WAHL_B",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 94
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 95
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 91
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 76
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 68
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 95
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 87
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 21,
+    "reiseKaempfe": 9,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 2,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "haefen",
+    "role": "spaeher",
+    "variante": "WAHL_A",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 94
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 94
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 86
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 89
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 75
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 82
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 76
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 75
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 21,
+    "reiseKaempfe": 9,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "haefen",
+    "role": "spaeher",
+    "variante": "WAHL_B",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 94
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 94
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 86
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 89
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 75
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 82
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 76
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 75
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 21,
+    "reiseKaempfe": 9,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "haefen",
+    "role": "magier",
+    "variante": "WAHL_A",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 90
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 85
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 96
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 47
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 21,
+    "reiseKaempfe": 9,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "haefen",
+    "role": "magier",
+    "variante": "WAHL_B",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 90
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 85
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 96
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 47
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 21,
+    "reiseKaempfe": 9,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "haefen",
+    "role": "heiler",
+    "variante": "WAHL_A",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 59
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 98
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 74
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 75
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 68
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 21,
+    "reiseKaempfe": 9,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "haefen",
+    "role": "heiler",
+    "variante": "WAHL_B",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 59
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 98
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 74
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 75
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 68
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 21,
+    "reiseKaempfe": 9,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "haefen",
+    "role": "schurke",
+    "variante": "WAHL_A",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 87
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 88
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 73
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 92
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 37
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 49
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 77
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 51
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 21,
+    "reiseKaempfe": 9,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_STANDARD_PARTY_RUN",
+    "faction": "haefen",
+    "role": "schurke",
+    "variante": "WAHL_B",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 87
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 88
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 73
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 92
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 37
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 49
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 77
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 51
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 21,
+    "reiseKaempfe": 9,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   }
+  ],
+  "E2E_OUTLAW_SOFTLOCK_CHECK": [
+   {
+    "profil": "E2E_OUTLAW_SOFTLOCK_CHECK",
+    "faction": "kronreich",
+    "role": "krieger",
+    "variante": "BOESE",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 91
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 91
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 79
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 92
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 66
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 77
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 92
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 21,
+    "reiseKaempfe": 11,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_OUTLAW_SOFTLOCK_CHECK",
+    "faction": "orden",
+    "role": "krieger",
+    "variante": "BOESE",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 86
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 86
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 78
+     },
+     {
+      "name": "Zweig haefen 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 88
+     },
+     {
+      "name": "Zweig haefen 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 61
+     },
+     {
+      "name": "Zweig haefen 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 68
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 100
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 80
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 22,
+    "reiseKaempfe": 11,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   },
+   {
+    "profil": "E2E_OUTLAW_SOFTLOCK_CHECK",
+    "faction": "haefen",
+    "role": "krieger",
+    "variante": "BOESE",
+    "stufen": {
+     "akt2": 10,
+     "akt3": 15,
+     "akt4": 22
+    },
+    "kaempfe": [
+     {
+      "name": "Zweig kronreich 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 86
+     },
+     {
+      "name": "Zweig kronreich 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 87
+     },
+     {
+      "name": "Zweig kronreich 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 75
+     },
+     {
+      "name": "Zweig orden 1",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 47
+     },
+     {
+      "name": "Zweig orden 2",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 49
+     },
+     {
+      "name": "Zweig orden 3",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 45
+     },
+     {
+      "name": "Akt 4 Hinterhalt",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 67
+     },
+     {
+      "name": "Akt 4 Thorvald",
+      "versuch": 1,
+      "sieg": true,
+      "restLp": 54
+     }
+    ],
+    "fehler": [],
+    "reiseEtappen": 21,
+    "reiseKaempfe": 10,
+    "szenen": 2,
+    "doppelteSpezialisierung": true,
+    "malakorVerborgen": true,
+    "thorvaldEntlarvt": true,
+    "untoteDelta": -15,
+    "stilleFederVerborgen": true,
+    "chronistGeheim": true,
+    "thing": true,
+    "hardcoreFrei": true,
+    "kontorEinzahlung": true,
+    "tor": true,
+    "ueberzaehlig": {
+     "grundwerte": 9,
+     "raenge": 1,
+     "talente": 0
+    },
+    "fertig": true
+   }
+  ]
+ }
+}

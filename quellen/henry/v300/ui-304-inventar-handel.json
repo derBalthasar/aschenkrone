@@ -1,0 +1,77 @@
+{
+  "schema_version": "3.0.4",
+  "feature": "inventar_und_handel_visuelles_upgrade",
+  "target_files": [
+    "ui/inventar.js",
+    "style/inventar.css",
+    "spiel/regeln.js"
+  ],
+  "waehrungs_banner_oben": {
+    "platzierung": "direkt_ueber_kontor_rohstoffe_und_in_kopfzeile",
+    "elemente": [
+      {
+        "id": "silber_stand",
+        "label": "Dein Silber",
+        "icon": "svg_silbermuenze",
+        "hervorhebung": "gold_badge_gross"
+      },
+      {
+        "id": "rucksack_platz",
+        "label": "Rucksack",
+        "icon": "svg_beutel"
+      },
+      {
+        "id": "kontor_gesamt",
+        "label": "Kontor-Vorräte",
+        "icon": "svg_truhe"
+      }
+    ]
+  },
+  "visuelle_aufwertung": {
+    "tier_farben_kartenrand": {
+      "tier_1": "#94a3b8",
+      "tier_2": "#10b981",
+      "tier_3": "#38bdf8",
+      "tier_4": "#f59e0b"
+    },
+    "item_svg_icons": {
+      "aktiv": true,
+      "kategorien": [
+        "axt",
+        "schwert",
+        "hammer",
+        "dolch",
+        "stab",
+        "bogen",
+        "ruestung_koerper",
+        "handschuhe",
+        "stiefel",
+        "helm",
+        "amulett",
+        "ring",
+        "trank"
+      ]
+    },
+    "ausruestungs_silhouette_hintergrund": {
+      "aktiv": true,
+      "stil": "dezente_nordische_ruestungs_vignette_hinter_slots"
+    },
+    "rohstoff_anzeige_fix": {
+      "verhindere_text_ellipsis": true,
+      "kompakte_namen": {
+        "RES_NAHRUNG": "Nahrung",
+        "RES_HOLZ": "Bauholz",
+        "RES_EISEN": "Roheisen",
+        "RES_STEIN": "Bruchstein",
+        "RES_RUNENSPLITTER": "Runensplitter"
+      },
+      "rohstoff_icons": true
+    }
+  },
+  "item_namen_bereinigung": [
+    {
+      "alt": "Runengeätzter Ascheriss-Fangzahn",
+      "neu": "Runengeätzter Leerenriss-Fangzahn"
+    }
+  ]
+}

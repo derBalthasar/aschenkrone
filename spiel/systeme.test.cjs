@@ -18,8 +18,10 @@ assert.equal(S.epFuer(30), 57250);
 assert.equal(S.stufeAus(57249), 29);
 assert.equal(S.stufeAus(57250), 30);
 assert.equal(S.ahnenPunkte(57250 + 9999), 1);
-assert.equal(S.talentPunkte(21), 0);
-assert.equal(S.talentPunkte(30), 5);
+// Patch 2.5.5: ein Meister-Talentpunkt je Stufe von 21 bis 30.
+assert.equal(S.talentPunkte(20), 0);
+assert.equal(S.talentPunkte(21), 1);
+assert.equal(S.talentPunkte(30), 10);
 assert.equal(S.signaturRang(25), 4);
 
 // Schaden (Patch 2.2.0): Rüstung prozentual, mindestens 1, Durchdringung senkt die Rüstung.
@@ -70,8 +72,9 @@ const g = S.gegnerListe[0];
 assert.equal(S.gegnerWerte(g.id, g.minStufe).lp, g.werte.hp);
 assert.ok(S.gegnerWerte(g.id, 30).lp > S.gegnerWerte(g.id, 20).lp);
 
-// Kriegskasse: Spenden ab Akt 4, voll mit 30/25/25/20.
-const k = { faction: "kronreich", questStufe: 3, factionRuf: {}, ressource: 50, kontor: { kronreich: { nahrung: 0, holz: 30, eisen: 30, stein: 30, runensplitter: 0 } } };
+// Kriegskasse: Spenden nach dem Großen Thing (Patch 2.6.1), voll mit 30/25/25/20.
+assert.match(S.spendenGrund({ faction: "kronreich", questStufe: 3, marks: [], kontor: {} }, "kronhall", "holz", 1), /Großen Thing/);
+const k = { faction: "kronreich", questStufe: 3, marks: ["grosses-thing"], factionRuf: {}, ressource: 50, kontor: { kronreich: { nahrung: 0, holz: 30, eisen: 30, stein: 30, runensplitter: 0 } } };
 assert.equal(S.spenden(k, "kronhall", "holz", 25), true);
 assert.equal(k.factionRuf.groves, 50);
 assert.equal(S.kasseVoll(k), false);

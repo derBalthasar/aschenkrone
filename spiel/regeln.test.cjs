@@ -8,7 +8,7 @@ const vm = require("node:vm");
 const root = path.join(__dirname, "..");
 const context = vm.createContext({ structuredClone });
 
-for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/faehigkeiten.js", "spiel/kampf.js", "spiel/startpunkte.js", "spiel/welt.js", "spiel/knoten-daten.js", "spiel/knoten.js", "spiel/nebenquests-daten.js", "spiel/nebenquests.js", "spiel/systeme-daten.js", "spiel/systeme.js", "spiel/regeln.js"]) {
+for (const file of ["bestiarium/daten.js", "spiel/klassen.js", "spiel/faehigkeiten.js", "spiel/kampf.js", "spiel/startpunkte.js", "spiel/welt.js", "spiel/knoten-daten.js", "spiel/knoten.js", "spiel/nebenquests-daten.js", "spiel/nebenquests.js", "spiel/systeme-daten.js", "spiel/systeme.js", "spiel/akt-dialoge.js", "spiel/regeln.js"]) {
   vm.runInContext(fs.readFileSync(path.join(root, file), "utf8"), context, { filename: file });
 }
 
@@ -25,13 +25,15 @@ const fightOut = (state, action = "spear") => {
   for (let turn = 0; turn < 40 && state.combat; turn++) state = rules.strike(state, action, highRoll);
   return state;
 };
-// Burgvögtin des Kronreichs mit festen Werten, damit die Kampf- und Probenwerte nachvollziehbar bleiben.
+// Wächterin mit festen Werten, damit die Kampf- und Probenwerte nachvollziehbar bleiben.
 const heroBuild = { frei: { strength: 2, presence: 2, will: 1 }, wahl: "presence", spez: null, meister: null,
   fertigkeiten: { nahkampf: 3, fernkampf: 2, magie: 0, verteidigung: 4, list: 2, fuehrung: 4, mut: 3 } };
 // Neue Helden des Kronreichs beginnen im Prolog in Westvik. Diese Tests laufen ab dem Erwachen bei Kornwik,
 // das für bestehende Spielstände erhalten bleibt.
 assert.equal(rules.create("Tala", "kronreich", "frau", 2, "waechter", heroBuild).scene, "heim-kronreich");
-const hero = () => ({ ...rules.create("Tala", "kronreich", "frau", 2, "waechter", heroBuild), scene: "wake" });
+// Patch 2.5.4: Die Geschichte um Kornwik nutzt Glut und Gleichgewicht, deshalb spielt sie hier eine Ritterin des Ordens.
+const hero = () => ({ ...rules.create("Tala", "orden", "frau", 2, "waechter", heroBuild), scene: "wake" });
+const heroKronreich = () => ({ ...rules.create("Tala", "kronreich", "frau", 2, "waechter", heroBuild), scene: "wake" });
 assert.equal(rules.read(JSON.stringify(hero())).scene, "wake");
 const start = () => rules.choose(rules.choose(hero(), "lantern"), "move");
 assert.equal(start().scene, "start");
@@ -224,7 +226,7 @@ for (const faction of factionIds) {
     assert.equal(sent.scene, "weltknoten");
     assert.equal(sent.knoten, hauptstadt);
     assert.deepEqual(plain(sent.handlung), { szene: "ankunft", knoten: "kornwik" });
-    assert.deepEqual(plain(reload(sent).hauptquest), { schritt: 0, wahl: null });
+    assert.deepEqual(plain(reload(sent).hauptquest), { schritt: 0, wahl: null, plan: 305 });
     sent = rules.zurHandlung({ ...sent, knoten: "kornwik" });
   }
   assert.equal(sent.scene, "ankunft");
@@ -252,7 +254,7 @@ assert.equal(migrated.balance, 0);
 assert.equal(migrated.scene, "start");
 assert.equal(migrated.umschulung, true);
 assert.equal(migrated.allocation, undefined);
-assert.deepEqual(Object.keys(migrated.equipment).sort(), ["armor", "head", "legs", "neck", "offhand", "ring1", "ring2", "weapon"]);
+assert.deepEqual(Object.keys(migrated.equipment).sort(), ["armor", "hands", "head", "legs", "neck", "offhand", "ring1", "ring2", "weapon"]);
 assert.deepEqual(Array.from(migrated.storage), []);
 assert.equal(rules.weapon(migrated), "speer");
 assert.equal(migrated.health, rules.healthLimit(migrated));
@@ -411,7 +413,8 @@ assert.ok(ids(ropeShelter).includes("rescue-rope"));
 const ropeRescue = rules.choose(ropeShelter, "rescue-rope");
 assert.ok(ropeRescue.marks.includes("joren-gerettet"));
 assert.equal(ropeRescue.ember, ropeShelter.ember);
-const failedRescue = rules.choose({ ...ropeShelter, balance: -2 }, "rescue-ember");
+// Patch 2.5.4: Geweihte Flamme verschiebt das Gleichgewicht um +1; bei +3 schlägt die Glut zurück.
+const failedRescue = rules.choose({ ...ropeShelter, balance: 3 }, "rescue-ember");
 assert.equal(failedRescue.scene, "pass-shelter");
 assert.ok(!failedRescue.marks.includes("joren-gerettet"));
 assert.equal(rules.choose(failedRescue, "rescue-balance").balance, 0);
@@ -532,9 +535,9 @@ const armored = rules.equip(lootArmor, "glutpanzer");
 assert.equal(reload(armored).equipment.armor, "glutpanzer");
 const woundedNew = { ...armored, health: 8, ember: 0 };
 assert.equal(rules.use(woundedNew, "galgenwurz").health, 18);
-assert.equal(rules.use(woundedNew, "glutfunke").ember, 2);
-assert.equal(rules.use(woundedNew, "glutfunke").inventory.filter(id => id === "glutfunke").length,
-  woundedNew.inventory.filter(id => id === "glutfunke").length - 1);
+// Patch 2.5.4: Die Freien Häfen haben keine Glut. Der Glutfunke bleibt im Rucksack.
+assert.equal(rules.emberLimit(woundedNew), 0);
+assert.equal(rules.use(woundedNew, "glutfunke"), woundedNew);
 assert.throws(() => reload({ ...armored, equipment: { weapon: "schwert", armor: "glutpanzer" } }));
 // Ausrüstungstests starten mit vollen Helden-LP, unabhängig von Verletzungen früherer Questkämpfe.
 const trial = state => rules.choose(rules.choose({ ...state, health: rules.healthLimit(state) }, "ridge-trail"), "ridge-fight");
@@ -581,19 +584,23 @@ assert.equal(rules.choose(rewarded, "reward-cloak"), rewarded);
 const apprentice = { ...yard, xp: 100, training: {}, stufenpunkte: 1 };
 assert.equal(rules.progression(apprentice).level, 2);
 assert.equal(rules.progression({ ...apprentice, xp: 99 }).level, 1);
-assert.equal(rules.progression(apprentice).points, 1);
+assert.equal(rules.progression(apprentice).points, 2 + 1, "Patch 2.5.5: 2 Punkte je Stufe plus 1 alter Punkt");
 const trained = rules.train(apprentice, "strength");
 assert.equal(reload(trained).training.strength, 1);
 // LP hängen jetzt an Rolle und Erfahrungsstufe, nicht mehr an Stärke.
 assert.equal(rules.healthLimit(trained), rules.healthLimit(apprentice));
 assert.equal(rules.heroAttributes(trained).strength, rules.heroAttributes(apprentice).strength + 1);
-const strongest = { ...apprentice, training: { strength: 1 }, xp: 410, stufenpunkte: 3, build: { ...heroBuild, frei: { strength: 5 } } };
+// Kronreich (+1 Stärke), damit die Grenze von 20 erreicht wird.
+const strongest = { ...apprentice, faction: "kronreich", origin: rules.create("Tala", "kronreich", "frau", 2, "waechter", heroBuild).origin,
+  training: { strength: 1 }, xp: 410, stufenpunkte: 3, build: { ...heroBuild, frei: { strength: 5 } } };
 assert.equal(rules.heroAttributes(strongest).strength, 18);
 const peak = rules.train(rules.train(strongest, "strength"), "strength");
 assert.equal(rules.heroAttributes(peak).strength, 20);
-assert.equal(rules.progression(peak).points, 1);
+assert.equal(rules.progression(peak).points, rules.progression(strongest).points - 2);
 assert.equal(rules.train(peak, "strength"), peak);
-assert.equal(rules.train(trained, "will"), trained);
+const ohnePunkte = { ...trained, xp: 0, stufenpunkte: 0 };
+assert.equal(rules.progression(ohnePunkte).points, 0);
+assert.equal(rules.train(ohnePunkte, "will"), ohnePunkte);
 assert.equal(rules.train({ ...apprentice, combat: bugs.combat }, "will").training.will, undefined);
 const vendor = rules.choose({ ...yard, silver: 25, inventory: [...yard.inventory, "keilerhauer"] }, "supply-post");
 const purchased = rules.trade(vendor, "eisenkeil", true);
@@ -680,9 +687,9 @@ assert.equal(healedByAlly.combat.bleeding, 0);
 assert.ok(healedByAlly.health > 10);
 
 const patrol = rules.choose(rules.choose(atYard, "toll"), "toll-fight");
-// Drei Deserteure allein, je Gefährte einer mehr, höchstens sechs.
-assert.equal(rules.targets(patrol).length, 6);
-assert.deepEqual(Array.from(rules.targets(reload(patrol)), target => target.id), [0, 1, 2, 3, 4, 5]);
+// Drei Deserteure allein, je Gefährte einer mehr, seit Patch 2.6.17 höchstens vier je Begegnung.
+assert.equal(rules.targets(patrol).length, 4);
+assert.deepEqual(Array.from(rules.targets(reload(patrol)), target => target.id), [0, 1, 2, 3]);
 const aimed = [];
 rules.strike(patrol, "spear", highRoll, undefined, 2, aimed);
 assert.equal(aimed[0].target, 2);
@@ -743,7 +750,7 @@ assert.equal(rules.relationship(failingRescue, "knight").oath, "broken");
 assert.equal(rules.reputation(failingRescue, "watch"), -35);
 const keptRescue = rules.choose({ ...withIven, scene: "pass-shelter" }, "rescue-ember");
 assert.equal(rules.relationship(keptRescue, "knight").oath, "fulfilled");
-assert.equal(rules.reputation(keptRescue, "watch"), 30);
+assert.equal(rules.reputation(keptRescue, "watch"), 30 + 12); // Patch 2.5.4: geweihte Flamme +12 Ansehen
 assert.ok(ids({ ...keptRescue, scene: "watch-yard" }).includes("watch-trust"));
 assert.ok(!ids({ ...failingRescue, scene: "watch-yard" }).includes("watch-trust"));
 const earlyBond = rules.bondWith(withIven, "knight", "talk");
@@ -774,7 +781,7 @@ console.log("Gefährtenaufträge, Beziehungsfolgen, Geschenke, Romanze, Fraktion
   assert.equal(loaded.equipment.ring2, null);
   assert.equal(loaded.equipment.armor, "glutpanzer");
   assert.equal(hero().storage.length, 0);
-  assert.equal(Object.keys(hero().equipment).join(), "weapon,offhand,head,neck,armor,legs,ring1,ring2");
+  assert.equal(Object.keys(hero().equipment).join(), "weapon,offhand,head,neck,armor,hands,legs,ring1,ring2");
 
   // Zentrallager nur in Städten und nicht im Kampf
   assert.equal(world.scenes[armored.scene].map, "hochwacht");
@@ -806,6 +813,12 @@ console.log("Gefährtenaufträge, Beziehungsfolgen, Geschenke, Romanze, Fraktion
   assert.equal(allStored.storage.length, 3);
   assert.ok(!allStored.inventory.includes("harzverband"));
   assert.equal(rules.retrieve(allStored, "harzverband", 3).inventory.filter(id => id === "harzverband").length, 3);
+
+  // Wegwerfen: ein Stück, nie Questgegenstände oder angelegte Stücke (UI-Überarbeitung 19. 11. 2026)
+  assert.equal(rules.wegwerfen(stack, "harzverband").inventory.filter(id => id === "harzverband").length, 2);
+  assert.equal(rules.wegwerfGrund(armored, "glutpanzer"), "angelegt");
+  assert.equal(rules.wegwerfen(armored, "glutpanzer"), armored);
+  assert.equal(rules.wegwerfen({ ...armored, inventory: [...armored.inventory, "flusssiegel"] }, "flusssiegel").inventory.includes("flusssiegel"), true);
 
   // Questgegenstände bleiben im Rucksack und belegen keinen Platz
   assert.ok(rules.isQuestItem("flusssiegel"));
@@ -934,7 +947,7 @@ console.log('Gruppenausrüstung, Besitz, Kampfboni und Spielstandmigration gepr�
 
 // Aufnahme erst nach angenommenem und abgegebenem Auftrag; kein mehrfacher Rufgewinn.
 const questStart = { ...rules.create("Tala", "kronreich", "frau", 1, "magier"), scene: "watch-yard", silver: 30 };
-for (const id of Object.keys(world.companions).filter(id => id !== questStart.role && !world.companions[id].soeldner && !world.companions[id].auftrag)) {
+for (const id of Object.keys(world.companions).filter(id => id !== questStart.role && !world.companions[id].soeldner && !world.companions[id].auftrag && !world.companions[id].champion)) {
   const applicant = { ...rules.create("Tala", "kronreich", "frau", 1, world.companions[id].klasse === "waechter" ? "heiler" : "waechter"), scene: "watch-yard", silver: 30 };
   const accepted = rules.promise(applicant, id);
   assert.equal(rules.recruit(accepted, id), accepted, id + ': Auftrag noch nicht abgegeben');
@@ -956,7 +969,14 @@ for (const id of Object.keys(world.companions).filter(id => id !== questStart.ro
 }
 const capacity = { ...atYard, companionQuests: { ...atYard.companionQuests, paladin: { status: 'done', debt: 0 } } };
 assert.equal(rules.recruitment(capacity, 'paladin'), 'ready');
-assert.equal(rules.recruit(capacity, 'paladin'), capacity, 'Auch erfüllte Quests umgehen das Gruppenlimit nicht');
+// v3.0.0: Bei vollem Trupp kommt der Gefährte in die Quartier-Reserve; erst bei voller Reserve (16) ist Schluss.
+const inReserve = rules.recruit(capacity, 'paladin');
+assert.equal(inReserve.party.length, rules.partyLimit, 'Auch erfüllte Quests umgehen das Gruppenlimit nicht');
+assert.equal(JSON.stringify(inReserve.gefaehrtenPool), '["paladin"]', 'Überzählige Gefährten warten in der Reserve');
+assert.equal(JSON.stringify(reload(inReserve).gefaehrtenPool), '["paladin"]');
+const reserveVoll = { ...capacity, gefaehrtenPool: Object.keys(world.companions).filter(id => !capacity.party.includes(id) && id !== 'paladin').slice(0, rules.poolLimit) };
+assert.equal(rules.poolLimit, 16);
+assert.equal(rules.recruit(reserveVoll, 'paladin'), reserveVoll, 'Volle Reserve nimmt niemanden auf');
 const herbalist = { ...questStart, inventory: [...questStart.inventory.filter(id => id !== 'galgenwurz'), 'galgenwurz', 'galgenwurz'] };
 const craftedBandage = rules.craft(herbalist, 'harzverband');
 assert.ok(craftedBandage.inventory.includes('harzverband'));
@@ -1381,7 +1401,7 @@ console.log("Reisebegegnungen (ruhig, scheu, Jäger, Alphatier, Ausweichen) gepr
   assert.equal(fresh.knoten, null);
 
   // Aus der Handlung in Kornwik in die Weltreise und zurück.
-  const atField = { ...hero(), scene: "return-field" };
+  const atField = { ...heroKronreich(), scene: "return-field" };
   assert.equal(rules.aktuellerKnoten(atField), "kornwik");
   const hub = rules.betreteWelt(atField);
   assert.equal(hub.scene, "weltknoten");
@@ -1517,7 +1537,7 @@ console.log("Reisebegegnungen (ruhig, scheu, Jäger, Alphatier, Ausweichen) gepr
   assert.equal(rules.ertragGrund(zwergHub), null);
   const harvested = rules.ertragEinholen(zwergHub);
   assert.equal(harvested.ressource, zwergHub.ressource + 5);
-  assert.match(rules.ertragGrund(harvested), /wieder bereit in 10 Runden/);
+  assert.match(rules.ertragGrund(harvested), /wieder bereit in 10 Etappen/);
   assert.equal(rules.read(JSON.stringify(harvested)).ertraege[zwergDorf.id], 0);
   assert.equal(rules.ertragGrund({ ...zwergHub, knoten: "perlstrand" }), "nur in Dörfern der eigenen Fraktion");
   // Zentrallager: Hauptstädte und eigene Städte, keine Dörfer.
@@ -1571,7 +1591,7 @@ console.log("Weltebene (Knotennetz, Weltleisten, Vorrat, Seewege, Pässe, Stolle
 {
   const ready = { ...hero(), stufenpunkte: 2 };
   const plan = rules.entwurf(ready, { training: { strength: 1, will: 1 } });
-  assert.equal(plan.stufenpunkte, 0);
+  assert.equal(rules.progression(plan).points, 0, "Patch 2.5.5: alle Punkte verteilt");
   same(plan.training, { strength: 1, will: 1 });
   assert.equal(rules.entwurf(ready, { training: { strength: 3 } }), ready, "Zu viele Punkte: nichts wird gespeichert");
   // Menschen spezialisieren sich ab Erfahrungsstufe 10 (Patch 2.0.0 Punkt 9), Quest-Stufe 3 reicht nicht mehr.
@@ -1632,7 +1652,7 @@ console.log("Charakter-Entwurf geprüft.");
   assert.equal(s.combat.auftrag, "kronhall_q04");
   assert.equal(s.combat.gegnerStufe, rules.level(held), "Gebietsstufe 1–6 folgt der Heldenstufe");
   assert.ok(s.combat.feinde.every(feind => feind.stufe === rules.level(held)));
-  assert.equal(s.combat.feinde.length, 3);
+  assert.equal(s.combat.feinde.length, 2, "Patch 2.5.4: allein höchstens 2 Gegner");
   assert.equal(reload(s).combat.auftrag, "kronhall_q04");
   assert.throws(() => reload({ ...s, combat: { ...s.combat, auftrag: "kronhall_q05" } }), /beschädigt/);
   const untote = s.weltLeisten.untote;
@@ -1658,9 +1678,25 @@ console.log("Charakter-Entwurf geprüft.");
   assert.equal(unterwegs.combat.id, "auftrag-grauwoelfe");
   assert.equal(unterwegs.combat.hinterhalt, undefined, "Auftragskämpfe lassen sich nicht umgehen");
   unterwegs = sieg(reload(unterwegs));
-  assert.equal(unterwegs.weltAuftraege.glutberg_q01.status, "erledigt");
-  assert.equal(unterwegs.ressource, pilger.ressource - 1 + 1 + 8, "Reise −1, Sieg +1, Lohn +8 Glaube");
-  assert.equal(rules.reise(unterwegs, "glutberg").combat, null, "erledigte Wegaufträge lösen nichts mehr aus");
+  // Rückreise-Pflicht (Henry, 20. 11. 2026): erst bereit zur Abgabe, Lohn beim Auftraggeber in Glutberg.
+  assert.equal(unterwegs.weltAuftraege.glutberg_q01.status, "bereit_zur_abgabe");
+  assert.equal(reload(unterwegs).weltAuftraege.glutberg_q01.status, "bereit_zur_abgabe", "Status ist speicherbar");
+  assert.equal(unterwegs.ressource, pilger.ressource - 1 + 1, "Reise −1, Sieg +1, Lohn noch offen");
+  assert.equal(rules.abgabeGrund(unterwegs, "glutberg_q01"), "nur in Glutberg");
+  assert.equal(rules.auftragGrund({ ...unterwegs, knoten: "glutberg" }, "glutberg_q01"), "bereit zur Abgabe");
+  const zurueck = rules.rueckkehrZiele(unterwegs);
+  assert.equal(zurueck.length, 1);
+  assert.equal(zurueck[0].knopf, "Rückkehr nach Glutberg antreten");
+  assert.equal(zurueck[0].route.join(), "glutberg");
+  assert.equal(rules.rueckmarsch(unterwegs), true);
+  let heim = rules.reise(unterwegs, "glutberg");
+  assert.equal(heim.combat, null, "Wegaufträge bereit zur Abgabe lösen nichts mehr aus");
+  assert.equal(heim.ressource, unterwegs.ressource - 1, "Rückmarsch verbraucht Nahrung");
+  assert.equal(rules.abgabeGrund(heim, "glutberg_q01"), null);
+  heim = rules.auftragAbgeben(heim, "glutberg_q01");
+  assert.equal(heim.weltAuftraege.glutberg_q01.status, "erledigt");
+  assert.equal(heim.ressource, unterwegs.ressource - 1 + 8, "Lohn +8 Glaube bei der Abgabe");
+  assert.equal(rules.rueckmarsch(heim), false);
 
   // Wegrabatt: Nach „Die brennende Grenzmarke“ kostet S01 einen Vorrat weniger.
   let grenze = imOrt("kronreich", "eikmark");
@@ -1760,76 +1796,92 @@ console.log("Charakter-Entwurf geprüft.");
   assert.equal(rules.candidates({ ...duell, knoten: "glutberg" }).some(([id]) => id === "halvar"), false, "Orden-Begleiter nur für Orden");
   for (const id of ["sigrid", "wulfgar", "fenris", "halvar", "gunhild", "malte"]) assert.ok(world.companions[id], id);
 
-  // Hauptquest Kronreich: Kronhall → Hagenfels (Deserteure) → Westvik (Wahl).
-  let akt = { ...held, hauptquest: { schritt: 0, wahl: null } };
-  assert.equal(rules.hauptquest(akt).schritt.titel, "Der Schwur am Krankenbett");
-  akt = reload(rules.hauptWeiter(akt));
+  // Hauptquest Kronreich (v3.0.5): Valengrad/Kronhall (Gespräch) → Eisentor/Hagenfels (Gespräch, Deserteure) → Kronhall (Urteil).
+  let akt = { ...held, hauptquest: { schritt: 0, wahl: null, plan: 305 } };
+  assert.equal(rules.hauptquest(akt).schritt.titel, "Blut im Thronsaal");
+  assert.equal(rules.hauptquest(akt).schritt.wahlen.length, 3, "drei Antworten je Szene");
+  assert.equal(rules.hauptGrund(akt), "Antwort wählen");
+  assert.equal(rules.hauptWeiter(akt), akt, "ohne Antwort geht es nicht weiter");
+  assert.match(rules.hauptGrund({ ...akt, ressource: 1 }, "valen_s1_opfer"), /^zu wenig /);
+  const opfer = reload(rules.hauptWeiter({ ...akt, ressource: 3 }, "valen_s1_opfer"));
+  assert.equal(opfer.ressource, 1);
+  assert.equal(opfer.hinterhaltSchutz, true);
+  assert.equal(opfer.szenen["akt1:0"], "valen_s1_opfer");
+  akt = reload(rules.hauptWeiter(akt, "valen_s1_direkt"));
   assert.equal(akt.hauptquest.schritt, 1);
+  assert.equal(akt.moral, (held.moral ?? rules.systeme.daten.moral.start) + 4);
   assert.equal(rules.hauptGrund(akt), "weiter in Hagenfels");
-  akt = rules.hauptWeiter({ ...akt, knoten: "hagenfels" });
+  assert.equal(rules.marschVignette(akt, "hagenfels"), "Der Wind trägt den Geruch verbrannten Korns von den Höfen bei Hagenfels herüber.");
+  const eisentor = { ...akt, knoten: "hagenfels", silver: 30 };
+  // Silber statt Kampf: der Rädelsführer zieht ab.
+  const gekauft = reload(rules.hauptWeiter(eisentor, "valen_s2_verhandlung"));
+  assert.equal(gekauft.combat, null);
+  assert.equal(gekauft.silver, 5);
+  assert.equal(gekauft.hauptquest.schritt, 2);
+  assert.equal(rules.hauptGrund({ ...eisentor, silver: 20 }, "valen_s2_verhandlung"), "zu wenig Silber");
+  // Probe ohne Zufall: Stärke gegen 12. Gelingt sie, fehlt im Kampf ein Gegner.
+  const probe = rules.hauptquest(eisentor).schritt.wahlen.find((w) => w.id === "valen_s2_staerke");
+  assert.deepEqual(plain(probe.probe), { attribut: "strength", wert: 12 });
+  const ohneProbe = rules.hauptWeiter({ ...eisentor, szenen: {} }, "valen_s2_geschick");
+  akt = rules.hauptWeiter(eisentor, "valen_s2_staerke");
   assert.equal(akt.combat.id, "auftrag-deserteure");
   assert.equal(akt.combat.auftrag, "haupt");
+  const staerke = rules.heroAttributes(eisentor).strength;
+  if (staerke >= 12) assert.equal(akt.combat.feinde.length, Math.max(1, ohneProbe.combat.feinde.length - 1));
+  else assert.equal(akt.combat.feinde.length, ohneProbe.combat.feinde.length);
   akt = sieg(reload(akt));
-  assert.equal(akt.hauptquest.schritt, 2);
-  const westvik = { ...akt, knoten: "westvik", silver: 50, health: rules.healthLimit(akt) };
-  assert.equal(rules.hauptGrund(westvik), "Wahl fehlt");
-  assert.equal(rules.hauptGrund({ ...westvik, silver: 39 }, "kron_act1_truce"), "zu wenig Silber");
-  const frieden = reload(rules.hauptWeiter(westvik, "kron_act1_truce"));
-  assert.equal(frieden.silver, 10);
+  assert.equal(akt.hauptquest.schritt, 2, "Kein Bericht mehr nötig: Schritt 3 ist die Rückkehr nach Valengrad");
+  assert.equal(rules.hauptGrund(akt), "weiter in Kronhall");
+  const thron = { ...akt, knoten: "kronhall", silver: 0, health: rules.healthLimit(akt) };
+  assert.equal(rules.hauptGrund(thron), "Antwort wählen");
+  const frieden = reload(rules.hauptWeiter(thron, "kron_act1_truce"));
   assert.equal(frieden.hauptquest.schritt, 3);
+  assert.equal(frieden.hauptquest.wahl, "kron_act1_truce");
   assert.equal(frieden.questStufe, 1);
-  assert.ok(frieden.marks.includes("kron_act1_truce"));
+  assert.ok(frieden.marks.includes("kron_act1_truce") && frieden.marks.includes("valen_pfad_gnade"));
+  assert.equal(frieden.kontor.kronreich.runensplitter, (thron.kontor?.kronreich?.runensplitter ?? 0) + 3);
   assert.ok(frieden.rewards.includes("akt1-kronreich"));
-  assert.equal(frieden.xp, westvik.xp + 300);
   assert.equal(rules.hauptquest(frieden).fertig, true);
   assert.equal(rules.hauptWeiter(frieden), frieden);
-  let kampf = rules.hauptWeiter(westvik, "kron_act1_fight");
-  assert.equal(kampf.combat.feinde[0].name, "Kapitän Urgash");
-  assert.equal(kampf.combat.feinde[0].rang, "elite");
-  const orks = kampf.weltLeisten.orks;
-  kampf = sieg(kampf);
-  assert.equal(kampf.hauptquest.schritt, 3);
-  assert.equal(kampf.weltLeisten.orks, orks - 5);
-  assert.ok(kampf.marks.includes("kron_act1_fight"));
+  const haerte = rules.hauptWeiter(thron, "kron_act1_fight");
+  assert.equal(haerte.combat, null, "Das Urteil ist kein Kampf mehr");
+  assert.equal(haerte.silver, 40);
+  assert.ok(haerte.marks.includes("valen_pfad_haerte"));
 
-  // Hauptquest Orden: Glutberg → Lichtheim → Brandstein → Glutberg (Wahl).
+  // Hauptquest Orden: Sonnenwacht/Glutberg → Aschenkloster (Kultisten) → Glutberg (Urteil).
   let orden = imOrt("orden", "glutberg");
-  orden = { ...orden, health: rules.healthLimit(orden), hauptquest: { schritt: 0, wahl: null } };
-  orden = rules.hauptWeiter(orden);
-  orden = sieg(rules.hauptWeiter({ ...orden, knoten: "lichtheim" }));
+  orden = { ...orden, health: rules.healthLimit(orden), hauptquest: { schritt: 0, wahl: null, plan: 305 } };
+  orden = rules.hauptWeiter(orden, "solis_s1_direkt");
+  assert.equal(rules.hauptGrund(orden), "weiter in Aschenkloster");
+  const kloster = rules.hauptWeiter({ ...orden, knoten: "aschenkloster" }, "solis_s2_predigt");
+  assert.equal(kloster.combat.id, "auftrag-kultisten");
+  orden = sieg(kloster);
   assert.equal(orden.hauptquest.schritt, 2);
-  const brand = rules.hauptWeiter({ ...orden, knoten: "brandstein" });
-  assert.equal(brand.combat.id, "auftrag-runenfresser");
-  orden = sieg(brand);
   orden = { ...orden, knoten: "glutberg" };
-  const vorrat = orden.ressource;
   const gnade = rules.hauptWeiter(orden, "orden_act1_mercy");
-  assert.equal(gnade.ressource, vorrat + 10);
   assert.equal(gnade.hauptquest.wahl, "orden_act1_mercy");
+  assert.ok(gnade.marks.includes("solis_pfad_bewahrung"));
   assert.equal(rules.hauptWeiter(orden, "kron_act1_truce"), orden, "nur die Wahl der eigenen Fraktion");
   assert.equal(rules.hauptquest(imOrt("hof", "kronhall")), null);
+  // Alte Spielstände: Orden-Schritt 3 von 4 wird Schritt 2 von 3.
+  assert.equal(reload({ ...orden, hauptquest: { schritt: 3, wahl: null } }).hauptquest.schritt, 2);
 
-  // Hauptquest Freie Häfen: Zollholm → Möwenstad → Silberholm → Perlvik (Wahl), Aushang und Begleiter.
+  // Hauptquest Freie Häfen: Korvath-Bucht/Perlvik → Nebelklippe/Nebelvik (Korsaren) → Perlvik (Urteil).
   let haefen = imOrt("haefen", "zollholm");
-  haefen = { ...haefen, health: rules.healthLimit(haefen), hauptquest: { schritt: 0, wahl: null } };
+  haefen = { ...haefen, health: rules.healthLimit(haefen), hauptquest: { schritt: 0, wahl: null, plan: 305 } };
   assert.equal(rules.hauptquest(haefen).titel, "Die Zollinseln");
   assert.equal(rules.aushang(haefen).length, 10);
-  const versteck = rules.hauptWeiter(haefen);
-  assert.equal(versteck.combat.id, "auftrag-schmuggler");
-  haefen = sieg(versteck);
-  assert.equal(haefen.hauptquest.schritt, 1);
-  assert.equal(rules.hauptGrund(haefen), "weiter in Möwenstad");
-  const kuriere = rules.hauptWeiter({ ...haefen, knoten: "moewenstad", health: rules.healthLimit(haefen) });
-  assert.equal(kuriere.combat.id, "auftrag-spione");
-  haefen = rules.hauptWeiter({ ...sieg(kuriere), knoten: "silberholm" });
-  assert.equal(haefen.hauptquest.schritt, 3);
-  haefen = { ...haefen, knoten: "perlvik" };
+  assert.equal(rules.hauptGrund(haefen), "weiter in Perlvik");
+  haefen = rules.hauptWeiter({ ...haefen, knoten: "perlvik" }, "korvath_s1_direkt");
+  const klippe = rules.hauptWeiter({ ...haefen, knoten: "nebelvik", health: rules.healthLimit(haefen) }, "korvath_s2_geschick");
+  assert.equal(klippe.combat.id, "auftrag-schmuggler");
+  haefen = { ...sieg(klippe), knoten: "perlvik" };
+  assert.equal(haefen.hauptquest.schritt, 2);
   const silber = haefen.silver;
   const schatten = reload(rules.hauptWeiter(haefen, "haefen_act1_shadow"));
-  assert.equal(schatten.silver, silber + 80, "Wahl im Schatten bringt 80 Silber");
-  assert.ok(schatten.marks.includes("haefen_act1_shadow"));
+  assert.ok(schatten.marks.includes("haefen_act1_shadow") && schatten.marks.includes("korvath_pfad_schmuggler"));
   const gilde = rules.hauptWeiter(haefen, "haefen_act1_guild");
-  assert.ok(gilde.ressource > haefen.ressource || gilde.ressource === rules.vorratMax, "Wahl der Gilde bringt Gold");
+  assert.equal(gilde.silver, silber + 45);
   assert.equal(rules.hauptWeiter(haefen, "orden_act1_mercy"), haefen, "nur die Wahl der eigenen Fraktion");
   // Begleiterin Karen Salzklinge nach perlvik_q10; Gold ist der Vorrat der Häfen.
   let karen = rules.auftragAnnehmen(haefen, "perlvik_q10");
@@ -1890,8 +1942,8 @@ console.log("Aufträge am Aushang, Wegaufträge, Wegrabatt, Trophäen, Begleiter
   const imOrt = (faction, ort, extra = {}) => ({ ...rules.create("Tala", faction, "frau", 1, "krieger"), scene: "weltknoten", knoten: ort,
     xp: 300, ...extra });
   const SY = rules.systeme;
-  // Kronhall in Phase 3 (Akt 2, Ruf 40) mit gefülltem Kontor.
-  let s = imOrt("kronreich", "kronhall", { questStufe: 1, silver: 2000, ressource: 40,
+  // Kronhall in Phase 3 mit gefülltem Kontor; Patch 2.6.19: Stufe 1 erst nach Akt 2 (Quest-Stufe 2).
+  let s = imOrt("kronreich", "kronhall", { questStufe: 2, silver: 2000, ressource: 40,
     factionRuf: { groves: 45 }, kontor: { kronreich: { nahrung: 50, holz: 100, eisen: 100, stein: 100, runensplitter: 5 } } });
   let info = rules.siedlungInfo(s);
   assert.equal(info.phase.nr, 3);
@@ -1934,14 +1986,14 @@ console.log("Aufträge am Aushang, Wegaufträge, Wegrabatt, Trophäen, Begleiter
   assert.equal(rules.progression(imOrt("kronreich", "kronhall", { xp: 57250 })).level, 30);
   assert.equal(rules.progression(imOrt("kronreich", "kronhall", { xp: 19000 })).level, 20);
   assert.equal(rules.progression(imOrt("kronreich", "kronhall", { xp: 21250 })).level, 21);
-  // Meister-Talente ab Stufe 22: Schildwall +10 % LP je Rang.
+  // Meister-Talente: Patch 2.5.5 ein Punkt je Stufe 21–30. Patch 2.6.2: Ungebrochener Schildwall Rang 1 +8 LP.
   let meister = imOrt("kronreich", "kronhall", { xp: 57250 });
   meister.health = rules.healthLimit(meister);
-  assert.equal(rules.aufstiegInfo(meister).talentPunkte, 5);
+  assert.equal(rules.aufstiegInfo(meister).talentPunkte, 10);
   const lp = rules.healthLimit(meister);
-  meister = reload(rules.talentLernen(meister, "MT_EISENWALL"));
-  assert.equal(meister.talente.MT_EISENWALL, 1);
-  assert.equal(rules.healthLimit(meister), Math.round(lp * 1.1));
+  meister = reload(rules.talentLernen(meister, "TREE_UNGEBROCHENER_SCHILDWALL"));
+  assert.equal(meister.talente.TREE_UNGEBROCHENER_SCHILDWALL, 1);
+  assert.equal(rules.healthLimit(meister), lp + 8);
   // Ahnen: je 5000 EP über Stufe 30 ein Punkt.
   assert.equal(rules.aufstiegInfo(meister).ahnenPunkte, 0);
   meister = reload(rules.ahnenLernen({ ...meister, xp: 62250 }, "perk_iron_blood"));
@@ -1980,3 +2032,88 @@ console.log("Siedlung, Bau, Garnison, Endgame, Stufe 30, Meister-Talente und Ahn
   if (runen) assert.equal(rules.resonanz({ ...held, equipment: { ...held.equipment, ring1: runen.id } }), true);
 }
 console.log("Patch 2.5.3 geprüft.");
+
+// v3.0.0 (Henry, 20. 11. 2026): Gefährten-Pool, Hauptstadt-Tausch, Freischaltung und Völker-Synergien.
+{
+  const truppIds = ["knight", "mage", "priest"].filter((id) => world.companions[id]);
+  const basis = (ort, extra = {}) => reload({ ...rules.create("Tala", "kronreich", "frau", 1, "krieger"), scene: "weltknoten", knoten: ort,
+    party: truppIds, gefaehrtenPool: ["ranger"], ...extra });
+  const hauptstadt = basis("kronhall");
+  assert.equal(rules.tauschGrund(hauptstadt), null, "Tausch in der Hauptstadt erlaubt");
+  const unterwegs = basis("hagenfels");
+  assert.equal(rules.tauschGrund(unterwegs), "Nur in Hauptstädten möglich");
+  assert.equal(rules.inReserve(unterwegs, truppIds[0]), unterwegs, "Unterwegs kein Auswechseln");
+  assert.equal(rules.inTrupp(unterwegs, "ranger"), unterwegs, "Unterwegs kein Einwechseln");
+  assert.equal(rules.inTrupp(hauptstadt, "ranger"), hauptstadt, "Trupp bleibt bei 4 Personen gedeckelt");
+  const raus = rules.inReserve(hauptstadt, truppIds[0]);
+  assert.equal(raus.party.length, truppIds.length - 1);
+  assert.ok(raus.gefaehrtenPool.includes(truppIds[0]));
+  const rein = rules.inTrupp(raus, "ranger");
+  assert.ok(rein.party.includes("ranger") && !rein.gefaehrtenPool.includes("ranger"));
+  assert.equal(reload(rein).party.length, truppIds.length);
+  // Fremde Hauptstadt, dort geächtet: nur Söldner wechseln.
+  const fremd = basis("glutberg");
+  rules.systeme.rufAendern(fremd, "orden", -60);
+  assert.match(rules.tauschGrund(fremd, truppIds[0]) ?? "", /geächtet/);
+  // Doppelt in Trupp und Reserve ist ein beschädigter Stand.
+  assert.throws(() => rules.read(JSON.stringify({ ...hauptstadt, gefaehrtenPool: [truppIds[0]] })));
+  // Akt-5-Champion: Bündnismarke bringt ihn kostenlos in die Reserve, Untote bekommen keinen.
+  const buendnis = reload({ ...hauptstadt, marks: [...hauptstadt.marks, "buendnis_zwerge"] });
+  assert.ok(buendnis.gefaehrtenPool.includes("gef_zwerge_khaz"));
+  const mitZwergin = rules.inTrupp(rules.inReserve(buendnis, truppIds[0]), "gef_zwerge_khaz");
+  assert.ok(mitZwergin.party.includes("gef_zwerge_khaz"));
+  const pakt = rules.synergien(mitZwergin).find((s) => s.name === "Pakt aus Stahl & Flamme");
+  assert.ok(pakt.aktiv && pakt.wirkt, "Mensch + Zwerg: +1 Rüstung");
+  assert.ok(!rules.synergien(hauptstadt).some((s) => s.aktiv), "Reiner Menschentrupp ohne Synergie");
+  const untot = reload({ ...rules.create("Tala", "hof", "frau", 1, "krieger"), marks: ["buendnis_zwerge"] });
+  assert.equal(untot.gefaehrtenPool.length, 0, "Untote schließen keine Bündnisse");
+  assert.ok(rules.poolInfo(untot).champions.every((c) => /Untote/.test(c.status)));
+}
+// Akt 2/3: Abgesandte der geeinten Schwester-Fraktion (Orden-Gefährte für einen Kronreich-Helden).
+{
+  const [id, gesandt] = Object.entries(world.companions).find(([, c]) => c.auftrag && c.fraktion === "orden" && c.klasse !== "krieger");
+  const vorher = reload({ ...rules.create("Tala", "kronreich", "frau", 1, "krieger"), scene: "weltknoten", knoten: gesandt.knoten });
+  assert.ok(!rules.candidates(vorher).some(([c]) => c === id), "Vor dem Zweig kein Abgesandter");
+  const geeint = { ...vorher, akte: { zweige: { orden: { stufe: 3, akt: 2, wahl: "good", soeldner: false } }, fspez: null,
+    akt4: { schritt: 0, siegel: [], wahlOffen: false, wahl: null } } };
+  assert.ok(rules.candidates(geeint).some(([c]) => c === id), "Nach dem Zweig wartet der Abgesandte");
+  assert.equal(rules.recruitment(geeint, id), "ready");
+  assert.ok(rules.recruit(geeint, id).party.includes(id));
+}
+console.log("Gefährten-Pool und Hauptstadt-Tausch geprüft.");
+// Fragenkatalog v3.0.4, Antwort 3 A (Henry, 20. 11. 2026): Alle vier Völker-Synergien wirken im Kampf.
+{
+  const mitElfe = reload({ ...rules.create("Tala", "kronreich", "frau", 1, "krieger"), scene: "weltknoten", knoten: "kronhall",
+    marks: ["buendnis_elfen"], party: ["gef_elfen_aethel"] });
+  const astral = rules.synergien(mitElfe).find((s) => s.name === "Astrale Kriegsführung");
+  assert.ok(astral.aktiv && astral.wirkt, "Mensch + Elf aktiv");
+  assert.ok(rules.synergien(mitElfe).every((s) => s.wirkt), "Alle Synergien haben eine Wirkung");
+  const auftrag = rules.aushang(mitElfe).find((x) => x.spiel.gegner && !x.spiel.weg);
+  const kampf = rules.auftragAusfuehren(rules.auftragAnnehmen(mitElfe, auftrag.id), auftrag.id);
+  assert.ok(kampf.combat, "Kampf beginnt");
+  const max = rules.kampfwerte(kampf).ausdauerMax;
+  assert.equal(kampf.combat.held.ausdauer, max + 1, "+1 Ausdauer über dem Höchstwert zu Kampfbeginn");
+  assert.equal(reload(kampf).combat.held.ausdauer, max + 1, "Spielstand mit Vorsprung bleibt ladbar");
+  const ohne = reload({ ...mitElfe, party: [] });
+  const kampfOhne = rules.auftragAusfuehren(rules.auftragAnnehmen(ohne, auftrag.id), auftrag.id);
+  assert.equal(kampfOhne.combat.held.ausdauer, rules.kampfwerte(kampfOhne).ausdauerMax, "Ohne Elf kein Vorsprung");
+  const amboss = rules.synergien(reload({ ...rules.create("Tala", "tiefes-koenigreich", "frau", 1, "krieger"), marks: ["buendnis_orks"] }));
+  assert.equal(amboss.find((s) => s.name === "Donner & Amboss").wert.nahkampfKrit, 1.62);
+  assert.equal(amboss.find((s) => s.name === "Zorn der Alten Wildnis").wert.ausweichenFrueh, 1);
+}
+console.log("Völker-Synergien geprüft.");
+// v3.0.5: Gastgeber-Szene vor dem ersten Kampf eines Schwester-Zweigs.
+{
+  const s = reload({ ...rules.create("Tala", "kronreich", "frau", 1, "krieger"), scene: "weltknoten", knoten: "glutberg",
+    xp: rules.systeme.epFuer(6), hauptquest: { schritt: 3, wahl: "kron_act1_truce", plan: 305 }, questStufe: 1, silver: 100 });
+  const sz = rules.szeneInfo(s, "zweig", "orden");
+  assert.equal(sz.titel, "Asche, Eid und läuterndes Feuer");
+  assert.equal(sz.optionen.length, 3);
+  assert.match(rules.zweigGrund(s, "orden", "good") ?? "", /sprechen/);
+  assert.equal(rules.zweigSzeneWaehlen(s, "orden", "zweig_solis_runen"), s, "Runensplitter fehlen");
+  const nach = reload(rules.zweigSzeneWaehlen(s, "orden", "zweig_solis_soeldner"));
+  assert.equal(nach.szenen["zweig:orden"], "zweig_solis_soeldner");
+  assert.equal(rules.zweigGrund(nach, "orden", "good"), null);
+  assert.equal(rules.zweigSzeneWaehlen(nach, "orden", "zweig_solis_probe"), nach, "nur einmal");
+}
+console.log("Gastgeber-Szenen geprüft.");

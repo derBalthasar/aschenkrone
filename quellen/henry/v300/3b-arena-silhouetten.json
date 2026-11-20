@@ -1,0 +1,101 @@
+{
+  "quelle": "Henry, Projekt-Thread 20. 11. 2026 (Kharos 3.0)",
+  "schema_version": "3.0.0",
+  "paket": "kharos_portraets_und_2d_teil_3b_von_3b_arena_silhouetten",
+  "target_file": "ui/kampf_arena_2d.js",
+  "voelker_2d_kampfmodelle": [
+    {
+      "volk": "menschen",
+      "klasse_gruppe": "kaiserritter_und_laeuterer",
+      "proportionen": {
+        "hoehe_faktor": 1.0,
+        "breite_faktor": 1.0
+      },
+      "ausruestung_svg": {
+        "helm": "ritter_visier_oder_inquisitor_hut",
+        "waffe": "breitschwert_oder_flammenklinge",
+        "schild": "turmschild_valen",
+        "projektil": "schwarzpulver_kugel_oder_lichtstrahl",
+        "akzent_farbe": "#dc2626"
+      }
+    },
+    {
+      "volk": "elfen",
+      "klasse_gruppe": "astralweber_dornenschuetze_blutweber",
+      "proportionen": {
+        "hoehe_faktor": 1.06,
+        "breite_faktor": 0.88
+      },
+      "ausruestung_svg": {
+        "helm": "spitze_ohren_und_stirnreif_oder_schattenmaske",
+        "waffe": "astralstab_langbogen_oder_zwillings_blutklingen",
+        "schild": "arkaner_spiegel_oder_knochenschild",
+        "projektil": "sternenlanze_giftdorn_oder_blutpfeil",
+        "akzent_farbe": "#a855f7"
+      }
+    },
+    {
+      "volk": "zwerge",
+      "klasse_gruppe": "eisenbrecher_dampfmoloch_sturmaxt",
+      "proportionen": {
+        "hoehe_faktor": 0.78,
+        "breite_faktor": 1.25
+      },
+      "ausruestung_svg": {
+        "helm": "runen_vollhelm_mit_langem_bart",
+        "waffe": "runenhammer_dampfkolben_oder_donnerbuechse",
+        "schild": "schwerer_turmschild_khaz",
+        "projektil": "kartätsche_oder_magma_kugel",
+        "akzent_farbe": "#f59e0b"
+      }
+    },
+    {
+      "volk": "orks",
+      "klasse_gruppe": "donnerkrieger_blutberserker_geisterrufer",
+      "proportionen": {
+        "hoehe_faktor": 1.18,
+        "breite_faktor": 1.3
+      },
+      "ausruestung_svg": {
+        "helm": "stosszahn_kiefer_und_kriegsbemalung",
+        "waffe": "riesige_spaltaxt_oder_schaedel_totemstab",
+        "schild": "beschlagener_bestienschild",
+        "projektil": "wurfspeer_oder_ahnenblitz",
+        "akzent_farbe": "#ea580c"
+      }
+    },
+    {
+      "volk": "untote",
+      "klasse_gruppe": "grabritter_seuchenweber_vampir",
+      "proportionen": {
+        "hoehe_faktor": 1.04,
+        "breite_faktor": 0.92
+      },
+      "ausruestung_svg": {
+        "helm": "totenkopf_krone_oder_vampir_kragen",
+        "waffe": "seelenklinge_seuchenstab_oder_blutklauen",
+        "schild": "knochen_bollwerk",
+        "projektil": "seelenriss_oder_faulnis_wolke",
+        "akzent_farbe": "#2dd4bf"
+      }
+    }
+  ],
+  "boss_sondermodelle": [
+    {
+      "boss_id": "archivar_malakor",
+      "name": "Archivar Malakor",
+      "skalierung": 1.3,
+      "waffe": "sternenschluessel_stab",
+      "aura": "violett_schwarze_leeren_ringe",
+      "akzent_farbe": "#6366f1"
+    },
+    {
+      "boss_id": "vael_thar_avatar",
+      "name": "Avatar von Vael-Thar, Verschlinger des Atems",
+      "skalierung": 1.65,
+      "waffe": "vier_schwebende_leeren_klingen",
+      "aura": "pulsierende_stille_und_sternenriss",
+      "akzent_farbe": "#38bdf8"
+    }
+  ]
+}

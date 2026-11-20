@@ -130,6 +130,40 @@ for (const g of p210["10_manaSystemAndPotions"].newManaPotions) add(g);
 for (const g of katalog.equipmentCatalog) add(g);
 add(p161.missingCatalogItemFix);
 for (const g of katalog.partyRelics) add(g, { tier: 4 });
+// ---- Spezifikation v2.6.0–2.6.16 (Henry, 19. 11. 2026, quellen/henry/v260/module.json aus „friss das.docx“) ----
+const v260Liste = JSON.parse(fs.readFileSync(path.join(__dirname, "henry", "v260", "module.json"), "utf8"));
+const v260Modul = (id) => v260Liste.find((m) => (m.module_id ?? m.patch_id ?? m.bundle_id) === id);
+// Tier-3/4-Ausrüstung (2.6.5): Werte stehen schon in der Spielskala (wie Tränke 10/24/51) und werden nicht durch 3,5 geteilt.
+const v260Slots = { MAIN_HAND: "RECHTE_HAND", OFF_HAND: "LINKE_HAND", ARMOR_CHEST: "KOERPER", HELMET: "KOPF", BOOTS: "BEINE",
+  GLOVES: "HAENDE", GROUP_RELIC: "GRUPPEN_RELIKT" };
+const v260Kategorie = { DOLCH_KURZSCHWERT: "DOLCH_KLINGE", ZAUBERFOKUS: "FOKUS_STAB", SCHWERT_AXT: "EINHAND", BOGEN_ARMBRUST: "FERNKAMPF_BOGEN",
+  SCHWARZPULVER_FERNKAMPF: "SCHWARZPULVER_GEWEHR", ALCHEMIE_WERKZEUG: "CHIRURG_NEBENHAND" };
+const v260Stats = { weapon_attack: "attack", armor: "armor", max_hp: "maxHp", crit_chance_pct: "critChance", armor_penetration: "armorPenFlat",
+  evasion_interval_bonus: "evasionInterval", staerke: "strength", geschick: "agility", intelligenz: "mind", willenskraft: "willpower",
+  charisma: "charisma", max_mana: "maxMana", max_stamina: "maxStamina", starting_ember_shield_pct: "emberShieldPct",
+  heal_and_dot_bonus_pct: "healPct", heal_and_fire_bonus_pct: "healPct", damage_bonus_pct: "damagePct", all_attributes_bonus: "allAttributes",
+  travel_ambush_reduction_pct: "ambushReductionPct", party_damage_bonus_pct: "partyDamagePct", party_armor_bonus: "partyArmor",
+  moral_loss_reduction_pct: "moralLossReductionPct" };
+const v260Handel = v260Modul("ASCHENKRONE_V265_TIER3_TIER4_MERCHANT_RULES");
+for (const modul of ["ASCHENKRONE_V265_TIER3_TIER4_ITEMS", "ASCHENKRONE_V265_TIER3_TIER4_RANGED_OFFHAND", "ASCHENKRONE_V265_TIER3_TIER4_SUBSLOTS"]) {
+  for (const it of v260Modul(modul).items) {
+    const amulett = it.slot === "RING_OR_AMULET" && /Amulett/i.test(it.name);
+    const slot = it.slot === "RING_OR_AMULET" ? (amulett ? "HALS" : "RING") : v260Slots[it.slot];
+    pruefe(slot, "v2.6.5 " + it.item_id + ": Platz " + it.slot);
+    const regel = v260Handel.merchant_tier_unlocks.find((r) => r.item_tier === it.tier);
+    const kategorie = it.weapon_type ? v260Kategorie[it.weapon_type] : it.armor_class ?? (it.slot === "OFF_HAND" ? (/schild/i.test(it.name) ? "SCHILD"
+      : /Kodex/i.test(it.name) ? "FOKUS_RELIQUIE" : "DOLCH_KLINGE") : "SCHMUCK");
+    pruefe(kategorie, "v2.6.5 " + it.item_id + ": Kategorie");
+    add({ id: it.item_id, name: it.name, slot, equipCategory: kategorie, magicTag: it.tag === "NORMAL_ITEM" ? "NORMAL" : it.tag, tier: it.tier,
+      source: ["KAUF", "CRAFT_STADT"], baseBuyPrice: it.buy_price_silver, baseSellPrice: Math.round(it.buy_price_silver / 2),
+      craftRecipe: { building: regel.required_building_for_crafting.replace(/^BLD_/, "").replace("AHNEN_RUNENSCHMIEDE", "RUNENSCHMIEDE"),
+        silver: Math.round(it.buy_price_silver * 0.55), materials: Object.entries(regel.crafting_material_cost).map(([id, count]) => ({ id, count })) },
+      stats: Object.fromEntries(Object.entries(it.stats).map(([k, v]) => [v260Stats[k] ?? k, v])),
+      klassen: it.eligible_classes === "ALL_HUMAN_CLASSES" ? null : it.eligible_classes.map((k) => k === "BLUTRITTER_DER_KRONE" ? "BLUTRITTER" : k),
+      stadtStufe: regel.required_city_tier, ...(it.requires_building_optional ? { gebaeudeOptional: it.requires_building_optional } : {}),
+      spielskala: true, v260: true });
+  }
+}
 const ausruestungsRechte = Object.fromEntries(Object.entries(oekonomie.classEquipmentPermissions).map(([k, v]) => [k, { ruestung: v.armorTypes, waffen: v.weaponTypes }]));
 const handwerk = [...oekonomie.fieldCraftingRecipes, p210["10_manaSystemAndPotions"].manaPotionFieldRecipe];
 const schmiede = { schrott: oekonomie.smithingSystem.smeltScrapRecipe, stufen: oekonomie.smithingSystem.upgradeLevels };
@@ -138,6 +172,21 @@ for (const r of handwerk) for (const z of [...r.ingredients.map((i) => i.id), r.
 // ---- Gegner (Gegnerdatei 1.5.0, Silber und Beutestufen aus Patch 1.6.0) ----
 const silberStufen = Object.fromEntries(p160b.numberListsAndRangesPatch.enemySilverAndTierLookup.map((e) => [e.enemyId, e]));
 const gegnerRegionen = {};
+// Patch 2.6.19 (Henry, B6): Miniboss „Wulfgar der Eidlose“ heißt „Varg der Eidlose“ (Gefährte Wulfgar Rossbrecher behält den Namen).
+const v2619 = JSON.parse(fs.readFileSync(path.join(__dirname, "henry", "v2619", "entscheidungen-b1-b11.json"), "utf8")).entscheidungen_b1_bis_b11;
+// Henry, 20. 11. 2026: Marsch-Animation und Rückreise-Pflicht (zweites JSON mit schema_version 2.6.19).
+const v2619marsch = JSON.parse(fs.readFileSync(path.join(__dirname, "henry", "v2619", "marsch-und-rueckreise.json"), "utf8"));
+// Henry, 20. 11. 2026: Globales Ort-Gate (drittes JSON mit schema_version 2.6.19).
+const v2619ortGate = JSON.parse(fs.readFileSync(path.join(__dirname, "henry", "v2619", "ort-gate.json"), "utf8"));
+// Henry, 20. 11. 2026: Vier Schwierigkeitsgrade mit Hardcore (viertes JSON mit schema_version 2.6.19).
+const v2619schwierigkeit = JSON.parse(fs.readFileSync(path.join(__dirname, "henry", "v2619", "schwierigkeitsgrade.json"), "utf8"));
+// Henrys Kampf-Paket (20. 11. 2026): Animationen, 2D-Arena, Bühnen nach Region.
+const v2619kampf = Object.fromEntries([["animationen", "kampf-animationen.json"], ["arena", "kampfarena-2d.json"], ["buehnen", "kampfbuehnen.json"]]
+  .map(([k, datei]) => [k, JSON.parse(fs.readFileSync(path.join(__dirname, "henry", "v2619", datei), "utf8"))]));
+// Henrys Porträt-Paket (20. 11. 2026): feste Hauptfiguren, Welt-Pools und SVG-Fallbacks.
+const v2619portraets = Object.fromEntries([["engine", "npc-portraets-engine.json"], ["svgHaupt", "npc-portraets-svg-teil1.json"], ["svgPools", "npc-portraets-svg-teil2.json"]]
+  .map(([k, datei]) => [k, JSON.parse(fs.readFileSync(path.join(__dirname, "henry", "v2619", datei), "utf8"))]));
+const umbenannt = { [v2619.B6_miniboss_umbenennung.name_alt]: v2619.B6_miniboss_umbenennung.name_neu };
 for (const nr of [4, 5, 6]) {
   const d = lies("gegner-" + nr);
   const label = lies("gegner-" + (nr - 3)).regionLabel;
@@ -145,7 +194,7 @@ for (const nr of [4, 5, 6]) {
   gegnerRegionen[fraktionVon[d.factionRegion]] = { name: label, gegner: liste.map((e) => {
     const s = silberStufen[e.id];
     pruefe(s, "Silber fehlt für " + e.id);
-    return { id: e.id, name: e.name, titel: e.title ?? null, familie: e.family, schwierigkeit: e.difficulty, miniboss: e.miniboss,
+    return { id: e.id, name: umbenannt[e.name] ?? e.name, titel: e.title ?? null, familie: e.family, schwierigkeit: e.difficulty, miniboss: e.miniboss,
       minStufe: e.minLevel, maxStufe: e.maxLevel, orte: e.spawnEdges ?? null, werte: e.stats, schwaechen: e.weaknesses, resistenzen: e.resistances,
       faehigkeiten: e.skills, beute: { ...e.loot, silverRange: undefined, equipmentTierPool: undefined, silber: [s.silverMin, s.silverMax], stufen: [s.tierMin, s.tierMax] } };
   }) };
@@ -299,8 +348,14 @@ const schritte = p210["1_xpCurveLevels21To30"].exactStepCosts;
 const aufstieg = { maxStufe: 30, schritte: Object.fromEntries(Object.entries(schritte).map(([k, v]) => [k, v])), summe30: p210["1_xpCurveLevels21To30"].totalXpAtLevel30,
   werteJeStufe: stufen.levelProgression.masterLevels.statGainPerLevel,
   aktStufen: Object.fromEntries(Object.entries(p200["4_levelCap30AndXpCurve"].actLevelRanges).map(([k, v]) => [k, [v.min, v.max]])),
-  talentStufen: p160a.masterTalentSystem.unlockLevels, talentMaxRang: p160a.masterTalentSystem.maxRankPerTalent,
-  talente: p160a.masterTalentSystem.talentTree, signaturRaenge: { 10: 1, 15: 2, 20: 3, 25: 4 },
+  talentStufen: p160a.masterTalentSystem.unlockLevels, talentMaxRang: v260Modul("ASCHENKRONE_MASTER_TALENT_TREES").unlock_rules.max_rank_per_tree,
+  // Patch 2.6.2: fünf Meister-Talentbäume mit je drei unterschiedlichen Rängen (ersetzen die fünf Talente aus Patch 1.6.0).
+  talente: v260Modul("ASCHENKRONE_MASTER_TALENT_TREES").talent_trees.map((t) => ({ id: t.tree_id, name: t.name, category: t.archetype_focus,
+    effectPerRank: t.ranks.map((r) => "Rang " + r.rank + ": " + r.description).join(" "),
+    raenge: t.ranks.map((r) => ({ rang: r.rank, text: r.description, wirkung: r.effects })) })),
+  talentAlt: { MT_KLINGENSTURM: "TREE_EISERNE_VORHUT", MT_EISENWALL: "TREE_UNGEBROCHENER_SCHILDWALL", MT_RUNENRESONANZ: "TREE_RUNEN_UND_GLUTRESONANZ",
+    MT_SCHLACHTFUEHRER: "TREE_BANNERJARL", MT_GRENZLAEUFER: "TREE_SCHATTENPFAD_UND_LIST" },
+  signaturRaenge: { 10: 1, 15: 2, 20: 3, 25: 4 },
   ahnen: { name: stufen.ancestralPrestigeSystem.name, epJeRang: p160a.progressionMilestonesFix.prestigeXpPerRank,
     pfade: stufen.ancestralPrestigeSystem.perkTracks.map((t) => ({ id: t.id, name: t.name, max: t.maxPoints, wirkung: t.bonusPerPoint })) } };
 
@@ -320,7 +375,9 @@ if (fehler.length) {
   process.exit(1);
 }
 
-const daten = { rohstoffe, rufRaenge, rufAusloeser, taten, fraktionsHandel, reise, doerfer, zehnt, wiederaufbau, stadtZustand,
+// Übrige Module 2.6.0–2.6.16 unverändert in Henrys Format; die Regeln lesen sie über SY.daten.v260.
+const v260 = Object.fromEntries(v260Liste.map((m) => [m.module_id ?? m.patch_id ?? m.bundle_id, m]));
+const daten = { v260, v2619, v2619marsch, v2619ortGate, v2619schwierigkeit, v2619kampf, v2619portraets, rohstoffe, rufRaenge, rufAusloeser, taten, fraktionsHandel, reise, doerfer, zehnt, wiederaufbau, stadtZustand,
   kriegskasse, moral, gegenstaende, ausruestungsRechte, handwerk, schmiede, gegnerRegionen, beutePools, klassen, signaturRaenge,
   gebaeude, siedlungsStufen, garnison, phasen, vorgebaut, endgame: endgameAktivitaeten, meisterwerk, aufstieg, kampf: kampfRegeln, ansicht, menschenKlassen };
 const ziel = path.join(__dirname, "..", "spiel", "systeme-daten.js");

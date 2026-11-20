@@ -1,0 +1,281 @@
+{
+  "quelle": "Henry, Projekt-Thread 20. 11. 2026 11:23 Berlin (Porträt-Paket)",
+  "schema_version": "2.6.19",
+  "feature": "feste_hauptcharaktere_und_variable_npc_portraet_pools",
+  "target_files": [
+    "spiel/regeln.js",
+    "ui/dialog.js",
+    "ui/portraet_engine.js",
+    "style/dialog.css"
+  ],
+  "asset_ordner": "assets/portraits/",
+  "engine_regeln": {
+    "speichere_run_seed_im_spielstand": true,
+    "variante_bleibt_im_lauf_konstant": true,
+    "variante_wechselt_bei_neustart": true,
+    "lade_logik": [
+      "1. Pruefe ob PNG/WebP unter assets/portraits/{dateiname} existiert",
+      "2. Falls Datei fehlt: Rendere stilisiertes Dark-Fantasy-SVG-Portraet aus den Varianten-Merkmalen als Fallback"
+    ]
+  },
+  "feste_hauptcharaktere": [
+    {
+      "npc_id": "kronprinzessin_astrid",
+      "name": "Kronprinzessin Astrid",
+      "dateiname": "kronprinzessin_astrid.png",
+      "status": "bild_bereits_generiert",
+      "stil_prompt": "Nordic dark fantasy oil painting portrait, young determined princess Astrid, platinum blonde braided hair, narrow iron circlet, crimson fur collar over chainmail, stone castle window, gritty painterly brushwork"
+    },
+    {
+      "npc_id": "jarl_ragnvald",
+      "name": "Jarl Ragnvald",
+      "dateiname": "jarl_ragnvald.png",
+      "stil_prompt": "Nordic dark fantasy oil painting portrait, grim scarred middle-aged Jarl Ragnvald, long grey braided beard, scar across cheek, heavy bearskin cloak over scale armor, smoky timber hall background"
+    },
+    {
+      "npc_id": "ordens_kastellan",
+      "name": "Ordens-Kastellan",
+      "dateiname": "ordens_kastellan.png",
+      "stil_prompt": "Nordic dark fantasy oil painting portrait, ascetic grim knight commander, short cropped dark hair, glowing amber eyes, faint ash brand on forehead, blackened plate armor with ember brooch, dark citadel brazier glow"
+    },
+    {
+      "npc_id": "priorin_sigrid",
+      "name": "Priorin Sigrid",
+      "dateiname": "priorin_sigrid.png",
+      "stil_prompt": "Nordic dark fantasy oil painting portrait, battle-worn stern prioress Sigrid, dark hair under ash-grey veil, compassionate yet hard amber eyes, simple iron cross on dark monastic robes, stone cloister background"
+    },
+    {
+      "npc_id": "gildenmeister_torben",
+      "name": "Gildenmeister Torben",
+      "dateiname": "gildenmeister_torben.png",
+      "stil_prompt": "Nordic dark fantasy oil painting portrait, calculating older merchant guildmaster Torben, silver-grey hair, trimmed goatee, heavy dark wool coat with tarnished silver buttons, dim harbor counting house"
+    },
+    {
+      "npc_id": "hafenmeisterin_ylva",
+      "name": "Hafenmeisterin Ylva",
+      "dateiname": "hafenmeisterin_ylva.png",
+      "stil_prompt": "Nordic dark fantasy oil painting portrait, weathered defiant female harbormaster Ylva, tousled auburn hair, notched eyebrow scar, salt-stained leather jerkin and scarf, foggy wooden pier background"
+    },
+    {
+      "npc_id": "verhuellter_glutpriester_geheim",
+      "name": "Verhüllter Glutpriester",
+      "dateiname": "geheim_verhuellter_glutpriester.png",
+      "geheimnis_sperre": true,
+      "stil_prompt": "Nordic dark fantasy oil painting portrait, tall figure in heavy ash-grey hooded robe, deep shadow obscuring entire face except shadowed chin, glowing ember brooch on chest, dark temple pillars"
+    },
+    {
+      "npc_id": "bote_der_stillen_feder_geheim",
+      "name": "Grauer Bote",
+      "dateiname": "geheim_grauer_bote.png",
+      "geheimnis_sperre": true,
+      "stil_prompt": "Nordic dark fantasy oil painting portrait, inconspicuous courier in high weathered travel collar and wide dark hat casting deep shadow over face, single black crow feather pinned to lapel, dim tavern corner"
+    }
+  ],
+  "variable_welt_npc_pools": [
+    {
+      "archetyp": "bauer_und_dorfbewohner",
+      "auswahl_modus": "deterministisch_nach_run_seed_und_ort",
+      "varianten": [
+        {
+          "id": "bauer_var_1",
+          "dateiname": "pool_bauer_01.png",
+          "merkmale": {
+            "geschlecht": "maennlich",
+            "alter": "alt",
+            "bart": "grauer_stoppelbart",
+            "kleidung": "grobe_wollkappe_und_leinen"
+          },
+          "stil_prompt": "Nordic dark fantasy oil painting portrait, gaunt weathered old farmer, hollow cheeks, grey stubble, coarse wool cap and patched linen tunic, overcast muddy village background"
+        },
+        {
+          "id": "bauer_var_2",
+          "dateiname": "pool_bauer_02.png",
+          "merkmale": {
+            "geschlecht": "weiblich",
+            "alter": "mittel",
+            "haar": "kopftuch_dunkel",
+            "kleidung": "schwerer_wollschal"
+          },
+          "stil_prompt": "Nordic dark fantasy oil painting portrait, resilient middle-aged peasant woman, soot-smudged face, dark headscarf, thick worn wool shawl, smoky rural homestead background"
+        },
+        {
+          "id": "bauer_var_3",
+          "dateiname": "pool_bauer_03.png",
+          "merkmale": {
+            "geschlecht": "maennlich",
+            "alter": "jung",
+            "haar": "zerzaust_braun",
+            "kleidung": "lederschuerze"
+          },
+          "stil_prompt": "Nordic dark fantasy oil painting portrait, wary young farmhand, tousled brown hair, dirt on brow, worn leather apron over coarse shirt, grey northern sky"
+        }
+      ]
+    },
+    {
+      "archetyp": "schmied",
+      "auswahl_modus": "deterministisch_nach_run_seed",
+      "varianten": [
+        {
+          "id": "schmied_var_1",
+          "dateiname": "pool_schmied_01.png",
+          "merkmale": {
+            "geschlecht": "maennlich",
+            "alter": "mittel",
+            "bart": "breiter_russiger_vollbart"
+          },
+          "stil_prompt": "Nordic dark fantasy oil painting portrait, broad-shouldered blacksmith, soot-stained face, thick dark beard, heavy scorched leather apron, warm orange forge fire glow"
+        },
+        {
+          "id": "schmied_var_2",
+          "dateiname": "pool_schmied_02.png",
+          "merkmale": {
+            "geschlecht": "weiblich",
+            "alter": "mittel",
+            "haar": "kurzer_zopf_rußig"
+          },
+          "stil_prompt": "Nordic dark fantasy oil painting portrait, muscular female armorer, ash-streaked cheek, tied-back dark hair, heavy leather smithing vest, glowing embers in dark smithy"
+        },
+        {
+          "id": "schmied_var_3",
+          "dateiname": "pool_schmied_03.png",
+          "merkmale": {
+            "geschlecht": "maennlich",
+            "alter": "alt",
+            "haar": "halbglatze_narben"
+          },
+          "stil_prompt": "Nordic dark fantasy oil painting portrait, elderly one-eyed master weaponsmith, burn scars on forearms, white beard, glowing hot steel reflection on face"
+        }
+      ]
+    },
+    {
+      "archetyp": "schankwirt",
+      "auswahl_modus": "deterministisch_nach_run_seed",
+      "varianten": [
+        {
+          "id": "wirt_var_1",
+          "dateiname": "pool_wirt_01.png",
+          "merkmale": {
+            "geschlecht": "weiblich",
+            "alter": "mittel",
+            "haar": "hochgesteckter_knoten"
+          },
+          "stil_prompt": "Nordic dark fantasy oil painting portrait, pragmatic tavern keeper woman, chestnut hair in messy bun, wool bodice, warm hearth firelight in smoky wooden inn"
+        },
+        {
+          "id": "wirt_var_2",
+          "dateiname": "pool_wirt_02.png",
+          "merkmale": {
+            "geschlecht": "maennlich",
+            "alter": "aelter",
+            "bart": "buschieger_schnurrbart"
+          },
+          "stil_prompt": "Nordic dark fantasy oil painting portrait, stocky grizzled innkeeper, bushy grey mustache, stained linen shirt and leather vest, dim candlelit tavern background"
+        }
+      ]
+    },
+    {
+      "archetyp": "wachhauptmann_aushang",
+      "auswahl_modus": "deterministisch_nach_run_seed",
+      "varianten": [
+        {
+          "id": "wache_var_1",
+          "dateiname": "pool_wache_01.png",
+          "merkmale": {
+            "geschlecht": "maennlich",
+            "alter": "mittel",
+            "helm": "nasenhelm"
+          },
+          "stil_prompt": "Nordic dark fantasy oil painting portrait, tired city watch captain, dented iron nasal helm, chainmail coif, stubble, cold rainy stone gatehouse"
+        },
+        {
+          "id": "wache_var_2",
+          "dateiname": "pool_wache_02.png",
+          "merkmale": {
+            "geschlecht": "weiblich",
+            "alter": "mittel",
+            "narbe": "stirnnarbe"
+          },
+          "stil_prompt": "Nordic dark fantasy oil painting portrait, stern female garrison sergeant, short dark hair, scar on brow, scratched brigandine armor, torchlit guard post"
+        }
+      ]
+    },
+    {
+      "archetyp": "kraeuterheilerin",
+      "auswahl_modus": "deterministisch_nach_run_seed",
+      "varianten": [
+        {
+          "id": "heiler_var_1",
+          "dateiname": "pool_heiler_01.png",
+          "merkmale": {
+            "geschlecht": "weiblich",
+            "alter": "alt",
+            "haar": "silberne_straehnen"
+          },
+          "stil_prompt": "Nordic dark fantasy oil painting portrait, wise elderly herbalist woman, silver hair with dried herbs, moss-green cloak, bone amulet, dim apothecary shelves"
+        },
+        {
+          "id": "heiler_var_2",
+          "dateiname": "pool_heiler_02.png",
+          "merkmale": {
+            "geschlecht": "maennlich",
+            "alter": "mittel",
+            "kleidung": "leder_pestmaske_am_guertel"
+          },
+          "stil_prompt": "Nordic dark fantasy oil painting portrait, pale weary plague healer, dark circles under eyes, stained dark wool coat, glass vials in background"
+        }
+      ]
+    },
+    {
+      "archetyp": "kontor_verwalter",
+      "auswahl_modus": "deterministisch_nach_run_seed",
+      "varianten": [
+        {
+          "id": "kontor_var_1",
+          "dateiname": "pool_kontor_01.png",
+          "merkmale": {
+            "geschlecht": "maennlich",
+            "alter": "aelter",
+            "kleidung": "dunkler_tuchrock"
+          },
+          "stil_prompt": "Nordic dark fantasy oil painting portrait, suspicious elderly quartermaster, ink-stained fingers, dark wool coat with brass chain, stacked crates and ledgers"
+        },
+        {
+          "id": "kontor_var_2",
+          "dateiname": "pool_kontor_02.png",
+          "merkmale": {
+            "geschlecht": "weiblich",
+            "alter": "mittel",
+            "kleidung": "pelzbesetzte_weste"
+          },
+          "stil_prompt": "Nordic dark fantasy oil painting portrait, sharp-eyed female trade factor, braided dark hair, fur-trimmed vest, parchment scrolls in dim warehouse"
+        }
+      ]
+    },
+    {
+      "archetyp": "soeldner_anwerber",
+      "auswahl_modus": "deterministisch_nach_run_seed",
+      "varianten": [
+        {
+          "id": "soeldner_var_1",
+          "dateiname": "pool_soeldner_01.png",
+          "merkmale": {
+            "geschlecht": "maennlich",
+            "alter": "vernarbt",
+            "accessoire": "augenklappe"
+          },
+          "stil_prompt": "Nordic dark fantasy oil painting portrait, scarred one-eyed mercenary recruiter, leather eyepatch, sly grin, patched leather armor, shadowy alleyway"
+        },
+        {
+          "id": "soeldner_var_2",
+          "dateiname": "pool_soeldner_02.png",
+          "merkmale": {
+            "geschlecht": "weiblich",
+            "alter": "jung_hart",
+            "haar": "rasierte_seite"
+          },
+          "stil_prompt": "Nordic dark fantasy oil painting portrait, hardened sellsword woman, side-shaved dark hair, wolf pelt over scarred mail, cold smirk"
+        }
+      ]
+    }
+  ]
+}

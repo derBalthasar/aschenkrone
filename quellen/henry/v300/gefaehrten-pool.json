@@ -1,0 +1,121 @@
+{
+  "schema_version": "3.0.0",
+  "feature": "voelker_uebergreifender_gefaehrten_pool_und_hauptstadt_tausch",
+  "target_files": [
+    "spiel/regeln.js",
+    "spiel/handlung_akte.js",
+    "ui/gefaehrten.js",
+    "sim/simulator.js"
+  ],
+  "trupp_und_pool_regeln": {
+    "max_aktive_gruppe": 4,
+    "max_pool_kapazitaet": 16,
+    "tausch_bedingung": {
+      "nur_in_hauptstaedten": true,
+      "erlaubte_orte_typ": "hauptstadt_einer_der_15_fraktionen",
+      "erfordert_nicht_geaechtet_oder_soeldner_bypass": true
+    },
+    "untote_sperre": {
+      "lebende_gefaehrten_verboten": true,
+      "pool_nur_untote_und_korrumpierte": true
+    }
+  },
+  "freischaltung_nach_spielfortschritt": [
+    {
+      "phase": "akt_1_heimat",
+      "bedingung": "start_fraktion",
+      "verfuegbare_gefaehrten": "Eigene Fraktions-Gefährten (Q10)"
+    },
+    {
+      "phase": "akt_2_und_3_schwester_zweige",
+      "bedingung": "schwester_zweig_abgeschlossen",
+      "verfuegbare_gefaehrten": "Abgesandte der geeinten Schwester-Fraktionen des eigenen Volkes"
+    },
+    {
+      "phase": "akt_5_uebersee_buendnis",
+      "bedingung": "buendnis_mit_fremdem_volk_geschlossen",
+      "verfuegbare_gefaehrten": "Elite-Champion des verbündeten Volkes (kostenlos im Pool)"
+    },
+    {
+      "phase": "akt_5_uebersee_eroberung",
+      "bedingung": "fremdes_volk_erobert",
+      "verfuegbare_gefaehrten": "Nur teure Söldner-Begleiter in Häfen (Silber-Kosten, -5 Moral)"
+    }
+  ],
+  "fremdvoelker_elite_gefaehrten": [
+    {
+      "id": "gef_menschen_valen",
+      "name": "Ritterhauptmann Cassian",
+      "volk": "menschen",
+      "fraktion": "Kaiserreich von Valen",
+      "klasse_rolle": "tank_schildwall",
+      "freischaltung": "buendnis_menschen"
+    },
+    {
+      "id": "gef_elfen_aethel",
+      "name": "Sternenklinge Sylas",
+      "volk": "elfen",
+      "fraktion": "Hochelfen von Aethel",
+      "klasse_rolle": "magie_aoe",
+      "freischaltung": "buendnis_elfen"
+    },
+    {
+      "id": "gef_elfen_vael",
+      "name": "Schattenweberin Nyxara",
+      "volk": "elfen",
+      "fraktion": "Nachtelfen von Vael’Dorn",
+      "klasse_rolle": "schurke_assassine",
+      "freischaltung": "buendnis_elfen"
+    },
+    {
+      "id": "gef_zwerge_khaz",
+      "name": "Runenmeisterin Dagna",
+      "volk": "zwerge",
+      "fraktion": "Bergzwerge von Khaz-Thar",
+      "klasse_rolle": "support_buff",
+      "freischaltung": "buendnis_zwerge"
+    },
+    {
+      "id": "gef_orks_grom",
+      "name": "Kriegsrufer Nazgrel",
+      "volk": "orks",
+      "fraktion": "Ehrenklans von Grom’Kar",
+      "klasse_rolle": "nahkampf_offensiv",
+      "freischaltung": "buendnis_orks"
+    }
+  ],
+  "voelker_synergie_boni": [
+    {
+      "kombination": [
+        "menschen",
+        "zwerge"
+      ],
+      "name": "Pakt aus Stahl & Flamme",
+      "effekt": "+1 Rüstung für die gesamte aktive Gruppe"
+    },
+    {
+      "kombination": [
+        "elfen",
+        "orks"
+      ],
+      "name": "Zorn der Alten Wildnis",
+      "effekt": "+10 % Ausweichen in der ersten Kampfphase"
+    },
+    {
+      "kombination": [
+        "menschen",
+        "elfen"
+      ],
+      "name": "Astrale Kriegsführung",
+      "effekt": "+1 Start-Kampfressource (Flammeneifer / Astralstrom)"
+    },
+    {
+      "kombination": [
+        "zwerge",
+        "orks"
+      ],
+      "name": "Donner & Amboss",
+      "effekt": "+12 % kritischer Schaden im Nahkampf"
+    }
+  ]
+}

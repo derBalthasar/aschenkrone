@@ -103,18 +103,119 @@ button.map-marker[aria-pressed="true"] { background: #694623; }
 .fighter-card img { width: 100%; max-height: 9rem; aspect-ratio: 3/2; object-fit: cover; }
 .fighter-card progress { width: 100%; height: .55rem; accent-color: #d58050; }
 .battle-target { grid-column: 1 / -1; margin: 0; color: #ffd28c; }
-.fighter-lunge { animation: battle-lunge var(--battle-step) ease-out; z-index: 2; }
-.enemy-lunge { animation: enemy-lunge var(--battle-step) ease-out; z-index: 2; }
-.fighter-hit { animation: battle-hit var(--battle-step) ease-out; }
+.fighter-lunge { animation: battle-lunge var(--ausfall-dauer, 240ms) ease-out; z-index: 2; }
+.enemy-lunge { animation: enemy-lunge var(--ausfall-dauer, 240ms) ease-out; z-index: 2; }
+.fighter-hit { animation: battle-hit 260ms ease-out; }
+.fighter-hit::after { content: ""; position: absolute; inset: 0; background: var(--treffer-flash, rgba(185, 28, 28, .45)); pointer-events: none; animation: treffer-flash 300ms ease-out forwards; }
+.fighter-dodge { animation: battle-dodge 280ms ease-out; }
 .fighter-cover { animation: battle-cover var(--battle-step) ease-out; }
-.hit-value { position: absolute; top: 10%; right: 10%; z-index: 4; font-weight: bold; color: #ffccae; background: #501e14; padding: .15rem .3rem; pointer-events: none; }
-.healing-value { background: #263820; color: #edf8cf; }
-@keyframes battle-lunge { 45% { transform: translateX(9px) scale(1.05); } }
-@keyframes enemy-lunge { 45% { transform: translateX(-9px) scale(1.05); } }
-@keyframes battle-hit { 45% { filter: brightness(1.65) saturate(1.25); transform: translateX(3px); } }
+.hit-value { position: absolute; top: 10%; right: 10%; z-index: 4; font-weight: bold; color: #ffccae; background: #501e14cc; padding: .15rem .3rem; pointer-events: none;
+  transform: scale(var(--fct-skala, 1)); text-shadow: 0 1px 2px #000; animation: fct-steigen 850ms ease-out forwards; }
+.healing-value, .hit-value.fct-heilung { background: #263820cc; }
+.hit-value.fct-kritischer_treffer { background: #451a03dd; }
+/* Kampf-Paket: Ausfallschritt 14 px über 240 ms, zum Gegner hin (Karten stehen nebeneinander). */
+@keyframes battle-lunge { 45% { transform: translateX(var(--ausfall, 14px)) scale(1.05); } }
+@keyframes enemy-lunge { 45% { transform: translateX(var(--ausfall-gegner, -14px)) scale(1.05); } }
+@keyframes battle-hit { 20% { transform: translateX(var(--treffer-shake, 6px)); } 40% { transform: translateX(calc(var(--treffer-shake, 6px) * -1)); }
+  60% { transform: translateX(calc(var(--treffer-shake, 6px) * .6)); } 80% { transform: translateX(calc(var(--treffer-shake, 6px) * -.4)); } }
+@keyframes treffer-flash { from { opacity: 1; } to { opacity: 0; } }
+@keyframes battle-dodge { 50% { transform: translateX(-12px); opacity: .7; } }
 @keyframes battle-cover { 45% { box-shadow: 0 0 .45rem #ffcc7a; } }
-@media (prefers-reduced-motion: reduce) {
-  .fighter-lunge, .enemy-lunge, .fighter-hit, .fighter-cover { animation: none; }
+@keyframes fct-steigen { from { translate: 0 0; opacity: 1; } 70% { opacity: 1; } to { translate: 0 -28px; opacity: 0; } }
+.lp-huelle { position: relative; }
+.lp-nachzug { position: absolute; pointer-events: none; z-index: 1; border-radius: 2px; }
+
+/* ---- 2D-Kampfarena in Seitenansicht (Henry, 20. 11. 2026) ---- */
+.kampf-arena { grid-column: 1 / -1; position: relative; height: var(--arena-hoehe, 220px); overflow: hidden; border: 1px solid #8b7050;
+  background: var(--himmel); isolation: isolate; }
+.kampf-arena::before { content: ""; position: absolute; inset: 40% 0 30%; background: radial-gradient(ellipse at 50% 60%, var(--glimmen), transparent 70%); z-index: 0; }
+.arena-boss-aura::after { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(circle at 76% 50%, rgba(153, 27, 27, .55), transparent 55%); animation: boss-aura 2.4s ease-in-out infinite; }
+@keyframes boss-aura { 50% { opacity: .35; transform: scale(1.06); } }
+.arena-kulisse { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+.arena-kulisse .bk-fern { fill: #0b0a09; opacity: .78; }
+.arena-kulisse .bk-nah { fill: #1a1512; }
+.arena-kulisse .bk-rauch { fill: none; stroke: #57534e; stroke-width: 10; stroke-linecap: round; opacity: .45; }
+.arena-kulisse .bk-glut { fill: none; stroke: #f97316; stroke-width: 2.5; opacity: .85; }
+.arena-kulisse .bk-runen { fill: none; stroke: var(--partikel); stroke-width: 1.4; opacity: .55; }
+.arena-kulisse .bk-detail { fill: none; stroke: #3f3a33; stroke-width: 2; }
+.arena-kulisse .bk-see { fill: #0b1220; }
+.arena-kulisse .bk-mast { fill: #0b0f19; stroke: #1f2937; stroke-width: 2; opacity: .8; }
+.arena-kulisse .bk-nebel { fill: #94a3b8; opacity: .14; }
+.arena-kulisse .bk-schnee { fill: #e2e8f0; opacity: .75; }
+[data-buehne="salzklippen_und_kueste"] .bk-nah { fill: #241c15; }
+[data-buehne="eispass_und_norden"] .bk-nah { fill: #cbd5e1; opacity: .9; }
+[data-buehne="eispass_und_norden"] .bk-detail { stroke: #64748b; }
+[data-buehne="altes_reich_ruinen"] .bk-fern { fill: #111827; opacity: .9; }
+[data-buehne="altes_reich_ruinen"] .bk-nah { fill: #1e1b2e; }
+[data-buehne="duesterwald_und_grenzhaus"] .bk-fern { fill: #04150b; opacity: .9; }
+[data-buehne="duesterwald_und_grenzhaus"] .bk-nah { fill: #1c1610; }
+.arena-partikel { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.arena-partikel i { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: var(--partikel); opacity: .8; animation: partikel-steigen 3.4s linear infinite; }
+.partikel-schraeger_kuestenregen_und_nebel i { width: 1px; height: 12px; border-radius: 0; transform: rotate(18deg); animation-name: partikel-regen; opacity: .55; }
+.partikel-schneegestoeber i { width: 4px; height: 4px; animation-name: partikel-schnee; }
+.partikel-runen_staub_schwebend i { box-shadow: 0 0 6px var(--partikel); animation-name: partikel-schweben; }
+.partikel-bodennebel_drift i { width: 70px; height: 14px; top: auto !important; bottom: 18%; filter: blur(6px); opacity: .28; animation-name: partikel-nebel; }
+@keyframes partikel-steigen { from { transform: translateY(40px); opacity: 0; } 20% { opacity: .9; } to { transform: translateY(-90px) translateX(12px); opacity: 0; } }
+@keyframes partikel-regen { from { translate: 0 -60px; } to { translate: -26px 220px; } }
+@keyframes partikel-schnee { from { translate: 0 -40px; opacity: 0; } 15% { opacity: .9; } to { translate: -40px 200px; opacity: .2; } }
+@keyframes partikel-schweben { 50% { translate: 6px -14px; opacity: .3; } }
+@keyframes partikel-nebel { from { translate: -60px 0; } to { translate: 80px 0; } }
+.arena-figuren { position: absolute; inset: 0; z-index: 2; }
+.arena-figur { position: absolute; width: 64px; height: 84px; translate: -50% -70%; scale: var(--skala, 1); transform-origin: 50% 100%; }
+.arena-figur .rig, .arena-sprite { width: 100%; height: 100%; overflow: visible; }
+.arena-gegner .rig, .arena-gegner .arena-sprite { transform: scaleX(-1); }
+.arena-sprite { object-fit: contain; filter: drop-shadow(0 3px 2px #000a); }
+.arena-figur .rig-bestie { width: 120%; margin-left: -10%; }
+.arena-name { position: absolute; left: 50%; bottom: -1.05rem; translate: -50% 0; white-space: nowrap; font-size: .62rem; color: #f3e1bf; text-shadow: 0 1px 2px #000; opacity: .85; }
+.ist-am-zug { z-index: 3; }
+.ist-am-zug .arena-name { color: #ffd28c; opacity: 1; }
+.rig { fill: #2b2420; stroke: #0c0a09; stroke-width: 1.2; stroke-linejoin: round; filter: drop-shadow(0 0 1.5px rgba(255, 214, 170, .35)); }
+.rig-schatten { fill: #000; stroke: none; opacity: .45; }
+.rig-beine path { fill: #1f1a16; }
+.rig-torso { fill: #3a3029; }
+.rig-haut { fill: #c8a27e; }
+.rig-helm, .rig-metall { fill: #6b7280; }
+.rig-akzent { fill: var(--akzent); }
+.rig-holz { fill: none; stroke: #7c5a3a; stroke-width: 3; stroke-linecap: round; }
+.rig-sehne { stroke: #d6d3d1; stroke-width: .8; }
+.rig-rost { fill: #92643f; }
+.rig-schild { fill: #57534e; }
+.rig-holzschild { fill: #7c5a3a; }
+.rig-glut { fill: #f59e0b; stroke: #b45309; }
+.rig-arm { fill: none; stroke: #3a3029; stroke-width: 5; stroke-linecap: round; }
+.rig-aura { fill: #991b1b; stroke: none; opacity: .4; filter: blur(4px); animation: boss-aura 1.8s ease-in-out infinite; }
+.rig-waffenarm { transform-origin: 38px 26px; transform-box: view-box; transition: transform 180ms ease-out; }
+.rig-bestie .rig-waffenarm { transform-origin: 62px 40px; }
+.rig-schwung .rig-waffenarm { transform: rotate(70deg); }
+.rig-hebepose .rig-waffenarm { transform: rotate(-55deg); }
+.rig-idle-breathe .rig-torso, .rig-idle-breathe .rig-kopf { animation: rig-atmen 1800ms ease-in-out infinite; animation-delay: inherit; transform-box: view-box; transform-origin: 30px 54px; }
+@keyframes rig-atmen { 50% { transform: scaleY(1.025) translateY(-.6px); } }
+.rig-hit-recoil { animation: rig-treffer 260ms ease-out; }
+.rig-hit-recoil .rig, .rig-hit-recoil .arena-sprite { filter: drop-shadow(0 0 5px #dc2626) drop-shadow(0 0 2px #fca5a5) brightness(1.5); }
+@keyframes rig-treffer { 30% { translate: calc(-50% - 8px) -70%; } 60% { translate: calc(-50% + 4px) -70%; } }
+.arena-gegner.rig-hit-recoil { animation-name: rig-treffer-gegner; }
+@keyframes rig-treffer-gegner { 30% { translate: calc(-50% + 8px) -70%; } 60% { translate: calc(-50% - 4px) -70%; } }
+.rig-geheilt .rig { filter: drop-shadow(0 0 6px #4ade80); }
+.rig-collapse-ash { animation: rig-asche 550ms ease-in forwards; }
+@keyframes rig-asche { to { opacity: .18; filter: grayscale(1) blur(1px); transform: rotate(-80deg) translateY(10px); } }
+.arena-gegner.rig-collapse-ash { animation-name: rig-asche-gegner; }
+@keyframes rig-asche-gegner { to { opacity: .18; filter: grayscale(1) blur(1px); transform: rotate(80deg) translateY(10px); } }
+.ist-besiegt .arena-name { opacity: .4; }
+.arena-titel { position: absolute; left: .5rem; top: .35rem; z-index: 3; font-size: .7rem; letter-spacing: .04em; color: #f3e1bfcc; text-shadow: 0 1px 2px #000; }
+.arena-text { position: absolute; z-index: 5; translate: -50% 0; font-weight: 800; font-size: 1rem; white-space: nowrap; pointer-events: none;
+  text-shadow: 0 0 3px #000, 0 2px 2px #000; scale: var(--fct-skala, 1); animation: arena-text-steigen 850ms ease-out forwards; }
+@keyframes arena-text-steigen { from { transform: translateY(0); opacity: 1; } 70% { opacity: 1; } to { transform: translateY(var(--fct-aufstieg, -28px)); opacity: 0; } }
+.arena-effekt { position: absolute; z-index: 4; width: 54px; height: 54px; translate: -50% -50%; fill: none; stroke: currentColor; stroke-width: 7; stroke-linecap: round;
+  stroke-dasharray: 160; stroke-dashoffset: 160; animation: effekt-schnitt 320ms ease-out forwards; filter: drop-shadow(0 0 4px currentColor); pointer-events: none; }
+.effekt-schild_block { fill: #94a3b833; stroke-width: 5; }
+@keyframes effekt-schnitt { 50% { stroke-dashoffset: 0; opacity: 1; } to { stroke-dashoffset: 0; opacity: 0; } }
+.arena-projektil { position: absolute; z-index: 4; width: 14px; height: 4px; margin-left: -7px; background: #d6d3d1; border-radius: 2px; pointer-events: none; }
+.projektil-glut_kugel { width: 12px; height: 12px; border-radius: 50%; background: radial-gradient(circle, #fde68a, #f59e0b 50%, #b91c1c); box-shadow: 0 0 10px #f59e0b; }
+.projektil-runen_blitz { width: 10px; height: 10px; border-radius: 2px; rotate: 45deg; background: #38bdf8; box-shadow: 0 0 10px #38bdf8; }
+@media (max-width: 40rem) {
+  .arena-figur { width: 48px; height: 63px; }
+  .arena-name { display: none; }
 }
 #training p, .trade-list h3 { flex-basis: 100%; }
 .inventory-list .rarity[data-quality="Ungewöhnlich"] { color: #bcd9a0; }
@@ -763,7 +864,7 @@ h1, h2 { font-family: var(--font-title); letter-spacing: .01em; }
 .hero-head .glut-help p { color: var(--ivory); }
 
 /* Reiter */
-.side-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: var(--iron-deep);
+.side-tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); background: var(--iron-deep);
   border-block: 1px solid var(--frame); }
 .side-tabs [role="tab"] { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .2rem;
   min-height: 3.4rem; padding: .4rem .2rem; color: var(--muted); background: transparent; border: 0; border-right: 1px solid var(--line);
@@ -783,6 +884,7 @@ h1, h2 { font-family: var(--font-title); letter-spacing: .01em; }
 #character-panel[data-side-tab="beutel"] #side-beutel,
 #character-panel[data-side-tab="chronik"] #side-chronik,
 #character-panel[data-side-tab="gefaehrten"] #side-gefaehrten { display: block; }
+#character-panel[data-side-tab="einstellungen"] #side-einstellungen { display: block; }
 .side-panel > details:first-child, .side-panel > section:first-child { border-top: 0; }
 .side-panel details > summary { cursor: pointer; font-family: var(--font-title); font-size: .95rem; letter-spacing: .03em; color: var(--accent); }
 .side-panel details details > summary { font-family: var(--font-ui); font-size: .88rem; letter-spacing: 0; color: var(--muted); }
@@ -835,7 +937,7 @@ h1, h2 { font-family: var(--font-title); letter-spacing: .01em; }
   :root[data-layout="ultrawide"] #side-karte { display: block; grid-column: 2; grid-row: 1 / span 3; align-self: start;
     padding: .2rem 1rem 1rem; background: var(--iron); border: 1px solid var(--frame); }
   :root[data-layout="ultrawide"] .hero-head { grid-column: 3; grid-row: 1; background: var(--iron); border: 1px solid var(--frame); border-bottom: 0; }
-  :root[data-layout="ultrawide"] .side-tabs { grid-column: 3; grid-row: 2; grid-template-columns: repeat(3, minmax(0, 1fr)); border-inline: 1px solid var(--frame); }
+  :root[data-layout="ultrawide"] .side-tabs { grid-column: 3; grid-row: 2; grid-template-columns: repeat(4, minmax(0, 1fr)); border-inline: 1px solid var(--frame); }
   :root[data-layout="ultrawide"] #side-tab-karte { display: none; }
   :root[data-layout="ultrawide"] .side-panel:not(#side-karte) { grid-column: 3; grid-row: 3; align-self: start;
     background: var(--iron); border: 1px solid var(--frame); border-top: 0; }
@@ -847,7 +949,7 @@ h1, h2 { font-family: var(--font-title); letter-spacing: .01em; }
   :root:is(:not([data-layout]), [data-layout="auto"]) #side-karte { display: block; grid-column: 2; grid-row: 1 / span 3; align-self: start;
     padding: .2rem 1rem 1rem; background: var(--iron); border: 1px solid var(--frame); }
   :root:is(:not([data-layout]), [data-layout="auto"]) .hero-head { grid-column: 3; grid-row: 1; background: var(--iron); border: 1px solid var(--frame); border-bottom: 0; }
-  :root:is(:not([data-layout]), [data-layout="auto"]) .side-tabs { grid-column: 3; grid-row: 2; grid-template-columns: repeat(3, minmax(0, 1fr)); border-inline: 1px solid var(--frame); }
+  :root:is(:not([data-layout]), [data-layout="auto"]) .side-tabs { grid-column: 3; grid-row: 2; grid-template-columns: repeat(4, minmax(0, 1fr)); border-inline: 1px solid var(--frame); }
   :root:is(:not([data-layout]), [data-layout="auto"]) #side-tab-karte { display: none; }
   :root:is(:not([data-layout]), [data-layout="auto"]) .side-panel:not(#side-karte) { grid-column: 3; grid-row: 3; align-self: start;
     background: var(--iron); border: 1px solid var(--frame); border-top: 0; }
@@ -993,3 +1095,783 @@ h1, h2 { font-family: var(--font-title); letter-spacing: .01em; }
 .welt-bauten { list-style: none; padding: 0; margin: .5rem 0; display: grid; gap: .5rem; }
 .welt-bauten li { display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem .5rem; }
 .welt-bauten li .action { flex-basis: 100%; }
+
+/* UI-Überarbeitung 19. 11. 2026 (v2.5.3): Ressourcen-Leiste, Weltlage-Akkordeon, Wegweiser-Zeilen, Proviant,
+   EP-Balken im Charakterfenster, Heilziel im Inventar und zweispaltige Werte in der Charaktererstellung. */
+.welt-status { gap: .5rem; }
+.welt-facts { display: flex; flex-wrap: wrap; gap: .25rem 1.6rem; }
+.welt-rohstoffe { margin: 0; gap: .3rem; padding: .35rem; }
+.welt-rohstoffe li { gap: .3rem; padding: .15rem .5rem; border: 1px solid rgba(140, 109, 63, .45); border-radius: 3px;
+  background: rgba(255, 248, 232, .55); font-size: .85rem; white-space: nowrap; }
+.welt-rohstoffe strong { font-variant-numeric: tabular-nums; }
+.welt-rohstoffe small { font-size: .74rem; color: #6b4f33; }
+.welt-lage { border: 1px solid #ad9066; border-radius: 3px; background: rgba(255, 248, 232, .45); }
+.welt-lage > summary { display: flex; flex-wrap: wrap; gap: .3rem; align-items: baseline; padding: .4rem .6rem; cursor: pointer; font-size: .9rem; }
+.welt-lage > summary span { color: #6b4f33; }
+.welt-lage.welt-warn > summary strong { color: #8a4b0b; }
+.welt-lage.welt-danger > summary strong { color: #8e2414; }
+.welt-lage[open] > summary { border-bottom: 1px solid rgba(140, 109, 63, .45); }
+.welt-lage .welt-meters { padding: .5rem .6rem .6rem; }
+
+.wegweiser-liste { display: grid; grid-template-columns: minmax(0, 1fr); gap: .4rem; margin: .5rem 0 0; padding: 0; list-style: none; }
+.wegweiser { min-width: 0; padding: 0; border: 1px solid #ad9066; border-left: 4px solid #6f8f4e; border-radius: 4px; background: #f4e8d0; }
+.wegweiser.welt-grenzland { border-left-color: #c27a1f; }
+.wegweiser-knopf { display: grid; grid-template-columns: minmax(8rem, 1.1fr) minmax(0, 1.6fr) auto; gap: .2rem .9rem; align-items: center;
+  width: 100%; margin: 0; padding: .45rem .65rem; font: inherit; color: var(--ink); text-align: left; background: transparent; border: 0;
+  border-radius: 3px; cursor: pointer; transition: background-color .15s ease, box-shadow .15s ease; }
+.wegweiser-knopf:not(:disabled):hover, .wegweiser-knopf:focus-visible { background: rgba(30, 25, 20, .07);
+  box-shadow: 0 0 0 1px rgba(212, 168, 87, .5), 0 0 12px rgba(212, 168, 87, .35); outline: none; }
+.wegweiser-knopf:disabled { cursor: not-allowed; opacity: .6; }
+.wegweiser-ziel, .wegweiser-weg { display: grid; min-width: 0; }
+.wegweiser-ziel strong { overflow-wrap: anywhere; }
+.wegweiser-ziel small, .wegweiser-gegner { font-size: .78rem; color: #69492d; overflow-wrap: anywhere; }
+.wegweiser-weg { display: block; font-size: .86rem; }
+.wegweiser-weg em { font-style: normal; white-space: nowrap; }
+.wegweiser-gefahr .wegweiser-weg em { padding: 0 .3rem; color: #7d2a14; background: rgba(184, 67, 47, .14); border-radius: 2px; font-weight: 600; }
+.wegweiser-gegner { display: block; }
+.wegweiser-kosten { display: flex; flex-direction: column; gap: .2rem; align-items: flex-end; }
+.wegweiser-kosten span { padding: .12rem .5rem; font-size: .8rem; font-weight: 600; white-space: nowrap; color: #fff0d5; background: #4c3120;
+  border-radius: 999px; font-variant-numeric: tabular-nums; }
+.wegweiser-zusatz { margin: 0 .65rem .45rem; font-size: .82rem; }
+.wegweiser-zusatz.welt-alarm { padding: .25rem .45rem; }
+.wegweiser-grund { color: #8e2414; }
+.wegweiser-frage { padding: .25rem .45rem; color: #fff0d5; background: #8a3b1c; border-radius: 3px; font-weight: 600; }
+.wegweiser-bestaetigen { border-color: #8a3b1c; box-shadow: 0 0 0 1px #8a3b1c; }
+@media (max-width: 42rem) {
+  .wegweiser-knopf { grid-template-columns: minmax(0, 1fr) auto; }
+  .wegweiser-weg { grid-column: 1 / -1; grid-row: 2; }
+  .wegweiser-kosten { grid-column: 2; grid-row: 1; }
+}
+@media (prefers-reduced-motion: reduce) { .wegweiser-knopf { transition: none; } }
+
+/* Kartenreiter: Nachbarorte als kompakte Wegweiser auf Eisen */
+.map-destinations:has(.wegweiser-liste) { display: grid; gap: .5rem; }
+.wegweiser-kompakt { margin: 0; gap: .3rem; }
+.wegweiser-kompakt .wegweiser { background: #2a221a; border-color: var(--line); }
+.wegweiser-kompakt .wegweiser.welt-grenzland { border-left-color: #c27a1f; }
+.wegweiser-kompakt .wegweiser-knopf { grid-template-columns: minmax(0, 1fr) auto; padding: .35rem .5rem; color: var(--ivory); }
+.wegweiser-kompakt .wegweiser-weg { grid-column: 1 / -1; grid-row: 2; font-size: .78rem; color: var(--muted); }
+.wegweiser-kompakt .wegweiser-kosten { grid-column: 2; grid-row: 1; }
+.wegweiser-kompakt .wegweiser-ziel small { color: var(--muted); }
+.wegweiser-kompakt .wegweiser-kosten span { color: #1d1813; background: var(--accent); }
+.wegweiser-kompakt .wegweiser-gefahr .wegweiser-weg em, .wegweiser-kompakt .wegweiser-gefahr em { color: #ffb59f; background: rgba(184, 67, 47, .3); }
+.wegweiser-kompakt .wegweiser-knopf:not(:disabled):hover, .wegweiser-kompakt .wegweiser-knopf:focus-visible { background: #3a2e22; }
+.wegweiser-kompakt .wegweiser-zusatz { color: var(--ivory); }
+.wegweiser-kompakt .welt-aushang-hinweis { color: var(--muted); }
+.wegweiser-kompakt .welt-alarm { color: #1d1813; }
+.wegweiser-kompakt .wegweiser-grund { color: #ff9b85; }
+
+/* Rechte Leiste: Proviant und Glutgleichgewicht bzw. Rüstungsschutz als saubere Zeilen über die ganze Breite */
+.vital-line { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .1rem .6rem; min-width: 0; }
+.vital-line dt { font-size: .75rem; letter-spacing: .04em; color: var(--muted); }
+.vital-line dd { margin: 0; font-size: .88rem; color: var(--ivory); font-variant-numeric: tabular-nums; text-align: right; }
+.vital-line .balance-scale { flex-basis: 100%; }
+.vital-line-low dd { color: #ff9b85; font-weight: 600; }
+
+/* Charakterfenster: EP-Balken statt Stufenraster */
+.sheet-vitals.sheet-vitals-zwei { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.sheet-xp-line .sheet-big { margin-bottom: .35rem; }
+.inventory-hub progress.sheet-xp-bar { display: block; width: 100%; height: .6rem; appearance: none; -webkit-appearance: none; border: 0;
+  border-radius: 2px; background: #2b241d; overflow: hidden; }
+.inventory-hub progress.sheet-xp-bar::-webkit-progress-bar { background: #2b241d; }
+.inventory-hub progress.sheet-xp-bar::-webkit-progress-value { background: linear-gradient(90deg, #8c6d3f, var(--accent)); }
+.inventory-hub progress.sheet-xp-bar::-moz-progress-bar { background: linear-gradient(90deg, #8c6d3f, var(--accent)); }
+.sheet-xp-line .sheet-note { margin: .3rem 0 0; }
+.sheet-ladder-box { margin-top: .5rem; }
+.sheet-ladder-box > summary { cursor: pointer; font-size: .85rem; color: var(--muted); }
+.sheet-ladder-box[open] > summary { margin-bottom: .4rem; }
+
+/* Inventar: Heilziel erst nach Auswahl eines Verbrauchsguts */
+.hub-ziel { margin: 0 .6rem .4rem; color: #eddbb9; }
+.hub-ziel-wahl { box-shadow: 0 0 0 1px var(--accent); }
+
+/* Charaktererstellung: Spezialisierungen einklappbar, Grundwerte und Fertigkeiten nebeneinander */
+.class-spez { margin: .4rem 0 0; padding: .35rem .55rem; border: 1px solid rgba(140, 109, 63, .55); border-radius: 3px; font-size: .92rem; }
+.class-spez > summary { cursor: pointer; font-weight: 600; }
+.class-spez p { margin: .35rem 0 0; }
+.creation-werte { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 1rem; align-items: start; }
+@media (min-width: 64rem) {
+  .creation { max-width: 1180px; }
+  .creation-werte { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.encounter #scene-content .wegweiser-zusatz { font-size: .82rem; line-height: 1.4; }
+/* Gleich breite Spalten, damit Minus, Wert und Plus in allen Zeilen untereinander stehen */
+@media (min-width: 42.0625rem) {
+  #point-controls .point-row { grid-template-columns: minmax(0, 1fr) 2.2rem 2.4rem 2rem 2.4rem minmax(4.5rem, auto); }
+  #skill-controls .point-row { grid-template-columns: minmax(6.4rem, 1fr) 2.4rem 2rem 2.4rem minmax(0, 7.5rem); }
+  #skill-controls .point-row > span:empty { display: none; }
+  #skill-controls .point-row small { overflow-wrap: anywhere; line-height: 1.25; }
+  .point-row .action { justify-content: center; min-width: 0; padding-inline: 0; }
+}
+.side-panel .wegweiser-liste, .encounter .wegweiser-liste { padding: 0; }
+
+/* Inventar in zwei Spalten (UI-Überarbeitung 19. 11. 2026): links Gruppe, Plätze und Kampfwerte, rechts Reiter */
+.inv-hub { width: min(74rem, calc(100vw - 1.5rem)); }
+.inv-body { display: grid; grid-template-columns: minmax(17rem, 38%) minmax(0, 1fr); min-height: 0; }
+.inv-links { display: grid; align-content: start; gap: .55rem; padding: .8rem 1rem; border-right: 1px solid var(--line); border-bottom: 0; }
+.inv-links .hub-section-title { margin: 0; }
+.inv-rechts { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.inv-member { display: flex; flex-wrap: wrap; gap: .3rem; }
+.inv-member[hidden] { display: none; }
+.inv-member-knopf { flex: 1 1 6rem; min-height: 2.2rem; padding: .2rem .5rem; font: inherit; font-size: .85rem; color: var(--muted);
+  background: #211b15; border: 1px solid var(--line); border-radius: 3px; cursor: pointer; overflow-wrap: anywhere; }
+.inv-member-knopf[aria-pressed="true"] { color: #fff0d5; background: #4c3120; border-color: #8d6947; }
+.inv-slots { display: grid; gap: .3rem; margin: 0; padding: 0; list-style: none; }
+.inv-slot-gruppe { display: grid; grid-template-columns: 5.6rem minmax(0, 1fr); gap: .4rem; align-items: start; }
+.inv-slot-gruppe > span { padding-top: .45rem; font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.inv-slot-plaetze { display: grid; gap: .25rem; min-width: 0; }
+.inv-slot { position: relative; min-width: 0; }
+.inv-slot-knopf { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 .45rem; width: 100%; min-height: 2.2rem; padding: .3rem 1.9rem .3rem .55rem;
+  text-align: left; font: inherit; color: inherit; background: #2b231a; border: 1px solid #6b5a46; border-left: 3px solid #6b5a46;
+  border-radius: 3px; cursor: pointer; }
+.inv-slot-knopf small { font-size: .68rem; color: var(--muted); }
+.inv-slot-knopf strong { flex: 1 1 auto; min-width: 0; font-size: .88rem; font-weight: 600; overflow-wrap: anywhere; }
+.inv-slot-leer .inv-slot-knopf { border-style: dashed; background: transparent; }
+.inv-slot-leer .inv-slot-knopf strong { color: var(--muted); font-weight: normal; }
+.inv-slot[data-quality="Ungewöhnlich"] .inv-slot-knopf { border-left-color: #8fb56d; }
+.inv-slot[data-quality="Selten"] .inv-slot-knopf { border-left-color: #6fa6d6; }
+.inv-slot[data-quality="Episch"] .inv-slot-knopf { border-left-color: #c58ef0; }
+.inv-slot-knopf:hover, .inv-slot-knopf:focus-visible { background: #3a2c1f; }
+.inv-slot-knopf[aria-pressed="true"] { outline: 2px solid #ffcc7a; outline-offset: 1px; background: #4c3120; }
+.inv-slot .hub-unequip { top: 50%; transform: translateY(-50%); right: .3rem; }
+.inv-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .3rem; padding: .45rem; background: var(--parchment); color: var(--ink); border-radius: 4px; }
+.inv-stats div { display: grid; justify-items: center; gap: 0; padding: .2rem .1rem; border: 0; border-radius: 3px; text-align: center; cursor: help; }
+.inv-stats dt { font-size: .7rem; letter-spacing: .05em; text-transform: uppercase; }
+.inv-stats dd { font-size: 1.05rem; }
+.inv-links .hub-compare { min-height: 0; margin: 0; font-size: .8rem; color: var(--muted); }
+.inv-links .hub-compare:empty { display: none; }
+.inv-links-fuss { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .4rem; }
+.inv-links-fuss .hub-unequip-all { width: auto; margin: 0; min-height: 2.2rem; padding: .2rem .7rem; color: var(--ivory); border-color: var(--frame); }
+.inv-links-fuss .hub-unequip-all[hidden] { display: none; }
+.inv-links-fuss .hub-silver { margin: 0 0 0 auto; color: var(--accent); }
+.inv-links .hub-belt, .inv-links .hub-relikt { margin-top: 0; padding: .45rem .55rem; background: var(--parchment); color: var(--ink); border: 0; border-radius: 4px; }
+.inv-links .hub-belt[hidden] { display: none; }
+.inv-hub .hub-tabs { padding: .6rem .8rem 0; }
+.inv-hub .hub-tabs button { min-height: 2.4rem; font-size: .92rem; }
+.inv-hub .hub-tabs button[aria-disabled="true"] { opacity: .55; border-style: dashed; }
+.inv-hub .hub-items { padding: .5rem .8rem 1rem; }
+.inv-hub .hub-bar { padding: .4rem 0 0; }
+.inv-hub .hub-bag-upgrade, .inv-hub .hub-slot-filter { margin: .45rem 0 0; }
+.inv-filter { display: flex; flex-wrap: wrap; gap: .3rem; }
+.inv-filter button { min-height: 2rem; padding: .15rem .65rem; font: inherit; font-size: .82rem; color: var(--muted); background: transparent;
+  border: 1px solid var(--line); border-radius: 999px; cursor: pointer; }
+.inv-filter button[aria-pressed="true"] { color: #1d1813; background: var(--accent); border-color: var(--accent); font-weight: 600; }
+.inv-list { display: grid; gap: .25rem; margin: .5rem 0 0; padding: 0; list-style: none; }
+.inv-list > p { margin: .2rem 0; color: var(--muted); font-size: .88rem; }
+.inv-row { --dot: #8a7a64; min-width: 0; background: #241d16; border: 1px solid #3a3027; border-radius: 3px; }
+.inv-row[data-quality="Ungewöhnlich"] { --dot: #8fb56d; }
+.inv-row[data-quality="Selten"] { --dot: #6fa6d6; }
+.inv-row[data-quality="Episch"] { --dot: #c58ef0; }
+.inv-row-kopf { display: flex; align-items: center; gap: .35rem; padding-right: .35rem; }
+.inv-row-auf { display: flex; flex: 1 1 auto; align-items: center; gap: .55rem; min-width: 0; min-height: 2.5rem; padding: .25rem .5rem;
+  font: inherit; color: inherit; text-align: left; background: transparent; border: 0; cursor: pointer; }
+.inv-row-statisch { cursor: default; }
+button.inv-row-auf:hover, button.inv-row-auf:focus-visible { background: #3a2c1f; }
+.inv-punkt { flex: none; width: .6rem; height: .6rem; border-radius: 50%; background: var(--dot); box-shadow: 0 0 0 1px #000a; }
+.inv-row-name { display: flex; flex: 1 1 auto; flex-wrap: wrap; align-items: baseline; gap: 0 .5rem; min-width: 0; }
+.inv-row-name strong { font-size: .9rem; font-weight: 600; overflow-wrap: anywhere; }
+.inv-row-name small { font-size: .74rem; color: var(--muted); }
+.inv-kennwert { flex: none; font-size: .82rem; font-weight: 600; color: var(--accent); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.inv-primaer { flex: none; min-height: 2rem; padding: .15rem .65rem; font: inherit; font-size: .82rem; font-weight: 600; color: var(--ivory);
+  background: #3d2e1e; border: 1px solid #8c6d3f; border-radius: 3px; cursor: pointer; white-space: nowrap; }
+.inv-primaer:not(:disabled):hover, .inv-primaer:focus-visible { border-color: var(--accent); background: #4c3120; }
+.inv-primaer:disabled { color: var(--off-text); background: var(--off-bg); border: 1px dashed var(--off-line); cursor: not-allowed; }
+.inv-row-details { display: grid; gap: .35rem; padding: .1rem .6rem .5rem 1.65rem; font-size: .84rem; color: #d9c29c; }
+.inv-row-details p { margin: 0; }
+.inv-vergleich { display: flex; flex-wrap: wrap; gap: .25rem; }
+.inv-row-aktionen { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem; }
+.inv-row-aktionen > span { margin-right: auto; font-size: .85rem; }
+.hub-mini.inv-gefahr { color: #fff0d5; background: #7a2c1f; border-color: #a4523f; }
+.inv-ziel { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem; padding: .35rem .6rem .5rem 1.65rem; border-top: 1px dashed #3a3027; }
+.inv-ziel > span { font-size: .8rem; color: var(--accent); }
+.inv-abschnitt { margin-top: .7rem; }
+.inv-abschnitt:first-child { margin-top: 0; }
+.inv-abschnitt h4 { margin: 0 0 .3rem; padding-bottom: .2rem; font-size: .76rem; font-weight: normal; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--accent); border-bottom: 1px solid var(--line); }
+.inv-hinweis { margin: .3rem 0; font-size: .86rem; color: var(--muted); }
+.inv-silber { margin: 0; text-align: right; color: var(--accent); font-weight: 600; }
+.inv-chips { display: flex; flex-wrap: wrap; gap: .3rem; margin: 0 0 .4rem; padding: 0; list-style: none; }
+.inv-chips li { display: flex; gap: .3rem; align-items: baseline; padding: .15rem .55rem; font-size: .84rem; background: #241d16; border: 1px solid #3a3027; border-radius: 3px; }
+.inv-chips span { color: var(--muted); }
+.inv-row-handel .inv-row-kopf { flex-wrap: wrap; }
+.inv-row-handel .inv-row-auf { flex-basis: 12rem; }
+@media (min-width: 52.01rem) and (min-height: 36rem) {
+  .inv-hub[open] { display: flex; flex-direction: column; height: calc(100svh - 1.5rem); overflow: hidden; }
+  .inv-hub > .inv-body { flex: 1 1 auto; overflow: hidden; }
+  .inv-links { overflow: auto; overscroll-behavior: contain; }
+  .inv-hub .hub-items { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; }
+}
+@media (max-width: 52rem) {
+  .inv-hub[open] { display: block; height: auto; overflow: auto; }
+  .inv-hub .hub-items { overflow: visible; }
+  .inv-body { grid-template-columns: minmax(0, 1fr); }
+  .inv-links { border-right: 0; border-bottom: 1px solid var(--line); }
+}
+@media (max-width: 42rem) {
+  .inv-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .inv-hub .hub-tabs button { font-size: .8rem; padding-inline: .2rem; }
+  .inv-slot-gruppe { grid-template-columns: 4.6rem minmax(0, 1fr); }
+  .inv-stats dd { font-size: .95rem; }
+  .inv-row-details, .inv-ziel { padding-left: .6rem; }
+}
+
+/* Pergamentrolle (19. 11. 2026): Große Fenster (Inventar, Charakterbogen, Reisekarte, Gespräch) rollen sich von oben
+   nach unten aus. clip-path legt das Fenster frei, ::after ist der Schattenbalken der Rolle, der an der Unterkante
+   mitwandert. Beim Schließen rollt das Pergament in 220 ms wieder ein, allow-discrete hält es bis dahin sichtbar.
+   Der Hintergrund blendet getrennt über 250 ms ein. Browser ohne @starting-style öffnen ohne Animation. */
+dialog.pergament {
+  --rolle-auf: cubic-bezier(.22, 1, .36, 1);
+  --rolle-zu: cubic-bezier(.55, 0, .75, .25);
+  --rolle-kante: 1.6rem;
+  /* Oben und seitlich greift der Ausschnitt über das Fenster hinaus, damit der Schlagschatten sichtbar bleibt. Die Unterkante
+     bleibt bündig, so läuft der Schattenbalken genau mit der Rollkante. */
+  clip-path: inset(0 -5rem 100% -5rem);
+  transform: translateY(-6px);
+  transition: clip-path 220ms var(--rolle-zu), transform 220ms var(--rolle-zu),
+    overlay 220ms allow-discrete, display 220ms allow-discrete;
+}
+dialog.pergament[open] {
+  clip-path: inset(-5rem -5rem 0 -5rem);
+  transform: translateY(0);
+  transition-duration: 350ms;
+  transition-timing-function: var(--rolle-auf);
+}
+@starting-style {
+  dialog.pergament[open] { clip-path: inset(0 -5rem 100% -5rem); transform: translateY(-6px); }
+}
+dialog.pergament::after {
+  content: ""; position: absolute; z-index: 20; inset-inline: 0; top: calc(100% - var(--rolle-kante)); height: var(--rolle-kante);
+  pointer-events: none; opacity: 0;
+  background: linear-gradient(to bottom, rgb(0 0 0 / 0), rgb(0 0 0 / .32) 70%, rgb(212 168 87 / .35) 92%, rgb(0 0 0 / .55));
+}
+dialog.pergament[open]::after { animation: rolle-kante-ab 350ms var(--rolle-auf), rolle-kante-weg 350ms linear; }
+dialog.pergament:not([open])::after { animation: rolle-kante-auf 220ms var(--rolle-zu), rolle-kante-da 220ms linear; }
+@keyframes rolle-kante-ab { from { top: 0; } to { top: calc(100% - var(--rolle-kante)); } }
+@keyframes rolle-kante-auf { from { top: calc(100% - var(--rolle-kante)); } to { top: 0; } }
+@keyframes rolle-kante-weg { 0%, 75% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes rolle-kante-da { 0% { opacity: .4; } 25%, 100% { opacity: 1; } }
+dialog.pergament::backdrop, dialog.dialog-klein::backdrop {
+  background-color: rgb(11 9 7 / 0);
+  -webkit-backdrop-filter: blur(0); backdrop-filter: blur(0);
+  transition: background-color 250ms ease-out, backdrop-filter 250ms ease-out, -webkit-backdrop-filter 250ms ease-out,
+    overlay 250ms allow-discrete, display 250ms allow-discrete;
+}
+dialog.pergament[open]::backdrop, dialog.dialog-klein[open]::backdrop {
+  background-color: rgb(11 9 7 / .8); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+}
+@starting-style {
+  dialog.pergament[open]::backdrop, dialog.dialog-klein[open]::backdrop {
+    background-color: rgb(11 9 7 / 0); -webkit-backdrop-filter: blur(0); backdrop-filter: blur(0);
+  }
+}
+/* Kleine System-Dialoge (kurze Sicherheitsabfragen): nur schnelles Einblenden */
+dialog.dialog-klein { opacity: 0; transition: opacity 150ms ease-out, overlay 150ms allow-discrete, display 150ms allow-discrete; }
+dialog.dialog-klein[open] { opacity: 1; }
+@starting-style { dialog.dialog-klein[open] { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  dialog.pergament, dialog.pergament[open], dialog.dialog-klein, dialog.pergament::backdrop, dialog.dialog-klein::backdrop {
+    transition: none; transform: none; clip-path: none;
+  }
+  dialog.pergament::after { display: none; animation: none; }
+}
+/* Kleine Einblendungen im Fenster: Details einer Item-Zeile, Zielwahl, Wegweiser-Nachfrage */
+@keyframes pop-ein { from { opacity: 0; transform: translateY(-4px); } }
+.inv-row-details, .inv-ziel, .wegweiser-frage { animation: pop-ein 180ms cubic-bezier(.16, 1, .3, 1); }
+@media (prefers-reduced-motion: reduce) {
+  .inv-row-details, .inv-ziel, .wegweiser-frage { animation: none; }
+}
+
+/* Gesprächsfenster (NPC-Dialog, 19. 11. 2026): Kopf in Schiefer und Gold, Rede auf hellem Pergament wie die Szene,
+   Antworten untereinander mit Tastenziffer und Abzeichen für Proben und Folgen. */
+.npc-dialog {
+  width: min(44rem, calc(100vw - 1.5rem)); max-height: calc(100svh - 1.5rem); padding: 0; overflow: auto; overscroll-behavior: contain;
+  color: #302419; background: #e9d8b7; border: 1px solid #8d6947; box-shadow: 0 1.5rem 4rem #000a, inset 0 0 0 3px #e9d8b7, inset 0 0 0 4px #b89566;
+}
+.npc-kopf { position: relative;
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: .9rem; align-items: start;
+  padding: .9rem 1rem; color: #f1e3c8; background: radial-gradient(ellipse at 20% 0%, #4c2d1e, #211b15 80%); border-bottom: 2px solid #8d6947;
+}
+.npc-portrait {
+  position: relative; width: 100px; height: 120px; overflow: hidden; background: #2b231a;
+  border: 2px solid #d4a857; outline: 1px solid #3e352a; outline-offset: 2px; box-shadow: 0 .3rem .8rem #0009;
+}
+.npc-portrait img, .npc-portrait svg { display: block; width: 100%; height: 100%; object-fit: cover; }
+.npc-wer { min-width: 0; }
+.npc-wer .overline { color: var(--accent); }
+.npc-wer h2 { margin: .1rem 0 .15rem; font-size: clamp(1.35rem, 3.4vw, 1.8rem); line-height: 1.2; overflow-wrap: anywhere; }
+.npc-titel { margin: 0; color: #d9c29c; font-size: .92rem; line-height: 1.4; }
+.npc-stand { display: flex; flex-wrap: wrap; gap: .3rem .4rem; margin: .45rem 0 0; font-size: .8rem; line-height: 1.3; }
+.npc-stand span { padding: .12rem .45rem; color: #f1e3c8; background: #2b231a; border: 1px solid #66523d; border-radius: 3px; }
+.npc-stand .npc-rang-gut { border-color: #8fb56d; color: #cfe8b8; }
+.npc-stand .npc-rang-schlecht { border-color: #c4553f; color: #ffc2b5; }
+.npc-close {
+  display: grid; place-items: center; width: 2.75rem; height: 2.75rem; padding: 0; font: inherit; font-size: 1.5rem; line-height: 1;
+  color: #f1e3c8; background: transparent; border: 1px solid #66523d; cursor: pointer;
+}
+.npc-close:hover, .npc-close:focus-visible { border-color: #d4a857; color: #ffcc7a; }
+.npc-body { padding: 1rem clamp(1rem, 4vw, 1.6rem) 1.2rem; }
+.npc-text { max-width: 65ch; }
+.npc-text p { margin: 0 0 .7rem; font-size: 1.05rem; line-height: 1.62; overflow-wrap: break-word; }
+.npc-text .npc-regie { font-style: italic; color: #5a4632; }
+.npc-text .npc-antwort { padding-left: .8rem; border-left: 3px solid #b89566; }
+.npc-text .npc-folge { font-size: .92rem; color: #5a4632; }
+.npc-optionen { display: grid; gap: .45rem; margin: .9rem 0 0; padding: 0; list-style: none; }
+.npc-option {
+  display: grid; grid-template-columns: 1.9rem minmax(0, 1fr); gap: .1rem .6rem; align-items: center; width: 100%; min-height: 2.75rem;
+  padding: .5rem .7rem; text-align: left; font: inherit; line-height: 1.4; color: #f1e3c8; background: #2b231a;
+  border: 1px solid #66523d; border-radius: 3px; cursor: pointer;
+}
+.npc-option:hover:not(:disabled), .npc-option:focus-visible { border-color: #d4a857; background: #3a2c1f; }
+.npc-option:disabled { opacity: .55; cursor: default; }
+.npc-taste {
+  grid-row: span 2; display: grid; place-items: center; width: 1.7rem; height: 1.7rem; font-size: .85rem; font-weight: bold;
+  color: #211b15; background: #d4a857; border-radius: 50%;
+}
+.npc-option-text { min-width: 0; overflow-wrap: break-word; }
+.npc-badges { display: flex; flex-wrap: wrap; gap: .25rem; }
+.npc-badge { padding: .05rem .4rem; font-size: .74rem; letter-spacing: .03em; color: #ffcc7a; border: 1px solid #8d6947; border-radius: 2px; white-space: nowrap; }
+.npc-badge-probe { color: #b9d6f0; border-color: #6fa6d6; }
+.npc-badge-kampf { color: #ffb4a5; border-color: #c4553f; }
+.npc-badge-gut { color: #cfe8b8; border-color: #8fb56d; }
+.npc-badge-ende { color: #b5aa99; border-color: #66523d; }
+.npc-option-hinweis { grid-column: 2; font-size: .82rem; color: #b5aa99; }
+.npc-wechsel { animation: npc-wechsel 220ms ease-out; }
+@keyframes npc-wechsel { from { opacity: 0; transform: translateY(4px); } }
+@media (max-width: 30rem) {
+  .npc-kopf { grid-template-columns: auto minmax(0, 1fr); }
+  .npc-portrait { width: 72px; height: 86px; }
+  .npc-close { position: absolute; top: .5rem; right: .5rem; width: 2.4rem; height: 2.4rem; }
+  .npc-wer { padding-right: 2.4rem; }
+  .npc-dialog { width: 100vw; max-width: 100vw; max-height: 100svh; margin: auto 0 0; }
+}
+@media (prefers-reduced-motion: reduce) { .npc-wechsel { animation: none; } }
+/* Gesprächsknopf im Hauptbildschirm */
+.npc-start { font-style: normal; }
+
+/* Patch 2.6.10: Einstellungs-Reiter (bei schmaler Leiste nur das Zahnrad) */
+/* Die Leiste ist schmal: der Reiter zeigt nur das Zahnrad, der Name steht im Tooltip und für Screenreader im Label. */
+.side-tab-kurz { display: none; }
+#side-tab-einstellungen .side-tab-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+#side-tab-einstellungen svg { width: 1.45rem; height: 1.45rem; }
+.einstellungen .save-actions { display: flex; flex-direction: column; align-items: stretch; gap: .35rem; }
+.einstellungen .save-badge { margin: .4rem 0 0; padding: .25rem .5rem; border: 1px solid var(--frame); border-radius: 3px; font-size: .85rem; color: var(--muted); }
+.einstellungen .option-row { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .6rem; margin: .45rem 0; font-size: .9rem; }
+.einstellungen .option-row select { margin-left: auto; }
+.menu-confirm { margin-top: .6rem; padding: .6rem .75rem; border: 1px solid var(--accent); border-radius: 3px; background: #241d16; }
+.menu-confirm p { margin: 0 0 .4rem; }
+
+/* Akt 2 bis 4 im Stadt-Hub */
+.welt-akte .akt-zweig { margin: .5rem 0; padding: .45rem .6rem; border-left: 3px solid var(--accent); }
+.welt-akte .akt-zweig.fertig { opacity: .7; border-left-color: var(--frame); }
+.akt5-tor { margin-top: .6rem; padding: .6rem .8rem; border: 1px solid var(--accent); border-radius: 4px; background: #241d16; }
+.akt5-tor h4 { margin: 0 0 .3rem; color: var(--accent); }
+
+/* Patch 2.6.15: Farbthemen je Fraktion (Henry). Das Attribut data-faction-theme am Wurzelelement wechselt bei Fraktionswahl
+ * und beim Laden. Henrys Variablen stehen wie geliefert, die bisherigen Variablen des Spiels werden darauf abgebildet. */
+:root[data-faction-theme="THEME_KRONREICH"] {
+  --bg-primary: #171513;
+  --bg-panel: #211d1a;
+  --bg-card: #292420;
+  --border-subtle: #3d352e;
+  --border-accent: #c89d54;
+  --text-primary: #ede6dc;
+  --text-muted: #a3988b;
+  --accent-primary: #c89d54;
+  --accent-secondary: #7d8894;
+  --hp-bar-fill: #9e2a2b;
+  --resource-bar-fill: #c89d54;
+  --bg: var(--bg-primary);
+  --iron-deep: var(--bg-primary);
+  --iron: var(--bg-panel);
+  --off-bg: var(--bg-card);
+  --line: var(--border-subtle);
+  --frame: var(--border-accent);
+  --ivory: var(--text-primary);
+  --muted: var(--text-muted);
+  --accent: var(--accent-primary);
+  --bar-hp: var(--hp-bar-fill);
+  --bar-stamina: var(--resource-bar-fill);
+}
+:root[data-faction-theme="THEME_ORDEN_DER_FLAMME"] {
+  --bg-primary: #161110;
+  --bg-panel: #211816;
+  --bg-card: #2b1e1b;
+  --border-subtle: #452d27;
+  --border-accent: #e06328;
+  --text-primary: #f2e6df;
+  --text-muted: #ad958c;
+  --accent-primary: #e06328;
+  --accent-secondary: #f0a848;
+  --hp-bar-fill: #b52b27;
+  --resource-bar-fill: #e06328;
+  --bg: var(--bg-primary);
+  --iron-deep: var(--bg-primary);
+  --iron: var(--bg-panel);
+  --off-bg: var(--bg-card);
+  --line: var(--border-subtle);
+  --frame: var(--border-accent);
+  --ivory: var(--text-primary);
+  --muted: var(--text-muted);
+  --accent: var(--accent-primary);
+  --bar-hp: var(--hp-bar-fill);
+  --bar-stamina: var(--resource-bar-fill);
+}
+:root[data-faction-theme="THEME_FREIE_HAEFEN"] {
+  --bg-primary: #10171c;
+  --bg-panel: #172229;
+  --bg-card: #1f2d36;
+  --border-subtle: #2f434f;
+  --border-accent: #4ea396;
+  --text-primary: #e4edf0;
+  --text-muted: #8fa4ad;
+  --accent-primary: #4ea396;
+  --accent-secondary: #c7a658;
+  --hp-bar-fill: #a33333;
+  --resource-bar-fill: #4ea396;
+  --bg: var(--bg-primary);
+  --iron-deep: var(--bg-primary);
+  --iron: var(--bg-panel);
+  --off-bg: var(--bg-card);
+  --line: var(--border-subtle);
+  --frame: var(--border-accent);
+  --ivory: var(--text-primary);
+  --muted: var(--text-muted);
+  --accent: var(--accent-primary);
+  --bar-hp: var(--hp-bar-fill);
+  --bar-stamina: var(--resource-bar-fill);
+}
+:root[data-faction-theme="THEME_ELFEN_PLACEHOLDER"] {
+  --bg-primary: #111714;
+  --bg-panel: #18211c;
+  --bg-card: #202b25;
+  --border-subtle: #324239;
+  --border-accent: #6aa87e;
+  --text-primary: #e6efe9;
+  --text-muted: #92a699;
+  --accent-primary: #6aa87e;
+  --accent-secondary: #c2d1d9;
+  --hp-bar-fill: #9e333b;
+  --resource-bar-fill: #6aa87e;
+  --bg: var(--bg-primary);
+  --iron-deep: var(--bg-primary);
+  --iron: var(--bg-panel);
+  --off-bg: var(--bg-card);
+  --line: var(--border-subtle);
+  --frame: var(--border-accent);
+  --ivory: var(--text-primary);
+  --muted: var(--text-muted);
+  --accent: var(--accent-primary);
+  --bar-hp: var(--hp-bar-fill);
+  --bar-stamina: var(--resource-bar-fill);
+}
+:root[data-faction-theme="THEME_ORKS_PLACEHOLDER"] {
+  --bg-primary: #171211;
+  --bg-panel: #221917;
+  --bg-card: #2c201d;
+  --border-subtle: #47332e;
+  --border-accent: #b8432e;
+  --text-primary: #ede3dc;
+  --text-muted: #a69288;
+  --accent-primary: #b8432e;
+  --accent-secondary: #c4b49f;
+  --hp-bar-fill: #a82424;
+  --resource-bar-fill: #b8432e;
+  --bg: var(--bg-primary);
+  --iron-deep: var(--bg-primary);
+  --iron: var(--bg-panel);
+  --off-bg: var(--bg-card);
+  --line: var(--border-subtle);
+  --frame: var(--border-accent);
+  --ivory: var(--text-primary);
+  --muted: var(--text-muted);
+  --accent: var(--accent-primary);
+  --bar-hp: var(--hp-bar-fill);
+  --bar-stamina: var(--resource-bar-fill);
+}
+:root[data-faction-theme="THEME_ZWERGE_PLACEHOLDER"] {
+  --bg-primary: #141517;
+  --bg-panel: #1d1f22;
+  --bg-card: #26292d;
+  --border-subtle: #3b4047;
+  --border-accent: #c47d3b;
+  --text-primary: #eaecf0;
+  --text-muted: #969ca6;
+  --accent-primary: #c47d3b;
+  --accent-secondary: #7c8999;
+  --hp-bar-fill: #a12d2d;
+  --resource-bar-fill: #c47d3b;
+  --bg: var(--bg-primary);
+  --iron-deep: var(--bg-primary);
+  --iron: var(--bg-panel);
+  --off-bg: var(--bg-card);
+  --line: var(--border-subtle);
+  --frame: var(--border-accent);
+  --ivory: var(--text-primary);
+  --muted: var(--text-muted);
+  --accent: var(--accent-primary);
+  --bar-hp: var(--hp-bar-fill);
+  --bar-stamina: var(--resource-bar-fill);
+}
+:root[data-faction-theme="THEME_UNTOTE_PLACEHOLDER"] {
+  --bg-primary: #0f1417;
+  --bg-panel: #161d21;
+  --bg-card: #1d262b;
+  --border-subtle: #2d3b42;
+  --border-accent: #66a3bd;
+  --text-primary: #e1eaed;
+  --text-muted: #899ba3;
+  --accent-primary: #66a3bd;
+  --accent-secondary: #9eb0b8;
+  --hp-bar-fill: #4b7b94;
+  --resource-bar-fill: #66a3bd;
+  --bg: var(--bg-primary);
+  --iron-deep: var(--bg-primary);
+  --iron: var(--bg-panel);
+  --off-bg: var(--bg-card);
+  --line: var(--border-subtle);
+  --frame: var(--border-accent);
+  --ivory: var(--text-primary);
+  --muted: var(--text-muted);
+  --accent: var(--accent-primary);
+  --bar-hp: var(--hp-bar-fill);
+  --bar-stamina: var(--resource-bar-fill);
+}
+:root[data-faction-theme] body, :root[data-faction-theme] .game-wrap { background-color: var(--bg-primary); }
+:root[data-faction-theme] .game-header { background: radial-gradient(ellipse at 24% 0%, var(--bg-card), var(--bg-primary) 74%); }
+:root[data-faction-theme] .side-tabs { background: var(--bg-primary); }
+
+/* Patch 2.6.16: Erstellung als dunkles Zwei-Spalten-Cockpit mit stehender rechter Spalte. */
+.creation { max-width: 1180px; grid-template-columns: minmax(0, 1fr) minmax(0, 320px); align-items: start; }
+.creation-vorschau { position: sticky; top: 1rem; display: grid; gap: .7rem; padding: .9rem; background: var(--iron-deep, #1d1915); color: var(--ivory, #efe4cc); border: 1px solid var(--frame, #6d5a41); border-radius: 6px; }
+.creation-vorschau figure { margin: 0; }
+.creation-vorschau #preview { width: 100%; aspect-ratio: 3 / 4; height: auto; }
+.creation-vorschau figcaption { font-size: .85rem; color: var(--muted, #b9a988); margin-top: .3rem; }
+.portrait-steuerung { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .35rem .6rem; align-items: center; }
+.portrait-steuerung label { margin: 0; font-size: .88rem; }
+.creation .portrait-steuerung select { padding: .3rem .4rem; }
+.creation-summary { border-top: 1px solid var(--frame, #6d5a41); padding-top: .5rem; }
+.creation-summary h3 { margin: 0 0 .3rem; font-size: 1rem; }
+.creation-summary p { margin: .25rem 0; font-size: .86rem; line-height: 1.35; }
+.creation-summary dl:empty { display: none; }
+.creation-knoepfe { display: grid; grid-template-columns: 1fr; gap: .4rem; margin: 0; }
+@media (max-width: 760px) {
+  .creation { grid-template-columns: minmax(0, 1fr); }
+  .creation-vorschau { position: static; grid-row: auto; }
+  .creation-vorschau figure { width: min(10rem, 50%); }
+}
+.creation .creation-vorschau select { background: #2a241e; color: var(--ivory, #efe4cc); border-color: var(--frame, #6d5a41); color-scheme: dark; }
+
+/* Patch 2.6.14: Aufstieg mit Abzeichen, Fähigkeitskarten und Meilensteinleiste. */
+.aufstieg-abzeichen { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; margin: .3rem 0 .6rem; }
+.abzeichen { padding: .2rem .55rem; border: 1px solid var(--line, #8a7457); border-radius: 999px; font-size: .85rem; }
+.abzeichen-offen { border-color: var(--accent, #b5862b); background: color-mix(in srgb, var(--accent, #b5862b) 22%, transparent); }
+.abzeichen-info { display: inline-grid; place-items: center; width: 1.4rem; height: 1.4rem; border-radius: 50%; border: 1px solid var(--line, #8a7457); font-size: .8rem; cursor: help; }
+.faehigkeit-karten { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; }
+@media (max-width: 640px) { .faehigkeit-karten { grid-template-columns: minmax(0, 1fr); } }
+.faehigkeit-karte { padding: .6rem .7rem; background: var(--iron-deep, #1d1915); color: var(--ivory, #efe4cc); border: 1px solid var(--frame, #6d5a41); border-left: 3px solid var(--accent, #b5862b); border-radius: 5px; }
+.faehigkeit-karte p { margin: .35rem 0; font-size: .86rem; line-height: 1.35; }
+.faehigkeit-kopf { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem; }
+.faehigkeit-kopf strong { flex: 1 1 auto; }
+.rang-pips { display: inline-flex; gap: 2px; }
+.rang-pips i { width: .9rem; height: .4rem; border: 1px solid var(--accent, #b5862b); }
+.rang-pips i.voll { background: var(--accent, #b5862b); }
+.kosten-pille { font-size: .75rem; padding: .05rem .45rem; border-radius: 999px; background: color-mix(in srgb, var(--accent, #b5862b) 30%, transparent); }
+.faehigkeit-fuss { color: var(--muted, #b9a988); }
+.faehigkeit-karte button { width: 100%; }
+.meilenstein-leiste { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .3rem; list-style: none; padding: 0; margin: .8rem 0; }
+.meilenstein-leiste li { padding: .35rem .4rem; border-top: 3px solid var(--line, #8a7457); font-size: .78rem; line-height: 1.25; }
+.meilenstein-leiste li.erreicht { border-top-color: var(--accent, #b5862b); }
+.meilenstein-leiste strong { display: block; }
+@media (max-width: 520px) { .meilenstein-leiste { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Patch 2.6.11: Kontor mit Rohstoffkarten, Proviantleiste, Kriegskasse und kompaktem Leerzustand. */
+.kontor-karten { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .35rem; list-style: none; padding: 0; margin: .3rem 0 .5rem; }
+.kontor-karten li { display: grid; text-align: center; padding: .4rem .2rem; border: 1px solid var(--line, #8a7457); border-radius: 4px; min-width: 0; }
+.kontor-karten strong { font-size: 1.25rem; line-height: 1.1; }
+.kontor-karten span { font-size: .72rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kontor-proviant { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .4rem; font-size: .88rem; }
+.kontor-proviant-knoepfe { display: inline-flex; gap: .25rem; }
+.kontor-kasse { margin: .5rem 0; padding: .4rem .6rem; border: 1px solid var(--accent, #b5862b); border-radius: 4px; }
+.kontor-kasse summary { cursor: pointer; font-weight: 600; }
+.kontor-kasse ul { list-style: none; padding: 0; margin: .4rem 0; display: grid; gap: .25rem; }
+.kontor-kasse li { display: grid; grid-template-columns: 5.5rem minmax(0, 1fr) 3.6rem; gap: .4rem; align-items: center; font-size: .82rem; }
+.kontor-kasse progress { width: 100%; height: .55rem; accent-color: var(--accent, #b5862b); }
+.kontor-kasse p { margin: .2rem 0 0; font-size: .8rem; }
+.kontor-leer { margin: 0; padding: .45rem .6rem; border: 1px dashed var(--line, #8a7457); border-radius: 4px; font-size: .85rem; }
+
+/* Patch 2.6.6: Kampfwerte als 2×2-Raster, Rohstoffe im festen Raster, Filterleiste beim Ausrüster. */
+.inv-stats, .inventory-hub .inv-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.inv-stats div { min-width: 0; }
+.inv-stats dd { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.rohstoff-raster .inv-row-kopf { flex-wrap: nowrap; }
+.rohstoff-raster .inv-row-auf { flex: 1 1 auto; min-width: 0; }
+.rohstoff-raster .inv-row-name { flex: 0 0 34%; min-width: 0; }
+.rohstoff-raster .inv-row-name strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.rohstoff-raster .inv-kennwert { flex: 0 0 auto; white-space: nowrap; }
+.rohstoff-raster .inv-primaer { flex: 0 0 auto; white-space: nowrap; padding-inline: .5rem; }
+.handel-filter { display: flex; flex-wrap: wrap; gap: .25rem; margin: 0 0 .4rem; }
+.handel-filter [aria-pressed="true"] { border-color: var(--accent, #b5862b); background: color-mix(in srgb, var(--accent, #b5862b) 25%, transparent); }
+
+/* Patch 2.6.12: Chronik mit Goldkarte, Statusmarken und Zeitleiste. */
+.travel-objective { border: 1px solid var(--accent, #b5862b); border-radius: 5px; padding: .45rem .6rem; }
+.travel-objective h3 { margin-top: 0; font-size: .95rem; }
+.quest-marke-done { color: var(--accent, #b5862b); font-weight: 600; }
+#quest-filters { display: flex; flex-wrap: nowrap; gap: .25rem; overflow-x: auto; }
+#quest-filters button { flex: 1 0 auto; padding: .25rem .45rem; font-size: .8rem; border-radius: 999px; }
+.journal-zeitleiste { list-style: none; padding: 0 0 0 .8rem; margin: .3rem 0; border-left: 2px solid var(--line, #8a7457); max-height: 30rem; overflow-y: auto; }
+.journal-zeitleiste li { position: relative; padding: .25rem 0 .45rem .4rem; }
+.journal-zeitleiste li::before { content: ""; position: absolute; left: -1.15rem; top: .55rem; width: .5rem; height: .5rem; border-radius: 50%; background: var(--accent, #b5862b); }
+.journal-zeitleiste small { display: block; color: var(--muted, #8a7457); font-size: .75rem; }
+.journal-zeitleiste p { margin: 0; font-size: .86rem; }
+.journal-marken { display: flex; flex-wrap: wrap; gap: .2rem; margin-top: .2rem; }
+.journal-marken span { font-size: .72rem; padding: 0 .4rem; border-radius: 999px; border: 1px solid var(--line, #8a7457); }
+
+/* Patch 2.6.8/2.6.9: Lagerfeuer-Szene. */
+.lagerfeuer { margin: 0 0 .8rem; padding: .6rem .8rem; border: 1px solid var(--accent, #b5862b); border-radius: 6px; background: color-mix(in srgb, var(--accent, #b5862b) 10%, transparent); }
+.lagerfeuer h3 { margin: 0 0 .3rem; }
+.lagerfeuer-regie { font-style: italic; color: var(--muted, #6b5a46); }
+.lagerfeuer-persoenlich { border-width: 2px; }
+.lagerfeuer-antworten { display: grid; gap: .35rem; }
+.lagerfeuer-antworten button { text-align: left; }
+.lagerfeuer-antworten small { display: block; font-size: .78rem; opacity: .85; }
+.party-vorteile { font-size: .85rem; margin: .2rem 0 .5rem; }
+
+/* Patch 2.6.7: Einwurf eines Gefährten und gestellte Fragen im Gespräch. */
+.npc-einwurf { font-style: italic; border-left: 2px solid var(--accent, #b5862b); padding-left: .5rem; }
+.npc-frage { font-weight: 600; margin-top: .6rem; }
+
+/* ---- Marsch-Animation und Rückreise-Pflicht (Henry, 20. 11. 2026, v2.6.19) ---- */
+:root { --abgabe: #d97706; }
+.rk-abgabering { fill: none; stroke: var(--abgabe); stroke-width: 2.4; pointer-events: none; }
+.rk-abgabe .rk-punkt { fill: var(--abgabe); }
+.rk-abgabe-hinweis { color: #f5b45a; font-weight: 600; }
+.rk-key-abgabe::before { width: .7rem; height: .7rem; border: 2px solid var(--abgabe); border-radius: 50%; }
+.rk-marsch-pfad { fill: none; stroke: #ffd38a; stroke-width: 4.5; stroke-linecap: round; vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 2px #0008); }
+.rk-marsch-banner { pointer-events: none; }
+.rk-banner-stange { stroke: #2a1a0e; stroke-width: 1.6; }
+.rk-banner-tuch { fill: #b3261e; stroke: #2a1a0e; stroke-width: .8; }
+.rk-banner-fuss { fill: #f3d9a4; stroke: #2a1a0e; stroke-width: .5; }
+.rk-marsch-weiter { display: none; }
+.rk-marschiert .rk-marsch-weiter { display: inline-flex; }
+.rk-marschiert :is(.rk-tools, .rk-info) { opacity: .55; pointer-events: none; }
+.rk-marschiert .rk-weg.rk-aktiv { stroke: #e3c98c; stroke-width: 2.2; opacity: .45; }
+.rk-marschiert .rk-zielring { display: none; }
+.rk-atmo { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.rk-vignette { position: absolute; inset: 0;
+  background: radial-gradient(ellipse at center, transparent 45%, rgba(8, 5, 3, var(--rk-vignette, .65)) 100%); }
+.rk-wetter { position: absolute; inset: 0; }
+.rk-wetter i { position: absolute; top: calc(-4% + var(--y, 0%)); left: var(--x); display: block; animation-delay: var(--d); animation-iteration-count: infinite;
+  animation-timing-function: linear; }
+.fx-ash-drift i { width: calc(7px * var(--s)); height: calc(7px * var(--s)); border-radius: 50%; background: #3b3530; opacity: .75;
+  box-shadow: 0 0 4px #e0703055;
+  animation-name: fx-ash; animation-duration: calc(6s * var(--s)); }
+.fx-rain-slant i { width: 2px; height: 24px; background: linear-gradient(#bcd4e600, #bcd4e6cc); transform: rotate(16deg);
+  animation-name: fx-rain; animation-duration: calc(.9s * var(--s)); }
+.fx-snow-gust i { width: calc(5px * var(--s)); height: calc(5px * var(--s)); border-radius: 50%; background: #f4f8fb; opacity: .85;
+  animation-name: fx-snow; animation-duration: calc(4.5s * var(--s)); }
+@keyframes fx-ash { to { transform: translate(-60px, 115vh) rotate(160deg); opacity: .2; } }
+@keyframes fx-rain { to { transform: translate(-90px, 120vh) rotate(16deg); } }
+@keyframes fx-snow { 50% { transform: translate(-80px, 55vh); } to { transform: translate(40px, 115vh); } }
+.rk-marsch-text { position: absolute; left: 50%; bottom: 1.2rem; transform: translateX(-50%); max-width: min(36rem, 90%); margin: 0;
+  padding: .55rem 1rem; text-align: center; font-family: var(--font-title); font-style: italic; color: #f6e7c8;
+  background: #140d08cc; border: 1px solid #8c6d3f; border-radius: 4px; opacity: 0; transition: opacity var(--rk-fade, 450ms) ease; pointer-events: none; }
+.rk-marsch-text.rk-sichtbar { opacity: 1; }
+.rueckkehr-banner { margin: 0 0 1rem; padding: .75rem 1rem; border: 1px solid var(--abgabe); border-left-width: 5px; border-radius: 4px;
+  background: #fbe3c0; color: #3a2410; }
+.rueckkehr-banner p { margin: .2rem 0; }
+.rueckkehr-banner strong { color: #8a3d00; }
+.auftrag-bereit strong { color: #8a3d00; }
+@media (prefers-reduced-motion: reduce) { .rk-wetter i { animation: none; display: none; } }
+/* Globales Ort-Gate (Henry, 20. 11. 2026) */
+.ort-gate-hinweis { margin: .4rem 0; padding: .35rem .6rem; border-left: 3px solid var(--abgabe); background: #fbe3c055; font-style: italic; }
+
+/* Kampf-Paket: Reiter „Gefährten“ in der Seitenleiste bleibt in einer Zeile. */
+#side-tab-gefaehrten .side-tab-label { white-space: nowrap; font-size: 0.72rem; }
+
+/* Porträt-Paket: Bewohner eines Ortes (Welt-Pools) als kleine Porträtleiste. */
+.orts-bewohner { display: flex; flex-wrap: wrap; gap: .6rem; margin: 0 0 .8rem; padding: 0; list-style: none; }
+.orts-bewohner li { display: grid; justify-items: center; gap: .2rem; width: 4.6rem; font-size: .75rem; text-align: center; }
+.orts-bewohner-bild { width: 4rem; height: 4.8rem; overflow: hidden; border: 1px solid #8d6947; border-radius: 3px; background: #1d1813; }
+.orts-bewohner-bild svg, .orts-bewohner-bild img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+/* Kharos 3.0: umbenannte gedruckte Kartennamen decken den alten Namen im Kartenbild ab. */
+.rk-gedruckt text.rk-umbenannt { stroke: #140c08; stroke-width: .62em; stroke-opacity: .92; }
+/* Kharos 3.0: Völker-Proportionen in der Arena, Leeren-Aura des Archivars Malakor. */
+.arena-figur .rig { transform-origin: 50% 100%; scale: var(--volk-b, 1) var(--volk-h, 1); }
+.arena-gegner .rig { scale: calc(var(--volk-b, 1) * -1) var(--volk-h, 1); transform: none; }
+.rig-leerenringe ellipse { fill: none; stroke: #6366f1; stroke-width: 1.4; opacity: .75; animation: leerenringe 2.2s linear infinite; transform-box: view-box; transform-origin: 30px 40px; }
+.rig-leerenringe ellipse + ellipse { stroke: #38bdf8; animation-direction: reverse; }
+@keyframes leerenringe { to { transform: rotate(360deg); } }
+.arena-leere.arena-boss-aura::after { background: radial-gradient(circle at 76% 50%, rgba(99, 102, 241, .5), rgba(2, 6, 23, .2) 45%, transparent 60%); }
+/* v3.0.0 Gefährten-Pool: drei Zonen im Tab „Gefährten“ (Kachel-Optik wie v2.6.16). */
+.gef-karte { display: grid; grid-template-columns: 2.6rem 1fr; column-gap: .55rem; align-items: start; }
+.gef-karte > :not(.gef-portrait) { grid-column: 2; }
+.gef-portrait { grid-row: 1 / span 3; width: 2.6rem; height: 2.6rem; border-radius: 6px; background-size: 400% auto; background-color: #1b130d;
+  border: 1px solid color-mix(in srgb, var(--accent, #b5862b) 45%, transparent); }
+.gef-synergien { margin: .35rem 0 .6rem; padding: .3rem .55rem; font-size: .82rem; border-left: 3px solid var(--accent, #b5862b);
+  background: color-mix(in srgb, var(--accent, #b5862b) 10%, transparent); }
+.gef-zone { margin-top: .8rem; padding-top: .55rem; border-top: 1px solid color-mix(in srgb, var(--accent, #b5862b) 30%, transparent); }
+.gef-zone h4 { margin: 0 0 .4rem; font-size: .9rem; letter-spacing: .03em; }
+.gef-filter { display: flex; flex-wrap: wrap; gap: .3rem; margin-bottom: .45rem; }
+.gef-pill { font: inherit; font-size: .78rem; padding: .12rem .65rem; border-radius: 999px; cursor: pointer; color: inherit;
+  border: 1px solid color-mix(in srgb, var(--accent, #b5862b) 50%, transparent); background: transparent; }
+.gef-pill.aktiv { background: color-mix(in srgb, var(--accent, #b5862b) 35%, transparent); }
+.gef-gesandte-liste { margin: 0; padding-left: 1.1rem; font-size: .82rem; }
+.gef-karte small { display: block; opacity: .75; }
+/* v3.0.2: Quest-Fokus und Reiseliste. */
+.quest-kurztext { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; margin: .2rem 0 .4rem; }
+.quest-kurztext.offen { display: block; -webkit-line-clamp: unset; }
+.quest-schritt { margin: .3rem 0 0; display: flex; flex-wrap: wrap; gap: .35rem; align-items: baseline; }
+.quest-ort { font-weight: 600; color: var(--accent, #d9a441); }
+.quest-badge { display: inline-block; font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; padding: .05rem .45rem; border-radius: 999px;
+  background: color-mix(in srgb, var(--accent, #d9a441) 30%, transparent); border: 1px solid color-mix(in srgb, var(--accent, #d9a441) 60%, transparent); }
+.quest-aktiv { border-left: 3px solid var(--accent, #d9a441); padding-left: .6rem; }
+details.quest-akkordeon { margin: .3rem 0; }
+details.quest-akkordeon > summary { cursor: pointer; padding: .3rem .1rem; opacity: .85; }
+details.quest-akkordeon[open] > summary { opacity: 1; }
+.wegweiser-quest .wegweiser-knopf { outline: 2px solid color-mix(in srgb, var(--accent, #d9a441) 70%, transparent); outline-offset: -2px; }
+.wegweiser-ziel .quest-badge { margin-right: .35rem; align-self: flex-start; justify-self: start; width: max-content; }
+.gesperrt-umschalter { margin-top: .5rem; font-size: .85rem; }
+/* v3.0.3: Sub-Reiter in Tab A, Aushang als zweispaltige Kurz-Kacheln. */
+.welt-subtabs { display: flex; flex-wrap: wrap; gap: .35rem; margin: 0 0 .7rem; border-bottom: 1px solid color-mix(in srgb, var(--accent, #d9a441) 30%, transparent); padding-bottom: .4rem; }
+.welt-subtab { font: inherit; font-size: .85rem; padding: .3rem .8rem; border-radius: 6px 6px 0 0; cursor: pointer; color: inherit; background: transparent;
+  border: 1px solid color-mix(in srgb, var(--accent, #d9a441) 35%, transparent); }
+.welt-subtab.aktiv { background: color-mix(in srgb, var(--accent, #d9a441) 28%, transparent); font-weight: 600; }
+.aushang-kacheln { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); gap: .55rem; }
+.aushang-kachel { border: 1px solid color-mix(in srgb, var(--accent, #d9a441) 30%, transparent); border-radius: 8px; padding: .5rem .65rem; display: flex; flex-direction: column; gap: .25rem; }
+.aushang-kachel p { margin: 0; }
+.aushang-kachel details summary { cursor: pointer; font-size: .8rem; opacity: .8; }
+.aushang-kachel .action { margin-top: auto; }
+.aushang-badges { display: flex; flex-wrap: wrap; gap: .25rem; }
+.badge-weg { background: color-mix(in srgb, #38bdf8 25%, transparent); border-color: color-mix(in srgb, #38bdf8 55%, transparent); }
+.badge-art { background: transparent; }
+/* v3.0.4: Inventar und Handel – Symbole, Tier-Kanten, Schatz-Banner, Rüstungs-Silhouette. */
+.inv-symbol, .schatz-symbol, .kontor-symbol { width: 1.05em; height: 1.05em; flex: none; fill: none; stroke: currentColor; stroke-width: 1.7;
+  stroke-linecap: round; stroke-linejoin: round; vertical-align: -.15em; margin-right: .35em; opacity: .9; }
+.inv-row-name { min-width: 0; }
+.inv-row-name > .inv-symbol { float: left; margin-top: .15em; }
+.inv-row[data-tier] { border-left: 4px solid var(--tier-farbe, transparent); }
+.inv-row[data-tier="1"] { --tier-farbe: #94a3b8; }
+.inv-row[data-tier="2"] { --tier-farbe: #10b981; }
+.inv-row[data-tier="3"] { --tier-farbe: #38bdf8; }
+.inv-row[data-tier="4"] { --tier-farbe: #f59e0b; }
+.inv-row[data-tier] .inv-symbol { color: var(--tier-farbe); opacity: 1; }
+.rohstoff-raster .inv-row-name strong, .kontor-karten span { white-space: nowrap; overflow: visible; text-overflow: clip; }
+.kontor-symbol { display: block; margin: 0 auto .15rem; width: 1.3rem; height: 1.3rem; }
+.schatz-banner { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0 0 .8rem; }
+.schatz-feld { flex: 1 1 8rem; display: flex; align-items: center; gap: .35rem; padding: .45rem .7rem; border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--accent, #d9a441) 35%, transparent); background: color-mix(in srgb, var(--accent, #d9a441) 8%, transparent); }
+.schatz-feld strong { margin-left: auto; font-size: 1.1rem; }
+.schatz-silber { border-color: #f59e0b; background: linear-gradient(135deg, rgba(245, 158, 11, .28), rgba(245, 158, 11, .08)); }
+.schatz-silber strong { font-size: 1.35rem; color: #fcd34d; }
+.hub-silver { display: inline-flex; align-items: center; gap: .2rem; padding: .2rem .6rem; border-radius: 999px; border: 1px solid #f59e0b;
+  background: rgba(245, 158, 11, .15); }
+.hub-silver strong { color: #fcd34d; }
+.hub-gear { position: relative; isolation: isolate; }
+.hub-gear::before { content: ""; position: absolute; inset: 2.2rem 8% 30% 8%; z-index: -1; pointer-events: none; opacity: .07;
+  background: no-repeat center / contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140' fill='none' stroke='%23e8d5a8' stroke-width='2.5'%3E%3Cpath d='M35 18a15 15 0 0 1 30 0v12H35z M42 30v6h16v-6 M22 44l28-6 28 6-4 40-24 10-24-10z M50 40v52 M38 58l12 8 12-8 M30 92l-6 40h16l10-34 10 34h16l-6-40'/%3E%3Cpath d='M50 52l-5 6 5 6 5-6z' stroke='%23d9a441'/%3E%3C/svg%3E"); }
+
+/* Gesamtsimulation 20. 11.: Warnungen zu knapper Nahrung und zu niedriger Stufe. */
+.turn-badge.knapp { border-color: #b4553c; color: #f0b9a6; }
+.stufen-warnung { margin: .4rem 0; padding: .35rem .6rem; border-left: 3px solid #b4553c; background: rgba(180, 85, 60, .1); }

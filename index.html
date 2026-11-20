@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Aschenkrone · Der Weg nach Heidvang</title>
+  <title>Aschenkrone · Der Krieg um den letzten Atem</title>
   <link rel="stylesheet" href="bestiarium/stil.css">
   <link rel="stylesheet" href="spiel/stil.css">
   <script defer src="bestiarium/daten.js"></script>
@@ -19,7 +19,13 @@
   <script defer src="spiel/nebenquests.js"></script>
   <script defer src="spiel/systeme-daten.js"></script>
   <script defer src="spiel/systeme.js"></script>
+  <script defer src="spiel/akt-dialoge.js"></script>
   <script defer src="spiel/regeln.js"></script>
+  <script defer src="spiel/kampf-arena.js"></script>
+  <script defer src="spiel/npc-portraets.js"></script>
+  <script defer src="spiel/kharos-daten.js"></script>
+  <script defer src="spiel/kharos.js"></script>
+  <script defer src="spiel/npcs.js"></script>
   <script defer src="spiel/karte-daten.js"></script>
   <script defer src="spiel/karte.js"></script>
   <script defer src="spiel/reisekarte-daten.js"></script>
@@ -31,7 +37,7 @@
 <body>
   <header class="game-header">
     <div class="game-wrap header-inner">
-      <div><p class="wordmark">Aschenkrone</p><h1>Der Weg nach Heidvang</h1></div>
+      <div><p class="wordmark">Aschenkrone</p><h1>Der Krieg um den letzten Atem</h1></div>
       <div class="header-controls">
         <div class="header-row">
           <nav aria-label="Nachschlagewerke">
@@ -80,14 +86,14 @@
         <label for="class">Klasse</label>
         <select id="class" aria-describedby="class-description"></select>
         <div id="class-description" class="class-description"></div>
+        <label for="schwierigkeit">Schwierigkeitsgrad</label>
+        <select id="schwierigkeit" aria-describedby="schwierigkeit-description"></select>
+        <p id="schwierigkeit-description" class="hint"></p>
         <div id="volk-choice" hidden>
           <label for="volk-wahl">Vielseitig · +1 auf einen Grundwert nach Wahl</label>
           <select id="volk-wahl"></select>
         </div>
-        <label for="appearance">Porträt</label>
-        <select id="appearance"><option value="mann">Männlich</option><option value="frau">Weiblich</option></select>
-        <label for="variant">Variante</label>
-        <select id="variant"></select>
+        <div class="creation-werte">
         <fieldset id="point-buy"><legend>Grundwerte</legend>
           <p id="points-left" aria-live="polite"></p>
           <div id="point-controls"></div>
@@ -97,14 +103,29 @@
           <div id="skill-controls"></div>
           <button id="skill-suggest" class="action" type="button">Vorschlag übernehmen</button>
         </fieldset>
-        <dl id="preview-stats" class="stat-line"></dl>
+        </div>
         <p id="creation-status" role="status"></p>
-        <div class="actions">
-          <button id="character-submit" class="action primary" type="submit">Prolog starten</button>
+      </form>
+      <!-- Patch 2.6.16: rechte Spalte bleibt stehen: Porträt mit Auswahl, Zusammenfassung, Knöpfe. -->
+      <aside class="creation-vorschau" aria-label="Vorschau">
+        <figure class="creation-portrait"><div id="preview" class="avatar" role="img"></div><figcaption id="preview-caption"></figcaption></figure>
+        <div class="portrait-steuerung">
+          <label for="appearance">Porträt</label>
+          <select id="appearance" form="character-form"><option value="mann">Männlich</option><option value="frau">Weiblich</option></select>
+          <label for="variant">Variante</label>
+          <select id="variant" form="character-form"></select>
+        </div>
+        <section class="creation-summary" aria-label="Zusammenfassung">
+          <h3 id="summary-title">Zusammenfassung</h3>
+          <p id="summary-faction"></p>
+          <p id="summary-class"></p>
+          <dl id="preview-stats" class="stat-line"></dl>
+        </section>
+        <div class="actions creation-knoepfe">
+          <button id="character-submit" class="action primary" type="submit" form="character-form">Prolog starten</button>
           <button class="action" type="button" id="cancel">Zurück</button>
         </div>
-      </form>
-      <figure><div id="preview" class="avatar" role="img"></div><figcaption id="preview-caption"></figcaption></figure>
+      </aside>
     </section>
 
     <section class="prologue" id="prologue" aria-labelledby="intro-title" hidden>
@@ -167,6 +188,7 @@
             <button type="button" role="tab" id="side-tab-beutel" aria-controls="side-beutel" aria-selected="false" tabindex="-1" data-side-tab="beutel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7c0-2 1.5-3 4-3s4 1 4 3 M6 8h12l1 11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z M10 4l-1-2 M14 4l1-2"/></svg><span class="side-tab-label">Beutel</span></button>
             <button type="button" role="tab" id="side-tab-chronik" aria-controls="side-chronik" aria-selected="false" tabindex="-1" data-side-tab="chronik"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z M5 17a3 3 0 0 1 3-3h10 M9 8h6 M9 11h4"/></svg><span class="side-tab-label">Chronik</span></button>
             <button type="button" role="tab" id="side-tab-gefaehrten" aria-controls="side-gefaehrten" aria-selected="false" tabindex="-1" data-side-tab="gefaehrten"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6 M16 11a2.5 2.5 0 1 0 0-5 M17 14c2.5.5 4 2.6 4 5.5"/></svg><span class="side-tab-label">Gefährten</span></button>
+            <button type="button" role="tab" id="side-tab-einstellungen" aria-controls="side-einstellungen" aria-selected="false" tabindex="-1" data-side-tab="einstellungen" title="Einstellungen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="side-tab-label">Einstellungen</span><span class="side-tab-kurz" aria-hidden="true">⚙</span></button>
           </div>
           <div id="side-karte" class="side-panel" role="tabpanel" aria-labelledby="side-tab-karte">
             <button type="button" class="action primary hub-launch rk-launch" data-reisekarte-open><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z M9 4v14 M15 6v14"/></svg><span>Reisekarte öffnen</span></button>
@@ -191,14 +213,17 @@
             <details open><summary id="questlog-summary">Questlog</summary>
               <div class="quest-clock-row"><p id="quest-clock" class="quest-clock"></p>
                 <details class="help-tip"><summary aria-label="Wie Fristen zählen" title="Wie Fristen zählen">?</summary>
-                <p class="quest-help">Fristen laufen in Spielzügen: Entscheidungen, Reisen, Kampfrunden, Herstellung und Auftragsaktionen. Lesen, Ausrüsten, Handel und Pausen kosten keine Zeit. Begleiteraufträge müssen vor Ablauf am Treffpunkt abgegeben werden.</p></details>
+                <p class="quest-help">Fristen laufen in Schritten: Entscheidungen, Reise-Etappen, Kampfrunden, Herstellung und Auftragsaktionen. Lesen, Ausrüsten, Handel und Pausen kosten keine Zeit. Begleiteraufträge müssen vor Ablauf am Treffpunkt abgegeben werden.</p></details>
               </div>
               <div id="quest-filters" class="actions" role="group" aria-label="Aufträge filtern"></div>
               <ul id="companion-quests" class="inventory-list"></ul></details>
             <details open><summary>Reisejournal</summary><ol id="journal"></ol></details>
           </div>
           <div id="side-gefaehrten" class="side-panel" role="tabpanel" aria-labelledby="side-tab-gefaehrten">
-            <details open><summary id="party-count">Gefährten</summary><ul id="party-members" class="inventory-list"></ul>
+            <details open><summary id="party-count">Gefährten</summary><ul id="party-members" class="inventory-list gef-trupp"></ul>
+              <p id="party-synergien" class="gef-synergien"></p>
+              <section id="gef-reserve" class="gef-zone" aria-labelledby="gef-reserve-titel"></section>
+              <section id="gef-gesandte" class="gef-zone" aria-labelledby="gef-gesandte-titel"></section>
               <details><summary>Mögliche Treffpunkte</summary><ul id="party-leads"></ul></details>
             </details>
             <details><summary>Fraktionsruf</summary><ul id="faction-ruf" class="inventory-list"></ul></details>
@@ -209,45 +234,80 @@
             </details>
             <div class="actions save-actions">
               <button id="legacy-build" class="action" hidden>Held an das neue Klassensystem anpassen</button>
-              <button id="export" class="action">Spielstand exportieren</button>
+            </div>
+          </div>
+          <div id="side-einstellungen" class="side-panel einstellungen" role="tabpanel" aria-labelledby="side-tab-einstellungen">
+            <details open><summary>Spielstand speichern</summary>
+              <div class="actions save-actions">
+                <button id="save-now" class="action">Lokal speichern</button>
+                <button id="export" class="action">Spielstand als Datei exportieren</button>
+              </div>
+              <p id="save-status" class="save-badge" role="status"></p>
+            </details>
+            <details open><summary>Spielstand laden</summary>
+              <div class="actions save-actions">
+                <button id="load-local" class="action">Letzten lokalen Spielstand laden</button>
+                <button id="load-wegpunkt" class="action">Wegpunkt vor letzter Schlacht laden</button>
+                <label for="save-file-play" class="action file-label">Spielstand-Datei importieren<input type="file" id="save-file-play" accept=".json,application/json"></label>
+              </div>
+              <p id="load-status" role="status"></p>
+            </details>
+            <details open><summary>Schwierigkeitsgrad</summary>
+              <label class="option-row">Schwierigkeit dieses Spielstands
+                <select id="opt-schwierigkeit"></select></label>
+              <p id="opt-schwierigkeit-hinweis" class="hint"></p>
+              <div id="ruhmeshalle" class="ruhmeshalle"></div>
+            </details>
+            <details open><summary>Optionen</summary>
+              <label class="option-row"><input type="checkbox" id="opt-punkte"> Vor Bosskämpfen an ungenutzte Aufstiegspunkte erinnern</label>
+              <label class="option-row">Begleiter-Einwürfe in Dialogen &amp; am Lagerfeuer
+                <select id="opt-einwuerfe"><option value="HÄUFIG">Häufig</option><option value="NORMAL">Normal</option><option value="SELTEN">Selten</option></select></label>
+              <label class="option-row">Kampflog-Anzeige
+                <select id="opt-kampflog"><option value="KOMPAKT">Kompakt</option><option value="AUSFÜHRLICH">Ausführlich</option></select></label>
+            </details>
+            <div class="actions save-actions">
               <button id="menu" class="action">Hauptmenü</button>
             </div>
-            <p id="save-status" role="status"></p>
+            <div id="menu-confirm" class="menu-confirm" hidden>
+              <p>Möchtest du wirklich zum Hauptmenü zurückkehren? Nicht gespeicherter Fortschritt geht verloren.</p>
+              <div class="actions"><button id="menu-yes" class="action primary">Zum Hauptmenü</button><button id="menu-no" class="action">Abbrechen</button></div>
+            </div>
           </div>
         </aside>
       </div>
     </div>
   </main>
-  <dialog id="inventory-hub" class="inventory-hub" aria-labelledby="hub-title">
+  <dialog id="inventory-hub" class="inventory-hub inv-hub pergament" aria-labelledby="hub-title">
     <div class="hub-head">
       <div><p class="overline" id="hub-place"></p><h2 id="hub-title">Inventar</h2></div>
       <button type="button" id="hub-close" class="action">Schließen</button>
     </div>
-    <section class="hub-gear" aria-labelledby="hub-gear-title">
-      <h3 id="hub-gear-title" class="hub-section-title">Ausrüstung</h3>
-      <div class="hub-gear-body">
-        <div id="hub-doll" class="hub-doll"></div>
-        <div class="hub-stats-box">
-          <dl id="hub-stats" class="hub-stats"></dl>
-          <p id="hub-compare" class="hub-compare" aria-live="polite"></p>
+    <div class="inv-body">
+      <section class="inv-links hub-gear" aria-labelledby="hub-gear-title">
+        <h3 id="hub-gear-title" class="hub-section-title">Ausrüstung</h3>
+        <div id="hub-member" class="inv-member" role="group" aria-label="Gruppenmitglied wählen" hidden></div>
+        <ul id="hub-slots" class="inv-slots" aria-label="Ausrüstungsplätze"></ul>
+        <dl id="hub-stats" class="hub-stats inv-stats"></dl>
+        <p id="hub-compare" class="hub-compare" aria-live="polite"></p>
+        <div class="inv-links-fuss">
           <button type="button" id="hub-unequip-all" class="action hub-unequip-all">Alles ablegen</button>
           <p id="hub-silver" class="hub-silver"></p>
-          <div id="hub-belt" class="hub-belt" aria-label="Gürtel"></div>
-          <div id="hub-relikt" class="hub-relikt" aria-label="Gruppen-Relikt" hidden></div>
         </div>
-      </div>
-    </section>
-    <div class="hub-tabs" role="tablist" aria-label="Aufbewahrung">
-      <button type="button" role="tab" id="hub-tab-bag" aria-controls="hub-items" data-tab="bag"></button>
-      <button type="button" role="tab" id="hub-tab-storage" aria-controls="hub-items" data-tab="storage"></button>
+        <div id="hub-belt" class="hub-belt" aria-label="Gürtel"></div>
+        <div id="hub-relikt" class="hub-relikt" aria-label="Gruppen-Relikt" hidden></div>
+      </section>
+      <section class="inv-rechts" aria-label="Rucksack, Kontor-Lager und Handel">
+        <div class="hub-tabs" role="tablist" aria-label="Inventar">
+          <button type="button" role="tab" id="hub-tab-bag" aria-controls="hub-items" data-tab="bag"></button>
+          <button type="button" role="tab" id="hub-tab-storage" aria-controls="hub-items" data-tab="storage"></button>
+          <button type="button" role="tab" id="hub-tab-trade" aria-controls="hub-items" data-tab="trade"></button>
+        </div>
+        <div id="hub-items" class="hub-items" role="tabpanel" aria-label="Gegenstände"></div>
+      </section>
     </div>
-    <div class="hub-bar"><progress id="hub-capacity" max="20" value="0" aria-label="Belegte Rucksackplätze"></progress><p id="hub-hint" class="hub-hint"></p></div>
-    <div id="hub-bag-upgrade" class="hub-bag-upgrade" hidden></div>
-    <div id="hub-slot-filter" class="hub-slot-filter" hidden></div>
-    <div id="hub-items" class="hub-items" role="tabpanel" aria-label="Gegenstände"></div>
     <p id="hub-status" class="hub-status" role="status"></p>
   </dialog>
-  <dialog id="character-sheet" class="inventory-hub character-sheet" aria-labelledby="sheet-title">
+  <dialog id="character-sheet" class="inventory-hub character-sheet pergament" aria-labelledby="sheet-title">
     <div class="hub-head">
       <div class="sheet-who">
         <div id="sheet-avatar" class="avatar sheet-avatar" role="img"></div>
@@ -271,9 +331,10 @@
     </div>
     <div id="sheet-panel" class="sheet-panel" role="tabpanel" tabindex="0"></div>
   </dialog>
-  <dialog id="reisekarte" class="inventory-hub reisekarte" aria-labelledby="rk-title">
+  <dialog id="reisekarte" class="inventory-hub reisekarte pergament" aria-labelledby="rk-title">
     <div class="hub-head">
       <div><p class="overline" id="rk-place"></p><h2 id="rk-title">Reisekarte</h2></div>
+      <button type="button" id="rk-marsch-weiter" class="action rk-marsch-weiter">Marsch überspringen</button>
       <button type="button" id="rk-close" class="action">Schließen</button>
     </div>
     <div class="rk-tools">
@@ -299,7 +360,23 @@
       </div>
       <aside id="rk-info" class="rk-info" aria-live="polite"></aside>
     </div>
-    <p class="rk-legend"><span class="rk-key rk-key-kernland">Kernland</span><span class="rk-key rk-key-grenzland">Grenzland</span><span class="rk-key rk-key-pass">Pass</span><span class="rk-key rk-key-dorfweg">Dorfweg</span><span class="rk-key rk-key-seeweg">Seeweg</span><span class="rk-key rk-key-ziel">erreichbar</span></p>
+    <p class="rk-legend"><span class="rk-key rk-key-kernland">Kernland</span><span class="rk-key rk-key-grenzland">Grenzland</span><span class="rk-key rk-key-pass">Pass</span><span class="rk-key rk-key-dorfweg">Dorfweg</span><span class="rk-key rk-key-seeweg">Seeweg</span><span class="rk-key rk-key-ziel">erreichbar</span><span class="rk-key rk-key-abgabe">Bericht erwartet</span></p>
+  </dialog>
+  <dialog id="npc-dialog" class="npc-dialog pergament" aria-labelledby="npc-name" aria-describedby="npc-text">
+    <header class="npc-kopf">
+      <div id="npc-portrait" class="npc-portrait" aria-hidden="true"></div>
+      <div class="npc-wer">
+        <p class="overline" id="npc-ort"></p>
+        <h2 id="npc-name"></h2>
+        <p id="npc-titel" class="npc-titel"></p>
+        <p id="npc-stand" class="npc-stand"></p>
+      </div>
+      <button type="button" id="npc-close" class="npc-close" aria-label="Gespräch beenden">×</button>
+    </header>
+    <div id="npc-body" class="npc-body">
+      <div id="npc-text" class="npc-text" aria-live="polite"></div>
+      <ol id="npc-optionen" class="npc-optionen" aria-label="Antworten · Tasten 1 bis 9"></ol>
+    </div>
   </dialog>
 </body>
 </html>

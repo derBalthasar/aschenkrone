@@ -1,0 +1,340 @@
+{
+  "quelle": "Henry, Projekt-Thread 20. 11. 2026 (Kharos 3.0)",
+  "schema_version": "3.0.0",
+  "paket": "kharos_master_teil_1b_von_1b",
+  "target_file": "spiel/regeln.js",
+  "fraktionen_zwerge_orks_untote": [
+    {
+      "fraktion_id": "zwerge_bergzwerge",
+      "volk": "zwerge",
+      "name": "Bergzwerge · Die Hochhallen von Khaz-Thar",
+      "heimatstadt": "Khaz-Thar",
+      "zweite_stadt": "Eisenamboss",
+      "anfuehrer_npc": "Hochkönig Borin Steinfaust",
+      "zweiter_npc": "Runenmeister Thrain",
+      "klassen": [
+        {
+          "klasse_id": "khaz_eisenbrecher",
+          "name": "Eisenbrecher",
+          "rolle": "tank_schildwall",
+          "primaerattribut": "staerke",
+          "ausweich_intervall": 7,
+          "faehigkeiten": [
+            "unerschuetterlicher_wall",
+            "hammer_der_tiefe",
+            "stein haut_rune"
+          ]
+        },
+        {
+          "klasse_id": "khaz_runenschmied",
+          "name": "Runenschmied",
+          "rolle": "support_buff",
+          "primaerattribut": "intelligenz",
+          "ausweich_intervall": 7,
+          "faehigkeiten": [
+            "rune_des_stahls",
+            "feuerstoss_amboss",
+            "rune_der_staerkung"
+          ]
+        }
+      ]
+    },
+    {
+      "fraktion_id": "zwerge_tiefenzwerge",
+      "volk": "zwerge",
+      "name": "Tiefenzwerge · Die Schlackefürsten von Mur’Grim",
+      "heimatstadt": "Mur’Grim",
+      "zweite_stadt": "Magmaschacht",
+      "anfuehrer_npc": "Schlackefürst Vorgrim",
+      "zweiter_npc": "Golembaumeisterin Helga",
+      "klassen": [
+        {
+          "klasse_id": "mur_dampf_moloch",
+          "name": "Dampfmoloch-Krieger",
+          "rolle": "nahkampf_ruestung",
+          "primaerattribut": "staerke",
+          "ausweich_intervall": 7,
+          "faehigkeiten": [
+            "dampf_ramme",
+            "schlacke_explosion",
+            "ueberdruck_panzer"
+          ]
+        },
+        {
+          "klasse_id": "mur_magma_alchemist",
+          "name": "Magma-Alchemist",
+          "rolle": "fernkampf_aoe",
+          "primaerattribut": "intelligenz",
+          "ausweich_intervall": 7,
+          "faehigkeiten": [
+            "geschmolzenes_erz",
+            "saeure_phiole",
+            "glutkern_heilung"
+          ]
+        }
+      ]
+    },
+    {
+      "fraktion_id": "zwerge_klippenzwerge",
+      "volk": "zwerge",
+      "name": "Klippenzwerge · Die Sturmbärte von Skald",
+      "heimatstadt": "Skald-Feste",
+      "zweite_stadt": "Donnerkap",
+      "anfuehrer_npc": "Sturmkapitän Rurik",
+      "zweiter_npc": "Sprengmeisterin Bera",
+      "klassen": [
+        {
+          "klasse_id": "skald_sturmaxt_berserker",
+          "name": "Sturmaxt-Krieger",
+          "rolle": "nahkampf_offensiv",
+          "primaerattribut": "staerke",
+          "ausweich_intervall": 6,
+          "faehigkeiten": [
+            "doppelaxt_wirbel",
+            "wellenbrecher_sturm",
+            "trotz_der_klippen"
+          ]
+        },
+        {
+          "klasse_id": "skald_donnerbuechse",
+          "name": "Donnerbüchsen-Schütze",
+          "rolle": "fernkampf",
+          "primaerattribut": "geschick",
+          "ausweich_intervall": 6,
+          "faehigkeiten": [
+            "kartätschen_schuss",
+            "pulverfass_wurf",
+            "gezielter_kanonenschlag"
+          ]
+        }
+      ]
+    },
+    {
+      "fraktion_id": "orks_ehrenklans",
+      "volk": "orks",
+      "name": "Ehrenklans · Der Donnerbund von Grom’Kar",
+      "heimatstadt": "Grom’Kar",
+      "zweite_stadt": "Steppenwacht",
+      "anfuehrer_npc": "Kriegshäuptling Durok",
+      "zweiter_npc": "Schildschwester Ashka",
+      "klassen": [
+        {
+          "klasse_id": "grom_donnerkrieger",
+          "name": "Donnerkrieger",
+          "rolle": "nahkampf_ausgewogen",
+          "primaerattribut": "staerke",
+          "ausweich_intervall": 6,
+          "faehigkeiten": [
+            "kriegsschrei_der_ahnen",
+            "spaltender_hieb",
+            "eiserne_disziplin"
+          ]
+        },
+        {
+          "klasse_id": "grom_bestienjaeger",
+          "name": "Bestienjäger",
+          "rolle": "fernkampf_geschick",
+          "primaerattribut": "geschick",
+          "ausweich_intervall": 5,
+          "faehigkeiten": [
+            "speerwurf",
+            "fangnetz",
+            "instinkt_des_wolfs"
+          ]
+        }
+      ]
+    },
+    {
+      "fraktion_id": "orks_bluthorde",
+      "volk": "orks",
+      "name": "Bluthorde · Die Schlächter von Kargath",
+      "heimatstadt": "Kargath-Grube",
+      "zweite_stadt": "Blutpass",
+      "anfuehrer_npc": "Kriegsfürst Gor’Vash",
+      "zweiter_npc": "Schlächterin Kragha",
+      "klassen": [
+        {
+          "klasse_id": "kargath_blutberserker",
+          "name": "Blutberserker",
+          "rolle": "nahkampf_glaskanone",
+          "primaerattribut": "staerke",
+          "ausweich_intervall": 6,
+          "faehigkeiten": [
+            "rasender_blutsturm",
+            "schaedelspalter",
+            "schmerz_zu_kraft"
+          ]
+        },
+        {
+          "klasse_id": "kargath_kriegstrommler",
+          "name": "Kriegstrommler",
+          "rolle": "support_offensiv",
+          "primaerattribut": "staerke",
+          "ausweich_intervall": 7,
+          "faehigkeiten": [
+            "trommel_des_gemetzels",
+            "blutrausch_aura",
+            "knochenbrecher"
+          ]
+        }
+      ]
+    },
+    {
+      "fraktion_id": "orks_knochenschamanen",
+      "volk": "orks",
+      "name": "Knochenschamanen · Der Geisterzirkel von Zul’Vash",
+      "heimatstadt": "Zul’Vash",
+      "zweite_stadt": "Aschemoor",
+      "anfuehrer_npc": "Seher Mok’Tar",
+      "zweiter_npc": "Geisterbinderin Yrelka",
+      "klassen": [
+        {
+          "klasse_id": "zul_geisterrufer",
+          "name": "Geisterrufer",
+          "rolle": "magie_heilung",
+          "primaerattribut": "intelligenz",
+          "ausweich_intervall": 7,
+          "faehigkeiten": [
+            "ahnenblitz",
+            "totem_der_heilung",
+            "geisterfessel"
+          ]
+        },
+        {
+          "klasse_id": "zul_totemkrieger",
+          "name": "Totemkrieger",
+          "rolle": "nahkampf_magie",
+          "primaerattribut": "staerke",
+          "ausweich_intervall": 6,
+          "faehigkeiten": [
+            "baerenklaue",
+            "flammentotem_schlag",
+            "geist_der_bestie"
+          ]
+        }
+      ]
+    },
+    {
+      "fraktion_id": "untote_grabkoenige",
+      "volk": "untote",
+      "name": "Grabkönige · Die Ewige Legion von Mor’Vael",
+      "heimatstadt": "Mor’Vael",
+      "zweite_stadt": "Knochenzitadelle",
+      "anfuehrer_npc": "Grabkönig Sethek",
+      "zweiter_npc": "Todesritterin Morwen",
+      "schwierigkeit_hinweis": "Schwerster Modus: Keine Buendnisse moeglich, nur Eroberung oder Korrumpierung.",
+      "klassen": [
+        {
+          "klasse_id": "mor_todesritter",
+          "name": "Grabritter",
+          "rolle": "tank_untot",
+          "primaerattribut": "staerke",
+          "ausweich_intervall": 7,
+          "faehigkeiten": [
+            "grabeskälte",
+            "seelenklinge",
+            "unheilige_ruestung"
+          ]
+        },
+        {
+          "klasse_id": "mor_knochenmarschall",
+          "name": "Knochenmarschall",
+          "rolle": "kontrolle_untot",
+          "primaerattribut": "intelligenz",
+          "ausweich_intervall": 7,
+          "faehigkeiten": [
+            "befehl_der_toten",
+            "fluch_der_schwäche",
+            "leichenschild"
+          ]
+        }
+      ]
+    },
+    {
+      "fraktion_id": "untote_seuchenflut",
+      "volk": "untote",
+      "name": "Seuchenflut · Die Bleiche Horde von Nethergrund",
+      "heimatstadt": "Nethergrund",
+      "zweite_stadt": "Faulmoor",
+      "anfuehrer_npc": "Seuchenfürst Malgath",
+      "zweiter_npc": "Fleischweberin Xyla",
+      "schwierigkeit_hinweis": "Schwerster Modus: Keine Buendnisse moeglich, nur Eroberung oder Korrumpierung.",
+      "klassen": [
+        {
+          "klasse_id": "nether_seuchenweber",
+          "name": "Seuchenweber",
+          "rolle": "dot_magie",
+          "primaerattribut": "intelligenz",
+          "ausweich_intervall": 7,
+          "faehigkeiten": [
+            "faulnis_wolke",
+            "seuchen_explosion",
+            "lebensentzug"
+          ]
+        },
+        {
+          "klasse_id": "nether_knochenschlaechter",
+          "name": "Knochenschlächter",
+          "rolle": "nahkampf_untot",
+          "primaerattribut": "staerke",
+          "ausweich_intervall": 7,
+          "faehigkeiten": [
+            "fleischerhaken",
+            "giftiger_biss",
+            "unaufhaltsamer_marsch"
+          ]
+        }
+      ]
+    },
+    {
+      "fraktion_id": "untote_fluesternde",
+      "volk": "untote",
+      "name": "Die Flüsternden · Der Schattenhof von Noctis",
+      "heimatstadt": "Noctis-Krypta",
+      "zweite_stadt": "Blutspiegel",
+      "anfuehrer_npc": "Fürstin Carmilla",
+      "zweiter_npc": "Schattenflüsterer Orin",
+      "schwierigkeit_hinweis": "Schwerster Modus: Keine Buendnisse moeglich, nur Eroberung oder Korrumpierung.",
+      "klassen": [
+        {
+          "klasse_id": "noctis_blutlord",
+          "name": "Vampir-Blutlord",
+          "rolle": "schurke_lebensraub",
+          "primaerattribut": "geschick",
+          "ausweich_intervall": 5,
+          "faehigkeiten": [
+            "vampirbiss",
+            "nebelgestalt",
+            "blutroter_tanz"
+          ]
+        },
+        {
+          "klasse_id": "noctis_seelenraeuber",
+          "name": "Seelenräuber",
+          "rolle": "magie_korrumpierung",
+          "primaerattribut": "intelligenz",
+          "ausweich_intervall": 7,
+          "faehigkeiten": [
+            "gedanken_fluestern",
+            "seelenriss",
+            "marionetten_fluch"
+          ]
+        }
+      ]
+    }
+  ],
+  "untoten_sondermechanik_korrumpierung": {
+    "diplomatie_gesperrt": true,
+    "buendnisse_verboten": true,
+    "erlaubte_pfade": [
+      "eroberung",
+      "korrumpierung"
+    ],
+    "korrumpierung_ablauf": {
+      "mechanik_basis": "Nutzt Ruf-Manipulation & Söldner-Übernahme ohne Stadt-Zugang",
+      "wirkung": "Vergiftet Vorräte, senkt gegnerische Moral um -30 und dreht feindliche Hauptleute als Verräter um",
+      "ritual_fortschritt_pro_volk": 25,
+      "ritual_ziel_vael_thar": 100
+    }
+  }
+}

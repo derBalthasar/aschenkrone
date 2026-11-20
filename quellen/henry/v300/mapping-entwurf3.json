@@ -1,0 +1,216 @@
+{
+  "quelle": "Henry, Projekt-Thread 20. 11. 2026 (Kharos 3.0)",
+  "schema_version": "3.0.0",
+  "feature": "verbindliches_1zu1_mapping_entwurf3_auf_kharos",
+  "target_files": [
+    "spiel/regeln.js",
+    "spiel/handlung_akte.js",
+    "ui/karte.js",
+    "ui/dialog.js",
+    "ui/portraet_engine.js"
+  ],
+  "sonderregeln_uebernahme": {
+    "karte_entwurf_3_beibehalten": true,
+    "alle_510_orte_beibehalten": true,
+    "klassensystem_6x6_beibehalten": true,
+    "heiler_ohne_deckel_beibehalten": true,
+    "gegenlied_mechanik_uebertragen_auf": "archivar_malakor"
+  },
+  "fraktions_und_orte_mapping": [
+    {
+      "volk": "menschen",
+      "alt_fraktion": "Kronreich",
+      "neu_fraktion": "Kaiserreich von Valen",
+      "hauptstadt": {
+        "alt": "Kronhall",
+        "neu": "Valengrad"
+      },
+      "zweite_stadt": {
+        "alt": "Hagenfels",
+        "neu": "Eisentor"
+      }
+    },
+    {
+      "volk": "menschen",
+      "alt_fraktion": "Orden der Flamme",
+      "neu_fraktion": "Flammenorden von Solis",
+      "hauptstadt": {
+        "alt": "Glutberg",
+        "neu": "Sonnenwacht"
+      },
+      "zweite_stadt": {
+        "alt": "Aschenkloster",
+        "neu": "Aschenkloster"
+      }
+    },
+    {
+      "volk": "menschen",
+      "alt_fraktion": "Freie Häfen",
+      "neu_fraktion": "Freie Kapitäne von Korvath",
+      "hauptstadt": {
+        "alt": "Perlvik",
+        "neu": "Korvath-Bucht"
+      },
+      "zweite_stadt": {
+        "alt": "Nebelvik",
+        "neu": "Nebelklippe"
+      }
+    },
+    {
+      "volk": "elfen",
+      "alt_fraktion": "Dornenklingen",
+      "neu_fraktion": "Hochelfen von Aethel",
+      "hauptstadt": {
+        "alt": "Hochdorn",
+        "neu": "Aethel-Spitze"
+      },
+      "zweite_stadt": {
+        "alt": "Nordkap",
+        "neu": "Sternenwarte"
+      }
+    },
+    {
+      "volk": "elfen",
+      "alt_fraktion": "Hüter des Weltenbaums",
+      "neu_fraktion": "Waldelfen von Sylvar",
+      "hauptstadt": {
+        "alt": "Ylvenor",
+        "neu": "Wurzelkron"
+      },
+      "zweite_stadt": {
+        "alt": "Wurzelhalle",
+        "neu": "Moosgrund"
+      }
+    },
+    {
+      "volk": "elfen",
+      "alt_fraktion": "Schattenblüte",
+      "neu_fraktion": "Nachtelfen von Vael’Dorn",
+      "hauptstadt": {
+        "alt": "Velasyr",
+        "neu": "Vael’Dorn"
+      },
+      "zweite_stadt": {
+        "alt": "Mondkelch",
+        "neu": "Knochenspitze"
+      }
+    },
+    {
+      "volk": "zwerge",
+      "alt_fraktion": "Tiefes Königreich",
+      "neu_fraktion": "Bergzwerge von Khaz-Thar",
+      "hauptstadt": {
+        "alt": "Ambossheim",
+        "neu": "Khaz-Thar"
+      },
+      "zweite_stadt": {
+        "alt": "Eisenwacht",
+        "neu": "Eisenamboss"
+      }
+    },
+    {
+      "volk": "zwerge",
+      "alt_fraktion": "Tiefgräber",
+      "neu_fraktion": "Tiefenzwerge von Mur’Grim",
+      "hauptstadt": {
+        "alt": "Kluftheim",
+        "neu": "Mur’Grim"
+      },
+      "zweite_stadt": {
+        "alt": "Rußtal",
+        "neu": "Magmaschacht"
+      }
+    },
+    {
+      "volk": "zwerge",
+      "alt_fraktion": "Runenschmiede",
+      "neu_fraktion": "Klippenzwerge von Skald",
+      "hauptstadt": {
+        "alt": "Essenfels",
+        "neu": "Skald-Feste"
+      },
+      "zweite_stadt": {
+        "alt": "Donnerfels",
+        "neu": "Donnerkap"
+      }
+    },
+    {
+      "volk": "orks",
+      "alt_fraktion": "Grüne Banner",
+      "neu_fraktion": "Ehrenklans von Grom’Kar",
+      "hauptstadt": {
+        "alt": "Kragmar",
+        "neu": "Grom’Kar"
+      },
+      "zweite_stadt": {
+        "alt": "Grenzwall",
+        "neu": "Steppenwacht"
+      }
+    },
+    {
+      "volk": "orks",
+      "alt_fraktion": "Staubreiter",
+      "neu_fraktion": "Bluthorde von Kargath",
+      "hauptstadt": {
+        "alt": "Zhar-Kesh",
+        "neu": "Kargath-Grube"
+      },
+      "zweite_stadt": {
+        "alt": "Skarrak",
+        "neu": "Blutpass"
+      }
+    },
+    {
+      "volk": "orks",
+      "alt_fraktion": "Aschenclan",
+      "neu_fraktion": "Knochenschamanen von Zul’Vash",
+      "hauptstadt": {
+        "alt": "Aschenthron",
+        "neu": "Zul’Vash"
+      },
+      "zweite_stadt": {
+        "alt": "Rauchkluft",
+        "neu": "Aschemoor"
+      }
+    },
+    {
+      "volk": "untote",
+      "alt_fraktion": "Hof der Bleichen Krone",
+      "neu_fraktion": "Grabkönige von Mor’Vael",
+      "hauptstadt": {
+        "alt": "Palast der Tausend Stimmen",
+        "neu": "Mor’Vael"
+      },
+      "zweite_stadt": {
+        "alt": "Kaltthron",
+        "neu": "Knochenzitadelle"
+      }
+    },
+    {
+      "volk": "untote",
+      "alt_fraktion": "Fäulnisbrut",
+      "neu_fraktion": "Seuchenflut von Nethergrund",
+      "hauptstadt": {
+        "alt": "Tempel der Fleischaltäre",
+        "neu": "Nethergrund"
+      },
+      "zweite_stadt": {
+        "alt": "Madenmoor",
+        "neu": "Faulmoor"
+      }
+    },
+    {
+      "volk": "untote",
+      "alt_fraktion": "Die Erinnernden",
+      "neu_fraktion": "Flüsternde von Noctis",
+      "hauptstadt": {
+        "alt": "Eryndor",
+        "neu": "Noctis-Krypta"
+      },
+      "zweite_stadt": {
+        "alt": "zweite_stadt_eryndor_entwurf3",
+        "neu": "Blutspiegel"
+      }
+    }
+  ]
+}

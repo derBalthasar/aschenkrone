@@ -116,6 +116,8 @@ const wahl = (choice) => choice ? Object.values(choice).map((o) => ({ id: o.id, 
 // Henry, 18. 11. 2026: Die Stufen der Schwester-Zweige richten sich nach der gespielten Reihenfolge,
 // nicht nach dem Zweig. Der erste Zweig ist Stufe 6–10, der zweite 11–15 (Geminis Werte bleiben als Empfehlung).
 const ZWEIG_STUFEN = "6-10 als erster Zweig, 11-15 als zweiter";
+// Patch 2.6.19 (Henry, B7): verbindliche Akt-Stufen 1–5, 6–10, 11–15, 16–22, 20–26 (Untoten-Norden 25–30); Geminis Werte bleiben als stufenGemini.
+const AKT_STUFEN = { "1": "1-5", "4": "16-22", "5": "20-26" };
 
 function reiheAus(teil1, f) {
   const ml = teil1.mainQuestline;
@@ -126,7 +128,8 @@ function reiheAus(teil1, f) {
       id: a.id,
       nr: a.freeOrder ? "2/3" : String(a.act),
       titel: geaendert.titel ?? a.title,
-      stufen: a.freeOrder ? ZWEIG_STUFEN : a.levelRange,
+      stufen: a.freeOrder ? ZWEIG_STUFEN : AKT_STUFEN[String(a.act)] ?? a.levelRange,
+      ...(!a.freeOrder && AKT_STUFEN[String(a.act)] && AKT_STUFEN[String(a.act)] !== a.levelRange ? { stufenGemini: a.levelRange } : {}),
       ...(a.freeOrder ? { freieReihenfolge: true, empfohlen: a.recommendedOrder, schwester: a.sisterFaction,
         stufenGemini: a.levelRange } : {}),
       ort: geaendert.ort ?? a.region ?? a.mainLocations?.join(", ") ?? orteDerSchritte,
@@ -242,7 +245,8 @@ const kronreich = {
   // Patch Henry, 18. 11. 2026 (Punkt 2): Alle 33 Städte der Menschen haben am Aushang Stufe 1–5.
   stufen: "1-5",
   // Klassen der Begleiter (Henry, 18. 11. 2026: keine zwei Späher). Wulfgar ist Steppenreiter (Späher des Kronreichs).
-  begleiterKlassen: { comp_kron_sigrid: "waechter", comp_kron_wulfgar: "spaeher", comp_kron_fenris: "krieger" },
+  // Patch 2.6.19 (Henry, B5): Fenris ist Meister-Bogenschütze und damit Späher (Fernkampf, Geschick).
+  begleiterKlassen: { comp_kron_sigrid: "waechter", comp_kron_wulfgar: "spaeher", comp_kron_fenris: "spaeher" },
   geheim: ["Identität der Stillen Feder"],
   quelle: "Gemini, 18. 11. 2026, auf Grundlage von „Orte und Wege der Menschen“",
   stand: "Aushang: Helden der drei Menschen-Fraktionen nehmen die Aufträge an. Andere Völker lesen nur mit.",

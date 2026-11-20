@@ -1,0 +1,70 @@
+{
+  "schema_version": "3.0.3",
+  "feature": "tab_a_subreiter_und_text_bereinigung",
+  "target_files": [
+    "ui/abenteuer.js",
+    "spiel/handlung_akte.js",
+    "spiel/regeln.js",
+    "style/layout.css"
+  ],
+  "ui_aufteilung_tab_a": {
+    "aktiviere_subreiter_unter_tab_a": true,
+    "subreiter": [
+      {
+        "id": "a1_aushang_npcs",
+        "label": "Aushang & NPCs",
+        "standard_aktiv": true,
+        "layout": "NPC-Porträts oben kompakt; Aushang-Aufträge als 2-spaltige Kurz-Karten (Titel, Stufen-Badge, Weg-Badge, Lohn, Button) ohne Textwände"
+      },
+      {
+        "id": "a2_siedlung_bau",
+        "label": "Siedlung & Bau",
+        "layout": "Phasen-Status, Stadt-Ausbau, Gebäude und Straßenbau; entferne doppelte 'Kosten:'-Wiederholungen in Button-Labels"
+      },
+      {
+        "id": "a3_hofstaat_diplomatie",
+        "label": "Hofstaat & Rekrutierung",
+        "layout": "Handelsverträge, Ruhmestaten, Chronik-Vorschau und Söldner-Rekrutierung"
+      }
+    ]
+  },
+  "text_und_daten_bereinigung": {
+    "entferne_entwickler_notizen": [
+      "(Henry, 18. 11. 2026):",
+      "Henry,"
+    ],
+    "ersetze_alte_stadtnamen_in_texten": [
+      {
+        "alt": "Kornwik",
+        "neu": "Valengrad"
+      },
+      {
+        "alt": "Heidvang",
+        "neu": "Valengrad"
+      },
+      {
+        "alt": "Eiswacht",
+        "neu": "Eisentor"
+      }
+    ],
+    "korrigiere_waehrungs_namen": [
+      {
+        "alt": "+7 Gold",
+        "neu": "+7 Silber"
+      },
+      {
+        "alt": "+6 Gold",
+        "neu": "+6 Silber"
+      },
+      {
+        "alt": "+10 Gold",
+        "neu": "+10 Silber"
+      },
+      {
+        "alt": "Gold",
+        "neu": "Silber",
+        "nur_in_quest_belohnungen": true
+      }
+    ]
+  }
+}

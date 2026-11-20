@@ -1,0 +1,35 @@
+{
+  "quelle": "Henry, 20. 11. 2026, 11:11 Berlin. Beim Einfügen zerteilt (drei andere JSONs standen mitten im Block); von Claude wieder zusammengesetzt.",
+  "schema_version": "2.6.19",
+  "feature": "vier_schwierigkeitsgrade_mit_hardcore_permadeath",
+  "target_files": ["spiel/regeln.js", "spiel/handlung_akte.js", "ui/charaktererstellung.js", "ui/einstellungen.js", "sim/simulator.js"],
+  "standard_auswahl": "leicht",
+  "hardcore_freischaltung": {
+    "storage_key": "aschenkrone_hardcore_unlocked",
+    "ausloeser_bedingung": { "min_quest_stufe": 4, "erforderlicher_titel": "Bannerjarl", "spaeterer_erweiterungs_trigger": "akt_5_abgeschlossen" },
+    "gesperrt_anzeige_in_ui": { "sichtbar_als_gesperrt": true,
+      "hinweis_text": "Gesperrt: Beende einmal die Hauptquest, um den Hardcore-Modus (Permadeath) freizuschalten." }
+  },
+  "schwierigkeitsgrade": [
+    { "id": "leicht", "anzeigename": "Leicht · Pfad der Asche", "kurzbeschreibung": "Die aktuelle Balance von Odris. Herausfordernd, aber fair für jeden Streiter.",
+      "ist_standard": true, "permadeath": false,
+      "modifikatoren": { "gegner_lp_faktor": 1.0, "gegner_schaden_faktor": 1.0, "hinterhalt_chance_offset": 0.0, "niederlage_silber_faktor": 0.75,
+        "niederlage_moral_abzug": -20, "ep_faktor": 1.0, "silber_lohn_faktor": 1.0 } },
+    { "id": "mittel", "anzeigename": "Mittel · Eiserner Schwur", "kurzbeschreibung": "Härtere Kämpfe und spürbare Verluste bei Niederlagen. Belohnt mit mehr Erfahrung und Silber.",
+      "permadeath": false,
+      "modifikatoren": { "gegner_lp_faktor": 1.15, "gegner_schaden_faktor": 1.12, "hinterhalt_chance_offset": 0.05, "niederlage_silber_faktor": 0.65,
+        "niederlage_moral_abzug": -25, "ep_faktor": 1.1, "silber_lohn_faktor": 1.1 } },
+    { "id": "schwer", "anzeigename": "Schwer · Blut der Ahnen", "kurzbeschreibung": "Gnadenlose Gegner und häufige Hinterhalte auf allen Wegen. Für erfahrene Feldherren.",
+      "permadeath": false,
+      "modifikatoren": { "gegner_lp_faktor": 1.3, "gegner_schaden_faktor": 1.25, "hinterhalt_chance_offset": 0.1, "niederlage_silber_faktor": 0.5,
+        "niederlage_moral_abzug": -35, "ep_faktor": 1.25, "silber_lohn_faktor": 1.2 } },
+    { "id": "hardcore", "anzeigename": "Hardcore · Aschenchronik (Permadeath)",
+      "kurzbeschreibung": "Ein Leben, ein Schwur. Fällst du im Kampf oder im Double-K.O., endet deine Geschichte unwiderruflich.",
+      "erfordert_freischaltung": true, "permadeath": true,
+      "sonderregeln": { "zuflucht_rettung_deaktiviert": true, "pre_combat_wegpunkt_deaktiviert": true, "wechsel_im_spiel_verboten": true,
+        "autosave_bei_tod_loescht_spielstand": true, "speichere_eintrag_in_ruhmeshalle": true, "abschluss_titel": "Der Ungebrochene" },
+      "modifikatoren": { "gegner_lp_faktor": 1.35, "gegner_schaden_faktor": 1.3, "hinterhalt_chance_offset": 0.12, "niederlage_silber_faktor": 0.0,
+        "niederlage_moral_abzug": -100, "ep_faktor": 1.4, "silber_lohn_faktor": 1.3 } }
+  ],
+  "simulator_regeln": { "standard_sim_modus": "leicht", "pruefe_hardcore_freischaltung_nach_akt4": true, "pruefe_permadeath_bei_0_lp": true }
+}

@@ -26,6 +26,8 @@ const world = (() => {
       name: "Krieger", weapon: "axt", attack: { name: "Gluthieb", power: 10, skill: "nahkampf" },
       restore: { name: "Standglut", guard: 8 },
       description: "Setzt auf Nahkampf und einen schweren Gluthieb. Standglut hält dich beim Gegenangriff auf den Beinen.",
+      // Patch 2.6.16: Text für Fraktionen ohne Glutgabe (Blutritter der Krone, Kronreich).
+      descriptionOhneGlut: "Setzt auf Nahkampf und einen schweren Wuchthieb. Eiserner Stand hält dich beim Gegenangriff auf den Beinen.",
     },
     waechter: {
       name: "Wächter", weapon: "speer", attack: { name: "Glutklinge", power: 8, skill: "nahkampf" },
@@ -244,6 +246,12 @@ const world = (() => {
       choices: [
         { id: "balance", label: "Wärme und Wachstum im Gleichgewicht halten · 1 Glut", emberCost: 1, soil: "balanced", to: "field" },
         { id: "force", label: "Die Asche mit einem starken Glutstoß wegbrennen · 1 Glut", emberCost: 1, soil: "force", to: "field" },
+        // Patch 2.5.4: Ersatz ohne Glutgabe für Kronreich und Freie Häfen.
+        { id: "soil-hands", label: "[Stärke 10] Die Ascheschicht mit bloßen Händen und Spaten abtragen", glutlos: true,
+          check: ["strength", 10], failMark: "saat-muehe", excludes: ["saat-erholt", "saat-verbrannt", "saat-muehe"],
+          mark: "saat-erholt", to: "field", failTo: "field",
+          pass: "Schicht um Schicht trägst du die Asche ab. Darunter ist die Erde noch feucht, und die ersten Spitzen kommen durch.",
+          fail: "Die Asche ist schwerer, als sie aussieht. Nach einer Stunde liegt der Streifen noch immer grau." },
         { id: "leave", label: "Die Saat unberührt lassen und weitergehen", to: "field" },
       ],
     },
@@ -398,7 +406,9 @@ const world = (() => {
           mark: "runa-plan", to: "watch-yard",
           message: "„Zwei kurze Lichtzeichen“, sagt Runa. „Dann schicke ich den Seilwagen. Aber erst muss ich wissen, wo wir suchen.“" },
         { id: "camp", label: "Am Wachfeuer rasten · LP und Glut auffüllen", recover: 99, replenish: 99, center: true,
-          to: "watch-yard", message: "Am Wachfeuer versorgst du deine Wunden und sammelst deine Glut." },
+          to: "watch-yard", message: "Am Wachfeuer versorgst du deine Wunden und sammelst deine Glut.",
+          // Patch 2.5.4: Ohne Glutgabe (Kronreich, Freie Häfen) nennt die Wahl keine Glut.
+          ohneGlut: { label: "Am Wachfeuer rasten · LP auffüllen", message: "Am Wachfeuer versorgst du deine Wunden." } },
         { id: "skarn-briefing", label: "Mit Runa über die ausgebliebenen Zeichen aus Glutberg sprechen",
           requires: "pass-gemeldet", excludes: "skarn-auftrag", to: "skarn-briefing" },
         { id: "skarn-road", label: "Über den bewachten Eispass zum Grenzlager reisen", requires: ["skarn-auftrag", "pass-bewacht"],
@@ -450,7 +460,6 @@ const world = (() => {
           fail: "Ein Rad schlägt gegen einen Grenzpfahl. Die Deserteure hören es und kommen auf euch zu.",
           mark: "zoll-umgangen", fight: "deserteure", to: "toll-resolved" },
         { id: "toll-fight", label: "Die Deserteure stellen · Kampf", condition: "toll-unresolved", fight: "deserteure", to: "toll-resolved" },
-        { id: "toll-revisit", label: "Mit Ada an der freigewordenen Zollstelle sprechen", condition: "toll-resolved", to: "toll-resolved" },
         { id: "toll-back", label: "Nach Eiswacht zurückkehren", destination: "hochwacht", to: "watch-yard" },
       ],
     },
@@ -633,9 +642,20 @@ const world = (() => {
         { id: "rescue-herb", label: "Joren mit Galgenwurz stabilisieren und ihn herausziehen", requiresItem: "galgenwurz",
           consume: "galgenwurz", mark: "joren-gerettet", to: "pass",
           message: "Mit der Galgenwurz hält Joren lange genug durch. Gemeinsam schiebt ihr den Balken gerade weit genug zur Seite." },
-        { id: "rescue-ember", label: "Den Balken mit gebundener Glut anheben · 1 Glut", emberCost: 1,
-          emberRescue: true, to: "pass",
-          message: "Du bindest die Glut im Holz. Der Balken hält gerade lange genug, um Joren hinauszuziehen." },
+        { id: "rescue-ember", label: "[· 1 Glut] Die Wunde mit geweihter Flamme ausbrennen", emberCost: 1,
+          emberRescue: true, balanceShift: 1, ruf: { watch: 12 }, to: "pass",
+          message: "Du bindest die Glut im Holz. Der Balken hält gerade lange genug, um Joren hinauszuziehen. Dann brennst du seine Wunde mit geweihter Flamme aus." },
+        // Patch 2.5.4: Ohne Glutgabe (Kronreich, Freie Häfen) rettet eine Probe auf einen Grundwert. Misslingt sie, bleibt der andere Weg.
+        { id: "rescue-strength", label: "[Stärke 11] Den brennenden Balken mit bloßer Kraft stemmen", glutlos: true,
+          check: ["strength", 11], failMark: "joren-stemmen-versucht", excludes: "joren-stemmen-versucht",
+          mark: "joren-gerettet", ruf: { watch: 12 }, to: "pass", failTo: "pass-shelter",
+          pass: "Du stemmst die Schulter unter den Balken. Das Holz knirscht, hebt sich eine Handbreit, und Joren kriecht hinaus.",
+          fail: "Der Balken bewegt sich keinen Fingerbreit. Joren stöhnt. Allein mit Kraft geht es nicht." },
+        { id: "rescue-lever", label: "[Geschick 11] Einen Deichselbaum als Hebel ansetzen", glutlos: true,
+          check: ["agility", 11], failMark: "joren-hebel-versucht", excludes: "joren-hebel-versucht",
+          mark: "joren-gerettet", ruf: { watch: 12 }, to: "pass", failTo: "pass-shelter",
+          pass: "Du setzt die Deichsel unter den Balken und keilst einen Stein darunter. Langsam hebt sich das Holz, und du ziehst Joren heraus.",
+          fail: "Die Deichsel rutscht vom Stein ab und schlägt gegen die Wand. Asche rieselt herab. Der Hebel findet keinen Halt." },
         { id: "rescue-balance", label: "Atmen und die Glut sammeln", condition: "unbalanced",
           center: true, to: "pass-shelter", message: "Du wartest, bis sich die Glut beruhigt hat." },
         { id: "rescue-wait", label: "Zurück nach Eiswacht gehen und zuerst Hilfe organisieren", to: "watch-yard", destination: "hochwacht" },
@@ -722,6 +742,12 @@ const world = (() => {
         { id: "skarn-balance", label: "Die Runen mit gebundener Glut stabilisieren · 1 Glut", emberCost: 1,
           emberRescue: "runen-geschuetzt", to: "skarn-aftermath",
           message: "Die Glut verteilt sich auf die ganze Schrift. Torben kann hindurch. Die Namen bleiben im Stein." },
+        // Patch 2.5.4: Ersatz ohne Glutgabe für Kronreich und Freie Häfen.
+        { id: "skarn-wedge", label: "[Intelligenz 12] Die Inschrift mechanisch verkeilen", glutlos: true,
+          check: ["mind", 12], failMark: "runen-keil-versucht", excludes: "runen-keil-versucht",
+          mark: "runen-geschuetzt", to: "skarn-aftermath", failTo: "skarn-runes",
+          pass: "Du liest, wo die Bögen tragen, und treibst Keile in die Fugen zwischen den Namen. Die Schrift hält, und Torben kommt hindurch.",
+          fail: "Der erste Keil sprengt eine Ecke aus dem Stein. Du hältst inne, bevor die Namen brechen." },
         { id: "skarn-pull", label: "Torben mit dem Seilschlitten aus dem Spalt ziehen", requires: "skarn-seilschlitten",
           mark: "runen-geschuetzt", to: "skarn-aftermath",
           message: "Am Seil kommt Torben durch den Spalt. Nalda sichert die Bögen von außen." },
@@ -745,13 +771,19 @@ const world = (() => {
         { id: "skarn-return", label: "Mit Torben ins Grenzlager zurückkehren", destination: "skarn-gate", to: "skarn-gate" },
       ],
     },
+    // Patch 2.5.4: Die Niederlage beendet die Reise nicht mehr. Kein automatisches Speichern in dieser Szene;
+    // „Letzten Wegpunkt laden“ erscheint im Spiel nur, wenn ein Spielstand vor dem Kampf existiert.
     defeat: {
-      place: "Kronreich", title: "Der Weg endet hier", objective: "Deine Reise ist beendet.",
-      text: "Du gehst zu Boden. Dein Auftrag bleibt unerledigt.",
+      place: "Kronreich", title: "Der Weg endet hier", objective: "Wähle, wie deine Chronik weitergeht.",
+      text: "Stahl und Staub schmecken nach Blut. Deine Deckung bricht, und Schwärze schlägt über dir zusammen. Doch der Tod nimmt dich heute noch nicht.",
+      choices: [
+        { id: "retreat", label: "Aus dem Staub kriechen und zur letzten Zuflucht schleppen", survive: true,
+          hint: "Du erwachst mit 1 LP in der letzten sicheren Stadt. Ein Viertel deines Silbers ist verloren, die Moral sinkt um 20." },
+      ],
     },
     // Weltebene (Technische Spezifikation): Ort, Text und Aktionen liefert der Stadt-Hub des aktuellen Knotens.
     weltknoten: {
-      place: "Weltreise", title: "Unterwegs in Odris", objective: "Reise von Knoten zu Knoten. Jede Reise ist eine Runde der Weltleisten.",
+      place: "Weltreise", title: "Unterwegs in Odris", objective: "Reise von Knoten zu Knoten. Jede Reise ist eine Etappe der Weltleisten.",
       text: "",
     },
     weltende: {
@@ -1014,25 +1046,25 @@ const world = (() => {
   Object.assign(companions, {
     steppenreiter: {
       klasse: "krieger", name: "Steppenreiter Arne", volk: "menschen", health: 30, scenes: [],
-      soeldner: { kosten: 50, orte: ["weidenkamm", "kraehenfurt"] }, place: "Söldner in Kornwik und Heidvang",
+      soeldner: { kosten: 50, orte: ["weidenkamm", "kraehenfurt"] }, place: "Söldner in Kronhall",
       introduction: "Arne hat sein Pferd an der Grenze verloren, nicht aber seinen Säbel. Für Sold reitet er mit, wohin du willst.",
       ability: "Sturmangriff", damage: 10,
     },
     grenzbogner: {
       klasse: "spaeher", name: "Grenzbognerin Ylva", volk: "menschen", health: 26, scenes: [],
-      soeldner: { kosten: 50, orte: ["weidenkamm", "kraehenfurt", "hochwacht"] }, place: "Söldnerin in Kornwik, Heidvang und Eiswacht",
+      soeldner: { kosten: 50, orte: ["weidenkamm", "kraehenfurt", "hochwacht"] }, place: "Söldnerin in Kronhall und Hagenfels",
       introduction: "Ylva zählt die Pfeile in ihrem Köcher zweimal. Sie hat für die Grenzwache gejagt, bis der Sold ausblieb.",
       ability: "Pfeilhagel", damage: 9, airborne: 3,
     },
     flammenknecht: {
       klasse: "waechter", name: "Flammenknecht Hal", volk: "menschen", health: 32, scenes: [],
-      soeldner: { kosten: 50, orte: ["hochwacht", "skarn-gate"] }, place: "Söldner in Eiswacht und Glutberg",
+      soeldner: { kosten: 50, orte: ["hochwacht", "skarn-gate"] }, place: "Söldner in Hagenfels und Glutberg",
       introduction: "Hal trägt das Zeichen des Ordens der Flamme auf dem Schild, aber keinen Eid mehr. Er schützt, wer ihn bezahlt.",
       ability: "Flammenschild", guard: 9,
     },
     feldscherin: {
       klasse: "heiler", name: "Feldscherin Ute", volk: "menschen", health: 24, scenes: [],
-      soeldner: { kosten: 50, orte: ["hochwacht", "skarn-gate"] }, place: "Söldnerin in Eiswacht und Glutberg",
+      soeldner: { kosten: 50, orte: ["hochwacht", "skarn-gate"] }, place: "Söldnerin in Hagenfels und Glutberg",
       introduction: "Ute rollt ihre Verbände so fest, dass sie wie Kerzen aussehen. Für Silber flickt sie jeden, der noch atmet.",
       ability: "Feldverband", heal: 8,
     },

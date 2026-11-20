@@ -1,0 +1,316 @@
+{
+  "quelle": "Henry, Projekt-Thread 20. 11. 2026 (Kharos 3.0)",
+  "schema_version": "3.0.0",
+  "paket": "kharos_kampagne_teil_2b_von_2b_akt5_und_nebenquests",
+  "target_file": "spiel/handlung_akte.js",
+  "akt_5_uebersee_und_finale": {
+    "akt": 5,
+    "stufe": {
+      "min": 20,
+      "max": 30
+    },
+    "titel": "Der Krieg um den letzten Atem",
+    "mechanik_ueberfahrt": {
+      "seewege_aktiv": true,
+      "seekampf_begegnungen": [
+        "korsaren_blockade",
+        "geisterschiff_der_seuchenflut",
+        "sturm_leviathan"
+      ],
+      "werft_und_zitadellen_bonus": "Reduziert Seegefechts-Wahrscheinlichkeit um 40 %"
+    },
+    "zielkontinente_konflikte": {
+      "regeln_lebende": "Du besuchst die 3 fremden Völker-Kontinente. Jedes Volk bietet eine Bündnis-Questreihe ODER eine Belagerungs-Eroberung.",
+      "regeln_untote": "Keine Bündnisse möglich. Jedes der 4 lebenden Völker muss durch Eroberung vernichtet oder durch Korrumpierung von innen gestürzt werden (+25 % Ritual-Fortschritt pro Volk).",
+      "konflikte": [
+        {
+          "ziel_volk": "elfen",
+          "kontinent": "Die Silbernen Inseln",
+          "buendnis_quest": "Rette den brennenden Sternenhain vor den Blutwebern und erhalte Astral-Verstärkung.",
+          "eroberung_quest": "Stürme die Zitadelle von Aethel und raube die Astralkerne für deine Armada.",
+          "untoten_korrumpierung": "Flüstere den Blutwebern Wahnsinn ein, bis sie ihre eigenen Brüder abschlachten."
+        },
+        {
+          "ziel_volk": "zwerge",
+          "kontinent": "Das Eisengrat-Gebirge",
+          "buendnis_quest": "Versiegle die durchgebrochenen Magmaschächte unter Khaz-Thar und gewinne Zwergen-Runenstahl.",
+          "eroberung_quest": "Durchbrich die Hochhallen und übernimm die Runenschmieden mit Gewalt.",
+          "untoten_korrumpierung": "Vergifte die Tiefenöfen mit Seelenasche und verwandle die Golems in Todeskonstrukte."
+        },
+        {
+          "ziel_volk": "orks",
+          "kontinent": "Die Roten Steppen",
+          "buendnis_quest": "Besiege den Champion der Bluthorde im Ritualkreis und gewinne den Donnerbund als Vorhut.",
+          "eroberung_quest": "Zerschlage die Kriegslager von Kargath und unterwirf die Stämme.",
+          "untoten_korrumpierung": "Verderbe die Ahnentotems der Schamanen und treibe die Horde in blinde Selbstzerstörung."
+        },
+        {
+          "ziel_volk": "menschen",
+          "kontinent": "Das Kronland von Valen",
+          "buendnis_quest": "Entlarve die Inquisitoren-Intrige in Sonnenwacht und eine die Ritterheere.",
+          "eroberung_quest": "Belagere Valengrad und zwinge das Kaiserreich in die Knie.",
+          "untoten_korrumpierung": "Korrumpierte Herzöge öffnen dir bei Nacht die Stadttore von Valengrad."
+        }
+      ]
+    },
+    "endgame_finale_vael_thar": {
+      "stufe": {
+        "min": 25,
+        "max": 30
+      },
+      "schauplatz": "Der Riss im Ewigen Eis",
+      "ende_lebende": {
+        "titel": "Der letzte Atem von Kharos",
+        "boss_id": "vael_thar_avatar",
+        "beschreibung": "An der Seite deiner verbündeten (oder unterworfenen) Völker stellst du dich den Untoten-Lords und dem manifestierten Avatar von Vael-Thar, um das Sternentor für immer zu schließen."
+      },
+      "ende_untote": {
+        "titel": "Die Stille Welt",
+        "boss_id": "letzte_allianz_der_lebenden",
+        "beschreibung": "Mit 100 % Ritual-Fortschritt reißt du das Tor auf. Vael-Thar betritt Kharos, und du führst die Untoten in die letzte Vernichtungsschlacht gegen die vereinigten Reste der vier lebenden Völker."
+      }
+    }
+  },
+  "aushang_nebenquests_kharos": [
+    {
+      "id": "nq_01",
+      "titel": "Karawane im Nebel",
+      "region": "menschen",
+      "typ": "eskorte",
+      "stufe": {
+        "min": 1,
+        "max": 5
+      },
+      "belohnung_silber": 35,
+      "belohnung_ep": 120
+    },
+    {
+      "id": "nq_02",
+      "titel": "Blutzoll an der Grenzbrücke",
+      "region": "menschen",
+      "typ": "kampf",
+      "stufe": {
+        "min": 2,
+        "max": 6
+      },
+      "belohnung_silber": 45,
+      "belohnung_ep": 160
+    },
+    {
+      "id": "nq_03",
+      "titel": "Verlorene Reliquie von Solis",
+      "region": "menschen",
+      "typ": "bergung",
+      "stufe": {
+        "min": 4,
+        "max": 9
+      },
+      "belohnung_silber": 60,
+      "belohnung_ep": 240
+    },
+    {
+      "id": "nq_04",
+      "titel": "Korsaren-Nest in der Salzklippe",
+      "region": "menschen",
+      "typ": "kampf",
+      "stufe": {
+        "min": 5,
+        "max": 10
+      },
+      "belohnung_silber": 75,
+      "belohnung_ep": 300
+    },
+    {
+      "id": "nq_05",
+      "titel": "Welkende Sternenwurzeln",
+      "region": "elfen",
+      "typ": "erkundung",
+      "stufe": {
+        "min": 1,
+        "max": 5
+      },
+      "belohnung_silber": 35,
+      "belohnung_ep": 120
+    },
+    {
+      "id": "nq_06",
+      "titel": "Die Jäger von Vael’Dorn",
+      "region": "elfen",
+      "typ": "kampf",
+      "stufe": {
+        "min": 3,
+        "max": 8
+      },
+      "belohnung_silber": 55,
+      "belohnung_ep": 210
+    },
+    {
+      "id": "nq_07",
+      "titel": "Spiegel der zerbrochenen Monde",
+      "region": "elfen",
+      "typ": "raetsel_probe",
+      "stufe": {
+        "min": 6,
+        "max": 12
+      },
+      "belohnung_silber": 80,
+      "belohnung_ep": 350
+    },
+    {
+      "id": "nq_08",
+      "titel": "Blutkunst im Schattenhain",
+      "region": "elfen",
+      "typ": "elite_jagd",
+      "stufe": {
+        "min": 10,
+        "max": 16
+      },
+      "belohnung_silber": 110,
+      "belohnung_ep": 520
+    },
+    {
+      "id": "nq_09",
+      "titel": "Verschütteter Erzstollen",
+      "region": "zwerge",
+      "typ": "bergung",
+      "stufe": {
+        "min": 1,
+        "max": 5
+      },
+      "belohnung_silber": 40,
+      "belohnung_ep": 130
+    },
+    {
+      "id": "nq_10",
+      "titel": "Amoklaufender Dampfgolem",
+      "region": "zwerge",
+      "typ": "kampf",
+      "stufe": {
+        "min": 4,
+        "max": 9
+      },
+      "belohnung_silber": 65,
+      "belohnung_ep": 260
+    },
+    {
+      "id": "nq_11",
+      "titel": "Schmuggel auf dem Donnerkap",
+      "region": "zwerge",
+      "typ": "entscheidung",
+      "stufe": {
+        "min": 7,
+        "max": 13
+      },
+      "belohnung_silber": 85,
+      "belohnung_ep": 380
+    },
+    {
+      "id": "nq_12",
+      "titel": "Runen der Stille",
+      "region": "zwerge",
+      "typ": "schmiede_quest",
+      "stufe": {
+        "min": 12,
+        "max": 18
+      },
+      "belohnung_silber": 130,
+      "belohnung_ep": 600
+    },
+    {
+      "id": "nq_13",
+      "titel": "Prüfung der Blutklauen",
+      "region": "orks",
+      "typ": "duell",
+      "stufe": {
+        "min": 1,
+        "max": 5
+      },
+      "belohnung_silber": 35,
+      "belohnung_ep": 125
+    },
+    {
+      "id": "nq_14",
+      "titel": "Rasende Totembestie",
+      "region": "orks",
+      "typ": "jagd",
+      "stufe": {
+        "min": 4,
+        "max": 10
+      },
+      "belohnung_silber": 65,
+      "belohnung_ep": 270
+    },
+    {
+      "id": "nq_15",
+      "titel": "Geisterpfad im Aschemoor",
+      "region": "orks",
+      "typ": "ritual",
+      "stufe": {
+        "min": 8,
+        "max": 14
+      },
+      "belohnung_silber": 95,
+      "belohnung_ep": 420
+    },
+    {
+      "id": "nq_16",
+      "titel": "Banner der drei Stämme",
+      "region": "orks",
+      "typ": "kampf",
+      "stufe": {
+        "min": 13,
+        "max": 19
+      },
+      "belohnung_silber": 140,
+      "belohnung_ep": 650
+    },
+    {
+      "id": "nq_17",
+      "titel": "Ernte der verlorenen Seelen",
+      "region": "untote",
+      "typ": "seelenraub",
+      "stufe": {
+        "min": 1,
+        "max": 6
+      },
+      "belohnung_silber": 40,
+      "belohnung_ep": 150
+    },
+    {
+      "id": "nq_18",
+      "titel": "Flüstern in der Garnison",
+      "region": "untote",
+      "typ": "korrumpierung",
+      "stufe": {
+        "min": 6,
+        "max": 12
+      },
+      "belohnung_silber": 85,
+      "belohnung_ep": 390
+    },
+    {
+      "id": "nq_19",
+      "titel": "Die Leeren-Sonde im Eis",
+      "region": "endgame_riss",
+      "typ": "elite_kampf",
+      "stufe": {
+        "min": 20,
+        "max": 26
+      },
+      "belohnung_silber": 210,
+      "belohnung_ep": 1100
+    },
+    {
+      "id": "nq_20",
+      "titel": "Herold von Vael-Thar",
+      "region": "endgame_riss",
+      "typ": "boss_jagd",
+      "stufe": {
+        "min": 25,
+        "max": 30
+      },
+      "belohnung_silber": 320,
+      "belohnung_ep": 1800
+    }
+  ]
+}
